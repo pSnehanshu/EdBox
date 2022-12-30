@@ -1,5 +1,6 @@
 import prisma from "../prisma";
 import { publicProcedure, router } from "./trpc";
+import authRouter from "./routers/auth";
 
 export const appRouter = router({
   health: publicProcedure.query(async ({ input, ctx }) => {
@@ -11,6 +12,7 @@ export const appRouter = router({
       db: result,
     };
   }),
+  auth: authRouter,
 });
 
 export type AppRouter = typeof appRouter;

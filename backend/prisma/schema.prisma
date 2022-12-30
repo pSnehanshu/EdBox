@@ -33,23 +33,24 @@ model School {
 }
 
 model User {
-  id         String    @id @default(cuid()) @db.VarChar(32)
-  name       String    @db.VarChar(50)
-  phone      String?   @db.VarChar(15)
-  email      String?   @db.VarChar(256)
-  password   String?   @db.VarChar(80)
-  otp        String?   @db.VarChar(10)
+  id         String         @id @default(cuid()) @db.VarChar(32)
+  name       String         @db.VarChar(50)
+  phone      String?        @unique @db.VarChar(15)
+  email      String?        @unique @db.VarChar(256)
+  password   String?        @db.VarChar(80)
+  otp        String?        @db.VarChar(10)
   otp_expiry DateTime?
   gender     Gender?
-  school_id  String    @db.VarChar(32)
-  School     School    @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  student_id String?   @db.VarChar(32)
-  teacher_id String?   @db.VarChar(32)
-  parent_id  String?   @db.VarChar(32)
-  staff_id   String?   @db.VarChar(32)
-  is_active  Boolean   @default(true)
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
+  school_id  String         @db.VarChar(32)
+  School     School         @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  student_id String?        @db.VarChar(32)
+  teacher_id String?        @db.VarChar(32)
+  parent_id  String?        @db.VarChar(32)
+  staff_id   String?        @db.VarChar(32)
+  is_active  Boolean        @default(true)
+  created_at DateTime       @default(now())
+  updated_at DateTime       @updatedAt
+  Sessions   LoginSession[]
 }
 
 enum Gender {
@@ -196,4 +197,12 @@ enum SenderRole {
   teacher
   parent
   staff
+}
+
+model LoginSession {
+  id          String   @id @default(uuid()) @db.VarChar(36)
+  user_id     String   @db.VarChar(32)
+  User        User     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  expiry_date DateTime
+  created_at  DateTime @default(now())
 }
