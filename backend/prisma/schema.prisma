@@ -33,24 +33,25 @@ model School {
 }
 
 model User {
-  id         String         @id @default(cuid()) @db.VarChar(32)
-  name       String         @db.VarChar(50)
-  phone      String?        @db.VarChar(15)
-  email      String?        @db.VarChar(256)
-  password   String?        @db.VarChar(80)
-  otp        String?        @db.VarChar(10)
-  otp_expiry DateTime?
-  gender     Gender?
-  school_id  String         @db.VarChar(32)
-  School     School         @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  student_id String?        @db.VarChar(32)
-  teacher_id String?        @db.VarChar(32)
-  parent_id  String?        @db.VarChar(32)
-  staff_id   String?        @db.VarChar(32)
-  is_active  Boolean        @default(true)
-  created_at DateTime       @default(now())
-  updated_at DateTime       @updatedAt
-  Sessions   LoginSession[]
+  id           String               @id @default(cuid()) @db.VarChar(32)
+  name         String               @db.VarChar(50)
+  phone        String?              @db.VarChar(15)
+  email        String?              @db.VarChar(256)
+  password     String?              @db.VarChar(80)
+  otp          String?              @db.VarChar(10)
+  otp_expiry   DateTime?
+  gender       Gender?
+  school_id    String               @db.VarChar(32)
+  School       School               @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  student_id   String?              @db.VarChar(32)
+  teacher_id   String?              @db.VarChar(32)
+  parent_id    String?              @db.VarChar(32)
+  staff_id     String?              @db.VarChar(32)
+  is_active    Boolean              @default(true)
+  created_at   DateTime             @default(now())
+  updated_at   DateTime             @updatedAt
+  Sessions     LoginSession[]
+  CustomGroups CustomGroupMembers[]
 
   @@unique([email, school_id])
   @@unique([phone, school_id])
@@ -157,22 +158,34 @@ model SchoolStaff {
 }
 
 model ParentStudent_mapping {
-  parent_id  String  @db.VarChar(32)
-  Parent     Parent  @relation(fields: [parent_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  student_id String  @db.VarChar(32)
-  Student    Student @relation(fields: [student_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  parent_id  String   @db.VarChar(32)
+  Parent     Parent   @relation(fields: [parent_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  student_id String   @db.VarChar(32)
+  Student    Student  @relation(fields: [student_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  created_at DateTime @default(now())
 
   @@id([parent_id, student_id])
 }
 
 model CustomGroup {
-  id         String   @id @default(cuid()) @db.VarChar(32)
-  name       String   @db.VarChar(50)
-  school_id  String   @db.VarChar(32)
-  School     School   @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  is_active  Boolean  @default(true)
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  id         String               @id @default(cuid()) @db.VarChar(32)
+  name       String               @db.VarChar(50)
+  school_id  String               @db.VarChar(32)
+  School     School               @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  is_active  Boolean              @default(true)
+  created_at DateTime             @default(now())
+  updated_at DateTime             @updatedAt
+  Members    CustomGroupMembers[]
+}
+
+model CustomGroupMembers {
+  user_id    String      @db.VarChar(32)
+  User       User        @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  group_id   String      @db.VarChar(32)
+  Group      CustomGroup @relation(fields: [group_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  created_at DateTime    @default(now())
+
+  @@id([user_id, group_id])
 }
 
 model Message {

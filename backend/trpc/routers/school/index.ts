@@ -2,6 +2,7 @@ import { router, publicProcedure, authProcedure } from "../../trpc";
 import { z } from "zod";
 import prisma from "../../../prisma";
 import { TRPCError } from "@trpc/server";
+import messagingRouter from "./messaging";
 
 const schoolRouter = router({
   schoolBasicInfo: publicProcedure
@@ -30,6 +31,7 @@ const schoolRouter = router({
 
       return school;
     }),
+  messaging: messagingRouter,
 });
 
 export default schoolRouter;
