@@ -1,4 +1,5 @@
 import { User } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import prisma from "../../../prisma";
 import {
@@ -96,6 +97,110 @@ const messagingRouter = router({
         startIndex,
         startIndex + input.limit
       );
+    }),
+  createGroup: authProcedure
+    .input(
+      z.object({
+        name: z.string().max(50).trim(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const group = await prisma.customGroup.create({
+        data: {
+          name: input.name,
+          created_by_id: ctx.user.id,
+          school_id: ctx.user.school_id,
+          Members: {
+            create: {
+              is_admin: true,
+              user_id: ctx.user.id,
+            },
+          },
+        },
+      });
+
+      return group;
+    }),
+  addMemberToGroup: authProcedure
+    .input(
+      z.object({
+        id: z.string().cuid(),
+        user_id: z.string().cuid(),
+        is_admin: z.boolean().default(false),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      // Fetch the invited user
+      const addedUser = await prisma.user.findUnique({
+        where: {
+          id: input.user_id,
+        },
+      });
+
+      if (!addedUser || addedUser.school_id !== ctx.user.school_id) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found",
+        });
+      }
+
+      // Fetch group
+      const group = await prisma.customGroup.findFirst({
+        where: {
+          id: input.id,
+          school_id: ctx.user.school_id,
+        },
+        include: {
+          Members: {
+            where: {
+              OR: [{ user_id: ctx.user.id }, { user_id: addedUser.id }],
+            },
+          },
+        },
+      });
+
+      if (!group) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Group not found" });
+      }
+
+      const currentUserMembership = group.Members.find(
+        (m) => m.user_id === ctx.user.id
+      );
+      const addedUserMembership = group.Members.find(
+        (m) => m.user_id === addedUser.id
+      );
+
+      if (!currentUserMembership) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Not a member of group",
+        });
+      }
+
+      if (!currentUserMembership.is_admin) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only admins can add users to groups",
+        });
+      }
+
+      if (addedUserMembership) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "User already a member",
+        });
+      }
+
+      // All ok, add member
+      const member = await prisma.customGroupMembers.create({
+        data: {
+          group_id: group.id,
+          user_id: addedUser.id,
+          is_admin: input.is_admin,
+        },
+      });
+
+      return member;
     }),
 });
 
