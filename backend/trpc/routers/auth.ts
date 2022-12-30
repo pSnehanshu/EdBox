@@ -4,18 +4,23 @@ import prisma from "../../prisma";
 import { TRPCError } from "@trpc/server";
 import { addMinutes, addMonths, isPast } from "date-fns";
 import _ from "lodash";
+import CONFIG from "../../config";
 
 const authRouter = router({
   requestEmailLoginOTP: publicProcedure
     .input(
       z.object({
         email: z.string().email(),
+        schoolId: z.string().cuid(),
       })
     )
     .mutation(async ({ input }) => {
       const user = await prisma.user.findUnique({
         where: {
-          email: input.email,
+          email_school_id: {
+            email: input.email,
+            school_id: input.schoolId,
+          },
         },
         select: {
           id: true,
@@ -29,8 +34,12 @@ const authRouter = router({
 
       // User exists, and is active
 
-      // Generate 6 digit OTP
-      const otp = Math.round(Math.random() * 1e6).toString();
+      // Generate OTP
+      const otp = (
+        Math.floor(Math.random() * 9 * 10 ** (CONFIG.otpLength - 1)) +
+        10 ** (CONFIG.otpLength - 1)
+      ).toString();
+
       const otpExpiry = addMinutes(new Date(), 10);
 
       await prisma.user.update({
@@ -46,8 +55,9 @@ const authRouter = router({
   submitEmailLoginOTP: publicProcedure
     .input(
       z.object({
-        otp: z.string(),
+        otp: z.string().regex(/^\d+$/).length(CONFIG.otpLength),
         email: z.string().email(),
+        schoolId: z.string().cuid(),
       })
     )
     .mutation(async ({ input }) => {
@@ -55,6 +65,7 @@ const authRouter = router({
       const user = await prisma.user.findFirst({
         where: {
           email: input.email,
+          school_id: input.schoolId,
         },
         select: {
           id: true,

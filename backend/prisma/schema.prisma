@@ -35,8 +35,8 @@ model School {
 model User {
   id         String         @id @default(cuid()) @db.VarChar(32)
   name       String         @db.VarChar(50)
-  phone      String?        @unique @db.VarChar(15)
-  email      String?        @unique @db.VarChar(256)
+  phone      String?        @db.VarChar(15)
+  email      String?        @db.VarChar(256)
   password   String?        @db.VarChar(80)
   otp        String?        @db.VarChar(10)
   otp_expiry DateTime?
@@ -51,6 +51,9 @@ model User {
   created_at DateTime       @default(now())
   updated_at DateTime       @updatedAt
   Sessions   LoginSession[]
+
+  @@unique([email, school_id])
+  @@unique([phone, school_id])
 }
 
 enum Gender {
