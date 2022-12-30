@@ -1,8 +1,11 @@
 import prisma from "../prisma";
 import { publicProcedure, router } from "./trpc";
 import authRouter from "./routers/auth";
+import schoolRouter from "./routers/school";
 
 export const appRouter = router({
+  auth: authRouter,
+  school: schoolRouter,
   health: publicProcedure.query(async ({ input, ctx }) => {
     // Test DB connection
     const result = await prisma.$queryRaw`select 1+1 sum`;
@@ -12,7 +15,6 @@ export const appRouter = router({
       db: result,
     };
   }),
-  auth: authRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -90,7 +90,7 @@ const authRouter = router({
       };
     }),
   whoami: authProcedure.query(({ ctx }) =>
-    _.omit(ctx.user, ["password", "otp", "otp_expiry"])
+    _.omit(ctx.user, ["password", "otp", "otp_expiry", "School"])
   ),
 });
 
