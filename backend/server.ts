@@ -4,6 +4,7 @@ import bodyParser from "body-parser";
 import * as trpcExpress from "@trpc/server/adapters/express";
 import { appRouter as trpcRouter } from "./trpc";
 import { createContext } from "./trpc/context";
+import initSocketIo from "./socketio";
 
 const app = express();
 app.use(bodyParser.json());
@@ -20,4 +21,8 @@ app.use(
 );
 
 const port = parseInt(process.env.PORT ?? "5080", 10);
-app.listen(port, () => console.log(`Running on port ${port}`));
+const httpServer = app.listen(port, () =>
+  console.log(`Running on port ${port}`)
+);
+
+initSocketIo(httpServer);
