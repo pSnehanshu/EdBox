@@ -125,15 +125,15 @@ const messagingRouter = router({
     .input(
       z.object({
         groupId: z.string().cuid(),
-        user_id: z.string().cuid(),
-        is_admin: z.boolean().default(false),
+        userId: z.string().cuid(),
+        isAdmin: z.boolean().default(false),
       })
     )
     .mutation(async ({ input, ctx }) => {
       // Fetch the invited user
       const addedUser = await prisma.user.findUnique({
         where: {
-          id: input.user_id,
+          id: input.userId,
         },
       });
 
@@ -196,11 +196,97 @@ const messagingRouter = router({
         data: {
           group_id: group.id,
           user_id: addedUser.id,
-          is_admin: input.is_admin,
+          is_admin: input.isAdmin,
         },
       });
 
       return member;
+    }),
+  removeMemberFromGroup: authProcedure
+    .input(
+      z.object({
+        groupId: z.string().cuid(),
+        userId: z.string().cuid(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      // Fetch target user
+      const targetUser = await prisma.user.findUnique({
+        where: { id: input.userId },
+        select: {
+          id: true,
+          is_active: true,
+          school_id: true,
+        },
+      });
+
+      if (!targetUser || targetUser.school_id !== ctx.user.school_id) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Given user not found",
+        });
+      }
+
+      // Fetch group and memberships
+      const group = await prisma.customGroup.findFirst({
+        where: {
+          id: input.groupId,
+          school_id: ctx.user.school_id,
+        },
+        include: {
+          Members: {
+            where: {
+              OR: [{ user_id: ctx.user.id }, { user_id: targetUser.id }],
+            },
+          },
+        },
+      });
+
+      if (!group) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Group not found" });
+      }
+
+      // Make sure current user is admin
+      const currentUserMembership = group.Members.find(
+        (m) => m.user_id === ctx.user.id
+      );
+
+      if (!currentUserMembership || !currentUserMembership.is_admin) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message:
+            "You are either not a member of the group, or not an admin member",
+        });
+      }
+
+      // Make sure target user is already a member
+      const targetMembership = group.Members.find(
+        (m) => m.user_id === targetUser.id
+      );
+
+      if (!targetMembership) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Given user is not a member of the group",
+        });
+      }
+
+      if (targetMembership.is_admin) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Can not remove an admin member",
+        });
+      }
+
+      // Remove membership
+      await prisma.customGroupMembers.delete({
+        where: {
+          user_id_group_id: {
+            user_id: targetUser.id,
+            group_id: group.id,
+          },
+        },
+      });
     }),
   makeMemberAdmin: authProcedure
     .input(
