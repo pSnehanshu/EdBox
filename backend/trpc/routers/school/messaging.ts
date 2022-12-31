@@ -373,6 +373,56 @@ const messagingRouter = router({
         });
       }
     }),
+  giveUpAdminRole: authProcedure
+    .input(
+      z.object({
+        groupId: z.string().cuid(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      // Fetch group and memberships
+      const group = await prisma.customGroup.findFirst({
+        where: {
+          id: input.groupId,
+          school_id: ctx.user.school_id,
+        },
+        include: {
+          Members: {
+            where: {
+              user_id: ctx.user.id,
+            },
+          },
+        },
+      });
+
+      if (!group) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Group not found" });
+      }
+
+      // Make sure current user is admin
+      const currentUserMembership = group.Members.find(
+        (m) => m.user_id === ctx.user.id
+      );
+
+      if (!currentUserMembership || !currentUserMembership.is_admin) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message:
+            "You are either not a member of the group, or not an admin member",
+        });
+      }
+
+      // Stop being admin
+      await prisma.customGroupMembers.update({
+        where: {
+          user_id_group_id: {
+            user_id: ctx.user.id,
+            group_id: group.id,
+          },
+        },
+        data: { is_admin: false },
+      });
+    }),
 });
 
 export default messagingRouter;
