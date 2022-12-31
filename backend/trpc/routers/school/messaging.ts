@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { User, Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import prisma from "../../../prisma";
@@ -422,6 +422,67 @@ const messagingRouter = router({
         },
         data: { is_admin: false },
       });
+    }),
+  updateGroupDetails: authProcedure
+    .input(
+      z.object({
+        groupId: z.string().cuid(),
+        name: z.string().max(50).optional(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      // Fetch group and memberships
+      const group = await prisma.customGroup.findFirst({
+        where: {
+          id: input.groupId,
+          school_id: ctx.user.school_id,
+        },
+        include: {
+          Members: {
+            where: {
+              user_id: ctx.user.id,
+            },
+          },
+        },
+      });
+
+      if (!group) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Group not found" });
+      }
+
+      // Make sure current user is admin
+      const currentUserMembership = group.Members.find(
+        (m) => m.user_id === ctx.user.id
+      );
+
+      if (!currentUserMembership || !currentUserMembership.is_admin) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message:
+            "You are either not a member of the group, or not an admin member",
+        });
+      }
+
+      // Collect updates
+      const updates: Prisma.CustomGroupUpdateInput = {};
+
+      if (input.name && group.name !== input.name) {
+        updates.name = input.name;
+      }
+
+      // Check if anything is being updated
+      if (Object.keys(updates).length < 1) {
+        // Don't update anything
+        return group;
+      }
+
+      // Update
+      const updatedGroup = await prisma.customGroup.update({
+        where: { id: group.id },
+        data: updates,
+      });
+
+      return updatedGroup;
     }),
 });
 
