@@ -78,10 +78,14 @@ export function parseGroupIdentifierString(
   identifier: string
 ): GroupIdentifier {
   const opts = identifier.split("&");
-  const final: Record<string, string> = {};
+  const final: Record<string, string | number> = {};
   opts.forEach((opt) => {
-    const [key, val] = opt.split("=");
-    final[decodeURIComponent(key)] = decodeURIComponent(val);
+    const keyVal = opt.split("=");
+    const key = decodeURIComponent(keyVal[0]);
+    const val = decodeURIComponent(keyVal[1]);
+
+    // Convert to int if possible
+    final[key] = /^\d+$/.test(val) ? parseInt(val, 10) : val;
   });
 
   return GroupIdentifier.parse(final);
