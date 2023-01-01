@@ -13,7 +13,7 @@ import { router, authProcedure } from "../../trpc";
  * Get list of all automatic groups a user is part of
  * @param user
  */
-async function getAutoGroups(
+export async function getAutoGroups(
   user: Pick<
     User,
     "school_id" | "teacher_id" | "student_id" | "parent_id" | "staff_id"

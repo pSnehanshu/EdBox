@@ -3,6 +3,8 @@ import { Server as HTTPServer } from "http";
 import prisma from "../prisma";
 import { isPast } from "date-fns";
 import { School, User } from "@prisma/client";
+import { getCustomGroupIdentifier } from "../utils/group-identifier";
+import { getAutoGroups } from "../trpc/routers/school/messaging";
 
 interface ServerToClientEvents {}
 
@@ -81,10 +83,35 @@ export default function initSocketIo(server: HTTPServer) {
 
       next();
     })
-    .on("connection", (socket) => {
-      const schoolNsp = socket.nsp;
-
+    .on("connection", async (socket) => {
       const user = socket.data.user!;
       const school = socket.data.school!;
+
+      async function joinGroupRooms() {
+        // Join the user to all the group rooms
+
+        const autoGroups = await getAutoGroups(user);
+
+        // Join auto groups
+        socket.join(autoGroups.map((g) => g.id));
+
+        const customGroups = await prisma.customGroupMembers.findMany({
+          where: {
+            user_id: user.id,
+            Group: {
+              is_active: true,
+            },
+          },
+        });
+
+        // Join custom groups
+        socket.join(
+          customGroups.map((g) =>
+            getCustomGroupIdentifier(school.id, g.group_id)
+          )
+        );
+      }
+
+      await joinGroupRooms();
     });
 }
