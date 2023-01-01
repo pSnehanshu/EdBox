@@ -6,13 +6,13 @@ import {
   getCustomGroupIdentifier,
   getGroupIdentifier,
 } from "../utils/group-identifier";
-import { getAutoGroups } from "../trpc/routers/school/messaging";
 import {
   ClientToServerEvents,
   InterServerEvents,
   ServerToClientEvents,
   SocketData,
 } from "../../shared/types";
+import { getAutoGroups } from "../utils/auto-groups";
 
 export default function initSocketIo(server: HTTPServer) {
   const io = new Server<
