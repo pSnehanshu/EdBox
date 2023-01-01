@@ -2,20 +2,17 @@ import { Server } from "socket.io";
 import { Server as HTTPServer } from "http";
 import prisma from "../prisma";
 import { isPast } from "date-fns";
-import { School, User } from "@prisma/client";
-import { getCustomGroupIdentifier } from "../utils/group-identifier";
+import {
+  getCustomGroupIdentifier,
+  getGroupIdentifier,
+} from "../utils/group-identifier";
 import { getAutoGroups } from "../trpc/routers/school/messaging";
-
-interface ServerToClientEvents {}
-
-interface ClientToServerEvents {}
-
-interface InterServerEvents {}
-
-interface SocketData {
-  user: User;
-  school: School;
-}
+import {
+  ClientToServerEvents,
+  InterServerEvents,
+  ServerToClientEvents,
+  SocketData,
+} from "../../shared/types";
 
 export default function initSocketIo(server: HTTPServer) {
   const io = new Server<
@@ -113,5 +110,23 @@ export default function initSocketIo(server: HTTPServer) {
       }
 
       await joinGroupRooms();
+
+      socket.on("messageCreate", async (groupIdentifier, text) => {
+        const identifier = getGroupIdentifier(groupIdentifier);
+
+        // Save message
+        const message = await prisma.message.create({
+          data: {
+            group_identifier: identifier,
+            sender_id: user.id,
+            sender_role: "student",
+            text,
+            school_id: school.id,
+          },
+        });
+
+        // Broadcast to all clients
+        socket.to(identifier).emit("newMessage", message);
+      });
     });
 }

@@ -16,30 +16,44 @@ export const CustomGroupIdentifier = z.object({
   id: cuid,
 });
 
-const AutoGroupIdentifier = z.object({
+const AutoGroupIdentifierBase = z.object({
   gd: z.literal("a"),
   sc: cuid,
 });
 
-export const ClassGroupIdentifier = AutoGroupIdentifier.extend({
+export const ClassGroupIdentifier = AutoGroupIdentifierBase.extend({
   ty: z.literal("cl"),
   cl: int,
 });
 
-export const SectionGroupIdentifier = AutoGroupIdentifier.extend({
+export const SectionGroupIdentifier = AutoGroupIdentifierBase.extend({
   ty: z.literal("se"),
   cl: int,
   se: int,
 });
 
-export const SchoolGroupIdentifier = AutoGroupIdentifier.extend({
+export const SchoolGroupIdentifier = AutoGroupIdentifierBase.extend({
   ty: z.literal("sc"),
 });
 
-export const SubjectGroupIdentifier = AutoGroupIdentifier.extend({
+export const SubjectGroupIdentifier = AutoGroupIdentifierBase.extend({
   ty: z.literal("su"),
   su: cuid,
 });
+
+export const AutoGroupIdentifier = z.discriminatedUnion("ty", [
+  ClassGroupIdentifier,
+  SectionGroupIdentifier,
+  SchoolGroupIdentifier,
+  SubjectGroupIdentifier,
+]);
+
+export const GroupIdentifier = z.union([
+  CustomGroupIdentifier,
+  AutoGroupIdentifier,
+]);
+
+export type GroupIdentifier = z.infer<typeof GroupIdentifier>;
 
 /**
  * Given an object, convert to query string but with keys alphabetically ordered
@@ -58,6 +72,19 @@ export function convertObjectToOrderedQueryString(obj: { [k: string]: any }) {
     });
 
   return finalString.join("&");
+}
+
+export function parseGroupIdentifierString(
+  identifier: string
+): GroupIdentifier {
+  const opts = identifier.split("&");
+  const final: Record<string, string> = {};
+  opts.forEach((opt) => {
+    const [key, val] = opt.split("=");
+    final[decodeURIComponent(key)] = decodeURIComponent(val);
+  });
+
+  return GroupIdentifier.parse(final);
 }
 
 export function getCustomGroupIdentifier(
@@ -92,4 +119,44 @@ export function getClassGroupIdentifier(
     cl: classNum,
   };
   return convertObjectToOrderedQueryString(id);
+}
+
+export function getSectionGroupIdentifier(
+  schoolId: string,
+  classNum: number,
+  sectionNum: number
+) {
+  const id: z.infer<typeof SectionGroupIdentifier> = {
+    gd: "a",
+    ty: "se",
+    sc: schoolId,
+    cl: classNum,
+    se: sectionNum,
+  };
+  return convertObjectToOrderedQueryString(id);
+}
+
+export function getSubjectGroupIdentifier(schoolId: string, subjectId: string) {
+  const id: z.infer<typeof SubjectGroupIdentifier> = {
+    gd: "a",
+    ty: "su",
+    sc: schoolId,
+    su: subjectId,
+  };
+  return convertObjectToOrderedQueryString(id);
+}
+
+export function getGroupIdentifier(idf: GroupIdentifier) {
+  if (idf.gd === "c") return getCustomGroupIdentifier(idf.sc, idf.id);
+
+  switch (idf.ty) {
+    case "sc":
+      return getSchoolGroupIdentifier(idf.sc);
+    case "cl":
+      return getClassGroupIdentifier(idf.sc, idf.cl);
+    case "se":
+      return getSectionGroupIdentifier(idf.sc, idf.cl, idf.se);
+    case "su":
+      return getSubjectGroupIdentifier(idf.sc, idf.su);
+  }
 }
