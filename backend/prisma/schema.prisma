@@ -30,6 +30,7 @@ model School {
   CustomGroups CustomGroup[]
   Messages     Message[]
   Subjects     Subject[]
+  Periods      RoutinePeriod[]
 }
 
 model User {
@@ -65,13 +66,14 @@ enum Gender {
 }
 
 model Subject {
-  id         String   @id @default(cuid()) @db.VarChar(32)
-  name       String   @db.VarChar(50)
-  school_id  String   @db.VarChar(32)
-  School     School   @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  is_active  Boolean  @default(true)
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  id         String          @id @default(cuid()) @db.VarChar(32)
+  name       String          @db.VarChar(50)
+  school_id  String          @db.VarChar(32)
+  School     School          @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  is_active  Boolean         @default(true)
+  created_at DateTime        @default(now())
+  updated_at DateTime        @updatedAt
+  Periods    RoutinePeriod[]
 }
 
 model ClassStd {
@@ -84,19 +86,54 @@ model ClassStd {
   updated_at DateTime        @updatedAt
   Sections   ClassSection[]
   Batches    StudentsBatch[]
+  Periods    RoutinePeriod[]
 
   @@id([numeric_id, school_id])
 }
 
 model ClassSection {
-  numeric_id Int      @db.SmallInt
-  school_id  String   @db.VarChar(32)
-  School     School   @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  class_id   Int      @db.SmallInt
-  Class      ClassStd @relation(fields: [class_id, school_id], references: [numeric_id, school_id], onDelete: Cascade, onUpdate: Cascade)
-  name       String?  @db.VarChar(10)
+  numeric_id Int             @db.SmallInt
+  school_id  String          @db.VarChar(32)
+  School     School          @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  class_id   Int             @db.SmallInt
+  Class      ClassStd        @relation(fields: [class_id, school_id], references: [numeric_id, school_id], onDelete: Cascade, onUpdate: Cascade)
+  name       String?         @db.VarChar(10)
+  Periods    RoutinePeriod[]
 
   @@id([numeric_id, class_id, school_id])
+}
+
+model RoutinePeriod {
+  section_id  Int          @db.SmallInt
+  Section     ClassSection @relation(fields: [section_id, class_id, school_id], references: [numeric_id, class_id, school_id], onDelete: Cascade, onUpdate: Cascade)
+  class_id    Int          @db.SmallInt
+  Class       ClassStd     @relation(fields: [class_id, school_id], references: [numeric_id, school_id], onDelete: Cascade, onUpdate: Cascade)
+  school_id   String       @db.VarChar(32)
+  School      School       @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  subject_id  String       @db.VarChar(32)
+  Subject     Subject      @relation(fields: [subject_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  day_of_week DayOfWeek
+  start_hour  Int          @db.SmallInt
+  start_min   Int          @db.SmallInt
+  end_hour    Int          @db.SmallInt
+  end_min     Int          @db.SmallInt
+  teacher_id  String?      @db.VarChar(32)
+  Teacher     Teacher?     @relation(fields: [teacher_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  is_active   Boolean      @default(true)
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
+
+  @@id([section_id, class_id, school_id, subject_id])
+}
+
+enum DayOfWeek {
+  sun
+  mon
+  tue
+  wed
+  thu
+  fri
+  sat
 }
 
 model StudentsBatch {
@@ -131,12 +168,13 @@ model Student {
 }
 
 model Teacher {
-  id         String   @id @default(cuid()) @db.VarChar(32)
-  school_id  String   @db.VarChar(32)
-  School     School   @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  is_active  Boolean  @default(true)
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  id         String          @id @default(cuid()) @db.VarChar(32)
+  school_id  String          @db.VarChar(32)
+  School     School          @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  is_active  Boolean         @default(true)
+  created_at DateTime        @default(now())
+  updated_at DateTime        @updatedAt
+  Periods    RoutinePeriod[]
 }
 
 model Parent {

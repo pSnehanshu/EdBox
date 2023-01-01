@@ -4,8 +4,10 @@ import {
   getClassGroupIdentifier,
   getSchoolGroupIdentifier,
   getSectionGroupIdentifier,
+  getSubjectGroupIdentifier,
   GroupBasicInfo,
 } from "./group-identifier";
+import _ from "lodash";
 
 /**
  * Get list of all automatic groups a user is part of
@@ -62,7 +64,7 @@ export async function getAutoGroups(
         name: `Class ${className} (all sections)`,
       });
 
-      // // Class group (A student can belong to only one section)
+      // Class group (A student can belong to only one section)
       if (typeof student.section === "number") {
         const section = await prisma.classSection.findUnique({
           where: {
@@ -70,6 +72,19 @@ export async function getAutoGroups(
               class_id: Class.numeric_id,
               numeric_id: student.section,
               school_id: schoolId,
+            },
+          },
+          include: {
+            Periods: {
+              where: {
+                is_active: true,
+                Subject: {
+                  is_active: true,
+                },
+              },
+              include: {
+                Subject: true,
+              },
             },
           },
         });
@@ -86,6 +101,17 @@ export async function getAutoGroups(
             ),
             name: `Class ${className} (${sectionName})`,
           });
+
+          // Fetch all the subject groups
+          _.uniqBy(section.Periods, (period) => period.subject_id).forEach(
+            ({ Subject }) => {
+              subjectGroups.push({
+                gd: "a",
+                name: `${Subject.name} - Class ${className} (${sectionName})`,
+                id: getSubjectGroupIdentifier(schoolId, Subject.id),
+              });
+            }
+          );
         }
       }
     }
