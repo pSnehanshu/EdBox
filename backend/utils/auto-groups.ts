@@ -33,7 +33,57 @@ export async function getAutoGroups(
   const subjectGroups: GroupBasicInfo[] = [];
 
   if (user.teacher_id) {
-    // Fetch classes where they teach
+    // Fetch necessary info about the teacher
+    const teacher = await prisma.teacher.findUnique({
+      where: { id: user.teacher_id },
+      include: {
+        Periods: {
+          where: {
+            is_active: true,
+            Class: {
+              is_active: true,
+            },
+            Subject: {
+              is_active: true,
+            },
+          },
+          include: {
+            Class: true,
+            Subject: true,
+            Section: true,
+          },
+        },
+      },
+    });
+
+    if (teacher && teacher.is_active && teacher.school_id === schoolId) {
+      // Subject groups
+      _.uniqBy(teacher.Periods, (p) => p.subject_id).forEach(
+        ({ Subject, Class, Section }) => {
+          const className = Class.name ?? Class.numeric_id;
+          const sectionName = Section.name ?? Section.numeric_id;
+
+          // Subject group
+          subjectGroups.push({
+            gd: "a",
+            id: getSubjectGroupIdentifier(schoolId, Subject.id),
+            name: `${Subject.name} - Class ${className} (${sectionName})`,
+          });
+        }
+      );
+
+      // Class groups
+      _.uniqBy(teacher.Periods, (p) => p.class_id).forEach(({ Class }) => {
+        const className = Class.name ?? Class.numeric_id;
+
+        // Class group
+        classGroups.push({
+          gd: "a",
+          id: getClassGroupIdentifier(schoolId, Class.numeric_id),
+          name: `Class ${className} (all sections)`,
+        });
+      });
+    }
   }
   if (user.student_id) {
     const student = await prisma.student.findUnique({
@@ -51,8 +101,8 @@ export async function getAutoGroups(
     if (
       student &&
       student.is_active &&
-      student.CurrentBatch &&
-      student.CurrentBatch.Class
+      student.school_id === schoolId &&
+      student.CurrentBatch?.Class
     ) {
       // Class group (A student can belong to only one class)
       const Class = student.CurrentBatch.Class;
@@ -103,7 +153,7 @@ export async function getAutoGroups(
           });
 
           // Fetch all the subject groups
-          _.uniqBy(section.Periods, (period) => period.subject_id).forEach(
+          _.uniqBy(section.Periods, (p) => p.subject_id).forEach(
             ({ Subject }) => {
               subjectGroups.push({
                 gd: "a",
