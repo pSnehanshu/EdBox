@@ -16,6 +16,7 @@ model School {
   name         String          @db.VarChar(50)
   logo         String?         @db.VarChar(256)
   icon         String?         @db.VarChar(256)
+  website      String?         @db.VarChar(256)
   is_active    Boolean         @default(true)
   created_at   DateTime        @default(now())
   updated_at   DateTime        @updatedAt

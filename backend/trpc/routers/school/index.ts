@@ -22,6 +22,7 @@ const schoolRouter = router({
           icon: true,
           name: true,
           is_active: true,
+          website: true,
         },
       });
 
