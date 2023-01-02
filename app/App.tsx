@@ -8,6 +8,7 @@ import useCachedResources from "./hooks/useCachedResources";
 import useColorScheme from "./hooks/useColorScheme";
 import Navigation from "./navigation";
 import { useFetchSchool, SchoolContext } from "./hooks/useSchool";
+import { useAuthToken } from "./utils/auth";
 
 function AppWithSchool() {
   const colorScheme = useColorScheme();
@@ -27,6 +28,7 @@ function AppWithSchool() {
 }
 
 export default function App() {
+  const authToken = useAuthToken();
   const isLoadingComplete = useCachedResources();
 
   const [queryClient] = useState(() => new QueryClient());
@@ -35,8 +37,10 @@ export default function App() {
       links: [
         httpBatchLink({
           url: "http://192.168.29.42:5080/trpc",
-          headers() {
-            return {};
+          async headers() {
+            return {
+              "x-session-id": (await authToken.get()) ?? undefined,
+            };
           },
         }),
       ],

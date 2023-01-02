@@ -28,6 +28,7 @@ import {
   RootTabParamList,
   RootTabScreenProps,
 } from "../types";
+import { useFetchCurrentUser } from "../utils/auth";
 import LinkingConfiguration from "./LinkingConfiguration";
 
 export default function Navigation({
@@ -53,24 +54,32 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
   const school = useSchool();
+  const { isLoggedIn } = useFetchCurrentUser();
 
   return (
     <Stack.Navigator>
-      <Stack.Screen
-        name="PreLogin"
-        component={PreLoginScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Login"
-        component={LoginScreen}
-        options={{ title: `Login to ${school.name}` }}
-      />
-      <Stack.Screen
-        name="Root"
-        component={BottomTabNavigator}
-        options={{ headerShown: false }}
-      />
+      {isLoggedIn ? (
+        <>
+          <Stack.Screen
+            name="Root"
+            component={BottomTabNavigator}
+            options={{ headerShown: false }}
+          />
+        </>
+      ) : (
+        <>
+          <Stack.Screen
+            name="PreLogin"
+            component={PreLoginScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Login"
+            component={LoginScreen}
+            options={{ title: `Login to ${school.name}` }}
+          />
+        </>
+      )}
       <Stack.Screen
         name="NotFound"
         component={NotFoundScreen}

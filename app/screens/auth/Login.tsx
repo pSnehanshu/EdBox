@@ -5,9 +5,11 @@ import { useSchool } from "../../hooks/useSchool";
 import { RootStackScreenProps } from "../../types";
 import { trpc } from "../../utils/trpc";
 import Spinner from "react-native-loading-spinner-overlay";
+import { useAuthToken } from "../../utils/auth";
 
 export default function LoginScreen({}: RootStackScreenProps<"Login">) {
   const school = useSchool();
+  const authToken = useAuthToken();
   const [step, setStep] = useState<"requestOTP" | "submitOTP">("requestOTP");
   const [email, setEmail] = useState("");
   const [otp, setOTP] = useState("");
@@ -18,7 +20,7 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
   });
   const submitOTP = trpc.auth.submitEmailLoginOTP.useMutation({
     onSuccess(data) {
-      alert(`Token: ${data.token}`);
+      authToken.set(data.token, new Date(data.expiry_date));
     },
   });
 

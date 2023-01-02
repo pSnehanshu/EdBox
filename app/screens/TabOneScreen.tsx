@@ -3,16 +3,19 @@ import EditScreenInfo from "../components/EditScreenInfo";
 import { Text, View } from "../components/Themed";
 import { useSchool } from "../hooks/useSchool";
 import { RootTabScreenProps } from "../types";
+import { useCurrentUser } from "../utils/auth";
 
 export default function TabOneScreen({
   navigation,
 }: RootTabScreenProps<"TabOne">) {
   const school = useSchool();
+  const user = useCurrentUser();
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Tab One</Text>
-      <Text style={styles.title}>{JSON.stringify(school, null, 2)}</Text>
+      <Text>{JSON.stringify(school, null, 2)}</Text>
+      <Text>{JSON.stringify(user, null, 2)}</Text>
       <View
         style={styles.separator}
         lightColor="#eee"
