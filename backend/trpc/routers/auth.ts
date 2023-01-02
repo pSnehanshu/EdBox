@@ -2,7 +2,7 @@ import { router, publicProcedure, authProcedure } from "../trpc";
 import { z } from "zod";
 import prisma from "../../prisma";
 import { TRPCError } from "@trpc/server";
-import { addMinutes, addMonths, isPast } from "date-fns";
+import { addMinutes, addMonths, isFuture, isPast } from "date-fns";
 import _ from "lodash";
 import CONFIG from "../../config";
 
@@ -25,6 +25,8 @@ const authRouter = router({
         select: {
           id: true,
           is_active: true,
+          otp: true,
+          otp_expiry: true,
         },
       });
 
@@ -35,10 +37,15 @@ const authRouter = router({
       // User exists, and is active
 
       // Generate OTP
-      const otp = (
+      let otp = (
         Math.floor(Math.random() * 9 * 10 ** (CONFIG.otpLength - 1)) +
         10 ** (CONFIG.otpLength - 1)
       ).toString();
+
+      if (user.otp && user.otp_expiry && isFuture(user.otp_expiry)) {
+        // An OTP exists, reuse it
+        otp = user.otp;
+      }
 
       const otpExpiry = addMinutes(new Date(), 10);
 
@@ -87,13 +94,22 @@ const authRouter = router({
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
-      // OTP correct, create session
-      const session = await prisma.loginSession.create({
-        data: {
-          expiry_date: addMonths(new Date(), 2),
-          user_id: user.id,
-        },
-      });
+      // OTP correct, create session and remove otp
+      const [session] = await prisma.$transaction([
+        prisma.loginSession.create({
+          data: {
+            expiry_date: addMonths(new Date(), 2),
+            user_id: user.id,
+          },
+        }),
+        prisma.user.update({
+          where: { id: user.id },
+          data: {
+            otp: null,
+            otp_expiry: null,
+          },
+        }),
+      ]);
 
       return {
         token: session.id,

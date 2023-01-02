@@ -16,6 +16,7 @@ import { ColorSchemeName, Pressable } from "react-native";
 
 import Colors from "../constants/Colors";
 import useColorScheme from "../hooks/useColorScheme";
+import { useSchool } from "../hooks/useSchool";
 import LoginScreen from "../screens/auth/Login";
 import PreLoginScreen from "../screens/auth/PreLogin";
 import ModalScreen from "../screens/ModalScreen";
@@ -51,6 +52,8 @@ export default function Navigation({
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
+  const school = useSchool();
+
   return (
     <Stack.Navigator>
       <Stack.Screen
@@ -61,7 +64,7 @@ function RootNavigator() {
       <Stack.Screen
         name="Login"
         component={LoginScreen}
-        options={{ title: "Login" }}
+        options={{ title: `Login to ${school.name}` }}
       />
       <Stack.Screen
         name="Root"
