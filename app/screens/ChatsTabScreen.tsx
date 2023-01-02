@@ -41,7 +41,7 @@ export default function ChatsTabScreen({}: RootTabScreenProps<"ChatsTab">) {
                 </Text>
               </View>
               <View style={styles.chatGroupRight}>
-                <Text style={styles.chatGroupLastMessage}>34m</Text>
+                <Text style={styles.chatGroupLastMessage}>10:23 pm</Text>
               </View>
             </Pressable>
           );
