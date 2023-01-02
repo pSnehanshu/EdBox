@@ -7,6 +7,7 @@ import {
   Text as DefaultText,
   View as DefaultView,
   TextInput as DefaultTextInput,
+  FlatList as DefaultList,
 } from "react-native";
 
 import Colors from "../constants/Colors";
@@ -34,6 +35,7 @@ type ThemeProps = {
 export type TextProps = ThemeProps & DefaultText["props"];
 export type ViewProps = ThemeProps & DefaultView["props"];
 export type TextInputProps = ThemeProps & DefaultTextInput["props"];
+export type ListProps<ItemT> = ThemeProps & DefaultList<ItemT>["props"];
 
 export function Text(props: TextProps) {
   const { style, lightColor, darkColor, ...otherProps } = props;
@@ -50,6 +52,16 @@ export function View(props: ViewProps) {
   );
 
   return <DefaultView style={[{ backgroundColor }, style]} {...otherProps} />;
+}
+
+export function List<ItemT = any>(props: ListProps<ItemT>) {
+  const { style, lightColor, darkColor, ...otherProps } = props;
+  const backgroundColor = useThemeColor(
+    { light: lightColor, dark: darkColor },
+    "background"
+  );
+
+  return <DefaultList style={[{ backgroundColor }, style]} {...otherProps} />;
 }
 
 export function TextInput(props: TextInputProps) {

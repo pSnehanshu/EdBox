@@ -1,36 +1,91 @@
-import { StyleSheet } from "react-native";
-
-import EditScreenInfo from "../components/EditScreenInfo";
-import { Text, View } from "../components/Themed";
+import { SafeAreaView, StyleSheet, Pressable, Image } from "react-native";
+import { List, Text, View } from "../components/Themed";
 import { RootTabScreenProps } from "../types";
+import { trpc } from "../utils/trpc";
 
 export default function ChatsTabScreen({}: RootTabScreenProps<"ChatsTab">) {
+  const {
+    isLoading,
+    isError,
+    data: chats,
+  } = trpc.school.messaging.fetchGroups.useQuery({
+    sort: "recent_message",
+    page: 1,
+  });
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Tab Two</Text>
-      <View
-        style={styles.separator}
-        lightColor="#eee"
-        darkColor="rgba(255,255,255,0.1)"
+    <SafeAreaView style={styles.container}>
+      <List
+        data={chats ?? []}
+        renderItem={({ item: chatGroup }) => {
+          return (
+            <Pressable
+              style={({ pressed }) => {
+                return {
+                  ...styles.chatGroup,
+                  backgroundColor: pressed ? "rgb(210, 230, 255)" : undefined,
+                };
+              }}
+              onPress={() => {
+                alert(`Group: ${chatGroup.id}`);
+              }}
+            >
+              <Image
+                source={require("../assets/images/multiple-users-silhouette.png")}
+                style={styles.chatGroupIcon}
+              />
+              <View style={styles.chatGroupMiddle}>
+                <Text style={styles.chatGroupName}>{chatGroup.name}</Text>
+                <Text style={styles.chatGroupLastMessage}>
+                  User 1: How are you everyone?
+                </Text>
+              </View>
+              <View style={styles.chatGroupRight}>
+                <Text style={styles.chatGroupLastMessage}>34m</Text>
+              </View>
+            </Pressable>
+          );
+        }}
       />
-      <EditScreenInfo path="/screens/TabTwoScreen.tsx" />
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    width: "100%",
   },
-  title: {
-    fontSize: 20,
+  chatGroup: {
+    paddingVertical: 16,
+    borderBottomColor: "gray",
+    borderBottomWidth: 0.5,
+    flex: 1,
+    flexDirection: "row",
+  },
+  chatGroupIcon: {
+    width: 48,
+    aspectRatio: 1,
+    borderColor: "gray",
+    borderWidth: 0.5,
+    borderRadius: 50,
+    marginLeft: 8,
+  },
+  chatGroupMiddle: {
+    backgroundColor: undefined,
+    flexGrow: 1,
+    paddingLeft: 16,
+  },
+  chatGroupName: {
+    fontSize: 16,
     fontWeight: "bold",
   },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: "80%",
+  chatGroupRight: {
+    backgroundColor: undefined,
+    paddingRight: 8,
+  },
+  chatGroupLastMessage: {
+    fontSize: 12,
+    color: "gray",
   },
 });
