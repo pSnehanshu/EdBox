@@ -91,6 +91,21 @@ export function parseGroupIdentifierString(
   return GroupIdentifier.parse(final);
 }
 
+/**
+ * A zod schema to validate and parse Group Identifier strings
+ */
+export const groupIdentifierSchema = z.string().transform((val, ctx) => {
+  try {
+    return parseGroupIdentifierString(val);
+  } catch (error) {
+    ctx.addIssue({
+      code: "custom",
+      message: "Not a proper Group Identifier String",
+    });
+    return z.NEVER;
+  }
+});
+
 export function getCustomGroupIdentifier(
   schoolId: string,
   groupId: string

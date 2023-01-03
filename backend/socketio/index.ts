@@ -125,8 +125,6 @@ export default function initSocketIo(server: HTTPServer) {
           const cleanGroupIdentifier =
             convertObjectToOrderedQueryString(identifier);
 
-          console.log("Message received", identifier, text);
-
           // Save message
           const message = await prisma.message.create({
             data: {

@@ -4,8 +4,10 @@ import { z } from "zod";
 import prisma from "../../../prisma";
 import { getAutoGroups } from "../../../utils/auto-groups";
 import {
+  convertObjectToOrderedQueryString,
   getCustomGroupIdentifier,
   GroupBasicInfo,
+  groupIdentifierSchema,
 } from "../../../utils/group-identifier";
 import { router, authProcedure } from "../../trpc";
 
@@ -439,6 +441,49 @@ const messagingRouter = router({
       });
 
       return updatedGroup;
+    }),
+  fetchGroupMessages: authProcedure
+    .input(
+      z.object({
+        groupIdentifier: groupIdentifierSchema,
+        limit: z.number().min(1).max(20).default(10),
+        page: z.number().min(1).default(1),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      if (input.groupIdentifier.sc !== ctx.user.school_id) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Can't find group from other schools",
+        });
+      }
+
+      const messages = prisma.message.findMany({
+        where: {
+          school_id: ctx.user.school_id,
+          group_identifier: convertObjectToOrderedQueryString(
+            input.groupIdentifier
+          ),
+        },
+        include: {
+          ParentMessage: true,
+          Sender: {
+            include: {
+              Student: true,
+              Teacher: true,
+              Parent: true,
+              Staff: true,
+            },
+          },
+        },
+        orderBy: {
+          created_at: "desc",
+        },
+        take: input.limit,
+        skip: (input.page - 1) * input.limit,
+      });
+
+      return messages;
     }),
 });
 

@@ -59,6 +59,7 @@ model User {
   Sessions            LoginSession[]
   CustomGroups        CustomGroupMembers[]
   CreatedCustomGroups CustomGroup[]
+  Messages            Message[]
 
   @@unique([email, school_id])
   @@unique([phone, school_id])
@@ -247,6 +248,7 @@ model Message {
   School            School     @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   text              String     @db.Text
   sender_id         String     @db.VarChar(32)
+  Sender            User       @relation(fields: [sender_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   sender_role       SenderRole
   group_identifier  String
   attachments       Json?
