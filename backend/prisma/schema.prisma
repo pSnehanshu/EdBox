@@ -45,10 +45,14 @@ model User {
   gender              Gender?
   school_id           String               @db.VarChar(32)
   School              School               @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  student_id          String?              @db.VarChar(32)
-  teacher_id          String?              @db.VarChar(32)
-  parent_id           String?              @db.VarChar(32)
-  staff_id            String?              @db.VarChar(32)
+  student_id          String?              @unique @db.VarChar(32)
+  Student             Student?             @relation(fields: [student_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  teacher_id          String?              @unique @db.VarChar(32)
+  Teacher             Teacher?             @relation(fields: [teacher_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  parent_id           String?              @unique @db.VarChar(32)
+  Parent              Parent?              @relation(fields: [parent_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  staff_id            String?              @unique @db.VarChar(32)
+  Staff               SchoolStaff?         @relation(fields: [staff_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
   is_active           Boolean              @default(true)
   created_at          DateTime             @default(now())
   updated_at          DateTime             @updatedAt
@@ -166,6 +170,7 @@ model Student {
   created_at        DateTime                @default(now())
   updated_at        DateTime                @updatedAt
   Parents           ParentStudent_mapping[]
+  User              User?
 }
 
 model Teacher {
@@ -176,6 +181,7 @@ model Teacher {
   created_at DateTime        @default(now())
   updated_at DateTime        @updatedAt
   Periods    RoutinePeriod[]
+  User       User?
 }
 
 model Parent {
@@ -186,6 +192,7 @@ model Parent {
   created_at DateTime                @default(now())
   updated_at DateTime                @updatedAt
   Students   ParentStudent_mapping[]
+  User       User?
 }
 
 model SchoolStaff {
@@ -195,6 +202,7 @@ model SchoolStaff {
   is_active  Boolean  @default(true)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+  User       User?
 }
 
 model ParentStudent_mapping {

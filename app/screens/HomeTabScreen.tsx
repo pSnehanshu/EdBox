@@ -4,9 +4,7 @@ import { useSchool } from "../hooks/useSchool";
 import { RootTabScreenProps } from "../types";
 import { useCurrentUser } from "../utils/auth";
 
-export default function HomeTabScreen({
-  navigation,
-}: RootTabScreenProps<"HomeTab">) {
+export default function HomeTabScreen({}: RootTabScreenProps<"HomeTab">) {
   const school = useSchool();
   const user = useCurrentUser();
 

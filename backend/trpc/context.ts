@@ -20,6 +20,10 @@ export async function createContext({ req, res }: CreateExpressContextOptions) {
       User: {
         include: {
           School: true,
+          Student: true,
+          Teacher: true,
+          Parent: true,
+          Staff: true,
         },
       },
     },
