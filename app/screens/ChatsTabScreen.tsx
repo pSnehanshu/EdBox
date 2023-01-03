@@ -98,6 +98,7 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderRadius: 50,
     marginLeft: 8,
+    backgroundColor: "white",
   },
   chatGroupMiddle: {
     backgroundColor: undefined,
