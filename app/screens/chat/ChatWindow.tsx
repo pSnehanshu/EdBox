@@ -1,10 +1,11 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
 import { Button } from "react-native";
-import { List, Text, TextInput, View } from "../../components/Themed";
+import { List, TextInput, View } from "../../components/Themed";
 import { ChatsTabParamList } from "../../types";
 import { useSocket } from "../../utils/socketio";
 import { trpc } from "../../utils/trpc";
+import ChatMessage from "./ChatMessage";
 
 export default function ChatWindowScreen({
   route: { params: groupInfo },
@@ -19,14 +20,8 @@ export default function ChatWindowScreen({
   return (
     <View>
       <List
-        data={messagesQuery.data ?? []}
-        renderItem={({ item: chat }) => {
-          return (
-            <Text>
-              {chat.Sender.name}: {chat.text} ({chat.created_at})
-            </Text>
-          );
-        }}
+        data={(messagesQuery.data ?? []).slice().reverse()}
+        renderItem={({ item }) => <ChatMessage message={item} />}
       />
 
       {
@@ -34,6 +29,7 @@ export default function ChatWindowScreen({
           <>
             <TextInput
               value={messageText}
+              placeholder="Message"
               onChangeText={(t) => setMessageText(t)}
             />
             <Button
