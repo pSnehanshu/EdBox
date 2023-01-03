@@ -1,9 +1,39 @@
+import {
+  createNativeStackNavigator,
+  NativeStackScreenProps,
+} from "@react-navigation/native-stack";
 import { SafeAreaView, StyleSheet, Pressable, Image } from "react-native";
 import { List, Text, View } from "../components/Themed";
-import { RootTabScreenProps } from "../types";
+import { ChatsTabParamList } from "../types";
 import { trpc } from "../utils/trpc";
+import ChatWindowScreen from "./chat/ChatWindow";
 
-export default function ChatsTabScreen({}: RootTabScreenProps<"ChatsTab">) {
+const ChatStack = createNativeStackNavigator<ChatsTabParamList>();
+
+export default function ChatsTabScreen() {
+  return (
+    <ChatStack.Navigator initialRouteName="ChatList">
+      <ChatStack.Screen
+        name="ChatList"
+        component={ChatsListScreen}
+        options={{
+          title: "Chat",
+        }}
+      />
+      <ChatStack.Screen
+        name="ChatWindow"
+        component={ChatWindowScreen}
+        options={{
+          title: "Messages",
+        }}
+      />
+    </ChatStack.Navigator>
+  );
+}
+
+function ChatsListScreen({
+  navigation,
+}: NativeStackScreenProps<ChatsTabParamList, "ChatList">) {
   const {
     isLoading,
     isError,
@@ -26,9 +56,7 @@ export default function ChatsTabScreen({}: RootTabScreenProps<"ChatsTab">) {
                   backgroundColor: pressed ? "rgb(210, 230, 255)" : undefined,
                 };
               }}
-              onPress={() => {
-                alert(`Group: ${chatGroup.id}`);
-              }}
+              onPress={() => navigation.navigate("ChatWindow", chatGroup)}
             >
               <Image
                 source={require("../assets/images/multiple-users-silhouette.png")}

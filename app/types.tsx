@@ -9,6 +9,7 @@ import {
   NavigatorScreenParams,
 } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import type { GroupBasicInfo } from "../backend/utils/group-identifier";
 
 declare global {
   namespace ReactNavigation {
@@ -30,6 +31,11 @@ export type RootStackScreenProps<Screen extends keyof RootStackParamList> =
 export type RootTabParamList = {
   HomeTab: undefined;
   ChatsTab: undefined;
+};
+
+export type ChatsTabParamList = {
+  ChatList: undefined;
+  ChatWindow: GroupBasicInfo;
 };
 
 export type RootTabScreenProps<Screen extends keyof RootTabParamList> =

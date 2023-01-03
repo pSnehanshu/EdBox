@@ -151,6 +151,7 @@ function BottomTabNavigator() {
               color={color}
             />
           ),
+          headerShown: false,
         }}
       />
     </BottomTab.Navigator>
