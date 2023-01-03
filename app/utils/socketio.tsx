@@ -6,6 +6,7 @@ import type {
 } from "../../shared/types";
 import { useRef, createContext, useEffect, useContext, useState } from "react";
 import { useAuthToken } from "./auth";
+import { useSchool } from "../hooks/useSchool";
 
 type SocketType = Socket<ServerToClientEvents, ClientToServerEvents>;
 
@@ -25,13 +26,14 @@ interface SocketProviderProps {
   children: JSX.Element | JSX.Element[];
 }
 export function SocketProvider({ children }: SocketProviderProps) {
+  const school = useSchool();
   const socket = useRef<SocketType>();
   const authToken = useAuthToken();
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     (async () => {
-      socket.current = io(config.backendHost, {
+      socket.current = io(`${config.backendHost}/${school.id}`, {
         auth: {
           token: (await authToken.get()) ?? undefined,
         },

@@ -114,6 +114,8 @@ export default function initSocketIo(server: HTTPServer) {
       socket.on("messageCreate", async (groupIdentifier, text) => {
         const identifier = getGroupIdentifier(groupIdentifier);
 
+        console.log("Message received", identifier, text);
+
         // Save message
         const message = await prisma.message.create({
           data: {
