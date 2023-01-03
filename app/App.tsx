@@ -9,6 +9,7 @@ import useColorScheme from "./hooks/useColorScheme";
 import Navigation from "./navigation";
 import { useFetchSchool, SchoolContext } from "./hooks/useSchool";
 import { useAuthToken } from "./utils/auth";
+import config from "./config";
 
 function AppWithSchool() {
   const colorScheme = useColorScheme();
@@ -36,7 +37,7 @@ export default function App() {
     trpc.createClient({
       links: [
         httpBatchLink({
-          url: "http://192.168.29.42:5080/trpc",
+          url: `${config.backendHost}/trpc`,
           async headers() {
             return {
               "x-session-id": (await authToken.get()) ?? undefined,

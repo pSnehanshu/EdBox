@@ -30,6 +30,7 @@ import {
 } from "../types";
 import { useFetchCurrentUser } from "../utils/auth";
 import LinkingConfiguration from "./LinkingConfiguration";
+import { SocketProvider, useSocket } from "../utils/socketio";
 
 export default function Navigation({
   colorScheme,
@@ -62,7 +63,7 @@ function RootNavigator() {
         <>
           <Stack.Screen
             name="Root"
-            component={BottomTabNavigator}
+            component={LoggedInScreens}
             options={{ headerShown: false }}
           />
         </>
@@ -100,6 +101,7 @@ const BottomTab = createBottomTabNavigator<RootTabParamList>();
 
 function BottomTabNavigator() {
   const colorScheme = useColorScheme();
+  const socket = useSocket();
 
   return (
     <BottomTab.Navigator
@@ -142,7 +144,7 @@ function BottomTabNavigator() {
         name="ChatsTab"
         component={ChatsTabScreen}
         options={{
-          title: "Chats",
+          title: `Chats ${socket.isConnected ? "" : "(reconnecting...)"}`,
           tabBarIcon: ({ color }) => (
             <Ionicons
               name="md-chatbubbles"
@@ -155,5 +157,13 @@ function BottomTabNavigator() {
         }}
       />
     </BottomTab.Navigator>
+  );
+}
+
+function LoggedInScreens() {
+  return (
+    <SocketProvider>
+      <BottomTabNavigator />
+    </SocketProvider>
   );
 }
