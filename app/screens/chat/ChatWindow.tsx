@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
-import { Button } from "react-native";
+import { Button, StyleSheet } from "react-native";
 import { List, TextInput, View } from "../../components/Themed";
 import { ChatsTabParamList } from "../../types";
 import { useSocket } from "../../utils/socketio";
@@ -18,15 +18,17 @@ export default function ChatWindowScreen({
   const utils = trpc.useContext();
 
   return (
-    <View>
+    <View style={styles.container}>
       <List
-        data={(messagesQuery.data ?? []).slice().reverse()}
+        inverted
+        style={styles.messages}
+        data={messagesQuery.data ?? []}
         renderItem={({ item }) => <ChatMessage message={item} />}
       />
 
       {
         socket.isConnected ? (
-          <>
+          <View style={styles.composer}>
             <TextInput
               value={messageText}
               placeholder="Message"
@@ -46,9 +48,17 @@ export default function ChatWindowScreen({
                 setMessageText("");
               }}
             />
-          </>
+          </View>
         ) : null /* TODO: Allow sending messages when offline */
       }
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  messages: {},
+  composer: {},
+});

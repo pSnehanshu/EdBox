@@ -446,7 +446,7 @@ const messagingRouter = router({
     .input(
       z.object({
         groupIdentifier: groupIdentifierSchema,
-        limit: z.number().min(1).max(20).default(10),
+        limit: z.number().min(1).max(500).default(100),
         page: z.number().min(1).default(1),
       })
     )
