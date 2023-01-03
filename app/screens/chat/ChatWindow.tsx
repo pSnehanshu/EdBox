@@ -27,15 +27,7 @@ export default function ChatWindowScreen({
         title="Send msg"
         onPress={() => {
           socket.isConnected &&
-            socket.client.emit(
-              "messageCreate",
-              {
-                gd: "a",
-                ty: "sc",
-                sc: school.id,
-              },
-              messageText
-            );
+            socket.client.emit("messageCreate", groupInfo.id, messageText);
 
           setMessageText("");
         }}

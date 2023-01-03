@@ -4,7 +4,8 @@ import prisma from "../prisma";
 import { isPast } from "date-fns";
 import {
   getCustomGroupIdentifier,
-  getGroupIdentifier,
+  convertObjectToOrderedQueryString,
+  parseGroupIdentifierString,
 } from "../utils/group-identifier";
 import {
   ClientToServerEvents,
@@ -112,23 +113,36 @@ export default function initSocketIo(server: HTTPServer) {
       await joinGroupRooms();
 
       socket.on("messageCreate", async (groupIdentifier, text) => {
-        const identifier = getGroupIdentifier(groupIdentifier);
+        try {
+          // Parse the incoming group identifier string, make sure it is valid format
+          const identifier = parseGroupIdentifierString(groupIdentifier);
 
-        console.log("Message received", identifier, text);
+          if (identifier.sc !== school.id) {
+            throw new Error("Can't send message to another school");
+          }
 
-        // Save message
-        const message = await prisma.message.create({
-          data: {
-            group_identifier: identifier,
-            sender_id: user.id,
-            sender_role: "student",
-            text,
-            school_id: school.id,
-          },
-        });
+          // Regenerate identifier string, to make sure it is ordered
+          const cleanGroupIdentifier =
+            convertObjectToOrderedQueryString(identifier);
 
-        // Broadcast to all clients
-        socket.to(identifier).emit("newMessage", message);
+          console.log("Message received", identifier, text);
+
+          // Save message
+          const message = await prisma.message.create({
+            data: {
+              group_identifier: cleanGroupIdentifier,
+              sender_id: user.id,
+              sender_role: "student",
+              text,
+              school_id: school.id,
+            },
+          });
+
+          // Broadcast to all clients
+          socket.to(cleanGroupIdentifier).emit("newMessage", message);
+        } catch (error) {
+          console.error("Failed to receive message", error);
+        }
       });
     });
 }
