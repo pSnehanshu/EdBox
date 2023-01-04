@@ -1,7 +1,10 @@
 import { WebSQLDatabase } from "expo-sqlite";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { Subject } from "rxjs";
 import type { Message } from "../../shared/types";
 import { SocketClient } from "../types";
+import { useDB } from "./db";
+import { useSocket } from "./socketio";
 
 export class MessagesRepository {
   /** The observable representing all received messages */
@@ -52,6 +55,23 @@ export class MessagesRepository {
     return groupObservable;
   }
 
+  useGroupMessageReceived(
+    groupIdentifier: string,
+    onReceive: (message: Message) => void
+  ) {
+    useEffect(() => {
+      const observable = this.getGroupMessageObservable(groupIdentifier);
+
+      const subscription = observable.subscribe((message) => {
+        onReceive(message);
+      });
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    }, []);
+  }
+
   /**
    * Send a new message
    * @param groupIdentifier
@@ -63,4 +83,36 @@ export class MessagesRepository {
       text,
     });
   }
+}
+
+const MessagesRepositoryContext = createContext<MessagesRepository | null>(
+  null
+);
+
+interface MessagesProviderProp {
+  children: JSX.Element | JSX.Element[];
+}
+export function MessagesProvider({ children }: MessagesProviderProp) {
+  const db = useDB();
+  const socket = useSocket();
+  const messages = useRef<MessagesRepository>();
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    if (socket.isConnected && !isLoaded) {
+      messages.current = new MessagesRepository(db, socket.client);
+      setIsLoaded(true);
+    }
+  }, [socket.isConnected]);
+
+  return (
+    <MessagesRepositoryContext.Provider value={messages.current ?? null}>
+      {children}
+    </MessagesRepositoryContext.Provider>
+  );
+}
+
+export function useMessages() {
+  const messages = useContext(MessagesRepositoryContext);
+  return messages!;
 }

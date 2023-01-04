@@ -29,6 +29,7 @@ import {
 import { useFetchCurrentUser } from "../utils/auth";
 import LinkingConfiguration from "./LinkingConfiguration";
 import { SocketProvider, useSocket } from "../utils/socketio";
+import { MessagesProvider } from "../utils/messages-repository";
 
 export default function Navigation({
   colorScheme,
@@ -102,59 +103,61 @@ function BottomTabNavigator() {
   const socket = useSocket();
 
   return (
-    <BottomTab.Navigator
-      initialRouteName="HomeTab"
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme].tint,
-      }}
-    >
-      <BottomTab.Screen
-        name="HomeTab"
-        component={HomeTabScreen}
-        options={({ navigation }: RootTabScreenProps<"HomeTab">) => ({
-          title: "Home",
-          tabBarIcon: ({ color }) => (
-            <Ionicons
-              name="home-sharp"
-              size={30}
-              style={{ marginBottom: -3 }}
-              color={color}
-            />
-          ),
-          headerRight: () => (
-            <Pressable
-              onPress={() => navigation.navigate("Modal")}
-              style={({ pressed }) => ({
-                opacity: pressed ? 0.5 : 1,
-              })}
-            >
-              <Ionicons
-                name="information-circle"
-                size={25}
-                color={Colors[colorScheme].text}
-                style={{ marginRight: 15 }}
-              />
-            </Pressable>
-          ),
-        })}
-      />
-      <BottomTab.Screen
-        name="ChatsTab"
-        component={ChatsTabScreen}
-        options={{
-          title: `Chats ${socket.isConnected ? "" : "(reconnecting...)"}`,
-          tabBarIcon: ({ color }) => (
-            <Ionicons
-              name="md-chatbubbles"
-              size={30}
-              style={{ marginBottom: -3 }}
-              color={color}
-            />
-          ),
-          headerShown: false,
+    <MessagesProvider>
+      <BottomTab.Navigator
+        initialRouteName="HomeTab"
+        screenOptions={{
+          tabBarActiveTintColor: Colors[colorScheme].tint,
         }}
-      />
-    </BottomTab.Navigator>
+      >
+        <BottomTab.Screen
+          name="HomeTab"
+          component={HomeTabScreen}
+          options={({ navigation }: RootTabScreenProps<"HomeTab">) => ({
+            title: "Home",
+            tabBarIcon: ({ color }) => (
+              <Ionicons
+                name="home-sharp"
+                size={30}
+                style={{ marginBottom: -3 }}
+                color={color}
+              />
+            ),
+            headerRight: () => (
+              <Pressable
+                onPress={() => navigation.navigate("Modal")}
+                style={({ pressed }) => ({
+                  opacity: pressed ? 0.5 : 1,
+                })}
+              >
+                <Ionicons
+                  name="information-circle"
+                  size={25}
+                  color={Colors[colorScheme].text}
+                  style={{ marginRight: 15 }}
+                />
+              </Pressable>
+            ),
+          })}
+        />
+        <BottomTab.Screen
+          name="ChatsTab"
+          component={ChatsTabScreen}
+          options={{
+            title: `Chats ${socket.isConnected ? "" : "(reconnecting...)"}`,
+            tabBarIcon: ({ color }) => (
+              <Ionicons
+                name="md-chatbubbles"
+                size={30}
+                style={{ marginBottom: -3 }}
+                color={color}
+              />
+            ),
+            headerShown: false,
+          }}
+        />
+      </BottomTab.Navigator>
+    </MessagesProvider>
   );
 }
 
