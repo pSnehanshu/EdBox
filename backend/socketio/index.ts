@@ -14,6 +14,7 @@ import {
   SocketData,
 } from "../../shared/types";
 import { getAutoGroups } from "../utils/auto-groups";
+import { defaultTransformer } from "@trpc/server";
 
 export default function initSocketIo(server: HTTPServer) {
   const io = new Server<
@@ -89,9 +90,10 @@ export default function initSocketIo(server: HTTPServer) {
         // Join the user to all the group rooms
 
         const autoGroups = await getAutoGroups(user);
+        const autoGroupIds = autoGroups.map((g) => g.id);
 
         // Join auto groups
-        socket.join(autoGroups.map((g) => g.id));
+        socket.join(autoGroupIds);
 
         const customGroups = await prisma.customGroupMembers.findMany({
           where: {
@@ -101,16 +103,18 @@ export default function initSocketIo(server: HTTPServer) {
             },
           },
         });
+        const customGroupIdentifiers = customGroups.map((g) =>
+          getCustomGroupIdentifier(school.id, g.group_id)
+        );
 
         // Join custom groups
-        socket.join(
-          customGroups.map((g) =>
-            getCustomGroupIdentifier(school.id, g.group_id)
-          )
-        );
+        socket.join(customGroupIdentifiers);
+
+        // Finally get all the group identifiers
+        return autoGroupIds.concat(customGroupIdentifiers);
       }
 
-      await joinGroupRooms();
+      const myGroups = await joinGroupRooms();
 
       socket.on("messageCreate", async (groupIdentifier, text) => {
         try {
@@ -125,6 +129,16 @@ export default function initSocketIo(server: HTTPServer) {
           const cleanGroupIdentifier =
             convertObjectToOrderedQueryString(identifier);
 
+          // Check if the user is a member of the auto-group
+          if (
+            identifier.gd === "a" &&
+            !myGroups.includes(cleanGroupIdentifier)
+          ) {
+            throw new Error("User not member of the given group");
+          }
+
+          // TODO: Check membership of custom groups
+
           // Save message
           const message = await prisma.message.create({
             data: {
@@ -134,10 +148,18 @@ export default function initSocketIo(server: HTTPServer) {
               text,
               school_id: school.id,
             },
+            include: {
+              ParentMessage: true,
+              Sender: true,
+            },
           });
 
           // Broadcast to all clients
-          socket.to(cleanGroupIdentifier).emit("newMessage", message);
+          socket
+            .to(cleanGroupIdentifier)
+            .emit("newMessage", defaultTransformer.output.serialize(message));
+
+          // TODO, send FCM and APN messages
         } catch (error) {
           console.error("Failed to receive message", error);
         }

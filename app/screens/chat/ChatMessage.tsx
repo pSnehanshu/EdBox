@@ -1,16 +1,8 @@
-import { useCurrentUser } from "../../utils/auth";
-import type { inferRouterOutputs } from "@trpc/server";
-import { AppRouter } from "../../../backend/trpc";
 import { format } from "date-fns";
+import { useCurrentUser } from "../../utils/auth";
 import { Text, View } from "../../components/Themed";
 import { StyleSheet } from "react-native";
-
-type ArrayElement<ArrayType extends readonly unknown[]> =
-  ArrayType extends readonly (infer ElementType)[] ? ElementType : never;
-
-export type Message = ArrayElement<
-  inferRouterOutputs<AppRouter>["school"]["messaging"]["fetchGroupMessages"]
->;
+import type { Message } from "../../../shared/types";
 
 interface ChatMessageProps {
   message: Message;
