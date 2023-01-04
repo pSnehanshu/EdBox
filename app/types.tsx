@@ -9,7 +9,12 @@ import {
   NavigatorScreenParams,
 } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import type { Socket } from "socket.io-client";
 import type { GroupBasicInfo } from "../backend/utils/group-identifier";
+import type {
+  ClientToServerEvents,
+  ServerToClientEvents,
+} from "../shared/types";
 
 declare global {
   namespace ReactNavigation {
@@ -43,3 +48,5 @@ export type RootTabScreenProps<Screen extends keyof RootTabParamList> =
     BottomTabScreenProps<RootTabParamList, Screen>,
     NativeStackScreenProps<RootStackParamList>
   >;
+
+export type SocketClient = Socket<ServerToClientEvents, ClientToServerEvents>;

@@ -1,14 +1,9 @@
-import { io, Socket } from "socket.io-client";
+import { io } from "socket.io-client";
 import config from "../config";
-import type {
-  ServerToClientEvents,
-  ClientToServerEvents,
-} from "../../shared/types";
 import { useRef, createContext, useEffect, useContext, useState } from "react";
 import { useAuthToken } from "./auth";
 import { useSchool } from "../utils/useSchool";
-
-type SocketType = Socket<ServerToClientEvents, ClientToServerEvents>;
+import { SocketClient } from "../types";
 
 const SocketContext = createContext<
   | {
@@ -16,7 +11,7 @@ const SocketContext = createContext<
     }
   | {
       isConnected: true;
-      client: SocketType;
+      client: SocketClient;
     }
 >({
   isConnected: false,
@@ -27,7 +22,7 @@ interface SocketProviderProps {
 }
 export function SocketProvider({ children }: SocketProviderProps) {
   const school = useSchool();
-  const socket = useRef<SocketType>();
+  const socket = useRef<SocketClient>();
   const authToken = useAuthToken();
   const [isConnected, setIsConnected] = useState(false);
 
