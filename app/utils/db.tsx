@@ -1,5 +1,6 @@
 import * as SQLite from "expo-sqlite";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { migrations as allMigrations } from "./db-migration";
 
 const dbContext = createContext<SQLite.WebSQLDatabase | null>(null);
 
@@ -18,6 +19,7 @@ export function DBProvider({ children }: DBProviderProps) {
 
     SQLite.openDatabase("main", "", "The main DB", 0, (_db) => {
       db.current = _db;
+      migrate(_db);
       setIsOpen(true);
     });
   }, [isOpen, setIsOpen]);
@@ -35,46 +37,94 @@ export function useDB() {
   return db!;
 }
 
-/**
- * Util functions for Expo SQLite
- */
+export type Migration = {
+  name: string;
+  fn: (tx: SQLite.SQLTransaction, db: SQLite.WebSQLDatabase) => Promise<void>;
+};
 
 /**
- * Executes SQL inside a transaction
- * @param tx
- * @param sql
- * @param args
- * @returns
+ * Start the migration process
+ * @param db
  */
-export function executeSql(
-  tx: SQLite.SQLTransaction,
-  sql: string,
-  args: Array<string | number | null>
-): Promise<SQLite.SQLResultSet> {
-  return new Promise((resolve, reject) => {
-    tx.executeSql(
-      sql,
-      args,
-      (_, res) => resolve(res),
-      (_, err) => {
-        reject(err);
-        return true;
-      }
-    );
-  });
+function migrate(db: SQLite.WebSQLDatabase) {
+  let pendingMigrations: Migration[] = [];
+  let lastMigrationSNO = -1;
+
+  db.transaction(
+    (tx) => {
+      tx.executeSql(
+        `CREATE TABLE IF NOT EXISTS _st_migrations (
+          sno INTEGER NOT NULL,
+          name TEXT NOT NULL PRIMARY KEY,
+          ran_at TEXT NOT NULL DEFAULT CURRENT_TIMSTAMP
+        )`
+      );
+
+      // Fetch migrations
+      tx.executeSql(
+        "SELECT * FROM _st_migrations ORDER BY sno DESC LIMIT 1",
+        [],
+        (tx, result) => {
+          const lastMigration = result.rows.item(0);
+          lastMigrationSNO = lastMigration
+            ? parseInt(lastMigration.sno, 10)
+            : -1;
+
+          // Slice out the pending migrations
+          pendingMigrations = allMigrations.slice(lastMigrationSNO + 1);
+
+          console.log(
+            `To apply ${pendingMigrations.length} migrations`,
+            pendingMigrations.map((m) => m.name)
+          );
+        },
+        (tx, err) => {
+          return true;
+        }
+      );
+    },
+    (err) => console.error(err),
+    () => {
+      executeMigrations(db, pendingMigrations, lastMigrationSNO + 1).catch(
+        (err) => {
+          console.error(err);
+          alert("Failed to apply migrations!");
+        }
+      );
+    }
+  );
 }
 
 /**
- * Initiate a DB transaction
+ * Run the given migrations and mark them as ran
  * @param db
- * @param executor
+ * @param migrations
+ * @param migrationStartIndex
  * @returns
  */
-export function transaction(
+export function executeMigrations(
   db: SQLite.WebSQLDatabase,
-  executor: SQLite.SQLTransactionCallback
+  migrations: Migration[],
+  migrationStartIndex: number
 ) {
   return new Promise((resolve, reject) => {
-    db.transaction(executor, reject, () => resolve(undefined));
+    db.transaction(
+      (tx) => {
+        migrations.forEach((migration, i) => {
+          migration.fn(tx, db);
+
+          // Mark as ran
+          const sno = i + migrationStartIndex;
+          const row = [sno, migration.name, new Date().toISOString()];
+          tx.executeSql(
+            "INSERT INTO _st_migrations (sno, name, ran_at) VALUES (?,?,?)",
+            row
+          );
+          console.log("Migration ran", row);
+        });
+      },
+      reject,
+      () => resolve(undefined)
+    );
   });
 }
