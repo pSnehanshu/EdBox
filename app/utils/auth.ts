@@ -38,6 +38,7 @@ export function useAuthToken() {
 export function useFetchCurrentUser() {
   const { isLoading, isError, data } = trpc.auth.whoami.useQuery(undefined, {
     retry: false,
+    staleTime: 60 * 60 * 1000,
   });
 
   return {
