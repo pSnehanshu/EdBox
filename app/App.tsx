@@ -4,10 +4,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
 import { useState } from "react";
 import { trpc } from "./utils/trpc";
-import useCachedResources from "./hooks/useCachedResources";
-import useColorScheme from "./hooks/useColorScheme";
+import useCachedResources from "./utils/useCachedResources";
+import useColorScheme from "./utils/useColorScheme";
 import Navigation from "./navigation";
-import { useFetchSchool, SchoolContext } from "./hooks/useSchool";
+import { useFetchSchool, SchoolContext } from "./utils/useSchool";
 import { useAuthToken } from "./utils/auth";
 import config from "./config";
 

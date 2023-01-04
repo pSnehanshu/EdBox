@@ -1,7 +1,7 @@
 import { Button, Image, StyleSheet } from "react-native";
 import { WebView } from "react-native-webview";
 import { View } from "../../components/Themed";
-import { useSchool } from "../../hooks/useSchool";
+import { useSchool } from "../../utils/useSchool";
 import * as WebBrowser from "expo-web-browser";
 import { RootStackScreenProps } from "../../types";
 

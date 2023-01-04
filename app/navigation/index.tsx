@@ -15,8 +15,8 @@ import * as React from "react";
 import { ColorSchemeName, Pressable } from "react-native";
 
 import Colors from "../constants/Colors";
-import useColorScheme from "../hooks/useColorScheme";
-import { useSchool } from "../hooks/useSchool";
+import useColorScheme from "../utils/useColorScheme";
+import { useSchool } from "../utils/useSchool";
 import LoginScreen from "../screens/auth/Login";
 import PreLoginScreen from "../screens/auth/PreLogin";
 import ModalScreen from "../screens/ModalScreen";

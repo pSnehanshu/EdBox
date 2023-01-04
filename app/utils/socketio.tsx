@@ -6,7 +6,7 @@ import type {
 } from "../../shared/types";
 import { useRef, createContext, useEffect, useContext, useState } from "react";
 import { useAuthToken } from "./auth";
-import { useSchool } from "../hooks/useSchool";
+import { useSchool } from "../utils/useSchool";
 
 type SocketType = Socket<ServerToClientEvents, ClientToServerEvents>;
 
