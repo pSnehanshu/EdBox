@@ -447,7 +447,11 @@ const messagingRouter = router({
       z.object({
         groupIdentifier: groupIdentifierSchema,
         limit: z.number().min(1).max(500).default(100),
-        page: z.number().min(1).default(1),
+        cursor: z
+          .string()
+          .regex(/^\d+$/, "Must be a numeric string")
+          .transform((v) => BigInt(v))
+          .optional(),
       })
     )
     .query(async ({ input, ctx }) => {
@@ -458,32 +462,48 @@ const messagingRouter = router({
         });
       }
 
-      const messages = prisma.message.findMany({
-        where: {
-          school_id: ctx.user.school_id,
-          group_identifier: convertObjectToOrderedQueryString(
-            input.groupIdentifier
-          ),
-        },
-        include: {
-          ParentMessage: true,
-          Sender: {
-            include: {
-              Student: true,
-              Teacher: true,
-              Parent: true,
-              Staff: true,
+      const messages = (
+        await prisma.message.findMany({
+          where: {
+            school_id: ctx.user.school_id,
+            group_identifier: convertObjectToOrderedQueryString(
+              input.groupIdentifier
+            ),
+          },
+          include: {
+            ParentMessage: true,
+            Sender: {
+              include: {
+                Student: true,
+                Teacher: true,
+                Parent: true,
+                Staff: true,
+              },
             },
           },
-        },
-        orderBy: {
-          created_at: "desc",
-        },
-        take: input.limit,
-        skip: (input.page - 1) * input.limit,
-      });
+          orderBy: {
+            sort_key: "desc",
+          },
+          take: input.limit + 1, // get an extra item at the end which we'll use as next cursor
+          cursor: input.cursor
+            ? {
+                sort_key: input.cursor,
+              }
+            : undefined,
+        })
+      ).map((m) => ({
+        ...m,
+        sort_key: m.sort_key.toString(), // Convert bigint to string
+      }));
 
-      return messages;
+      // Determining the cursor
+      let nextCursor: string | undefined = undefined;
+      if (messages.length > input.limit) {
+        const nextItem = messages.pop();
+        nextCursor = nextItem!.sort_key;
+      }
+
+      return { messages, cursor: nextCursor };
     }),
 });
 

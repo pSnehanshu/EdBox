@@ -6,7 +6,7 @@ export type ArrayElement<ArrayType extends readonly unknown[]> =
   ArrayType extends readonly (infer ElementType)[] ? ElementType : never;
 
 export type Message = ArrayElement<
-  inferRouterOutputs<AppRouter>["school"]["messaging"]["fetchGroupMessages"]
+  inferRouterOutputs<AppRouter>["school"]["messaging"]["fetchGroupMessages"]["messages"]
 >;
 
 export interface ServerToClientEvents {

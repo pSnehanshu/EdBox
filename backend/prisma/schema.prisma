@@ -257,6 +257,7 @@ model Message {
   created_at        DateTime   @default(now())
   updated_at        DateTime   @updatedAt
   Replies           Message[]  @relation("Replies")
+  sort_key          BigInt     @unique @default(autoincrement()) @db.BigInt
 
   @@index([group_identifier, school_id])
 }
