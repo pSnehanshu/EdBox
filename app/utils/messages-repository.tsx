@@ -105,8 +105,10 @@ export function MessagesProvider({ children }: MessagesProviderProp) {
     }
   }, [socket.isConnected]);
 
+  if (!messages.current) return null;
+
   return (
-    <MessagesRepositoryContext.Provider value={messages.current ?? null}>
+    <MessagesRepositoryContext.Provider value={messages.current}>
       {children}
     </MessagesRepositoryContext.Provider>
   );
