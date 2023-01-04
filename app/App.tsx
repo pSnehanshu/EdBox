@@ -10,6 +10,7 @@ import Navigation from "./navigation";
 import { useFetchSchool, SchoolContext } from "./utils/useSchool";
 import { useAuthToken } from "./utils/auth";
 import config from "./config";
+import { DBProvider } from "./utils/db";
 
 function AppWithSchool() {
   const colorScheme = useColorScheme();
@@ -51,10 +52,12 @@ export default function App() {
   if (!isLoadingComplete) return null;
 
   return (
-    <trpc.Provider client={trpcClient} queryClient={queryClient}>
-      <QueryClientProvider client={queryClient}>
-        <AppWithSchool />
-      </QueryClientProvider>
-    </trpc.Provider>
+    <DBProvider>
+      <trpc.Provider client={trpcClient} queryClient={queryClient}>
+        <QueryClientProvider client={queryClient}>
+          <AppWithSchool />
+        </QueryClientProvider>
+      </trpc.Provider>
+    </DBProvider>
   );
 }
