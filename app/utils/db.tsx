@@ -85,12 +85,14 @@ function migrate(db: SQLite.WebSQLDatabase) {
     },
     (err) => console.error(err),
     () => {
-      executeMigrations(db, pendingMigrations, lastMigrationSNO + 1).catch(
-        (err) => {
+      executeMigrations(db, pendingMigrations, lastMigrationSNO + 1)
+        .then(() => {
+          console.log("All migrations applied!");
+        })
+        .catch((err) => {
           console.error(err);
           alert("Failed to apply migrations!");
-        }
-      );
+        });
     }
   );
 }
