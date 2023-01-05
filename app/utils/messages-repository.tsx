@@ -146,10 +146,14 @@ export class MessagesRepository {
         .then(setMessagesReconcile); // 6. Return this list
     }, [setFinalMessages, groupIdentifier, limit]);
 
+    this.useGroupMessageReceived(groupIdentifier, (newMessage) => {
+      setFinalMessages((m) => [newMessage, ...m]);
+    });
+
     return {
       messages: finalMessages,
       fetchNextPage() {
-        const cursor = finalMessages.at(-1)?.sort_key;
+        const cursor = _.last(finalMessages)?.sort_key;
         if (!cursor) return;
 
         // TODO: Fetch using cursor

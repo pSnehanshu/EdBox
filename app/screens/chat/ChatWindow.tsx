@@ -15,9 +15,6 @@ export default function ChatWindowScreen({
   const messages = useMessages();
   const groupMessages = messages.useFetchGroupMessages(groupInfo.id, 20);
   const utils = trpc.useContext();
-  messages.useGroupMessageReceived(groupInfo.id, (message) => {
-    utils.school.messaging.fetchGroupMessages.invalidate();
-  });
 
   return (
     <View style={styles.container}>

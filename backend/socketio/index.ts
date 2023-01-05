@@ -154,6 +154,9 @@ export default function initSocketIo(server: HTTPServer) {
             },
           });
 
+          // Must do this, becasue JSON.stringify can't serialize big ints
+          message.sort_key = message.sort_key.toString() as any;
+
           // Broadcast to all clients
           socket
             .to(cleanGroupIdentifier)
