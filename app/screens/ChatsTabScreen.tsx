@@ -2,9 +2,13 @@ import {
   createNativeStackNavigator,
   NativeStackScreenProps,
 } from "@react-navigation/native-stack";
+import { format } from "date-fns";
 import { SafeAreaView, StyleSheet, Pressable, Image } from "react-native";
+import { GroupBasicInfo } from "../../backend/utils/group-identifier";
+import { Message } from "../../shared/types";
 import { List, Text, View } from "../components/Themed";
 import { ChatsTabParamList } from "../types";
+import { useMessages } from "../utils/messages-repository";
 import { trpc } from "../utils/trpc";
 import ChatWindowScreen from "./chat/ChatWindow";
 
@@ -31,6 +35,45 @@ export default function ChatsTabScreen() {
   );
 }
 
+interface GroupItemProps {
+  onClick?: () => void;
+  group: GroupBasicInfo;
+}
+function GroupItem(props: GroupItemProps) {
+  const Messages = useMessages();
+  const { messages } = Messages.useFetchGroupMessages(props.group.id, 1);
+  const lastMessage = messages[0] as Message | undefined;
+  const time = lastMessage
+    ? format(new Date(lastMessage.created_at), "h:mm aaa")
+    : "";
+
+  return (
+    <Pressable
+      style={({ pressed }) => {
+        return {
+          ...styles.chatGroup,
+          backgroundColor: pressed ? "rgb(210, 230, 255)" : undefined,
+        };
+      }}
+      onPress={props.onClick}
+    >
+      <Image
+        source={require("../assets/images/multiple-users-silhouette.png")}
+        style={styles.chatGroupIcon}
+      />
+      <View style={styles.chatGroupMiddle}>
+        <Text style={styles.chatGroupName}>{props.group.name}</Text>
+        <Text style={styles.chatGroupLastMessage}>
+          {lastMessage?.Sender?.name}: {lastMessage?.text}
+        </Text>
+      </View>
+      <View style={styles.chatGroupRight}>
+        <Text style={styles.chatGroupLastMessage}>{time}</Text>
+      </View>
+    </Pressable>
+  );
+}
+
 function ChatsListScreen({
   navigation,
 }: NativeStackScreenProps<ChatsTabParamList, "ChatList">) {
@@ -47,33 +90,12 @@ function ChatsListScreen({
     <SafeAreaView style={styles.container}>
       <List
         data={chats ?? []}
-        renderItem={({ item: chatGroup }) => {
-          return (
-            <Pressable
-              style={({ pressed }) => {
-                return {
-                  ...styles.chatGroup,
-                  backgroundColor: pressed ? "rgb(210, 230, 255)" : undefined,
-                };
-              }}
-              onPress={() => navigation.navigate("ChatWindow", chatGroup)}
-            >
-              <Image
-                source={require("../assets/images/multiple-users-silhouette.png")}
-                style={styles.chatGroupIcon}
-              />
-              <View style={styles.chatGroupMiddle}>
-                <Text style={styles.chatGroupName}>{chatGroup.name}</Text>
-                <Text style={styles.chatGroupLastMessage}>
-                  User 1: How are you everyone?
-                </Text>
-              </View>
-              <View style={styles.chatGroupRight}>
-                <Text style={styles.chatGroupLastMessage}>10:23 pm</Text>
-              </View>
-            </Pressable>
-          );
-        }}
+        renderItem={({ item: group }) => (
+          <GroupItem
+            group={group}
+            onClick={() => navigation.navigate("ChatWindow", group)}
+          />
+        )}
       />
     </SafeAreaView>
   );
