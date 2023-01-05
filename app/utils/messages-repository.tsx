@@ -37,7 +37,16 @@ export class MessagesRepository {
 
     // When new message is created
     this.composerObservable.subscribe((message) => {
-      this.socket.emit("messageCreate", message.groupIdentifier, message.text);
+      this.socket.emit(
+        "messageCreate",
+        message.groupIdentifier,
+        message.text,
+        (createdMessage) => {
+          this.getGroupMessageObservable(message.groupIdentifier).next(
+            createdMessage
+          );
+        }
+      );
     });
   }
 

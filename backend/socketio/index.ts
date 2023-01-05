@@ -116,7 +116,7 @@ export default function initSocketIo(server: HTTPServer) {
 
       const myGroups = await joinGroupRooms();
 
-      socket.on("messageCreate", async (groupIdentifier, text) => {
+      socket.on("messageCreate", async (groupIdentifier, text, callback) => {
         try {
           // Parse the incoming group identifier string, make sure it is valid format
           const identifier = parseGroupIdentifierString(groupIdentifier);
@@ -157,10 +157,14 @@ export default function initSocketIo(server: HTTPServer) {
           // Must do this, becasue JSON.stringify can't serialize big ints
           message.sort_key = message.sort_key.toString() as any;
 
+          const serializedMessage =
+            defaultTransformer.output.serialize(message);
+
           // Broadcast to all clients
-          socket
-            .to(cleanGroupIdentifier)
-            .emit("newMessage", defaultTransformer.output.serialize(message));
+          socket.to(cleanGroupIdentifier).emit("newMessage", serializedMessage);
+
+          // Send acknowledgement
+          callback(serializedMessage);
 
           // TODO, send FCM and APN messages
         } catch (error) {

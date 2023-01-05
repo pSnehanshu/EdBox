@@ -14,7 +14,11 @@ export interface ServerToClientEvents {
 }
 
 export interface ClientToServerEvents {
-  messageCreate: (groupIdentifier: string, text: string) => void;
+  messageCreate: (
+    groupIdentifier: string,
+    text: string,
+    callback: (message: Message) => void
+  ) => void;
 }
 
 export interface InterServerEvents {}
