@@ -39,4 +39,15 @@ export const migrations: Migration[] = [
       );
     },
   },
+  {
+    name: "add sort_key to messages",
+    async fn(tx) {
+      tx.executeSql(
+        "ALTER TABLE messages ADD COLUMN sort_key INTEGER NOT NULL"
+      );
+      tx.executeSql(
+        "CREATE UNIQUE INDEX messages_sort_key_unique_index ON messages(sort_key);"
+      );
+    },
+  },
 ];
