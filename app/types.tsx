@@ -26,6 +26,7 @@ export type RootStackParamList = {
   PreLogin: undefined;
   Login: undefined;
   Root: NavigatorScreenParams<RootTabParamList> | undefined;
+  ChatWindow: GroupBasicInfo;
   Modal: undefined;
   NotFound: undefined;
 };
@@ -40,7 +41,6 @@ export type RootTabParamList = {
 
 export type ChatsTabParamList = {
   ChatList: undefined;
-  ChatWindow: GroupBasicInfo;
 };
 
 export type RootTabScreenProps<Screen extends keyof RootTabParamList> =

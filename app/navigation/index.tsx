@@ -30,6 +30,7 @@ import { useFetchCurrentUser } from "../utils/auth";
 import LinkingConfiguration from "./LinkingConfiguration";
 import { SocketProvider, useSocket } from "../utils/socketio";
 import { MessagesProvider } from "../utils/messages-repository";
+import ChatWindowScreen from "../screens/chat/ChatWindow";
 
 export default function Navigation({
   colorScheme,
@@ -56,38 +57,35 @@ function RootNavigator() {
   const school = useSchool();
   const { isLoggedIn } = useFetchCurrentUser();
 
-  return (
-    <Stack.Navigator>
-      {isLoggedIn ? (
-        <>
+  return isLoggedIn ? (
+    <SocketProvider>
+      <MessagesProvider>
+        <Stack.Navigator>
           <Stack.Screen
             name="Root"
-            component={LoggedInScreens}
-            options={{ headerShown: false }}
-          />
-        </>
-      ) : (
-        <>
-          <Stack.Screen
-            name="PreLogin"
-            component={PreLoginScreen}
+            component={BottomTabNavigator}
             options={{ headerShown: false }}
           />
           <Stack.Screen
-            name="Login"
-            component={LoginScreen}
-            options={{ title: `Login to ${school.name}` }}
+            name="ChatWindow"
+            component={ChatWindowScreen}
+            options={{ headerShown: true, title: "Messages" }}
           />
-        </>
-      )}
+        </Stack.Navigator>
+      </MessagesProvider>
+    </SocketProvider>
+  ) : (
+    <Stack.Navigator>
       <Stack.Screen
-        name="NotFound"
-        component={NotFoundScreen}
-        options={{ title: "Oops!" }}
+        name="PreLogin"
+        component={PreLoginScreen}
+        options={{ headerShown: false }}
       />
-      <Stack.Group screenOptions={{ presentation: "modal" }}>
-        <Stack.Screen name="Modal" component={ModalScreen} />
-      </Stack.Group>
+      <Stack.Screen
+        name="Login"
+        component={LoginScreen}
+        options={{ title: `Login to ${school.name}` }}
+      />
     </Stack.Navigator>
   );
 }
@@ -103,68 +101,58 @@ function BottomTabNavigator() {
   const socket = useSocket();
 
   return (
-    <MessagesProvider>
-      <BottomTab.Navigator
-        initialRouteName="HomeTab"
-        screenOptions={{
-          tabBarActiveTintColor: Colors[colorScheme].tint,
+    <BottomTab.Navigator
+      initialRouteName="HomeTab"
+      screenOptions={{
+        tabBarActiveTintColor: Colors[colorScheme].tint,
+      }}
+    >
+      <BottomTab.Screen
+        name="HomeTab"
+        component={HomeTabScreen}
+        options={({ navigation }: RootTabScreenProps<"HomeTab">) => ({
+          title: "Home",
+          tabBarIcon: ({ color }) => (
+            <Ionicons
+              name="home-sharp"
+              size={30}
+              style={{ marginBottom: -3 }}
+              color={color}
+            />
+          ),
+          headerRight: () => (
+            <Pressable
+              onPress={() => navigation.navigate("Modal")}
+              style={({ pressed }) => ({
+                opacity: pressed ? 0.5 : 1,
+              })}
+            >
+              <Ionicons
+                name="information-circle"
+                size={25}
+                color={Colors[colorScheme].text}
+                style={{ marginRight: 15 }}
+              />
+            </Pressable>
+          ),
+        })}
+      />
+      <BottomTab.Screen
+        name="ChatsTab"
+        component={ChatsTabScreen}
+        options={{
+          title: `Chats ${socket.isConnected ? "" : "(reconnecting...)"}`,
+          tabBarIcon: ({ color }) => (
+            <Ionicons
+              name="md-chatbubbles"
+              size={30}
+              style={{ marginBottom: -3 }}
+              color={color}
+            />
+          ),
+          headerShown: false,
         }}
-      >
-        <BottomTab.Screen
-          name="HomeTab"
-          component={HomeTabScreen}
-          options={({ navigation }: RootTabScreenProps<"HomeTab">) => ({
-            title: "Home",
-            tabBarIcon: ({ color }) => (
-              <Ionicons
-                name="home-sharp"
-                size={30}
-                style={{ marginBottom: -3 }}
-                color={color}
-              />
-            ),
-            headerRight: () => (
-              <Pressable
-                onPress={() => navigation.navigate("Modal")}
-                style={({ pressed }) => ({
-                  opacity: pressed ? 0.5 : 1,
-                })}
-              >
-                <Ionicons
-                  name="information-circle"
-                  size={25}
-                  color={Colors[colorScheme].text}
-                  style={{ marginRight: 15 }}
-                />
-              </Pressable>
-            ),
-          })}
-        />
-        <BottomTab.Screen
-          name="ChatsTab"
-          component={ChatsTabScreen}
-          options={{
-            title: `Chats ${socket.isConnected ? "" : "(reconnecting...)"}`,
-            tabBarIcon: ({ color }) => (
-              <Ionicons
-                name="md-chatbubbles"
-                size={30}
-                style={{ marginBottom: -3 }}
-                color={color}
-              />
-            ),
-            headerShown: false,
-          }}
-        />
-      </BottomTab.Navigator>
-    </MessagesProvider>
-  );
-}
-
-function LoggedInScreens() {
-  return (
-    <SocketProvider>
-      <BottomTabNavigator />
-    </SocketProvider>
+      />
+    </BottomTab.Navigator>
   );
 }

@@ -1,3 +1,4 @@
+import { useNavigation } from "@react-navigation/native";
 import {
   createNativeStackNavigator,
   NativeStackScreenProps,
@@ -12,7 +13,6 @@ import { List, Text, View } from "../components/Themed";
 import { ChatsTabParamList } from "../types";
 import { useMessages } from "../utils/messages-repository";
 import { trpc } from "../utils/trpc";
-import ChatWindowScreen from "./chat/ChatWindow";
 
 const ChatStack = createNativeStackNavigator<ChatsTabParamList>();
 
@@ -24,13 +24,6 @@ export default function ChatsTabScreen() {
         component={ChatsListScreen}
         options={{
           title: "Chat",
-        }}
-      />
-      <ChatStack.Screen
-        name="ChatWindow"
-        component={ChatWindowScreen}
-        options={{
-          title: "Messages",
         }}
       />
     </ChatStack.Navigator>
@@ -92,9 +85,10 @@ function GroupItem(props: GroupItemProps) {
   );
 }
 
-function ChatsListScreen({
-  navigation,
-}: NativeStackScreenProps<ChatsTabParamList, "ChatList">) {
+function ChatsListScreen({}: NativeStackScreenProps<
+  ChatsTabParamList,
+  "ChatList"
+>) {
   const {
     isLoading,
     isError,
@@ -103,6 +97,7 @@ function ChatsListScreen({
     sort: "recent_message",
     page: 1,
   });
+  const navigation = useNavigation();
 
   return (
     <SafeAreaView style={styles.container}>
