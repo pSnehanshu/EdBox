@@ -4,6 +4,7 @@
  *
  */
 import { Ionicons } from "@expo/vector-icons";
+import { createNavigationContainerRef } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
   NavigationContainer,
@@ -17,8 +18,6 @@ import useColorScheme from "../utils/useColorScheme";
 import { useSchool } from "../utils/useSchool";
 import LoginScreen from "../screens/auth/Login";
 import PreLoginScreen from "../screens/auth/PreLogin";
-import ModalScreen from "../screens/ModalScreen";
-import NotFoundScreen from "../screens/NotFoundScreen";
 import HomeTabScreen from "../screens/HomeTabScreen";
 import ChatsTabScreen from "../screens/ChatsTabScreen";
 import {
@@ -32,6 +31,9 @@ import { SocketProvider, useSocket } from "../utils/socketio";
 import { MessagesProvider } from "../utils/messages-repository";
 import ChatWindowScreen from "../screens/chat/ChatWindow";
 
+/** This can be used to navigate from outside any component or hook */
+export const navigationRef = createNavigationContainerRef<RootStackParamList>();
+
 export default function Navigation({
   colorScheme,
 }: {
@@ -41,6 +43,7 @@ export default function Navigation({
     <NavigationContainer
       linking={LinkingConfiguration}
       theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+      ref={navigationRef}
     >
       <RootNavigator />
     </NavigationContainer>

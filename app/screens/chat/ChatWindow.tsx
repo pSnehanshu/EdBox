@@ -7,7 +7,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { List, Text, TextInput, View } from "../../components/Themed";
-import { ChatsTabParamList } from "../../types";
+import { RootStackParamList } from "../../types";
 import { trpc } from "../../utils/trpc";
 import ChatMessage from "./ChatMessage";
 import { Ionicons } from "@expo/vector-icons";
@@ -20,7 +20,7 @@ const renderItem: ListRenderItem<Message> = ({ item }) => (
 
 export default function ChatWindowScreen({
   route: { params: groupInfo },
-}: NativeStackScreenProps<ChatsTabParamList, "ChatWindow">) {
+}: NativeStackScreenProps<RootStackParamList, "ChatWindow">) {
   const [messageText, setMessageText] = useState("");
   const messages = useMessages();
   const groupMessages = messages.useFetchGroupMessages(groupInfo.id, 30);

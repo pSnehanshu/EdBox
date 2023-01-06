@@ -10,7 +10,6 @@ import {
 } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { Socket } from "socket.io-client";
-import type { GroupBasicInfo } from "../backend/utils/group-identifier";
 import type {
   ClientToServerEvents,
   ServerToClientEvents,
@@ -26,7 +25,7 @@ export type RootStackParamList = {
   PreLogin: undefined;
   Login: undefined;
   Root: NavigatorScreenParams<RootTabParamList> | undefined;
-  ChatWindow: GroupBasicInfo;
+  ChatWindow: { id: string; name?: string };
   Modal: undefined;
   NotFound: undefined;
 };
