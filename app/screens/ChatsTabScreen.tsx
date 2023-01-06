@@ -3,6 +3,7 @@ import {
   NativeStackScreenProps,
 } from "@react-navigation/native-stack";
 import { format, isToday, isYesterday, isThisYear } from "date-fns";
+import _ from "lodash";
 import { useMemo } from "react";
 import { SafeAreaView, StyleSheet, Pressable, Image } from "react-native";
 import { GroupBasicInfo } from "../../backend/utils/group-identifier";
@@ -79,7 +80,9 @@ function GroupItem(props: GroupItemProps) {
       <View style={styles.chatGroupMiddle}>
         <Text style={styles.chatGroupName}>{props.group.name}</Text>
         <Text style={styles.chatGroupLastMessage}>
-          {lastMessage?.Sender?.name}: {lastMessage?.text}
+          {_.truncate(`${lastMessage?.Sender?.name}: ${lastMessage?.text}`, {
+            length: 45,
+          })}
         </Text>
       </View>
       <View style={styles.chatGroupRight}>

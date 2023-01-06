@@ -66,6 +66,7 @@ const styles = StyleSheet.create({
   senderName: {
     fontSize: 12,
     textDecorationLine: "underline",
+    opacity: 0.7,
   },
   body: {
     paddingVertical: 4,
@@ -75,5 +76,6 @@ const styles = StyleSheet.create({
     textAlign: "right",
     paddingRight: 6,
     paddingBottom: 4,
+    opacity: 0.6,
   },
 });
