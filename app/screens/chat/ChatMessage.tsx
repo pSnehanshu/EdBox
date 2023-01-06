@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { format, isThisYear, isToday, isYesterday } from "date-fns";
 import { useCurrentUser } from "../../utils/auth";
 import { Text, View } from "../../components/Themed";
-import { StyleSheet } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 import type { Message } from "../../../shared/types";
 
 interface ChatMessageProps {
@@ -10,8 +10,8 @@ interface ChatMessageProps {
 }
 export default function ChatMessage({ message }: ChatMessageProps) {
   const user = useCurrentUser();
-
-  const isSentByMe = user.id === message.sender_id;
+  const sender = message.Sender;
+  const isSentByMe = user.id === sender.id;
   const color = isSentByMe ? "black" : "white";
   const time = useMemo(() => {
     const date = new Date(message.created_at);
@@ -39,9 +39,14 @@ export default function ChatMessage({ message }: ChatMessageProps) {
       }}
     >
       {isSentByMe ? null : (
-        <Text style={{ ...styles.senderName, color }}>
-          {message.Sender.name}
-        </Text>
+        <Pressable
+          onPress={() => {
+            // TODO: Show basic user info as modal, with link to full profile
+            alert(`User: ${sender.name}\nID: ${sender.id}`);
+          }}
+        >
+          <Text style={{ ...styles.senderName, color }}>{sender.name}</Text>
+        </Pressable>
       )}
       <Text style={{ ...styles.body, color }}>{message.text}</Text>
       <Text style={{ ...styles.time, color }}>{time}</Text>
