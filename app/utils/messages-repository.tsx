@@ -1,5 +1,12 @@
 import { WebSQLDatabase } from "expo-sqlite";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Subject } from "rxjs";
 import type { Message } from "../../shared/types";
 import { SocketClient } from "../types";
@@ -85,75 +92,101 @@ export class MessagesRepository {
   }
 
   useFetchGroupMessages(groupIdentifier: string, limit = 20) {
-    const [finalMessages, setFinalMessages] = useState<Message[]>([]);
     const utils = trpc.useContext();
+    const [finalMessages, setFinalMessages] = useState<Message[]>([]);
+    const [nextCursor, setNextCursor] = useState<string>();
 
-    function setMessagesReconcile(messages: Message[]) {
-      setFinalMessages((existingMessages) => {
-        // // Assume both `existingMessages` and `messages` are
-        // // ordered based on `sort_key` in decreasing order.
-        // // We need to merge these two arrays, and the final array
-        // // must be ordered based on `sort_key` in decreasing order.
-        // // If two items in the arrays contain the same `sort_key`,
-        // // the final array should contain the one in the `messages` array.
-        // // Ensure none are empty
-        // if (messages.length < 1) return existingMessages;
-        // if (existingMessages.length < 1) return messages;
-        // // If they don't have overlap, then it's easy
-        // if (
-        //   BigInt(messages.at(0)!.sort_key) <
-        //   BigInt(existingMessages.at(-1)!.sort_key)
-        // ) {
-        //   return existingMessages.concat(messages);
-        // } else if (
-        //   BigInt(existingMessages.at(0)!.sort_key) <
-        //   BigInt(messages.at(-1)!.sort_key)
-        // ) {
-        //   return messages.concat(existingMessages);
-        // }
-        // // There is definitely overlap
-        // const combined: Message[] = existingMessages;
-        // return combined;
+    const setMessagesReconcile = useCallback(
+      (messages: Message[], cursor?: string) => {
+        setNextCursor(cursor);
 
-        // TODO: Optimize (read above)
-        return _.chain(existingMessages.concat(messages))
-          .sortBy((m) => BigInt(m.sort_key))
-          .sortedUniqBy((m) => m.sort_key)
-          .reverse()
-          .value();
-      });
-    }
+        setFinalMessages((existingMessages) => {
+          // // Assume both `existingMessages` and `messages` are
+          // // ordered based on `sort_key` in decreasing order.
+          // // We need to merge these two arrays, and the final array
+          // // must be ordered based on `sort_key` in decreasing order.
+          // // If two items in the arrays contain the same `sort_key`,
+          // // the final array should contain the one in the `messages` array.
+          // // Ensure none are empty
+          // if (messages.length < 1) return existingMessages;
+          // if (existingMessages.length < 1) return messages;
+          // // If they don't have overlap, then it's easy
+          // if (
+          //   BigInt(messages.at(0)!.sort_key) <
+          //   BigInt(existingMessages.at(-1)!.sort_key)
+          // ) {
+          //   return existingMessages.concat(messages);
+          // } else if (
+          //   BigInt(existingMessages.at(0)!.sort_key) <
+          //   BigInt(messages.at(-1)!.sort_key)
+          // ) {
+          //   return messages.concat(existingMessages);
+          // }
+          // // There is definitely overlap
+          // const combined: Message[] = existingMessages;
+          // return combined;
 
-    useEffect(() => {
-      // 1. Fetch from SQLite
-      this.fetchMessagesFromDB({
-        groupIdentifier,
-        limit,
-      })
-        .then(setMessagesReconcile) // 2. Return this list
-        .catch((err) => console.error(err));
-    }, [setFinalMessages, groupIdentifier, limit]);
+          // TODO: Optimize (read above)
+          return _.chain(existingMessages.concat(messages))
+            .sortBy((m) => BigInt(m.sort_key))
+            .sortedUniqBy((m) => m.sort_key)
+            .reverse()
+            .value();
+        });
+      },
+      []
+    );
 
-    useEffect(() => {
-      // 3. Fetch from tRPC
-      utils.school.messaging.fetchGroupMessages
-        .fetch({
-          groupIdentifier,
-          limit,
-        })
-        .then((response) =>
-          /* 4. Insert these messages into SQLite */ this.insertMessagesToDB(
-            response.messages
-          )
-        )
-        .then(() =>
-          /* 5. Refetch from SQLite and return */ this.fetchMessagesFromDB({
+    const fetchMessages = useCallback(
+      async (cursor?: string) => {
+        try {
+          const serverPromise = utils.school.messaging.fetchGroupMessages.fetch(
+            {
+              groupIdentifier,
+              limit,
+              cursor,
+            }
+          );
+
+          // 1. Fetch from local
+          const dbMessages = await this.fetchMessagesFromDB({
             groupIdentifier,
             limit,
-          })
-        )
-        .then(setMessagesReconcile); // 6. Return this list
-    }, [setFinalMessages, groupIdentifier, limit]);
+            cursor,
+          });
+
+          // 2. Return local data
+          setMessagesReconcile(dbMessages.messages, dbMessages.cursor);
+
+          // 3. Fetch from Server
+          const serverMessages = await serverPromise;
+
+          // 4. Save server data into local
+          await this.insertMessagesToDB(serverMessages.messages);
+
+          // 5. Re-fetch from local
+          const dbMessages2 = await this.fetchMessagesFromDB({
+            groupIdentifier,
+            limit,
+            cursor,
+          });
+
+          // 6. Return fresh local data
+          setMessagesReconcile(dbMessages2.messages, serverMessages.cursor);
+        } catch (error) {
+          console.error("fetchMessages Error:", error);
+        }
+      },
+      [groupIdentifier, limit, setMessagesReconcile]
+    );
+
+    const fetchNextPage = useCallback(() => {
+      if (nextCursor) fetchMessages(nextCursor);
+    }, [fetchMessages, nextCursor]);
+
+    useEffect(() => {
+      fetchMessages(nextCursor);
+    }, [fetchMessages]);
 
     this.useGroupMessageReceived(groupIdentifier, (newMessage) => {
       setFinalMessages((m) => [newMessage, ...m]);
@@ -161,12 +194,8 @@ export class MessagesRepository {
 
     return {
       messages: finalMessages,
-      fetchNextPage() {
-        const cursor = _.last(finalMessages)?.sort_key;
-        if (!cursor) return;
-
-        // TODO: Fetch using cursor
-      },
+      fetchNextPage,
+      nextCursor,
     };
   }
 
@@ -177,7 +206,7 @@ export class MessagesRepository {
     groupIdentifier: string;
     limit?: number;
     cursor?: string | number;
-  }): Promise<Message[]> {
+  }): Promise<{ messages: Message[]; cursor?: string }> {
     const args: Array<string | number | null> = [];
     let sql = `SELECT * FROM messages WHERE `;
 
@@ -187,13 +216,14 @@ export class MessagesRepository {
 
     // Second param cursor if defined
     if (params.cursor) {
-      sql += "AND sort_key >= ? ";
+      sql += "AND sort_key <= ? ";
       args.push(params.cursor);
     }
 
     // Third param is limit
+    const limit = params.limit ?? 20;
     sql += "ORDER BY sort_key DESC LIMIT ?;";
-    args.push(params.limit ?? 20);
+    args.push(limit + 1 /* +1 for cursor */);
 
     // Finally, run the query to fetch the result
     return new Promise((resolve, reject) => {
@@ -205,7 +235,14 @@ export class MessagesRepository {
             const localMessages = result.rows._array.map(
               (row) => JSON.parse(row.obj) as Message
             );
-            resolve(localMessages);
+
+            let cursor: string | undefined = undefined;
+            if (localMessages.length > limit) {
+              const last = localMessages.pop();
+              cursor = last?.sort_key;
+            }
+
+            resolve({ messages: localMessages, cursor });
           },
           (tx, error) => {
             reject(error);
