@@ -1,12 +1,17 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
-import { StyleSheet } from "react-native";
+import { ListRenderItem, StyleSheet } from "react-native";
 import { List, TextInput, View } from "../../components/Themed";
 import { ChatsTabParamList } from "../../types";
 import { trpc } from "../../utils/trpc";
 import ChatMessage from "./ChatMessage";
 import { Ionicons } from "@expo/vector-icons";
 import { useMessages } from "../../utils/messages-repository";
+import { Message } from "../../../shared/types";
+
+const renderItem: ListRenderItem<Message> = ({ item }) => (
+  <ChatMessage message={item} />
+);
 
 export default function ChatWindowScreen({
   route: { params: groupInfo },
@@ -24,9 +29,10 @@ export default function ChatWindowScreen({
         inverted
         style={styles.messages}
         data={groupMessages.messages}
-        renderItem={({ item }) => <ChatMessage message={item} />}
-        onEndReached={() => groupMessages.fetchNextPage()}
+        renderItem={renderItem}
+        onEndReached={groupMessages.fetchNextPage}
         onEndReachedThreshold={1}
+        initialNumToRender={10}
       />
 
       <View style={styles.composer}>

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import { format, isThisYear, isToday, isYesterday } from "date-fns";
 import { useCurrentUser } from "../../utils/auth";
 import { Text, View } from "../../components/Themed";
@@ -8,7 +8,7 @@ import type { Message } from "../../../shared/types";
 interface ChatMessageProps {
   message: Message;
 }
-export default function ChatMessage({ message }: ChatMessageProps) {
+function ChatMessage({ message }: ChatMessageProps) {
   const user = useCurrentUser();
   const sender = message.Sender;
   const isSentByMe = user.id === sender.id;
@@ -84,3 +84,5 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
 });
+
+export default memo(ChatMessage);
