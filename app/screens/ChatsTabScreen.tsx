@@ -2,7 +2,8 @@ import {
   createNativeStackNavigator,
   NativeStackScreenProps,
 } from "@react-navigation/native-stack";
-import { format } from "date-fns";
+import { format, isToday, isYesterday, isThisYear } from "date-fns";
+import { useMemo } from "react";
 import { SafeAreaView, StyleSheet, Pressable, Image } from "react-native";
 import { GroupBasicInfo } from "../../backend/utils/group-identifier";
 import { Message } from "../../shared/types";
@@ -43,9 +44,23 @@ function GroupItem(props: GroupItemProps) {
   const Messages = useMessages();
   const { messages } = Messages.useFetchGroupMessages(props.group.id, 1);
   const lastMessage = messages[0] as Message | undefined;
-  const time = lastMessage
-    ? format(new Date(lastMessage.created_at), "h:mm aaa")
-    : "";
+  const time = useMemo(() => {
+    if (!lastMessage?.created_at) return "";
+
+    const date = new Date(lastMessage.created_at);
+
+    if (isToday(date)) {
+      return format(date, "h:mm aaa");
+    }
+    if (isYesterday(date)) {
+      return "Yesterday";
+    }
+    if (isThisYear(date)) {
+      return format(date, "d MMM");
+    }
+
+    return format(date, "dd/LL/yy");
+  }, [lastMessage?.created_at]);
 
   return (
     <Pressable

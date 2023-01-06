@@ -1,4 +1,5 @@
-import { format } from "date-fns";
+import { useMemo } from "react";
+import { format, isThisYear, isToday, isYesterday } from "date-fns";
 import { useCurrentUser } from "../../utils/auth";
 import { Text, View } from "../../components/Themed";
 import { StyleSheet } from "react-native";
@@ -11,8 +12,22 @@ export default function ChatMessage({ message }: ChatMessageProps) {
   const user = useCurrentUser();
 
   const isSentByMe = user.id === message.sender_id;
-  const time = format(new Date(message.created_at), "h:mm aaa");
   const color = isSentByMe ? "black" : "white";
+  const time = useMemo(() => {
+    const date = new Date(message.created_at);
+    const time = format(date, "hh:mm aaa");
+
+    if (isToday(date)) {
+      return time;
+    }
+    if (isYesterday(date)) {
+      return `Yesterday ${time}`;
+    }
+    if (isThisYear(date)) {
+      return `${format(date, "d MMM")} ${time}`;
+    }
+    return `${format(date, "dd/MM/yy")} ${time}`;
+  }, [message.created_at]);
 
   return (
     <View
