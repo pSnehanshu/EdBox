@@ -4,7 +4,6 @@
  *
  */
 import { Ionicons } from "@expo/vector-icons";
-import { createNavigationContainerRef } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
   NavigationContainer,
@@ -30,9 +29,7 @@ import LinkingConfiguration from "./LinkingConfiguration";
 import { SocketProvider, useSocket } from "../utils/socketio";
 import { MessagesProvider } from "../utils/messages-repository";
 import ChatWindowScreen from "../screens/chat/ChatWindow";
-
-/** This can be used to navigate from outside any component or hook */
-export const navigationRef = createNavigationContainerRef<RootStackParamList>();
+import { navigationRef } from "./navRef";
 
 export default function Navigation({
   colorScheme,

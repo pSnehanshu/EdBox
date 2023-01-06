@@ -16,7 +16,7 @@ import { trpc } from "./trpc";
 import _ from "lodash";
 import BigInt from "big-integer";
 import Toast from "react-native-toast-message";
-import { navigationRef } from "../navigation";
+import { navigationRef } from "../navigation/navRef";
 
 export class MessagesRepository {
   /** The observable representing all received messages */
