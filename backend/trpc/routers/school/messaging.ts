@@ -442,6 +442,138 @@ const messagingRouter = router({
 
       return updatedGroup;
     }),
+  fetchGroupInfo: authProcedure
+    .input(
+      z.object({
+        groupIdentifier: groupIdentifierSchema,
+      })
+    )
+    .query(async ({ input, ctx }): Promise<{ name: string }> => {
+      if (input.groupIdentifier.sc !== ctx.user.school_id) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Can't find group from other schools",
+        });
+      }
+
+      if (input.groupIdentifier.gd === "c") {
+        const group = await prisma.customGroup.findFirst({
+          where: {
+            id: input.groupIdentifier.id,
+            school_id: input.groupIdentifier.sc,
+            is_active: true,
+          },
+          select: {
+            name: true,
+          },
+        });
+
+        if (!group) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+          });
+        }
+
+        return { name: group.name };
+      }
+
+      const groupType = input.groupIdentifier.ty;
+
+      if (groupType === "sc") {
+        const school = await prisma.school.findFirst({
+          where: {
+            id: input.groupIdentifier.sc,
+            is_active: true,
+          },
+          select: {
+            name: true,
+          },
+        });
+
+        if (!school) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+          });
+        }
+
+        return { name: school.name };
+      } else if (groupType === "cl") {
+        const Class = await prisma.classStd.findUnique({
+          where: {
+            numeric_id_school_id: {
+              numeric_id: input.groupIdentifier.cl,
+              school_id: input.groupIdentifier.sc,
+            },
+          },
+          select: {
+            name: true,
+            is_active: true,
+          },
+        });
+
+        if (!Class || !Class.is_active) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+          });
+        }
+
+        return {
+          name: `Class ${
+            Class.name ?? input.groupIdentifier.cl
+          } (all sections)`,
+        };
+      } else if (groupType === "se") {
+        const section = await prisma.classSection.findUnique({
+          where: {
+            numeric_id_class_id_school_id: {
+              class_id: input.groupIdentifier.cl,
+              numeric_id: input.groupIdentifier.se,
+              school_id: input.groupIdentifier.sc,
+            },
+          },
+          include: {
+            Class: {
+              select: {
+                name: true,
+                numeric_id: true,
+                is_active: true,
+              },
+            },
+          },
+        });
+
+        if (!section || !section.Class.is_active) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+          });
+        }
+
+        return {
+          name: `Class ${section.Class.name ?? section.Class.numeric_id} (${
+            section.name ?? input.groupIdentifier.se
+          })`,
+        };
+      } else {
+        const subject = await prisma.subject.findFirst({
+          where: {
+            id: input.groupIdentifier.su,
+            school_id: input.groupIdentifier.sc,
+            is_active: true,
+          },
+          select: {
+            name: true,
+          },
+        });
+
+        if (!subject) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+          });
+        }
+
+        return { name: subject.name };
+      }
+    }),
   fetchGroupMessages: authProcedure
     .input(
       z.object({

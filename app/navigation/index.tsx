@@ -72,7 +72,10 @@ function RootNavigator() {
           <Stack.Screen
             name="ChatWindow"
             component={ChatWindowScreen}
-            options={{ headerShown: true, title: "Messages" }}
+            options={({ route }) => ({
+              headerShown: true,
+              title: `${route.params.name ?? "Messages"}`,
+            })}
           />
         </Stack.Navigator>
       </MessagesProvider>

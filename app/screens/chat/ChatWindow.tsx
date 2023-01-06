@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Button,
@@ -20,11 +20,15 @@ const renderItem: ListRenderItem<Message> = ({ item }) => (
 
 export default function ChatWindowScreen({
   route: { params: groupInfo },
+  navigation,
 }: NativeStackScreenProps<RootStackParamList, "ChatWindow">) {
   const [messageText, setMessageText] = useState("");
   const messages = useMessages();
   const groupMessages = messages.useFetchGroupMessages(groupInfo.id, 30);
   const utils = trpc.useContext();
+  const groupInfoQuery = trpc.school.messaging.fetchGroupInfo.useQuery({
+    groupIdentifier: groupInfo.id,
+  });
 
   /** The Element that should appear at the end of the chat */
   const chatEndElement = useMemo(() => {
@@ -54,6 +58,14 @@ export default function ChatWindowScreen({
     groupMessages.fetchNextPage,
     groupMessages.messages.length,
   ]);
+
+  useEffect(() => {
+    if (!groupInfoQuery.isLoading && !groupInfoQuery.isError) {
+      navigation.setOptions({
+        title: groupInfoQuery.data.name,
+      });
+    }
+  }, [groupInfoQuery.isLoading, groupInfoQuery.isError]);
 
   return (
     <View style={styles.container}>
