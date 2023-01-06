@@ -13,18 +13,20 @@ export default function ChatWindowScreen({
 }: NativeStackScreenProps<ChatsTabParamList, "ChatWindow">) {
   const [messageText, setMessageText] = useState("");
   const messages = useMessages();
-  const groupMessages = messages.useFetchGroupMessages(groupInfo.id, 20);
+  const groupMessages = messages.useFetchGroupMessages(groupInfo.id, 30);
   const utils = trpc.useContext();
 
   return (
     <View style={styles.container}>
+      {/* TODO: Add a manual load more button to the top of the chat list.
+      this is because sometimes onEndReached is not triggered */}
       <List
         inverted
         style={styles.messages}
         data={groupMessages.messages}
         renderItem={({ item }) => <ChatMessage message={item} />}
         onEndReached={() => groupMessages.fetchNextPage()}
-        onEndReachedThreshold={0.2}
+        onEndReachedThreshold={1}
       />
 
       <View style={styles.composer}>

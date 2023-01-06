@@ -95,6 +95,7 @@ export class MessagesRepository {
     const utils = trpc.useContext();
     const [finalMessages, setFinalMessages] = useState<Message[]>([]);
     const [nextCursor, setNextCursor] = useState<string>();
+    const [isLoading, setIsLoading] = useState(false);
 
     const setMessagesReconcile = useCallback(
       (messages: Message[], cursor?: string) => {
@@ -140,6 +141,9 @@ export class MessagesRepository {
     const fetchMessages = useCallback(
       async (cursor?: string) => {
         try {
+          // Start loading
+          setIsLoading(true);
+
           const serverPromise = utils.school.messaging.fetchGroupMessages.fetch(
             {
               groupIdentifier,
@@ -175,14 +179,19 @@ export class MessagesRepository {
           setMessagesReconcile(dbMessages2.messages, serverMessages.cursor);
         } catch (error) {
           console.error("fetchMessages Error:", error);
+        } finally {
+          // Loading finish
+          setIsLoading(false);
         }
       },
       [groupIdentifier, limit, setMessagesReconcile]
     );
 
     const fetchNextPage = useCallback(() => {
-      if (nextCursor) fetchMessages(nextCursor);
-    }, [fetchMessages, nextCursor]);
+      if (nextCursor && !isLoading) {
+        fetchMessages(nextCursor);
+      }
+    }, [fetchMessages, nextCursor, isLoading]);
 
     useEffect(() => {
       fetchMessages(nextCursor);
@@ -195,7 +204,8 @@ export class MessagesRepository {
     return {
       messages: finalMessages,
       fetchNextPage,
-      nextCursor,
+      hasMore: !!nextCursor,
+      isLoading,
     };
   }
 
