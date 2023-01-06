@@ -128,7 +128,8 @@ export class MessagesRepository {
           // return combined;
 
           // TODO: Optimize (read above)
-          return _.chain(existingMessages.concat(messages))
+          // Give more preference to `messages` because it is likely fresher
+          return _.chain(messages.concat(existingMessages))
             .sortBy((m) => BigInt(m.sort_key))
             .sortedUniqBy((m) => m.sort_key)
             .reverse()
