@@ -1,7 +1,12 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useState } from "react";
-import { ListRenderItem, StyleSheet } from "react-native";
-import { List, TextInput, View } from "../../components/Themed";
+import { useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  Button,
+  ListRenderItem,
+  StyleSheet,
+} from "react-native";
+import { List, Text, TextInput, View } from "../../components/Themed";
 import { ChatsTabParamList } from "../../types";
 import { trpc } from "../../utils/trpc";
 import ChatMessage from "./ChatMessage";
@@ -21,6 +26,35 @@ export default function ChatWindowScreen({
   const groupMessages = messages.useFetchGroupMessages(groupInfo.id, 30);
   const utils = trpc.useContext();
 
+  /** The Element that should appear at the end of the chat */
+  const chatEndElement = useMemo(() => {
+    if (groupMessages.isLoading) {
+      return <ActivityIndicator style={styles.chatLoading} size="large" />;
+    }
+
+    if (groupMessages.hasMore) {
+      return (
+        <View style={styles.loadMoreBtn}>
+          <Button
+            title="Load older messages"
+            onPress={groupMessages.fetchNextPage}
+          />
+        </View>
+      );
+    }
+
+    if (groupMessages.messages.length > 0) {
+      return <Text style={styles.endOfChat}>End of chat</Text>;
+    }
+
+    return <></>;
+  }, [
+    groupMessages.hasMore,
+    groupMessages.isLoading,
+    groupMessages.fetchNextPage,
+    groupMessages.messages.length,
+  ]);
+
   return (
     <View style={styles.container}>
       {/* TODO: Add a manual load more button to the top of the chat list.
@@ -33,6 +67,7 @@ export default function ChatWindowScreen({
         onEndReached={groupMessages.fetchNextPage}
         onEndReachedThreshold={1}
         initialNumToRender={10}
+        ListFooterComponent={chatEndElement}
       />
 
       <View style={styles.composer}>
@@ -79,5 +114,16 @@ const styles = StyleSheet.create({
   },
   composerSendBtn: {
     padding: 8,
+  },
+  chatLoading: {
+    padding: 16,
+  },
+  loadMoreBtn: {
+    marginBottom: 16,
+  },
+  endOfChat: {
+    textAlign: "center",
+    padding: 16,
+    opacity: 0.7,
   },
 });
