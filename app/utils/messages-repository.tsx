@@ -100,7 +100,6 @@ export class MessagesRepository {
   ) {
     useEffect(() => {
       const observable = this.getGroupMessageObservable(groupIdentifier);
-
       const subscription = observable.subscribe((message) => {
         onReceive(message);
       });
@@ -108,7 +107,7 @@ export class MessagesRepository {
       return () => {
         subscription.unsubscribe();
       };
-    }, []);
+    }, [groupIdentifier]);
   }
 
   useFetchGroupMessages(groupIdentifier: string, limit = 20) {
@@ -217,6 +216,12 @@ export class MessagesRepository {
     useEffect(() => {
       fetchMessages(nextCursor);
     }, [fetchMessages]);
+
+    useEffect(() => {
+      setFinalMessages([]);
+      setNextCursor(undefined);
+      fetchMessages();
+    }, [groupIdentifier]);
 
     this.useGroupMessageReceived(groupIdentifier, (newMessage) => {
       setFinalMessages((m) => [newMessage, ...m]);

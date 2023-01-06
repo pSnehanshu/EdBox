@@ -65,7 +65,7 @@ export default function ChatWindowScreen({
         title: groupInfoQuery.data.name,
       });
     }
-  }, [groupInfoQuery.isLoading, groupInfoQuery.isError]);
+  }, [groupInfoQuery.isLoading, groupInfoQuery.isError, groupInfo.id]);
 
   return (
     <View style={styles.container}>
