@@ -36,7 +36,7 @@ export function useAuthToken() {
   };
 }
 
-export function useFetchCurrentUser() {
+export function useCurrentUser() {
   const Token = useAuthToken();
   const [user, setUser] = useState<User>();
   const whoami = trpc.auth.whoami.useQuery(undefined, {
@@ -80,13 +80,4 @@ export function useFetchCurrentUser() {
     isLoggedIn: !!user,
     user,
   };
-}
-
-/**
- * Get the currently logged in user.
- * Use this function only when you're sure that the user is logged in.
- */
-export function useCurrentUser() {
-  const { user } = useFetchCurrentUser();
-  return user as NonNullable<typeof user>;
 }

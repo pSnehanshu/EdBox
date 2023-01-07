@@ -24,7 +24,7 @@ import {
   RootTabParamList,
   RootTabScreenProps,
 } from "../types";
-import { useFetchCurrentUser } from "../utils/auth";
+import { useCurrentUser } from "../utils/auth";
 import LinkingConfiguration from "./LinkingConfiguration";
 import { SocketProvider, useSocket } from "../utils/socketio";
 import { MessagesProvider } from "../utils/messages-repository";
@@ -55,7 +55,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
   const school = useSchool();
-  const { isLoggedIn } = useFetchCurrentUser();
+  const { isLoggedIn } = useCurrentUser();
 
   if (!school) return null;
 

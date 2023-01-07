@@ -9,10 +9,7 @@ interface ChatMessageProps {
   message: Message;
 }
 function ChatMessage({ message }: ChatMessageProps) {
-  const user = useCurrentUser();
-  const sender = message.Sender;
-  const isSentByMe = user.id === sender.id;
-  const color = isSentByMe ? "black" : "white";
+  const { user } = useCurrentUser();
   const time = useMemo(() => {
     const date = new Date(message.created_at);
     const time = format(date, "hh:mm aaa");
@@ -28,6 +25,12 @@ function ChatMessage({ message }: ChatMessageProps) {
     }
     return `${format(date, "dd/MM/yy")} ${time}`;
   }, [message.created_at]);
+
+  if (!user) return null;
+
+  const sender = message.Sender;
+  const isSentByMe = user.id === sender.id;
+  const color = isSentByMe ? "black" : "white";
 
   return (
     <View
