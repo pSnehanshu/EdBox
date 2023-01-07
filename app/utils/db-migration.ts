@@ -33,17 +33,9 @@ export const migrations: Migration[] = [
         obj TEXT NOT NULL,
         created_at TEXT NOT NULL,
         group_identifier TEXT NOT NULL,
+        sort_key INTEGER NOT NULL,
         FOREIGN KEY(group_identifier) REFERENCES groups(id) ON DELETE CASCADE
-      );`,
-        []
-      );
-    },
-  },
-  {
-    name: "add sort_key to messages",
-    async fn(tx) {
-      tx.executeSql(
-        "ALTER TABLE messages ADD COLUMN sort_key INTEGER NOT NULL"
+      );`
       );
       tx.executeSql(
         "CREATE UNIQUE INDEX messages_sort_key_unique_index ON messages(sort_key);"
