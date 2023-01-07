@@ -46,7 +46,8 @@
     "react-native-web": "~0.18.9",
     "react-native-webview": "11.23.1",
     "rxjs": "^7.8.0",
-    "socket.io-client": "^4.5.4"
+    "socket.io-client": "^4.5.4",
+    "@react-native-async-storage/async-storage": "~1.17.3"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
