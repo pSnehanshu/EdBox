@@ -5,7 +5,7 @@ import {
 } from "@react-navigation/native-stack";
 import { format, isToday, isYesterday, isThisYear } from "date-fns";
 import _ from "lodash";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SafeAreaView, StyleSheet, Pressable, Image } from "react-native";
 import { GroupBasicInfo } from "../../backend/utils/group-identifier";
 import { Message } from "../../shared/types";
@@ -33,6 +33,7 @@ export default function ChatsTabScreen() {
 interface GroupItemProps {
   onClick?: () => void;
   group: GroupBasicInfo;
+  onMessage?: (date: Date) => void;
 }
 function GroupItem(props: GroupItemProps) {
   const Messages = useMessages();
@@ -54,6 +55,12 @@ function GroupItem(props: GroupItemProps) {
     }
 
     return format(date, "dd/LL/yy");
+  }, [lastMessage?.created_at]);
+
+  useEffect(() => {
+    if (lastMessage?.created_at) {
+      props.onMessage?.(new Date(lastMessage.created_at));
+    }
   }, [lastMessage?.created_at]);
 
   return (
@@ -89,24 +96,42 @@ function ChatsListScreen({}: NativeStackScreenProps<
   ChatsTabParamList,
   "ChatList"
 >) {
+  const navigation = useNavigation();
   const {
     isLoading,
     isError,
-    data: chats,
+    data: groups,
   } = trpc.school.messaging.fetchGroups.useQuery({
     sort: "recent_message",
     page: 1,
   });
-  const navigation = useNavigation();
+  const [groupTimeMapping, setGroupTimeMapping] = useState<
+    Record<string, Date>
+  >({});
+
+  const sortedGroups = useMemo(() => {
+    if (!groups) return [];
+
+    return _.sortBy(groups, (group) => {
+      const t = groupTimeMapping[group.id];
+      return t ?? new Date();
+    }).reverse();
+  }, [groupTimeMapping, groups?.length]);
 
   return (
     <SafeAreaView style={styles.container}>
       <List
-        data={chats ?? []}
+        data={sortedGroups}
         renderItem={({ item: group }) => (
           <GroupItem
             group={group}
             onClick={() => navigation.navigate("ChatWindow", group)}
+            onMessage={(date) => {
+              setGroupTimeMapping((mapping) => ({
+                ...mapping,
+                [group.id]: date,
+              }));
+            }}
           />
         )}
       />
