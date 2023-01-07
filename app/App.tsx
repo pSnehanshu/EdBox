@@ -21,7 +21,7 @@ function AppWithSchool() {
   return (
     <SafeAreaProvider>
       {school ? <Navigation colorScheme={colorScheme} /> : <SchoolNotFound />}
-      <StatusBar style="auto" />
+      <StatusBar style={colorScheme === "light" ? "dark" : "light"} />
     </SafeAreaProvider>
   );
 }
