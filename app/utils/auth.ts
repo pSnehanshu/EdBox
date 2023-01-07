@@ -36,9 +36,14 @@ export function useAuthToken() {
   };
 }
 
+/**
+ * Cache user object to avoid fetching from AsyncStorage over and over
+ */
+let globalUser: User | undefined = undefined;
+
 export function useCurrentUser() {
   const Token = useAuthToken();
-  const [user, setUser] = useState<User>();
+  const [user, setUser] = useState<User | undefined>(globalUser);
   const whoami = trpc.auth.whoami.useQuery(undefined, {
     retry: false,
     staleTime: 60 * 60 * 1000,
@@ -46,6 +51,9 @@ export function useCurrentUser() {
 
   useEffect(() => {
     (async () => {
+      // Cached value found, no need to refetch
+      if (globalUser) return;
+
       const token = await Token.get();
       if (!token) return;
 
@@ -53,7 +61,11 @@ export function useCurrentUser() {
       const _user = await AsyncStorage.getItem(USER);
       if (!_user) return;
 
-      setUser(JSON.parse(_user));
+      const user = JSON.parse(_user);
+      setUser(user);
+
+      // Cache the value
+      globalUser = user;
     })();
   }, []);
 
@@ -66,11 +78,13 @@ export function useCurrentUser() {
             // Session is invalid
             setUser(undefined);
             await AsyncStorage.removeItem(USER);
+            globalUser = undefined;
           }
         } else {
           // Save locally
           setUser(whoami.data);
           await AsyncStorage.setItem(USER, JSON.stringify(whoami.data));
+          globalUser = whoami.data;
         }
       }
     })();

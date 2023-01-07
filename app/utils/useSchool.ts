@@ -5,6 +5,11 @@ import { trpc } from "../utils/trpc";
 import { SCHOOL } from "./async-storage-keys";
 
 /**
+ * Cache school object to avoid fetching from AsyncStorage over and over
+ */
+let globalSchool: School | undefined = undefined;
+
+/**
  * Fetch the current school object.
  */
 export function useSchool(): School | undefined {
@@ -12,16 +17,24 @@ export function useSchool(): School | undefined {
     // TODO: Bring this from environment variables
     schoolId: "clca5hw6i000008jr4ibyh2cc",
   });
-  const [school, setSchool] = useState<School>();
+  const [school, setSchool] = useState<School | undefined>(globalSchool);
 
   // Fetch locally
   useEffect(() => {
     (async () => {
+      if (globalSchool) {
+        // The object is cached, so no need to refetch it
+        return;
+      }
+
       const _school = await AsyncStorage.getItem(SCHOOL);
       if (!_school) return;
 
       const school = JSON.parse(_school);
       setSchool(school);
+
+      // Cache the value
+      globalSchool = school;
     })();
   }, []);
 
@@ -33,12 +46,14 @@ export function useSchool(): School | undefined {
             // Invalid School
             setSchool(undefined);
             await AsyncStorage.removeItem(SCHOOL);
+            globalSchool = undefined;
           } else {
             // Some other error
           }
         } else {
           setSchool(schoolQuery.data);
           await AsyncStorage.setItem(SCHOOL, JSON.stringify(schoolQuery.data));
+          globalSchool = schoolQuery.data;
         }
       }
     })();
