@@ -12,16 +12,15 @@ import { useAuthToken } from "./utils/auth";
 import config from "./config";
 import { DBProvider } from "./utils/db";
 import Toast from "react-native-toast-message";
+import SchoolNotFound from "./screens/SchoolNotFound";
 
 function AppWithSchool() {
   const colorScheme = useColorScheme();
   const school = useSchool();
 
-  if (!school) return null;
-
   return (
     <SafeAreaProvider>
-      <Navigation colorScheme={colorScheme} />
+      {school ? <Navigation colorScheme={colorScheme} /> : <SchoolNotFound />}
       <StatusBar style="auto" />
     </SafeAreaProvider>
   );
