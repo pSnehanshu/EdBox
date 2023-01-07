@@ -37,6 +37,58 @@ export function useDB() {
   return db!;
 }
 
+/**
+ * Pass a SELECT SQL query to read data from SQLite
+ * @param sql
+ * @param args
+ * @returns
+ */
+export function useReadDB<T = unknown>(
+  sql: string,
+  args: Array<number | string | null> = []
+) {
+  const db = useDB();
+  const [result, setResult] = useState<T[]>();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<SQLite.SQLError>();
+
+  useEffect(() => {
+    setIsLoading(true);
+
+    db.readTransaction(
+      (tx) => {
+        tx.executeSql(
+          sql,
+          args,
+          (tx, res) => {
+            setResult(res.rows._array);
+          },
+          (tx, err) => {
+            setError(err);
+            return true;
+          }
+        );
+      },
+      (err) => {
+        setError(err);
+        setIsLoading(false);
+      },
+      () => setIsLoading(false)
+    );
+
+    return () => {
+      setError(undefined);
+    };
+  }, [sql, args.join("/")]);
+
+  return {
+    data: result,
+    isLoading,
+    isError: !!error,
+    error,
+  };
+}
+
 export type Migration = {
   name: string;
   fn: (tx: SQLite.SQLTransaction, db: SQLite.WebSQLDatabase) => Promise<void>;

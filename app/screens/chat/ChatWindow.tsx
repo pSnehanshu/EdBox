@@ -8,11 +8,11 @@ import {
 } from "react-native";
 import { List, Text, TextInput, View } from "../../components/Themed";
 import { RootStackParamList } from "../../types";
-import { trpc } from "../../utils/trpc";
 import ChatMessage from "./ChatMessage";
 import { Ionicons } from "@expo/vector-icons";
 import { useMessages } from "../../utils/messages-repository";
 import { Message } from "../../../shared/types";
+import { useGroupInfo } from "../../utils/groups";
 
 const renderItem: ListRenderItem<Message> = ({ item }) => (
   <ChatMessage message={item} />
@@ -25,10 +25,7 @@ export default function ChatWindowScreen({
   const [messageText, setMessageText] = useState("");
   const messages = useMessages();
   const groupMessages = messages.useFetchGroupMessages(groupInfo.id, 30);
-  const utils = trpc.useContext();
-  const groupInfoQuery = trpc.school.messaging.fetchGroupInfo.useQuery({
-    groupIdentifier: groupInfo.id,
-  });
+  const groupInfoQuery = useGroupInfo(groupInfo.id);
 
   /** The Element that should appear at the end of the chat */
   const chatEndElement = useMemo(() => {
@@ -60,12 +57,16 @@ export default function ChatWindowScreen({
   ]);
 
   useEffect(() => {
-    if (!groupInfoQuery.isLoading && !groupInfoQuery.isError) {
+    if (
+      !groupInfoQuery.isLoading &&
+      !groupInfoQuery.isError &&
+      groupInfoQuery.data?.name
+    ) {
       navigation.setOptions({
-        title: groupInfoQuery.data.name,
+        title: groupInfoQuery.data?.name,
       });
     }
-  }, [groupInfoQuery.isLoading, groupInfoQuery.isError, groupInfo.id]);
+  }, [groupInfoQuery.data?.name, groupInfo.id]);
 
   return (
     <View style={styles.container}>
@@ -96,7 +97,6 @@ export default function ChatWindowScreen({
           onPress={() => {
             if (!messageText.trim()) return;
             messages.sendMessage(groupInfo.id, messageText.trim());
-            utils.school.messaging.fetchGroupMessages.invalidate();
             setMessageText("");
           }}
         >

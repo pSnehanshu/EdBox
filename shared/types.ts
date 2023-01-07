@@ -9,6 +9,11 @@ export type Message = ArrayElement<
   inferRouterOutputs<AppRouter>["school"]["messaging"]["fetchGroupMessages"]["messages"]
 >;
 
+export interface Group {
+  name: string;
+  identifier: string;
+}
+
 export interface ServerToClientEvents {
   newMessage: (msg: Message) => void;
 }

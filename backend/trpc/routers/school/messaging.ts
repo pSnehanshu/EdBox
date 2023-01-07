@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { Group } from "../../../../shared/types";
 import prisma from "../../../prisma";
 import { getAutoGroups } from "../../../utils/auto-groups";
 import {
@@ -448,7 +449,11 @@ const messagingRouter = router({
         groupIdentifier: groupIdentifierSchema,
       })
     )
-    .query(async ({ input, ctx }): Promise<{ name: string }> => {
+    .query(async ({ input, ctx }): Promise<Group> => {
+      const identifier = convertObjectToOrderedQueryString(
+        input.groupIdentifier
+      );
+
       if (input.groupIdentifier.sc !== ctx.user.school_id) {
         throw new TRPCError({
           code: "NOT_FOUND",
@@ -474,7 +479,7 @@ const messagingRouter = router({
           });
         }
 
-        return { name: group.name };
+        return { name: group.name, identifier };
       }
 
       const groupType = input.groupIdentifier.ty;
@@ -496,7 +501,7 @@ const messagingRouter = router({
           });
         }
 
-        return { name: school.name };
+        return { name: school.name, identifier };
       } else if (groupType === "cl") {
         const Class = await prisma.classStd.findUnique({
           where: {
@@ -521,6 +526,7 @@ const messagingRouter = router({
           name: `Class ${
             Class.name ?? input.groupIdentifier.cl
           } (all sections)`,
+          identifier,
         };
       } else if (groupType === "se") {
         const section = await prisma.classSection.findUnique({
@@ -552,6 +558,7 @@ const messagingRouter = router({
           name: `Class ${section.Class.name ?? section.Class.numeric_id} (${
             section.name ?? input.groupIdentifier.se
           })`,
+          identifier,
         };
       } else {
         const subject = await prisma.subject.findFirst({
@@ -571,7 +578,7 @@ const messagingRouter = router({
           });
         }
 
-        return { name: subject.name };
+        return { name: subject.name, identifier };
       }
     }),
   fetchGroupMessages: authProcedure
