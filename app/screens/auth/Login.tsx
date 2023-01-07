@@ -44,6 +44,9 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
               value={email}
               onChangeText={(v) => setEmail(v)}
               placeholder="Email address"
+              autoFocus
+              keyboardType="email-address"
+              autoComplete="email"
             />
           </View>
 
@@ -65,6 +68,8 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
               value={otp}
               onChangeText={(v) => setOTP(v)}
               placeholder="OTP"
+              autoFocus
+              keyboardType="number-pad"
             />
           </View>
 
