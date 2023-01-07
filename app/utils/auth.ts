@@ -4,10 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import { trpc } from "./trpc";
 import type { User } from "../../shared/types";
-
-const AUTH_TOKEN = "auth-token";
-const AUTH_TOKEN_EXPIRY = "auth-token-expiry";
-const USER = "user";
+import { AUTH_TOKEN, AUTH_TOKEN_EXPIRY, USER } from "./async-storage-keys";
 
 export function useAuthToken() {
   const utils = trpc.useContext();

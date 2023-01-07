@@ -27,6 +27,8 @@ export function SocketProvider({ children }: SocketProviderProps) {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
+    if (!school) return;
+
     (async () => {
       socket.current = io(`${config.backendHost}/${school.id}`, {
         auth: {
@@ -42,7 +44,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
       socket.current?.disconnect();
       socket.current?.removeAllListeners();
     };
-  }, []);
+  }, [school?.id]);
 
   return (
     <SocketContext.Provider

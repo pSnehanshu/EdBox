@@ -57,6 +57,8 @@ function RootNavigator() {
   const school = useSchool();
   const { isLoggedIn } = useFetchCurrentUser();
 
+  if (!school) return null;
+
   return isLoggedIn ? (
     <SocketProvider>
       <MessagesProvider>

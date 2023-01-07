@@ -10,6 +10,8 @@ export default function PreLoginScreen({
 }: RootStackScreenProps<"PreLogin">) {
   const school = useSchool();
 
+  if (!school) return null;
+
   return (
     <>
       <View style={styles.container}>

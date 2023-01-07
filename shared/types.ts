@@ -1,5 +1,5 @@
 import type {
-  School,
+  School as DBSchool,
   User as DBUser,
 } from "../backend/node_modules/@prisma/client";
 import type { inferRouterOutputs } from "../backend/node_modules/@trpc/server";
@@ -19,6 +19,8 @@ export interface Group {
 
 export type User = inferRouterOutputs<AppRouter>["auth"]["whoami"];
 
+export type School = inferRouterOutputs<AppRouter>["school"]["schoolBasicInfo"];
+
 export interface ServerToClientEvents {
   newMessage: (msg: Message) => void;
 }
@@ -35,5 +37,5 @@ export interface InterServerEvents {}
 
 export interface SocketData {
   user: DBUser;
-  school: School;
+  school: DBSchool;
 }

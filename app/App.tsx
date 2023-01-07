@@ -7,7 +7,7 @@ import { trpc } from "./utils/trpc";
 import useCachedResources from "./utils/useCachedResources";
 import useColorScheme from "./utils/useColorScheme";
 import Navigation from "./navigation";
-import { useFetchSchool, SchoolContext } from "./utils/useSchool";
+import { useSchool } from "./utils/useSchool";
 import { useAuthToken } from "./utils/auth";
 import config from "./config";
 import { DBProvider } from "./utils/db";
@@ -15,18 +15,15 @@ import Toast from "react-native-toast-message";
 
 function AppWithSchool() {
   const colorScheme = useColorScheme();
-  const { isLoading, isError, data: school } = useFetchSchool();
+  const school = useSchool();
 
-  if (isLoading) return null;
-  if (isError) return null;
+  if (!school) return null;
 
   return (
-    <SchoolContext.Provider value={school}>
-      <SafeAreaProvider>
-        <Navigation colorScheme={colorScheme} />
-        <StatusBar />
-      </SafeAreaProvider>
-    </SchoolContext.Provider>
+    <SafeAreaProvider>
+      <Navigation colorScheme={colorScheme} />
+      <StatusBar style="auto" />
+    </SafeAreaProvider>
   );
 }
 

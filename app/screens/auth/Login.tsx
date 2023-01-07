@@ -24,6 +24,8 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
     },
   });
 
+  if (!school) return null;
+
   return (
     <View
       style={{
