@@ -3,7 +3,7 @@ import * as SecureStore from "expo-secure-store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import { trpc } from "./trpc";
-import type { User } from "../../shared/types";
+import type { User } from "schooltalk-shared/types";
 import { AUTH_TOKEN, AUTH_TOKEN_EXPIRY, USER } from "./async-storage-keys";
 
 export function useAuthToken() {

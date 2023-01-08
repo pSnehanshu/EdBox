@@ -1,7 +1,8 @@
 {
-  "name": "schooltalk",
+  "name": "schooltalk-app",
   "version": "1.0.0",
-  "main": "node_modules/expo/AppEntry.js",
+  "main": "index.js",
+  "license": "UNLICENSED",
   "scripts": {
     "start": "npm run typecheck && expo start",
     "android": "npm run typecheck && expo start --android",
@@ -14,6 +15,7 @@
     "preset": "jest-expo"
   },
   "dependencies": {
+    "schooltalk-shared": "*",
     "@expo/vector-icons": "^13.0.0",
     "@react-navigation/bottom-tabs": "^6.0.5",
     "@react-navigation/native": "^6.0.2",

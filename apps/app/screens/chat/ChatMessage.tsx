@@ -3,7 +3,7 @@ import { format, isThisYear, isToday, isYesterday } from "date-fns";
 import { useCurrentUser } from "../../utils/auth";
 import { Text, View } from "../../components/Themed";
 import { Pressable, StyleSheet } from "react-native";
-import type { Message } from "../../../shared/types";
+import type { Message } from "schooltalk-shared/types";
 
 interface ChatMessageProps {
   message: Message;

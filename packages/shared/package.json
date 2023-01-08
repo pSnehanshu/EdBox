@@ -1,0 +1,9 @@
+{
+  "name": "schooltalk-shared",
+  "version": "1.0.0",
+  "description": "Shared package for all apps",
+  "main": "index.js",
+  "author": "Snehanshu Phukon",
+  "license": "UNLICENSED",
+  "private": true
+}

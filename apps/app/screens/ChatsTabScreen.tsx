@@ -8,7 +8,7 @@ import _ from "lodash";
 import { useEffect, useMemo, useState } from "react";
 import { SafeAreaView, StyleSheet, Pressable, Image } from "react-native";
 import { GroupBasicInfo } from "../../backend/utils/group-identifier";
-import { Message } from "../../shared/types";
+import { Message } from "schooltalk-shared/types";
 import { List, Text, View } from "../components/Themed";
 import { ChatsTabParamList } from "../types";
 import { useMessages } from "../utils/messages-repository";

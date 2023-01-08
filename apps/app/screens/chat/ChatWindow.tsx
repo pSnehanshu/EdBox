@@ -11,7 +11,7 @@ import { RootStackParamList } from "../../types";
 import ChatMessage from "./ChatMessage";
 import { Ionicons } from "@expo/vector-icons";
 import { useMessages } from "../../utils/messages-repository";
-import { Message } from "../../../shared/types";
+import { Message } from "schooltalk-shared/types";
 import { useGroupInfo } from "../../utils/groups";
 
 const renderItem: ListRenderItem<Message> = ({ item }) => (

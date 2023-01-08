@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import type { Group } from "../../shared/types";
+import type { Group } from "schooltalk-shared/types";
 import { useDB, useReadDB } from "./db";
 import { trpc } from "./trpc";
 

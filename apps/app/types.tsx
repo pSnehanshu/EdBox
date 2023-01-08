@@ -13,7 +13,7 @@ import type { Socket } from "socket.io-client";
 import type {
   ClientToServerEvents,
   ServerToClientEvents,
-} from "../shared/types";
+} from "schooltalk-shared/types";
 
 declare global {
   namespace ReactNavigation {

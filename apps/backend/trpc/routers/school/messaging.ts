@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { Group } from "../../../../shared/types";
+import { Group } from "schooltalk-shared/types";
 import prisma from "../../../prisma";
 import { getAutoGroups } from "../../../utils/auto-groups";
 import {

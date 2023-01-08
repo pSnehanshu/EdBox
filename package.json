@@ -1,0 +1,16 @@
+{
+  "name": "schooltalk",
+  "version": "1.0.0",
+  "description": "Communication app for teachers, students, parents, and administration.",
+  "repository": "git@github.com:pSnehanshu/schooltalk.git",
+  "author": "Snehanshu <hello@snehanshu.com>",
+  "license": "UNLICENSED",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "dependencies": {
+    "@trpc/server": "^10.8.1"
+  }
+}

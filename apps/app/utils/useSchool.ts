@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
-import type { School } from "../../shared/types";
+import type { School } from "schooltalk-shared/types";
 import { trpc } from "../utils/trpc";
 import { SCHOOL } from "./async-storage-keys";
 

@@ -8,7 +8,7 @@ import {
   useState,
 } from "react";
 import { Subject } from "rxjs";
-import type { Message } from "../../shared/types";
+import type { Message } from "schooltalk-shared/types";
 import { SocketClient } from "../types";
 import { useDB } from "./db";
 import { useSocket } from "./socketio";

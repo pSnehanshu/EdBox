@@ -12,7 +12,7 @@ import {
   InterServerEvents,
   ServerToClientEvents,
   SocketData,
-} from "../../shared/types";
+} from "schooltalk-shared/types";
 import { getAutoGroups } from "../utils/auto-groups";
 import { defaultTransformer } from "@trpc/server";
 
