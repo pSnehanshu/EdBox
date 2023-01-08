@@ -4,6 +4,8 @@ This is the mobile app. This is built using [React Native](https://reactnative.d
 
 # Run
 
+First ensure that the [backend](../backend/README.md) is properly setup, then proceed:
+
 ```bash
 yarn start
 ```
