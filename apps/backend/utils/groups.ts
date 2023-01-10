@@ -1,11 +1,13 @@
 import { User } from "@prisma/client";
 import prisma from "../prisma";
 import {
+  convertObjectToOrderedQueryString,
   getClassGroupIdentifier,
   getCustomGroupIdentifier,
   getSchoolGroupIdentifier,
   getSectionGroupIdentifier,
   getSubjectGroupIdentifier,
+  GroupIdentifier,
 } from "./group-identifier";
 import _ from "lodash";
 import { Group } from "schooltalk-shared/types";
@@ -224,4 +226,99 @@ export async function getUserGroups(
   // slice and return
   const startIndex = (pagination.page - 1) * pagination.limit;
   return combined.slice(startIndex, startIndex + pagination.limit);
+}
+
+interface Membership {
+  userId: string;
+  name: string;
+  groupIdentifier: string;
+  isAdmin: boolean;
+}
+
+/**
+ * Get the members of a given group
+ * @param groupIdentifier
+ * @returns
+ */
+export async function getGroupMembers(
+  groupIdentifier: GroupIdentifier,
+  pagination?: {
+    limit: number;
+    page: number;
+  }
+): Promise<Membership[]> {
+  const groupIdentifierString =
+    convertObjectToOrderedQueryString(groupIdentifier);
+
+  if (groupIdentifier.gd === "c") {
+    // Fetch all custom groups
+    const customGroupMembers = await prisma.customGroupMembers.findMany({
+      where: {
+        group_id: groupIdentifier.id,
+        Group: {
+          is_active: true,
+        },
+        User: {
+          is_active: true,
+        },
+      },
+      include: {
+        User: {
+          select: {
+            name: true,
+          },
+        },
+      },
+      take: pagination?.limit,
+      skip: pagination ? (pagination.page - 1) * pagination.limit : undefined,
+    });
+
+    return customGroupMembers.map((cgm) => ({
+      userId: cgm.user_id,
+      name: cgm.User.name,
+      groupIdentifier: groupIdentifierString,
+      isAdmin: cgm.is_admin,
+    }));
+  }
+
+  // Fetch auto group members
+  if (groupIdentifier.ty === "sc") {
+    // All users are member of school group
+    const users = await prisma.user.findMany({
+      where: {
+        school_id: groupIdentifier.sc,
+        is_active: true,
+      },
+      orderBy: {
+        name: "asc",
+      },
+      select: {
+        id: true,
+        name: true,
+        Staff: {
+          select: {
+            role: true,
+          },
+        },
+      },
+      take: pagination?.limit,
+      skip: pagination ? (pagination.page - 1) * pagination.limit : undefined,
+    });
+
+    return users.map((u) => ({
+      groupIdentifier: groupIdentifierString,
+      name: u.name,
+      userId: u.id,
+      isAdmin:
+        u.Staff?.role === "principal" || u.Staff?.role === "vice_principal",
+    }));
+  } else if (groupIdentifier.ty === "cl") {
+    // TODO
+  } else if (groupIdentifier.ty === "se") {
+    // TODO
+  } else if (groupIdentifier.ty === "su") {
+    // TODO
+  }
+
+  return [];
 }
