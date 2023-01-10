@@ -7,7 +7,6 @@ import { getAutoGroups } from "../../../utils/auto-groups";
 import {
   convertObjectToOrderedQueryString,
   getCustomGroupIdentifier,
-  GroupBasicInfo,
   groupIdentifierSchema,
 } from "../../../utils/group-identifier";
 import { router, authProcedure } from "../../trpc";
@@ -40,9 +39,8 @@ const messagingRouter = router({
         // TODO
       }
 
-      const customGroups: GroupBasicInfo[] = customGroupMembers.map((cgm) => ({
-        gd: "c",
-        id: getCustomGroupIdentifier(ctx.user.school_id, cgm.group_id),
+      const customGroups: Group[] = customGroupMembers.map((cgm) => ({
+        identifier: getCustomGroupIdentifier(ctx.user.school_id, cgm.group_id),
         name: cgm.Group.name,
       }));
 

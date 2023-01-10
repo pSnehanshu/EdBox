@@ -90,7 +90,7 @@ export default function initSocketIo(server: HTTPServer) {
         // Join the user to all the group rooms
 
         const autoGroups = await getAutoGroups(user);
-        const autoGroupIds = autoGroups.map((g) => g.id);
+        const autoGroupIds = autoGroups.map((g) => g.identifier);
 
         // Join auto groups
         socket.join(autoGroupIds);

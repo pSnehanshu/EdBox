@@ -12,6 +12,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { Socket } from "socket.io-client";
 import type {
   ClientToServerEvents,
+  Group,
   ServerToClientEvents,
 } from "schooltalk-shared/types";
 
@@ -25,7 +26,7 @@ export type RootStackParamList = {
   PreLogin: undefined;
   Login: undefined;
   Root: NavigatorScreenParams<RootTabParamList> | undefined;
-  ChatWindow: { id: string; name?: string };
+  ChatWindow: Group;
   Modal: undefined;
   NotFound: undefined;
 };

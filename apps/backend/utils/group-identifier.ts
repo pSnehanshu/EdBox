@@ -1,12 +1,5 @@
 import { z } from "zod";
 
-export type GroupBasicInfo = {
-  id: string;
-  name: string;
-  /** Group Definition: a-automatic, c-custom */
-  gd: "a" | "c";
-};
-
 const cuid = z.string().cuid();
 const int = z.number().int();
 

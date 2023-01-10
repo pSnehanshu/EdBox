@@ -24,8 +24,11 @@ export default function ChatWindowScreen({
 }: NativeStackScreenProps<RootStackParamList, "ChatWindow">) {
   const [messageText, setMessageText] = useState("");
   const messages = useMessages();
-  const groupMessages = messages.useFetchGroupMessages(groupInfo.id, 30);
-  const groupInfoQuery = useGroupInfo(groupInfo.id);
+  const groupMessages = messages.useFetchGroupMessages(
+    groupInfo.identifier,
+    30
+  );
+  const groupInfoQuery = useGroupInfo(groupInfo.identifier);
 
   /** The Element that should appear at the end of the chat */
   const chatEndElement = useMemo(() => {
@@ -66,7 +69,7 @@ export default function ChatWindowScreen({
         title: groupInfoQuery.data?.name,
       });
     }
-  }, [groupInfoQuery.data?.name, groupInfo.id]);
+  }, [groupInfoQuery.data?.name, groupInfo.identifier]);
 
   return (
     <View style={styles.container}>
@@ -96,7 +99,7 @@ export default function ChatWindowScreen({
           style={styles.composerSendBtn}
           onPress={() => {
             if (!messageText.trim()) return;
-            messages.sendMessage(groupInfo.id, messageText.trim());
+            messages.sendMessage(groupInfo.identifier, messageText.trim());
             setMessageText("");
           }}
         >

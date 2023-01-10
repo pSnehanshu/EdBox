@@ -66,9 +66,9 @@ export class MessagesRepository {
         text1: `Message from ${message.Sender.name}`,
         text2: message.text,
         onPress() {
-          // TODO: Open the group
           navigationRef.navigate("ChatWindow", {
-            id: message.group_identifier,
+            identifier: message.group_identifier,
+            name: "",
           });
 
           Toast.hide();

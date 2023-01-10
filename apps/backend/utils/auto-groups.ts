@@ -5,9 +5,9 @@ import {
   getSchoolGroupIdentifier,
   getSectionGroupIdentifier,
   getSubjectGroupIdentifier,
-  GroupBasicInfo,
 } from "./group-identifier";
 import _ from "lodash";
+import { Group } from "schooltalk-shared/types";
 
 /**
  * Get list of all automatic groups a user is part of
@@ -18,7 +18,7 @@ export async function getAutoGroups(
     User,
     "school_id" | "teacher_id" | "student_id" | "parent_id" | "staff_id"
   >
-): Promise<GroupBasicInfo[]> {
+): Promise<Group[]> {
   const school = await prisma.school.findUnique({
     where: { id: user.school_id },
   });
@@ -28,15 +28,14 @@ export async function getAutoGroups(
   }
 
   // School group
-  const schoolGroup: GroupBasicInfo = {
-    id: getSchoolGroupIdentifier(school.id),
+  const schoolGroup: Group = {
+    identifier: getSchoolGroupIdentifier(school.id),
     name: school.name,
-    gd: "a",
   };
 
-  const classGroups: GroupBasicInfo[] = [];
-  const sectionGroups: GroupBasicInfo[] = [];
-  const subjectGroups: GroupBasicInfo[] = [];
+  const classGroups: Group[] = [];
+  const sectionGroups: Group[] = [];
+  const subjectGroups: Group[] = [];
 
   if (user.teacher_id) {
     // Fetch necessary info about the teacher
@@ -71,8 +70,7 @@ export async function getAutoGroups(
 
           // Subject group
           subjectGroups.push({
-            gd: "a",
-            id: getSubjectGroupIdentifier(school.id, Subject.id),
+            identifier: getSubjectGroupIdentifier(school.id, Subject.id),
             name: `${Subject.name} - Class ${className} (${sectionName})`,
           });
         }
@@ -84,8 +82,7 @@ export async function getAutoGroups(
 
         // Class group
         classGroups.push({
-          gd: "a",
-          id: getClassGroupIdentifier(school.id, Class.numeric_id),
+          identifier: getClassGroupIdentifier(school.id, Class.numeric_id),
           name: `Class ${className} (all sections)`,
         });
       });
@@ -115,8 +112,7 @@ export async function getAutoGroups(
       const className = Class.name ?? Class.numeric_id;
 
       classGroups.push({
-        gd: "a",
-        id: getClassGroupIdentifier(school.id, Class.numeric_id),
+        identifier: getClassGroupIdentifier(school.id, Class.numeric_id),
         name: `Class ${className} (all sections)`,
       });
 
@@ -149,8 +145,7 @@ export async function getAutoGroups(
           const sectionName = section.name ?? section.numeric_id;
 
           sectionGroups.push({
-            gd: "a",
-            id: getSectionGroupIdentifier(
+            identifier: getSectionGroupIdentifier(
               school.id,
               Class.numeric_id,
               section.numeric_id
@@ -162,9 +157,8 @@ export async function getAutoGroups(
           _.uniqBy(section.Periods, (p) => p.subject_id).forEach(
             ({ Subject }) => {
               subjectGroups.push({
-                gd: "a",
                 name: `${Subject.name} - Class ${className} (${sectionName})`,
-                id: getSubjectGroupIdentifier(school.id, Subject.id),
+                identifier: getSubjectGroupIdentifier(school.id, Subject.id),
               });
             }
           );

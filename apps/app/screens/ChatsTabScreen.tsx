@@ -7,7 +7,7 @@ import { format, isToday, isYesterday, isThisYear } from "date-fns";
 import _ from "lodash";
 import { useEffect, useMemo, useState } from "react";
 import { SafeAreaView, StyleSheet, Pressable, Image } from "react-native";
-import { GroupBasicInfo } from "../../backend/utils/group-identifier";
+import { Group } from "schooltalk-shared/types";
 import { Message } from "schooltalk-shared/types";
 import { List, Text, View } from "../components/Themed";
 import { ChatsTabParamList } from "../types";
@@ -32,12 +32,15 @@ export default function ChatsTabScreen() {
 
 interface GroupItemProps {
   onClick?: () => void;
-  group: GroupBasicInfo;
+  group: Group;
   onMessage?: (date: Date) => void;
 }
 function GroupItem(props: GroupItemProps) {
   const Messages = useMessages();
-  const { messages } = Messages.useFetchGroupMessages(props.group.id, 1);
+  const { messages } = Messages.useFetchGroupMessages(
+    props.group.identifier,
+    1
+  );
   const lastMessage = messages[0] as Message | undefined;
   const time = useMemo(() => {
     if (!lastMessage?.created_at) return "";
@@ -115,7 +118,7 @@ function ChatsListScreen({}: NativeStackScreenProps<
     if (!groups) return [];
 
     return _.sortBy(groups, (group) => {
-      const t = groupTimeMapping[group.id];
+      const t = groupTimeMapping[group.identifier];
       return t ?? new Date();
     }).reverse();
   }, [groupTimeMapping, groups?.length]);
@@ -131,7 +134,7 @@ function ChatsListScreen({}: NativeStackScreenProps<
             onMessage={(date) => {
               setGroupTimeMapping((mapping) => ({
                 ...mapping,
-                [group.id]: date,
+                [group.identifier]: date,
               }));
             }}
           />
