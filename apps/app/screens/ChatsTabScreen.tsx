@@ -80,9 +80,11 @@ function GroupItem(props: GroupItemProps) {
       <View style={styles.chatGroupMiddle}>
         <Text style={styles.chatGroupName}>{props.group.name}</Text>
         <Text style={styles.chatGroupLastMessage}>
-          {_.truncate(`${lastMessage?.Sender?.name}: ${lastMessage?.text}`, {
-            length: 45,
-          })}
+          {lastMessage
+            ? _.truncate(`${lastMessage.Sender?.name}: ${lastMessage.text}`, {
+                length: 45,
+              })
+            : "Tap to chat"}
         </Text>
       </View>
       <View style={styles.chatGroupRight}>
