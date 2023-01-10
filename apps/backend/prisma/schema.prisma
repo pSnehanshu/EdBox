@@ -197,13 +197,20 @@ model Parent {
 }
 
 model SchoolStaff {
-  id         String   @id @default(cuid()) @db.VarChar(32)
-  school_id  String   @db.VarChar(32)
-  School     School   @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  is_active  Boolean  @default(true)
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  id         String    @id @default(cuid()) @db.VarChar(32)
+  role       StaffRole @default(others)
+  school_id  String    @db.VarChar(32)
+  School     School    @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  is_active  Boolean   @default(true)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
   User       User?
+}
+
+enum StaffRole {
+  principal
+  vice_principal
+  others
 }
 
 model ParentStudent_mapping {
