@@ -3,7 +3,6 @@ import { Server as HTTPServer } from "http";
 import prisma from "../prisma";
 import { isPast } from "date-fns";
 import {
-  getCustomGroupIdentifier,
   convertObjectToOrderedQueryString,
   parseGroupIdentifierString,
 } from "../utils/group-identifier";
@@ -13,7 +12,7 @@ import {
   ServerToClientEvents,
   SocketData,
 } from "schooltalk-shared/types";
-import { getAutoGroups } from "../utils/auto-groups";
+import { getUserGroups } from "../utils/groups";
 import { defaultTransformer } from "@trpc/server";
 
 export default function initSocketIo(server: HTTPServer) {
@@ -88,30 +87,14 @@ export default function initSocketIo(server: HTTPServer) {
 
       async function joinGroupRooms() {
         // Join the user to all the group rooms
+        const groups = await getUserGroups(user);
+        const groupIds = groups.map((g) => g.identifier);
 
-        const autoGroups = await getAutoGroups(user);
-        const autoGroupIds = autoGroups.map((g) => g.identifier);
-
-        // Join auto groups
-        socket.join(autoGroupIds);
-
-        const customGroups = await prisma.customGroupMembers.findMany({
-          where: {
-            user_id: user.id,
-            Group: {
-              is_active: true,
-            },
-          },
-        });
-        const customGroupIdentifiers = customGroups.map((g) =>
-          getCustomGroupIdentifier(school.id, g.group_id)
-        );
-
-        // Join custom groups
-        socket.join(customGroupIdentifiers);
+        // Join  groups
+        socket.join(groupIds);
 
         // Finally get all the group identifiers
-        return autoGroupIds.concat(customGroupIdentifiers);
+        return groupIds;
       }
 
       const myGroups = await joinGroupRooms();

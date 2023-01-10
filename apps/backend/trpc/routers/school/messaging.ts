@@ -3,10 +3,9 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { Group } from "schooltalk-shared/types";
 import prisma from "../../../prisma";
-import { getAutoGroups } from "../../../utils/auto-groups";
+import { getUserGroups } from "../../../utils/groups";
 import {
   convertObjectToOrderedQueryString,
-  getCustomGroupIdentifier,
   groupIdentifierSchema,
 } from "../../../utils/group-identifier";
 import { router, authProcedure } from "../../trpc";
@@ -17,44 +16,15 @@ const messagingRouter = router({
       z.object({
         limit: z.number().int().min(1).max(20).default(10),
         page: z.number().int().min(1),
-        sort: z.enum([/* "name_asc", "name_desc", */ "recent_message"]),
+        // sort: z.enum([/* "name_asc", "name_desc", */ "recent_message"]),
       })
     )
-    .query(async ({ input, ctx }) => {
-      // Fetch all custom groups
-      const customGroupMembers = await prisma.customGroupMembers.findMany({
-        where: {
-          user_id: ctx.user.id,
-          Group: {
-            is_active: true,
-          },
-        },
-        include: {
-          Group: true,
-        },
-      });
-
-      // Sort
-      if (input.sort === "recent_message") {
-        // TODO
-      }
-
-      const customGroups: Group[] = customGroupMembers.map((cgm) => ({
-        identifier: getCustomGroupIdentifier(ctx.user.school_id, cgm.group_id),
-        name: cgm.Group.name,
-      }));
-
-      // Now fetch all automatic groups
-      const autoGroups = await getAutoGroups(ctx.user);
-
-      const startIndex = (input.page - 1) * input.limit;
-
-      // Combine, slice and return
-      return [...autoGroups, ...customGroups].slice(
-        startIndex,
-        startIndex + input.limit
-      );
-    }),
+    .query(async ({ input, ctx }) =>
+      getUserGroups(ctx.user, {
+        limit: input.limit,
+        page: input.page,
+      })
+    ),
   createGroup: authProcedure
     .input(
       z.object({

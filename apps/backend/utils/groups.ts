@@ -2,6 +2,7 @@ import { User } from "@prisma/client";
 import prisma from "../prisma";
 import {
   getClassGroupIdentifier,
+  getCustomGroupIdentifier,
   getSchoolGroupIdentifier,
   getSectionGroupIdentifier,
   getSubjectGroupIdentifier,
@@ -13,7 +14,7 @@ import { Group } from "schooltalk-shared/types";
  * Get list of all automatic groups a user is part of
  * @param user
  */
-export async function getAutoGroups(
+async function getAutoGroups(
   user: Pick<
     User,
     "school_id" | "teacher_id" | "student_id" | "parent_id" | "staff_id"
@@ -174,4 +175,53 @@ export async function getAutoGroups(
   }
 
   return [schoolGroup, ...classGroups, ...sectionGroups, ...subjectGroups];
+}
+
+/**
+ * Get a list of groups, the user is part of.
+ * @param user
+ * @param pagination
+ * @returns
+ */
+export async function getUserGroups(
+  user: Pick<
+    User,
+    "id" | "school_id" | "teacher_id" | "student_id" | "parent_id" | "staff_id"
+  >,
+  pagination?: { page: number; limit: number }
+): Promise<Group[]> {
+  // Fetch all custom groups
+  const customGroupMembers = await prisma.customGroupMembers.findMany({
+    where: {
+      user_id: user.id,
+      Group: {
+        is_active: true,
+      },
+    },
+    include: {
+      Group: true,
+    },
+  });
+
+  // Sort
+  // if (pagination.sort === "recent_message") {
+  //   // TODO
+  // }
+
+  const customGroups: Group[] = customGroupMembers.map((cgm) => ({
+    identifier: getCustomGroupIdentifier(user.school_id, cgm.group_id),
+    name: cgm.Group.name,
+  }));
+
+  // Now fetch all automatic groups
+  const autoGroups = await getAutoGroups(user);
+
+  // Combine
+  const combined = autoGroups.concat(customGroups);
+
+  if (!pagination) return combined;
+
+  // slice and return
+  const startIndex = (pagination.page - 1) * pagination.limit;
+  return combined.slice(startIndex, startIndex + pagination.limit);
 }
