@@ -33,7 +33,7 @@ export function useGroupInfo(groupIdentifier: string) {
     return dbResult.data?.[0]
       ? (JSON.parse(dbResult.data?.[0].obj) as Group)
       : undefined;
-  }, [dbResult.data?.[0].id]);
+  }, [dbResult.data?.[0]?.id]);
 
   const data = groupQuery.data ?? dbData;
 
