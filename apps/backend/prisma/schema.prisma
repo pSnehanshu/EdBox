@@ -129,7 +129,7 @@ model RoutinePeriod {
   created_at  DateTime     @default(now())
   updated_at  DateTime     @updatedAt
 
-  @@id([section_id, class_id, school_id, subject_id])
+  @@id([section_id, class_id, school_id, subject_id, day_of_week, start_hour, start_min])
 }
 
 enum DayOfWeek {

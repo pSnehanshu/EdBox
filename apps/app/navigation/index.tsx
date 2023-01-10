@@ -3,7 +3,7 @@
  * https://reactnavigation.org/docs/getting-started
  *
  */
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
   NavigationContainer,
@@ -30,6 +30,7 @@ import { SocketProvider, useSocket } from "../utils/socketio";
 import { MessagesProvider } from "../utils/messages-repository";
 import ChatWindowScreen from "../screens/chat/ChatWindow";
 import { navigationRef } from "./navRef";
+import RoutineScreen from "../screens/routine/RoutineScreen";
 
 export default function Navigation({
   colorScheme,
@@ -155,7 +156,23 @@ function BottomTabNavigator() {
               color={color}
             />
           ),
-          headerShown: false,
+          headerShown: true,
+        }}
+      />
+      <BottomTab.Screen
+        name="Routine"
+        component={RoutineScreen}
+        options={{
+          title: "Routine",
+          headerShown: true,
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons
+              name="timetable"
+              size={30}
+              style={{ marginBottom: -3 }}
+              color={color}
+            />
+          ),
         }}
       />
     </BottomTab.Navigator>

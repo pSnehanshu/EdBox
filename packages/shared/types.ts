@@ -5,8 +5,10 @@ import type { AppRouter } from "../../apps/backend/trpc";
 export type ArrayElement<ArrayType extends readonly unknown[]> =
   ArrayType extends readonly (infer ElementType)[] ? ElementType : never;
 
+type RouterOutput = inferRouterOutputs<AppRouter>;
+
 export type Message = ArrayElement<
-  inferRouterOutputs<AppRouter>["school"]["messaging"]["fetchGroupMessages"]["messages"]
+  RouterOutput["school"]["messaging"]["fetchGroupMessages"]["messages"]
 >;
 
 export interface Group {
@@ -14,9 +16,15 @@ export interface Group {
   identifier: string;
 }
 
-export type User = inferRouterOutputs<AppRouter>["auth"]["whoami"];
+export type User = RouterOutput["auth"]["whoami"];
 
-export type School = inferRouterOutputs<AppRouter>["school"]["schoolBasicInfo"];
+export type School = RouterOutput["school"]["schoolBasicInfo"];
+
+export type Routine = RouterOutput["school"]["routine"]["fetchForTeacher"];
+
+export type RoutinePeriod = ArrayElement<NonNullable<Routine["mon"]>>;
+
+export type DayOfWeek = RoutinePeriod["day_of_week"];
 
 export interface ServerToClientEvents {
   newMessage: (msg: Message) => void;

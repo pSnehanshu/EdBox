@@ -3,6 +3,7 @@ import { z } from "zod";
 import prisma from "../../../prisma";
 import { TRPCError } from "@trpc/server";
 import messagingRouter from "./messaging";
+import routineRouter from "./routine";
 
 const schoolRouter = router({
   schoolBasicInfo: publicProcedure
@@ -33,6 +34,7 @@ const schoolRouter = router({
       return school;
     }),
   messaging: messagingRouter,
+  routine: routineRouter,
 });
 
 export default schoolRouter;

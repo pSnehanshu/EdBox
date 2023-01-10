@@ -23,7 +23,7 @@ export default function ChatsTabScreen() {
         name="ChatList"
         component={ChatsListScreen}
         options={{
-          title: "Chat",
+          headerShown: false,
         }}
       />
     </ChatStack.Navigator>
@@ -107,7 +107,6 @@ function ChatsListScreen({}: NativeStackScreenProps<
     isError,
     data: groups,
   } = trpc.school.messaging.fetchGroups.useQuery({
-    sort: "recent_message",
     page: 1,
   });
   const [groupTimeMapping, setGroupTimeMapping] = useState<
