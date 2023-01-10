@@ -1,5 +1,16 @@
-export default {
-  backendHost: "http://192.168.29.42:5080",
-  /** The school ID for which the app is configured */
-  schoolId: "clca5hw6i000008jr4ibyh2cc"
-};
+/**
+ * This file is the global config file. Import this to access the values.
+ * This will throw error if it is unable to gather all the required configs.
+ */
+
+import { z } from "zod";
+
+const ConfigSchema = z.object({
+  backendHost: z.string().url(),
+  schoolId: z.string().cuid(),
+});
+
+export default ConfigSchema.parse({
+  backendHost: process.env.HOSTNAME,
+  schoolId: process.env.SCHOOLID,
+});

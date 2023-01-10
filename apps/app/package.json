@@ -4,10 +4,10 @@
   "main": "index.js",
   "license": "UNLICENSED",
   "scripts": {
-    "start": "npm run typecheck && expo start",
-    "android": "npm run typecheck && expo start --android",
-    "ios": "npm run typecheck && expo start --ios",
-    "web": "npm run typecheck && expo start --web",
+    "start": "npm run typecheck && NODE_OPTIONS='-r dotenv/config' expo start",
+    "android": "npm run typecheck && NODE_OPTIONS='-r dotenv/config' expo start --android",
+    "ios": "npm run typecheck && NODE_OPTIONS='-r dotenv/config' expo start --ios",
+    "web": "npm run typecheck && NODE_OPTIONS='-r dotenv/config' expo start --web",
     "test": "jest --watchAll",
     "typecheck": "tsc --noEmit"
   },
@@ -49,13 +49,16 @@
     "react-native-webview": "11.23.1",
     "rxjs": "^7.8.0",
     "schooltalk-shared": "*",
-    "socket.io-client": "^4.5.4"
+    "socket.io-client": "^4.5.4",
+    "zod": "^3.20.2"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
     "@types/lodash": "^4.14.191",
     "@types/react": "~18.0.24",
     "@types/react-native": "~0.70.6",
+    "babel-plugin-transform-inline-environment-variables": "^0.4.4",
+    "dotenv": "^16.0.3",
     "jest": "^26.6.3",
     "jest-expo": "~47.0.1",
     "react-test-renderer": "18.1.0",
