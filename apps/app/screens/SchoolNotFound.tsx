@@ -1,8 +1,8 @@
-import { Button, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import { Text, View } from "../components/Themed";
 import { trpc } from "../utils/trpc";
 import { Ionicons } from "@expo/vector-icons";
-import { schoolId } from "../utils/useSchool";
+import config from "../config";
 
 export default function SchoolNotFound() {
   const utils = trpc.useContext();
@@ -26,7 +26,7 @@ export default function SchoolNotFound() {
         </Ionicons.Button>
       </View>
 
-      <Text style={styles.debugInfo}>School ID: {schoolId}</Text>
+      <Text style={styles.debugInfo}>School ID: {config.schoolId}</Text>
     </View>
   );
 }
