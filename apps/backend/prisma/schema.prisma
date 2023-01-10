@@ -167,7 +167,6 @@ model Student {
   current_batch_num Int?                    @db.SmallInt
   CurrentBatch      StudentsBatch?          @relation("CurrentBatch", fields: [current_batch_num, school_id], references: [numeric_id, school_id], onDelete: Restrict)
   section           Int?                    @db.SmallInt
-  is_active         Boolean                 @default(true)
   created_at        DateTime                @default(now())
   updated_at        DateTime                @updatedAt
   Parents           ParentStudent_mapping[]
@@ -178,7 +177,6 @@ model Teacher {
   id         String          @id @default(cuid()) @db.VarChar(32)
   school_id  String          @db.VarChar(32)
   School     School          @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  is_active  Boolean         @default(true)
   created_at DateTime        @default(now())
   updated_at DateTime        @updatedAt
   Periods    RoutinePeriod[]
@@ -189,7 +187,6 @@ model Parent {
   id         String                  @id @default(cuid()) @db.VarChar(32)
   school_id  String                  @db.VarChar(32)
   School     School                  @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  is_active  Boolean                 @default(true)
   created_at DateTime                @default(now())
   updated_at DateTime                @updatedAt
   Students   ParentStudent_mapping[]
@@ -201,7 +198,6 @@ model SchoolStaff {
   role       StaffRole @default(others)
   school_id  String    @db.VarChar(32)
   School     School    @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  is_active  Boolean   @default(true)
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt
   User       User?

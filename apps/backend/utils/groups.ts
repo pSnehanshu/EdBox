@@ -64,7 +64,7 @@ async function getAutoGroups(
       },
     });
 
-    if (teacher && teacher.is_active && teacher.school_id === school.id) {
+    if (teacher && teacher.school_id === school.id) {
       // Subject groups
       _.uniqBy(teacher.Periods, (p) => p.subject_id).forEach(
         ({ Subject, Class, Section }) => {
@@ -106,7 +106,6 @@ async function getAutoGroups(
     // Check if they belong to any class
     if (
       student &&
-      student.is_active &&
       student.school_id === school.id &&
       student.CurrentBatch?.Class
     ) {
