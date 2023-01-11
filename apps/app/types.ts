@@ -27,7 +27,7 @@ export type RootStackParamList = {
   Login: undefined;
   Root: NavigatorScreenParams<RootTabParamList> | undefined;
   ChatWindow: Group;
-  Modal: undefined;
+  AttendanceTaker: { periodId: string };
   NotFound: undefined;
 };
 

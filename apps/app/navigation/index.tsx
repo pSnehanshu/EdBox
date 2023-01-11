@@ -23,6 +23,7 @@ import { MessagesProvider } from "../utils/messages-repository";
 import ChatWindowScreen from "../screens/chat/ChatWindow";
 import { navigationRef } from "./navRef";
 import RoutineScreen from "../screens/routine/RoutineScreen";
+import AttendanceTakerScreen from "../screens/attendance/AttendanceTakerScreen";
 
 export default function Navigation({
   colorScheme,
@@ -68,6 +69,14 @@ function RootNavigator() {
               headerShown: true,
               title: `${route.params.name ?? "Messages"}`,
             })}
+          />
+          <Stack.Screen
+            name="AttendanceTaker"
+            component={AttendanceTakerScreen}
+            options={{
+              headerShown: true,
+              title: "Take Attendance",
+            }}
           />
         </Stack.Navigator>
       </MessagesProvider>

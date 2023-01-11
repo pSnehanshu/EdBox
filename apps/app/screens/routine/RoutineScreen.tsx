@@ -10,6 +10,7 @@ import { format } from "date-fns";
 import { TabView, TabBar } from "react-native-tab-view";
 import Spinner from "react-native-loading-spinner-overlay";
 import Timeline from "react-native-timeline-flatlist";
+import { useNavigation } from "@react-navigation/native";
 import { DayOfWeek, RoutinePeriod } from "schooltalk-shared/types";
 import { trpc } from "../../utils/trpc";
 import { Text } from "../../components/Themed";
@@ -133,12 +134,17 @@ const DayRoutine = memo(({ periods }: DayRoutineProps) => {
       }
     });
   }, periods);
+  const navigation = useNavigation();
 
   const onEventPress = useCallback<TimelineOnPressProp>((e) => {
     const { data } = e as any as RoutineTimelineData;
     if (!data.is_gap) {
       const isAttendanceTaken = data.AttendancesTaken.length > 0;
-      alert(isAttendanceTaken ? "View attendance" : "Take attendance please");
+      if (isAttendanceTaken) {
+        alert("View attendance");
+      } else {
+        navigation.navigate("AttendanceTaker", { periodId: data.id });
+      }
     }
   }, []);
 
