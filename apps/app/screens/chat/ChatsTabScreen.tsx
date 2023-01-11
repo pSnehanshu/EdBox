@@ -77,7 +77,7 @@ function GroupItem(props: GroupItemProps) {
       onPress={props.onClick}
     >
       <Image
-        source={require("../assets/images/multiple-users-silhouette.png")}
+        source={require("../../assets/images/multiple-users-silhouette.png")}
         style={styles.chatGroupIcon}
       />
       <View style={styles.chatGroupMiddle}>

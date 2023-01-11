@@ -1,25 +1,11 @@
 import { z } from "zod";
-import { AttendanceStatus, Month } from "@prisma/client";
+import { AttendanceStatus } from "@prisma/client";
 import { everyLimit } from "schooltalk-shared/async";
+import { NumberMonthMapping } from "schooltalk-shared/mics";
 import { authProcedure, router, teacherProcedure } from "../../trpc";
 import prisma from "../../../prisma";
 import { TRPCError } from "@trpc/server";
 import { getDate, getMonth, getYear } from "date-fns";
-
-const NumberMonthMapping: Record<number, Month> = {
-  1: "jan",
-  2: "feb",
-  3: "mar",
-  4: "apr",
-  5: "may",
-  6: "jun",
-  7: "jul",
-  8: "aug",
-  9: "sep",
-  10: "oct",
-  11: "nov",
-  12: "dec",
-};
 
 const attendanceRouter = router({
   create: teacherProcedure
