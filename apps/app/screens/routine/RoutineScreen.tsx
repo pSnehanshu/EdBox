@@ -107,7 +107,7 @@ const DayRoutine = memo(({ day, periods }: DayRoutineProps) => {
         return {
           time,
           title: "Gap :)",
-          description: "Enjoy of time off.",
+          description: "Enjoy your time off.",
         };
       } else {
         return {
