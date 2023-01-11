@@ -1,29 +1,11 @@
 import { DayOfWeek } from "@prisma/client";
-import { TRPCError } from "@trpc/server";
 import _ from "lodash";
 import prisma from "../../../prisma";
-import { authProcedure, router, t } from "../../trpc";
+import { authProcedure, router, teacherMiddleware } from "../../trpc";
 
 const routineRouter = router({
   fetchForTeacher: authProcedure
-    .use(
-      t.middleware(({ ctx, next }) => {
-        // Check if teacher
-        if (!ctx.session?.User.Teacher) {
-          throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "Not a teacher",
-          });
-        }
-
-        return next({
-          ctx: {
-            ...ctx,
-            teacher: ctx.session.User.Teacher,
-          },
-        });
-      })
-    )
+    .use(teacherMiddleware)
     .query(async ({ ctx }) => {
       const periods = await prisma.routinePeriod.findMany({
         where: {

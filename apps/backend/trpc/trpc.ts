@@ -24,3 +24,24 @@ export const authProcedure = t.procedure.use(
     });
   })
 );
+
+/** Verify that the user is a teacher */
+export const teacherMiddleware = t.middleware(({ ctx, next }) => {
+  // Check if teacher
+  if (!ctx.session?.User.Teacher) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Not a teacher",
+    });
+  }
+
+  return next({
+    ctx: {
+      ...ctx,
+      teacher: ctx.session.User.Teacher,
+    },
+  });
+});
+
+/** Procedure with `teacherMiddleware` pre-applied */
+export const teacherProcedure = authProcedure.use(teacherMiddleware);

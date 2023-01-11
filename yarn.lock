@@ -2911,6 +2911,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/async@npm:^3.2.16":
+  version: 3.2.16
+  resolution: "@types/async@npm:3.2.16"
+  checksum: 42b26d59e65ebb06ca5debee128a9dc9684af5f376a6b74e5d6e9e969e999077593aa04504ca5ac1f30e18371c06dcc5edeaf64be6e727fa20dbd1a98c487c37
+  languageName: node
+  linkType: hard
+
 "@types/babel__core@npm:^7.0.0, @types/babel__core@npm:^7.1.7":
   version: 7.1.20
   resolution: "@types/babel__core@npm:7.1.20"
@@ -3579,7 +3586,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"async@npm:^3.2.2":
+"async@npm:^3.2.2, async@npm:^3.2.4":
   version: 3.2.4
   resolution: "async@npm:3.2.4"
   checksum: 43d07459a4e1d09b84a20772414aa684ff4de085cbcaec6eea3c7a8f8150e8c62aa6cd4e699fe8ee93c3a5b324e777d34642531875a0817a35697522c1b02e89
@@ -10755,6 +10762,9 @@ __metadata:
 "schooltalk-shared@*, schooltalk-shared@workspace:packages/shared":
   version: 0.0.0-use.local
   resolution: "schooltalk-shared@workspace:packages/shared"
+  dependencies:
+    "@types/async": ^3.2.16
+    async: ^3.2.4
   languageName: unknown
   linkType: soft
 

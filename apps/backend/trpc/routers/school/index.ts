@@ -4,6 +4,7 @@ import prisma from "../../../prisma";
 import { TRPCError } from "@trpc/server";
 import messagingRouter from "./messaging";
 import routineRouter from "./routine";
+import attendanceRouter from "./attendance";
 
 const schoolRouter = router({
   schoolBasicInfo: publicProcedure
@@ -35,6 +36,7 @@ const schoolRouter = router({
     }),
   messaging: messagingRouter,
   routine: routineRouter,
+  attendance: attendanceRouter,
 });
 
 export default schoolRouter;
