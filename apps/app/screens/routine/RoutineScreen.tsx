@@ -1,9 +1,16 @@
-import { ComponentProps, useCallback, useState, memo } from "react";
-import { useWindowDimensions } from "react-native";
+import { ComponentProps, useCallback, useState, memo, useMemo } from "react";
+import {
+  StyleProp,
+  StyleSheet,
+  useWindowDimensions,
+  ViewStyle,
+} from "react-native";
+import _ from "lodash";
+import { format } from "date-fns";
 import { TabView, TabBar } from "react-native-tab-view";
 import Spinner from "react-native-loading-spinner-overlay";
-import { format } from "date-fns";
-import { DayOfWeek, Routine } from "schooltalk-shared/types";
+import Timeline from "react-native-timeline-flatlist";
+import { DayOfWeek, RoutinePeriod } from "schooltalk-shared/types";
 import { trpc } from "../../utils/trpc";
 import { Text } from "../../components/Themed";
 import useColorScheme from "../../utils/useColorScheme";
@@ -15,11 +22,106 @@ type RenderTabBarProp = NonNullable<
 >;
 interface DayRoutineProps {
   day: DayOfWeek;
-  periods: Routine["mon"];
+  periods: RoutinePeriod[];
 }
+type GapPeriod = {
+  is_gap: true;
+  start_hour: number;
+  start_min: number;
+  end_hour: number;
+  end_min: number;
+};
+
+/** Copied from https://github.com/Eugnis/react-native-timeline-flatlist/blob/9f08aaaf50fcd95398e1b47d0d39f063e7d2825f/lib/index.d.ts#L5-L17 */
+type TimelineData = {
+  time?: string;
+  title?: string;
+  description?: any;
+  lineWidth?: number;
+  lineColor?: string;
+  eventContainerStyle?: StyleProp<ViewStyle>;
+  circleSize?: number;
+  circleColor?: string;
+  dotColor?: string;
+  icon?: string | React.ReactNode;
+  position?: "left" | "right";
+};
 
 const DayRoutine = memo(({ day, periods }: DayRoutineProps) => {
-  return <Text style={{ flex: 1 }}>{JSON.stringify(periods, null, 2)}</Text>;
+  const data = useMemo<TimelineData[]>(() => {
+    // Sort
+    const sorted = _.sortBy(periods.slice(), (p) =>
+      parseFloat(`${p.start_hour}.${p.start_min}`)
+    );
+    // Insert gaps
+    const withGaps: Array<(RoutinePeriod & { is_gap: false }) | GapPeriod> = [];
+    sorted.forEach((p, i) => {
+      // First insert the gap, then insert the period
+      if (i === 0) {
+        withGaps.push({
+          ...p,
+          is_gap: false,
+        });
+      } else {
+        const previous = sorted[i - 1];
+        const hasGap =
+          previous.end_hour !== p.start_hour
+            ? true
+            : previous.end_min !== p.start_min;
+        if (hasGap) {
+          const gap: GapPeriod = {
+            is_gap: true,
+            start_hour: previous.end_hour,
+            start_min: previous.end_min,
+            end_hour: p.start_hour,
+            end_min: p.start_min,
+          };
+
+          withGaps.push(gap);
+        }
+
+        withGaps.push({
+          ...p,
+          is_gap: false,
+        });
+      }
+    });
+
+    return withGaps.map((p) => {
+      const isPM =
+        p.start_hour > 12
+          ? true
+          : p.start_hour === 12
+          ? p.start_min > 0
+          : false;
+      let startHour: number | string =
+        p.start_hour > 12 ? p.start_hour - 12 : p.start_hour;
+      startHour = startHour < 10 ? `0${startHour}` : `${startHour}`;
+      const startMin: string =
+        p.start_min < 10 ? `0${p.start_min}` : `${p.start_min}`;
+
+      const time = `${startHour}:${startMin} ${isPM ? "pm" : "am"}`;
+
+      // TODO: Show duration & End of day
+      if (p.is_gap) {
+        return {
+          time,
+          title: "Gap :)",
+          description: "Enjoy of time off.",
+        };
+      } else {
+        return {
+          time,
+          title: `${p.Subject.name} - Class ${
+            p.Class.name ?? p.Class.numeric_id
+          } (${p.Section.name ?? p.Section.numeric_id})`,
+          description: "You have a class here.",
+        };
+      }
+    });
+  }, periods);
+
+  return <Timeline data={data} separator style={styles.timeline} />;
 });
 
 const routes: TabRoute[] = [
@@ -86,3 +188,10 @@ export default function RoutineScreen() {
     />
   );
 }
+
+const styles = StyleSheet.create({
+  timeline: {
+    padding: 4,
+    paddingTop: 16,
+  },
+});
