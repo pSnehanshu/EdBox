@@ -1,9 +1,4 @@
-/**
- * If you are not familiar with React Navigation, refer to the "Fundamentals" guide:
- * https://reactnavigation.org/docs/getting-started
- *
- */
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
   NavigationContainer,
@@ -12,6 +7,7 @@ import {
 } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { ColorSchemeName, Pressable } from "react-native";
+import * as WebBrowser from "expo-web-browser";
 import Colors from "../constants/Colors";
 import useColorScheme from "../utils/useColorScheme";
 import { useSchool } from "../utils/useSchool";
@@ -19,11 +15,7 @@ import LoginScreen from "../screens/auth/Login";
 import PreLoginScreen from "../screens/auth/PreLogin";
 import HomeTabScreen from "../screens/HomeTabScreen";
 import ChatsTabScreen from "../screens/ChatsTabScreen";
-import {
-  RootStackParamList,
-  RootTabParamList,
-  RootTabScreenProps,
-} from "../types";
+import { RootStackParamList, RootTabParamList } from "../types";
 import { useCurrentUser } from "../utils/auth";
 import LinkingConfiguration from "./LinkingConfiguration";
 import { SocketProvider, useSocket } from "../utils/socketio";
@@ -105,6 +97,7 @@ const BottomTab = createBottomTabNavigator<RootTabParamList>();
 function BottomTabNavigator() {
   const colorScheme = useColorScheme();
   const socket = useSocket();
+  const school = useSchool();
 
   return (
     <BottomTab.Navigator
@@ -116,47 +109,51 @@ function BottomTabNavigator() {
       <BottomTab.Screen
         name="HomeTab"
         component={HomeTabScreen}
-        options={({ navigation }: RootTabScreenProps<"HomeTab">) => ({
+        options={{
           title: "Home",
+          headerTitle: school?.name ?? "Home",
+          headerShown: true,
           tabBarIcon: ({ color }) => (
-            <Ionicons
-              name="home-sharp"
+            <MaterialCommunityIcons
+              name="home"
               size={30}
               style={{ marginBottom: -3 }}
               color={color}
             />
           ),
-          headerRight: () => (
-            <Pressable
-              onPress={() => navigation.navigate("Modal")}
-              style={({ pressed }) => ({
-                opacity: pressed ? 0.5 : 1,
-              })}
-            >
-              <Ionicons
-                name="information-circle"
-                size={25}
-                color={Colors[colorScheme].text}
-                style={{ marginRight: 15 }}
-              />
-            </Pressable>
-          ),
-        })}
+          headerRight: () =>
+            school?.website ? (
+              <Pressable
+                onPress={() => WebBrowser.openBrowserAsync(school?.website!)}
+                style={({ pressed }) => ({
+                  opacity: pressed ? 0.5 : 1,
+                })}
+              >
+                <MaterialCommunityIcons
+                  name="web"
+                  size={25}
+                  color={Colors[colorScheme].text}
+                  style={{ marginRight: 15 }}
+                />
+              </Pressable>
+            ) : null,
+        }}
       />
       <BottomTab.Screen
         name="ChatsTab"
         component={ChatsTabScreen}
         options={{
-          title: `Chats ${socket.isConnected ? "" : "(reconnecting...)"}`,
+          title: `Chats ${socket.isConnected ? "" : "(connecting...)"}`,
+          headerTitle: "Chats",
+          headerShown: true,
           tabBarIcon: ({ color }) => (
-            <Ionicons
-              name="md-chatbubbles"
+            <MaterialCommunityIcons
+              name={socket.isConnected ? "chat" : "chat-remove"}
               size={30}
               style={{ marginBottom: -3 }}
               color={color}
             />
           ),
-          headerShown: true,
         }}
       />
       <BottomTab.Screen
