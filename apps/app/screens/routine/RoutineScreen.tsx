@@ -20,6 +20,9 @@ type RenderSceneProp = ComponentProps<typeof TabView<TabRoute>>["renderScene"];
 type RenderTabBarProp = NonNullable<
   ComponentProps<typeof TabView<TabRoute>>["renderTabBar"]
 >;
+type TimelineOnPressProp = NonNullable<
+  ComponentProps<typeof Timeline>["onEventPress"]
+>;
 interface DayRoutineProps {
   day: DayOfWeek;
   periods: RoutinePeriod[];
@@ -33,7 +36,7 @@ type GapPeriod = {
 };
 
 /** Copied from https://github.com/Eugnis/react-native-timeline-flatlist/blob/9f08aaaf50fcd95398e1b47d0d39f063e7d2825f/lib/index.d.ts#L5-L17 */
-type TimelineData = {
+type TimelineData<T = unknown> = {
   time?: string;
   title?: string;
   description?: any;
@@ -45,16 +48,20 @@ type TimelineData = {
   dotColor?: string;
   icon?: string | React.ReactNode;
   position?: "left" | "right";
+  data: T;
 };
 
-const DayRoutine = memo(({ day, periods }: DayRoutineProps) => {
-  const data = useMemo<TimelineData[]>(() => {
+const DayRoutine = memo(({ periods }: DayRoutineProps) => {
+  type CustomPeriodType = (RoutinePeriod & { is_gap: false }) | GapPeriod;
+  type RoutineTimelineData = TimelineData<CustomPeriodType>;
+
+  const data = useMemo<RoutineTimelineData[]>(() => {
     // Sort
     const sorted = _.sortBy(periods.slice(), (p) =>
       parseFloat(`${p.start_hour}.${p.start_min}`)
     );
     // Insert gaps
-    const withGaps: Array<(RoutinePeriod & { is_gap: false }) | GapPeriod> = [];
+    const withGaps: CustomPeriodType[] = [];
     sorted.forEach((p, i) => {
       // First insert the gap, then insert the period
       if (i === 0) {
@@ -108,20 +115,41 @@ const DayRoutine = memo(({ day, periods }: DayRoutineProps) => {
           time,
           title: "Gap :)",
           description: "Enjoy your time off.",
+          data: p,
         };
       } else {
+        const isAttendanceTaken = p.AttendancesTaken.length > 0;
+
         return {
           time,
           title: `${p.Subject.name} - Class ${
             p.Class.name ?? p.Class.numeric_id
           } (${p.Section.name ?? p.Section.numeric_id})`,
-          description: "You have a class here.",
+          description: isAttendanceTaken
+            ? "Attendance taken, tap to view"
+            : "Tap to take attendance",
+          data: p,
         };
       }
     });
   }, periods);
 
-  return <Timeline data={data} separator style={styles.timeline} />;
+  const onEventPress = useCallback<TimelineOnPressProp>((e) => {
+    const { data } = e as any as RoutineTimelineData;
+    if (!data.is_gap) {
+      const isAttendanceTaken = data.AttendancesTaken.length > 0;
+      alert(isAttendanceTaken ? "View attendance" : "Take attendance please");
+    }
+  }, []);
+
+  return (
+    <Timeline
+      data={data}
+      separator
+      style={styles.timeline}
+      onEventPress={onEventPress}
+    />
+  );
 });
 
 const routes: TabRoute[] = [
@@ -135,7 +163,7 @@ const routes: TabRoute[] = [
 ];
 
 export default function RoutineScreen() {
-  const routineQuery = trpc.school.routine.fetchForTeacher.useQuery();
+  const routineQuery = trpc.school.routine.fetchForTeacher.useQuery({});
   const layout = useWindowDimensions();
   const color = useColorScheme();
   const [index, setIndex] = useState(
