@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { AttendanceStatus, Month } from "@prisma/client";
 import { everyLimit } from "schooltalk-shared/async";
-import { router, teacherProcedure } from "../../trpc";
+import { authProcedure, router, teacherProcedure } from "../../trpc";
 import prisma from "../../../prisma";
 import { TRPCError } from "@trpc/server";
 import { getDate, getMonth, getYear } from "date-fns";
@@ -148,6 +148,80 @@ const attendanceRouter = router({
       });
 
       return id;
+    }),
+  fetchForPeriod: authProcedure
+    .input(
+      z.object({
+        periodId: z.string().cuid(),
+        date: z
+          .string()
+          .datetime()
+          .transform((v) => new Date(v)),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      // Check if period is valid
+      const period = await prisma.routinePeriod.findUnique({
+        where: {
+          id_school_id: {
+            id: input.periodId,
+            school_id: ctx.user.school_id,
+          },
+        },
+        select: {
+          is_active: true,
+          section_id: true,
+          class_id: true,
+          AttendancesTaken: {
+            where: {
+              year: getYear(input.date),
+              month: NumberMonthMapping[getMonth(input.date)],
+              day: getDate(input.date),
+            },
+            select: {
+              StudentAttendances: {
+                select: {
+                  status: true,
+                  remarks: true,
+                  Student: {
+                    select: {
+                      id: true,
+                      User: {
+                        select: {
+                          id: true,
+                          name: true,
+                          is_active: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              Teacher: {
+                select: {
+                  id: true,
+                  User: {
+                    select: {
+                      id: true,
+                      name: true,
+                      is_active: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!period || !period.is_active) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Period not found",
+        });
+      }
+
+      return period;
     }),
 });
 
