@@ -1,7 +1,7 @@
 import { memo, useMemo } from "react";
 import { format, isThisYear, isToday, isYesterday } from "date-fns";
-import { useCurrentUser } from "../../utils/auth";
-import { Text, View } from "../../components/Themed";
+import { useCurrentUser } from "../utils/auth";
+import { Text, View } from "./Themed";
 import { Pressable, StyleSheet } from "react-native";
 import type { Message } from "schooltalk-shared/types";
 

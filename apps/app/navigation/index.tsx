@@ -14,7 +14,7 @@ import { useSchool } from "../utils/useSchool";
 import LoginScreen from "../screens/auth/Login";
 import PreLoginScreen from "../screens/auth/PreLogin";
 import HomeTabScreen from "../screens/HomeTabScreen";
-import ChatsTabScreen from "../screens/ChatsTabScreen";
+import ChatsTabScreen from "../screens/chat/ChatsTabScreen";
 import { RootStackParamList, RootTabParamList } from "../types";
 import { useCurrentUser } from "../utils/auth";
 import LinkingConfiguration from "./LinkingConfiguration";

@@ -9,10 +9,10 @@ import { useEffect, useMemo, useState } from "react";
 import { SafeAreaView, StyleSheet, Pressable, Image } from "react-native";
 import { Group } from "schooltalk-shared/types";
 import { Message } from "schooltalk-shared/types";
-import { List, Text, View } from "../components/Themed";
-import { ChatsTabParamList } from "../types";
-import { useMessages } from "../utils/messages-repository";
-import { trpc } from "../utils/trpc";
+import { List, Text, View } from "../../components/Themed";
+import { ChatsTabParamList } from "../../types";
+import { useMessages } from "../../utils/messages-repository";
+import { trpc } from "../../utils/trpc";
 
 const ChatStack = createNativeStackNavigator<ChatsTabParamList>();
 
