@@ -5,7 +5,7 @@ import { httpBatchLink } from "@trpc/client";
 import { useState } from "react";
 import { trpc } from "./utils/trpc";
 import useCachedResources from "./utils/useCachedResources";
-import useColorScheme from "./utils/useColorScheme";
+import useColorScheme, { ColorSchemeContext } from "./utils/useColorScheme";
 import Navigation from "./navigation";
 import { useSchool } from "./utils/useSchool";
 import { useAuthToken } from "./utils/auth";
@@ -29,6 +29,7 @@ function AppWithSchool() {
 export default function App() {
   const authToken = useAuthToken();
   const isLoadingComplete = useCachedResources();
+  const [colorScheme, setColorScheme] = useState<"light" | "dark">("light");
 
   const [queryClient] = useState(() => new QueryClient());
   const [trpcClient] = useState(() =>
@@ -52,7 +53,11 @@ export default function App() {
     <DBProvider>
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
         <QueryClientProvider client={queryClient}>
-          <AppWithSchool />
+          <ColorSchemeContext.Provider
+            value={{ scheme: colorScheme, change: setColorScheme }}
+          >
+            <AppWithSchool />
+          </ColorSchemeContext.Provider>
         </QueryClientProvider>
       </trpc.Provider>
       <Toast />

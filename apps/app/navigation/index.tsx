@@ -9,7 +9,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { ColorSchemeName, Pressable } from "react-native";
 import * as WebBrowser from "expo-web-browser";
 import Colors from "../constants/Colors";
-import useColorScheme from "../utils/useColorScheme";
+import useColorScheme, { ColorSchemeContext } from "../utils/useColorScheme";
 import { useSchool } from "../utils/useSchool";
 import LoginScreen from "../screens/auth/Login";
 import PreLoginScreen from "../screens/auth/PreLogin";
@@ -24,6 +24,8 @@ import ChatWindowScreen from "../screens/chat/ChatWindow";
 import { navigationRef } from "./navRef";
 import RoutineScreen from "../screens/routine/RoutineScreen";
 import AttendanceTakerScreen from "../screens/attendance/AttendanceTakerScreen";
+import { View } from "../components/Themed";
+import { useContext } from "react";
 
 export default function Navigation({
   colorScheme,
@@ -104,7 +106,7 @@ function RootNavigator() {
 const BottomTab = createBottomTabNavigator<RootTabParamList>();
 
 function BottomTabNavigator() {
-  const colorScheme = useColorScheme();
+  const { scheme, change } = useContext(ColorSchemeContext);
   const socket = useSocket();
   const school = useSchool();
 
@@ -112,7 +114,7 @@ function BottomTabNavigator() {
     <BottomTab.Navigator
       initialRouteName="HomeTab"
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme].tint,
+        tabBarActiveTintColor: Colors[scheme].tint,
       }}
     >
       <BottomTab.Screen
@@ -130,22 +132,43 @@ function BottomTabNavigator() {
               color={color}
             />
           ),
-          headerRight: () =>
-            school?.website ? (
+          headerRight: () => (
+            <View style={{ flexDirection: "row" }}>
+              {school?.website ? (
+                <Pressable
+                  onPress={() => WebBrowser.openBrowserAsync(school?.website!)}
+                  style={({ pressed }) => ({
+                    opacity: pressed ? 0.5 : 1,
+                  })}
+                >
+                  <MaterialCommunityIcons
+                    name="web"
+                    size={25}
+                    color={Colors[scheme].text}
+                    style={{ marginRight: 15 }}
+                  />
+                </Pressable>
+              ) : null}
+
               <Pressable
-                onPress={() => WebBrowser.openBrowserAsync(school?.website!)}
+                onPress={() => change(scheme === "light" ? "dark" : "light")}
                 style={({ pressed }) => ({
                   opacity: pressed ? 0.5 : 1,
                 })}
               >
                 <MaterialCommunityIcons
-                  name="web"
+                  name={
+                    scheme === "light"
+                      ? "moon-waning-crescent"
+                      : "weather-sunny"
+                  }
                   size={25}
-                  color={Colors[colorScheme].text}
+                  color={Colors[scheme].text}
                   style={{ marginRight: 15 }}
                 />
               </Pressable>
-            ) : null,
+            </View>
+          ),
         }}
       />
       <BottomTab.Screen
