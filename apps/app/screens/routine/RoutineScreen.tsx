@@ -148,12 +148,24 @@ const DayRoutine = memo(({ periods }: DayRoutineProps) => {
     }
   }, []);
 
+  const colorScheme = useColorScheme();
+  const textColor = colorScheme === "dark" ? "white" : "black";
+
   return (
     <Timeline
       data={data}
       separator
       style={styles.timeline}
       onEventPress={onEventPress}
+      titleStyle={{
+        color: textColor,
+      }}
+      descriptionStyle={{
+        color: textColor,
+      }}
+      timeStyle={{
+        color: textColor,
+      }}
     />
   );
 });
