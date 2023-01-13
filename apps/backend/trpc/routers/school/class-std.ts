@@ -1,5 +1,5 @@
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import type { Prisma } from "@prisma/client";
 import prisma from "../../../prisma";
 import { authProcedure, router } from "../../trpc";
 
@@ -43,37 +43,44 @@ const classStdRouter = router({
         section && section.Class.is_active && section.Class.Batch?.is_active;
 
       if (!isValid) {
-        return { students: [], cursor: undefined };
+        return { students: [], cursor: undefined, total: 0 };
       }
 
       // Now fetch students via batch
       const batchId = section.Class.Batch?.numeric_id!;
 
-      const students = await prisma.student.findMany({
-        where: {
-          school_id: ctx.user.school_id,
-          current_batch_num: batchId,
-          section: input.sectionId,
-          User: { is_active: true },
-        },
-        include: {
-          User: true,
-        },
-        take: input.limit + 1,
-        cursor:
-          typeof input.cursor === "number"
-            ? {
-                roll_num_section_current_batch_num: {
-                  current_batch_num: batchId,
-                  roll_num: input.cursor,
-                  section: input.sectionId,
-                },
-              }
-            : undefined,
-        orderBy: {
-          roll_num: "asc",
-        },
-      });
+      const where: Prisma.StudentWhereInput = {
+        school_id: ctx.user.school_id,
+        current_batch_num: batchId,
+        section: input.sectionId,
+        User: { is_active: true },
+      };
+
+      const [students, total] = await Promise.all([
+        prisma.student.findMany({
+          where,
+          include: {
+            User: true,
+          },
+          take: input.limit + 1,
+          cursor:
+            typeof input.cursor === "number"
+              ? {
+                  roll_num_section_current_batch_num: {
+                    current_batch_num: batchId,
+                    roll_num: input.cursor,
+                    section: input.sectionId,
+                  },
+                }
+              : undefined,
+          orderBy: {
+            roll_num: "asc",
+          },
+        }),
+        prisma.student.count({
+          where,
+        }),
+      ]);
 
       // Check has more
       let cursor: number | undefined = undefined;
@@ -82,7 +89,7 @@ const classStdRouter = router({
         cursor = next?.roll_num;
       }
 
-      return { students, cursor };
+      return { students, total, cursor };
     }),
 });
 

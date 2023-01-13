@@ -8,6 +8,7 @@ import {
 } from "react";
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   Keyboard,
   ListRenderItem,
@@ -19,6 +20,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Spinner from "react-native-loading-spinner-overlay";
 import type { AttendanceStatus } from "@prisma/client";
 import { Student } from "schooltalk-shared/types";
+import _ from "lodash";
 import { List, Text, TextInput, View } from "../../components/Themed";
 import { RootStackScreenProps } from "../../types";
 import { trpc } from "../../utils/trpc";
@@ -231,7 +233,7 @@ export default function AttendanceTakerScreen({
     trpc.school.routine.fetchPeriodStudents.useInfiniteQuery(
       {
         periodId,
-        limit: 4,
+        limit: 20,
       },
       { getNextPageParam: (lastPage) => lastPage.cursor }
     );
@@ -258,6 +260,20 @@ export default function AttendanceTakerScreen({
       }
     >
   >({});
+
+  const totalStudents = useMemo(
+    () => _.last(studentsQuery.data?.pages)?.total ?? 0,
+    [studentsQuery.fetchStatus]
+  );
+
+  let totalPresent = 0;
+  let totalAbsent = 0;
+  Object.values(attendance).forEach(({ status }) => {
+    if (status === "present") totalPresent += 1;
+    else if (status === "absent") totalAbsent += 1;
+  });
+  const totalRemaining = totalStudents - (totalPresent + totalAbsent);
+
   const setAttendanceStatus = useCallback(
     (studentId: string, status: AttendanceStatus | undefined) => {
       setAttendance((a) => ({
@@ -354,6 +370,33 @@ export default function AttendanceTakerScreen({
         getItemLayout={getItemLayout}
         innerRef={studentsList as any}
       />
+
+      <View style={styles.submitPanel}>
+        <View style={styles.submitPanelStats}>
+          <Text style={{ color: "green" }}>Present: {totalPresent}</Text>
+          <Text style={{ color: "red" }}>Absent: {totalAbsent}</Text>
+          <Text>Remaining: {totalRemaining}</Text>
+        </View>
+        <View style={styles.submitPanelBtn}>
+          <MaterialCommunityIcons.Button
+            name="cloud-upload"
+            size={30}
+            onPress={() => {
+              if (totalRemaining > 0) {
+                Alert.alert(
+                  "Attendance not complete yet!",
+                  `Take attendance of the remaining ${totalRemaining} students before you submit.`
+                );
+              } else {
+                // TODO: Submit to server
+              }
+            }}
+            style={{ height: "100%" }}
+          >
+            Submit attendance
+          </MaterialCommunityIcons.Button>
+        </View>
+      </View>
     </View>
   );
 }
@@ -364,6 +407,20 @@ const styles = StyleSheet.create({
     padding: 8,
     marginTop: 16,
     height: 100,
+  },
+  submitPanel: {
+    flexDirection: "row",
+    padding: 4,
+    borderColor: "gray",
+    borderTopWidth: 1,
+    height: 80,
+  },
+  submitPanelStats: {
+    flex: 1,
+  },
+  submitPanelBtn: {
+    flex: 1,
+    height: "100%",
   },
   student: {
     flex: 1,
