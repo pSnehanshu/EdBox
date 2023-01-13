@@ -3,6 +3,7 @@
  * https://docs.expo.io/guides/color-schemes/
  */
 
+import { ComponentPropsWithRef } from "react";
 import {
   Text as DefaultText,
   View as DefaultView,
@@ -35,7 +36,10 @@ type ThemeProps = {
 export type TextProps = ThemeProps & DefaultText["props"];
 export type ViewProps = ThemeProps & DefaultView["props"];
 export type TextInputProps = ThemeProps & DefaultTextInput["props"];
-export type ListProps<ItemT> = ThemeProps & DefaultList<ItemT>["props"];
+export type ListProps<ItemT> = ThemeProps &
+  DefaultList<ItemT>["props"] & {
+    innerRef?: ComponentPropsWithRef<typeof DefaultList<ItemT>>["ref"];
+  };
 
 export function Text(props: TextProps) {
   const { style, lightColor, darkColor, ...otherProps } = props;
@@ -61,7 +65,13 @@ export function List<ItemT = any>(props: ListProps<ItemT>) {
     "background"
   );
 
-  return <DefaultList style={[{ backgroundColor }, style]} {...otherProps} />;
+  return (
+    <DefaultList
+      style={[{ backgroundColor }, style]}
+      {...otherProps}
+      ref={props.innerRef}
+    />
+  );
 }
 
 export function TextInput(props: TextInputProps) {

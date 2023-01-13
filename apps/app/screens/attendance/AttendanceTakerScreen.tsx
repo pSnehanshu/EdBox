@@ -1,6 +1,14 @@
-import { memo, useCallback, useState } from "react";
+import {
+  ComponentProps,
+  memo,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ActivityIndicator,
+  FlatList,
   Keyboard,
   ListRenderItem,
   Pressable,
@@ -15,6 +23,9 @@ import { List, Text, TextInput, View } from "../../components/Themed";
 import { RootStackScreenProps } from "../../types";
 import { trpc } from "../../utils/trpc";
 import useColorScheme from "../../utils/useColorScheme";
+
+/** Height of a student row */
+const STUDENT_ITEM_HEIGHT: number = 200;
 
 interface StudentItemProps {
   student: Student;
@@ -201,6 +212,14 @@ function RemarksEditor({
   );
 }
 
+const getItemLayout: NonNullable<
+  ComponentProps<typeof List<Student>>["getItemLayout"]
+> = (_student, index) => ({
+  length: STUDENT_ITEM_HEIGHT,
+  offset: STUDENT_ITEM_HEIGHT * index,
+  index,
+});
+
 export default function AttendanceTakerScreen({
   route: {
     params: { periodId },
@@ -212,7 +231,7 @@ export default function AttendanceTakerScreen({
     trpc.school.routine.fetchPeriodStudents.useInfiniteQuery(
       {
         periodId,
-        limit: 20,
+        limit: 4,
       },
       { getNextPageParam: (lastPage) => lastPage.cursor }
     );
@@ -220,6 +239,16 @@ export default function AttendanceTakerScreen({
     studentsQuery.fetchNextPage();
   }, []);
 
+  const students = useMemo<Student[]>(() => {
+    const students: Student[] = [];
+    studentsQuery.data?.pages.forEach((page) =>
+      students.push(...page.students)
+    );
+
+    return students;
+  }, [studentsQuery.fetchStatus]);
+
+  const studentsList = useRef<FlatList<Student>>();
   const [attendance, setAttendance] = useState<
     Record<
       string,
@@ -238,8 +267,16 @@ export default function AttendanceTakerScreen({
           remarks: a[studentId]?.remarks,
         },
       }));
+
+      // Scroll to next item
+      const nextItemIndex = students.findIndex((s) => s.id === studentId) + 1;
+      if (nextItemIndex < students.length)
+        studentsList.current?.scrollToIndex?.({
+          index: students.findIndex((s) => s.id === studentId) + 1,
+          viewPosition: 0.5,
+        });
     },
-    []
+    [students]
   );
   const setAttendanceRemarks = useCallback(
     (studentId: string, remarks: string | undefined) => {
@@ -270,9 +307,6 @@ export default function AttendanceTakerScreen({
   );
 
   if (studentsQuery.isLoading) return <Spinner visible />;
-
-  const students: Student[] = [];
-  studentsQuery.data?.pages.forEach((page) => students.push(...page.students));
 
   return (
     <View style={styles.container}>
@@ -317,6 +351,8 @@ export default function AttendanceTakerScreen({
         }
         onEndReached={fetchNextPage}
         onEndReachedThreshold={0.5}
+        getItemLayout={getItemLayout}
+        innerRef={studentsList as any}
       />
     </View>
   );
@@ -332,7 +368,7 @@ const styles = StyleSheet.create({
   student: {
     flex: 1,
     flexDirection: "row",
-    height: 200,
+    height: STUDENT_ITEM_HEIGHT,
     padding: 8,
     borderBottomColor: "gray",
     borderBottomWidth: 0.5,
