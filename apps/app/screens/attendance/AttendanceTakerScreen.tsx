@@ -199,7 +199,7 @@ export default function AttendanceTakerScreen({
   },
 }: RootStackScreenProps<"AttendanceTaker">) {
   // TODO: Check if attendance is already taken
-
+  const utils = trpc.useContext();
   const studentsQuery =
     trpc.school.routine.fetchPeriodStudents.useInfiniteQuery(
       {
@@ -256,7 +256,7 @@ export default function AttendanceTakerScreen({
   studentsQuery.data?.pages.forEach((page) => students.push(...page.students));
 
   return (
-    <View>
+    <View style={styles.container}>
       {/* Why is this not inside <StudentItem />? Answer: https://stackoverflow.com/q/62825753/9990365 */}
       <RemarksEditor
         student={studentForRemarks}
@@ -284,27 +284,32 @@ export default function AttendanceTakerScreen({
       <List
         data={students}
         renderItem={renderItem}
+        onRefresh={utils.school.routine.fetchPeriodStudents.invalidate}
+        refreshing={studentsQuery.isFetching}
         ListFooterComponent={
-          <View>
+          <View style={styles.listFooter}>
             {studentsQuery.isFetchingNextPage ? (
-              <ActivityIndicator />
-            ) : studentsQuery.hasNextPage ? (
-              <Button
-                title="Load more"
-                onPress={() => studentsQuery.fetchNextPage()}
-              />
+              <ActivityIndicator size="large" />
             ) : null}
           </View>
         }
         ListEmptyComponent={
           studentsQuery.isFetched ? <Text>No students here!</Text> : null
         }
+        onEndReached={() => studentsQuery.fetchNextPage()}
+        onEndReachedThreshold={0.5}
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: { height: "100%" },
+  listFooter: {
+    padding: 8,
+    marginTop: 16,
+    height: 100,
+  },
   student: {
     flex: 1,
     flexDirection: "row",
