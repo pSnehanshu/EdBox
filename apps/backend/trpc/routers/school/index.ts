@@ -5,6 +5,7 @@ import { TRPCError } from "@trpc/server";
 import messagingRouter from "./messaging";
 import routineRouter from "./routine";
 import attendanceRouter from "./attendance";
+import classStdRouter from "./class-std";
 
 const schoolRouter = router({
   schoolBasicInfo: publicProcedure
@@ -37,6 +38,7 @@ const schoolRouter = router({
   messaging: messagingRouter,
   routine: routineRouter,
   attendance: attendanceRouter,
+  class: classStdRouter,
 });
 
 export default schoolRouter;

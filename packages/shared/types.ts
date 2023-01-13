@@ -26,6 +26,10 @@ export type RoutinePeriod = ArrayElement<NonNullable<Routine["mon"]>>;
 
 export type DayOfWeek = RoutinePeriod["day_of_week"];
 
+export type Student = ArrayElement<
+  RouterOutput["school"]["routine"]["fetchPeriodStudents"]["students"]
+>;
+
 export interface ServerToClientEvents {
   newMessage: (msg: Message) => void;
 }

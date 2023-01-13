@@ -1,10 +1,12 @@
 import { DayOfWeek } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
 import { getDate, getMonth, getYear } from "date-fns";
 import _ from "lodash";
 import { NumberMonthMapping } from "schooltalk-shared/mics";
 import { z } from "zod";
 import prisma from "../../../prisma";
-import { router, teacherProcedure } from "../../trpc";
+import { authProcedure, router, teacherProcedure } from "../../trpc";
+import classStdRouter from "./class-std";
 
 const routineRouter = router({
   fetchForTeacher: teacherProcedure
@@ -66,6 +68,44 @@ const routineRouter = router({
         DayOfWeek,
         typeof periods | undefined
       >;
+    }),
+  fetchPeriodStudents: authProcedure
+    .input(
+      z.object({
+        periodId: z.string().cuid(),
+        limit: z.number().int().min(1).max(100).default(20),
+        /** Roll number */
+        cursor: z.number().int().nullish(),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const period = await prisma.routinePeriod.findUnique({
+        where: {
+          id_school_id: {
+            id: input.periodId,
+            school_id: ctx.user.school_id,
+          },
+        },
+        select: {
+          is_active: true,
+          class_id: true,
+          section_id: true,
+        },
+      });
+
+      if (!period || !period.is_active) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+        });
+      }
+
+      // Call another procedure
+      return classStdRouter.createCaller(ctx).fetchSectionStudents({
+        limit: input.limit,
+        cursor: input.cursor,
+        classId: period.class_id,
+        sectionId: period.section_id,
+      });
     }),
 });
 

@@ -93,7 +93,7 @@ model ClassStd {
   created_at DateTime        @default(now())
   updated_at DateTime        @updatedAt
   Sections   ClassSection[]
-  Batches    StudentsBatch[]
+  Batch      StudentsBatch?
   Periods    RoutinePeriod[]
 
   @@id([numeric_id, school_id])
@@ -213,13 +213,14 @@ model StudentsBatch {
   updated_at      DateTime  @updatedAt
 
   @@id([numeric_id, school_id])
+  @@unique([class_id, school_id])
 }
 
 model Student {
   id                String                  @id @default(cuid()) @db.VarChar(32)
   school_id         String                  @db.VarChar(32)
   School            School                  @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  roll_num          Int?                    @db.SmallInt
+  roll_num          Int                     @db.SmallInt
   joining_batch_num Int                     @db.SmallInt
   JoiningBatch      StudentsBatch           @relation("JoiningBatch", fields: [joining_batch_num, school_id], references: [numeric_id, school_id], onDelete: Restrict)
   current_batch_num Int?                    @db.SmallInt
@@ -230,6 +231,8 @@ model Student {
   Parents           ParentStudent_mapping[]
   User              User?
   Attendances       StudentAttendance[]
+
+  @@unique([roll_num, section, current_batch_num])
 }
 
 model Teacher {
