@@ -22,7 +22,7 @@ interface StudentItemProps {
   status?: AttendanceStatus;
   remarks?: string;
   onStatusSelected: (status: AttendanceStatus | undefined) => void;
-  onRemarksSet: (remarks: string | undefined) => void;
+  onAddRemarksPress: () => void;
 }
 const StudentItem = memo(
   ({
@@ -30,67 +30,13 @@ const StudentItem = memo(
     status,
     remarks,
     onStatusSelected,
-    onRemarksSet,
+    onAddRemarksPress,
   }: StudentItemProps) => {
-    const [remarksModalVisible, setRemarksModalVisible] = useState(false);
-    const closeRemarksDialog = () => {
-      Keyboard.dismiss();
-      setTimeout(() => {
-        // For smooth keyboard closure
-        setRemarksModalVisible(false);
-        setTmpRemarks(undefined);
-      }, 300);
-    };
-
-    const [tmpRemarks, setTmpRemarks] = useState<string | undefined>(undefined);
     const color = useColorScheme();
     const btnBgColor = color === "dark" ? "black" : "white";
 
     return (
       <View style={styles.student}>
-        {/* Remarks input dialog box */}
-        <Dialog
-          isVisible={remarksModalVisible}
-          onBackdropPress={closeRemarksDialog}
-        >
-          <Dialog.Title title={student.User?.name} />
-          <Text>Write attendance remarks:</Text>
-
-          <TextInput
-            autoFocus
-            multiline
-            numberOfLines={5}
-            placeholder="Remarks"
-            value={tmpRemarks === undefined ? remarks : tmpRemarks}
-            style={styles.studentRemarkInput}
-            onChangeText={(txt) => setTmpRemarks(txt)}
-          />
-
-          <Dialog.Actions>
-            <Dialog.Button
-              title="SAVE"
-              onPress={() => {
-                if (tmpRemarks) onRemarksSet(tmpRemarks);
-                closeRemarksDialog();
-              }}
-              buttonStyle={{
-                backgroundColor: "#09c",
-                borderRadius: 3,
-              }}
-              containerStyle={{
-                width: 100,
-              }}
-              titleStyle={{ color: "white" }}
-            />
-            <Dialog.Button
-              title="cancel"
-              type="clear"
-              titleStyle={{ color: "red" }}
-              onPress={closeRemarksDialog}
-            />
-          </Dialog.Actions>
-        </Dialog>
-
         {/* Student name and remarks */}
         <View style={styles.studentLeft}>
           <Text style={styles.studentName}>
@@ -99,7 +45,7 @@ const StudentItem = memo(
 
           {remarks ? <Text>Remarks: {remarks}</Text> : null}
 
-          <Pressable onPress={() => setRemarksModalVisible(true)}>
+          <Pressable onPress={onAddRemarksPress}>
             <Text
               style={{
                 textDecorationLine: "underline",
@@ -147,6 +93,76 @@ const StudentItem = memo(
   }
 );
 
+interface RemarksEditorProps {
+  isVisible: boolean;
+  student?: Student;
+  remarks: string;
+  onRemarksSet: (remark: string | undefined) => void;
+  onClose: () => void;
+}
+function RemarksEditor({
+  isVisible,
+  student,
+  remarks,
+  onRemarksSet,
+  onClose,
+}: RemarksEditorProps) {
+  const [tmpRemarks, setTmpRemarks] = useState<string | undefined>(undefined);
+  const closeRemarksDialog = useCallback(() => {
+    Keyboard.dismiss();
+    setTimeout(() => {
+      // For smooth keyboard closure
+      onClose();
+      setTmpRemarks(undefined);
+    }, 300);
+  }, []);
+
+  return (
+    <Dialog isVisible={isVisible} onBackdropPress={closeRemarksDialog}>
+      {student ? (
+        <>
+          <Dialog.Title title={student.User?.name} />
+          <Text>Write attendance remarks:</Text>
+
+          <TextInput
+            autoFocus
+            multiline
+            numberOfLines={5}
+            placeholder="Remarks"
+            value={tmpRemarks === undefined ? remarks : tmpRemarks}
+            style={styles.studentRemarkInput}
+            onChangeText={(txt) => setTmpRemarks(txt)}
+          />
+
+          <Dialog.Actions>
+            <Dialog.Button
+              title="SAVE"
+              onPress={() => {
+                if (tmpRemarks) onRemarksSet(tmpRemarks);
+                closeRemarksDialog();
+              }}
+              buttonStyle={{
+                backgroundColor: "#09c",
+                borderRadius: 3,
+              }}
+              containerStyle={{
+                width: 100,
+              }}
+              titleStyle={{ color: "white" }}
+            />
+            <Dialog.Button
+              title="cancel"
+              type="clear"
+              titleStyle={{ color: "red" }}
+              onPress={closeRemarksDialog}
+            />
+          </Dialog.Actions>
+        </>
+      ) : null}
+    </Dialog>
+  );
+}
+
 export default function AttendanceTakerScreen({
   route: {
     params: { periodId },
@@ -172,6 +188,7 @@ export default function AttendanceTakerScreen({
       }
     >
   >({});
+  const [studentForRemarks, setStudentForRemarks] = useState<Student>();
 
   const renderItem = useCallback<ListRenderItem<Student>>(
     ({ item: student }) => (
@@ -188,15 +205,7 @@ export default function AttendanceTakerScreen({
             },
           }))
         }
-        onRemarksSet={(remarks) =>
-          setAttendance((a) => ({
-            ...a,
-            [student.id]: {
-              remarks: remarks?.trim(),
-              status: a[student.id]?.status,
-            },
-          }))
-        }
+        onAddRemarksPress={() => setStudentForRemarks(student)}
       />
     ),
     [attendance]
@@ -209,6 +218,30 @@ export default function AttendanceTakerScreen({
 
   return (
     <View>
+      {/* Why is this not inside <StudentItem />? Answer: https://stackoverflow.com/q/62825753/9990365 */}
+      <RemarksEditor
+        student={studentForRemarks}
+        remarks={
+          studentForRemarks
+            ? attendance[studentForRemarks.id]?.remarks ?? ""
+            : ""
+        }
+        isVisible={!!studentForRemarks}
+        onClose={() => setStudentForRemarks(undefined)}
+        onRemarksSet={(remarks) => {
+          if (studentForRemarks) {
+            setAttendance((a) => ({
+              ...a,
+              [studentForRemarks.id]: {
+                remarks: remarks?.trim(),
+                status: a[studentForRemarks.id]?.status,
+              },
+            }));
+          }
+        }}
+      />
+
+      {/* The list of students */}
       <List
         data={students}
         renderItem={renderItem}
@@ -227,7 +260,6 @@ export default function AttendanceTakerScreen({
         ListEmptyComponent={
           studentsQuery.isFetched ? <Text>No students here!</Text> : null
         }
-        keyboardShouldPersistTaps="always"
       />
     </View>
   );
