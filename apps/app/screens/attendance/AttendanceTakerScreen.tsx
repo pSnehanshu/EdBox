@@ -23,6 +23,7 @@ interface StudentItemProps {
   remarks?: string;
   onStatusSelected: (status: AttendanceStatus | undefined) => void;
   onAddRemarksPress: () => void;
+  onRemoveRemarksPress: () => void;
 }
 const StudentItem = memo(
   ({
@@ -31,6 +32,7 @@ const StudentItem = memo(
     remarks,
     onStatusSelected,
     onAddRemarksPress,
+    onRemoveRemarksPress,
   }: StudentItemProps) => {
     const color = useColorScheme();
     const btnBgColor = color === "dark" ? "black" : "white";
@@ -45,16 +47,32 @@ const StudentItem = memo(
 
           {remarks ? <Text>Remarks: {remarks}</Text> : null}
 
-          <Pressable onPress={onAddRemarksPress}>
-            <Text
-              style={{
-                textDecorationLine: "underline",
-                color: "#09c",
-              }}
-            >
-              {remarks ? "Edit remarks" : "Add remarks"}
-            </Text>
-          </Pressable>
+          <View style={styles.studentRemarkActions}>
+            <Pressable onPress={onAddRemarksPress}>
+              <Text
+                style={{
+                  textDecorationLine: "underline",
+                  color: "#09c",
+                }}
+              >
+                {remarks ? "Edit remark" : "Add remarks"}
+              </Text>
+            </Pressable>
+
+            {remarks ? (
+              <Pressable onPress={onRemoveRemarksPress}>
+                <Text
+                  style={{
+                    textDecorationLine: "underline",
+                    color: "red",
+                    marginLeft: 4,
+                  }}
+                >
+                  Remove remark
+                </Text>
+              </Pressable>
+            ) : null}
+          </View>
         </View>
 
         {/* Attendance status selector */}
@@ -107,6 +125,7 @@ function RemarksEditor({
   onRemarksSet,
   onClose,
 }: RemarksEditorProps) {
+  const color = useColorScheme();
   const [tmpRemarks, setTmpRemarks] = useState<string | undefined>(undefined);
   const closeRemarksDialog = useCallback(() => {
     Keyboard.dismiss();
@@ -118,10 +137,21 @@ function RemarksEditor({
   }, []);
 
   return (
-    <Dialog isVisible={isVisible} onBackdropPress={closeRemarksDialog}>
+    <Dialog
+      isVisible={isVisible}
+      onBackdropPress={closeRemarksDialog}
+      overlayStyle={{
+        backgroundColor: color === "dark" ? "#222" : "white",
+      }}
+    >
       {student ? (
         <>
-          <Dialog.Title title={student.User?.name} />
+          <Dialog.Title
+            title={student.User?.name}
+            titleStyle={{
+              color: color === "dark" ? "white" : "black",
+            }}
+          />
           <Text>Write attendance remarks:</Text>
 
           <TextInput
@@ -206,6 +236,15 @@ export default function AttendanceTakerScreen({
           }))
         }
         onAddRemarksPress={() => setStudentForRemarks(student)}
+        onRemoveRemarksPress={() =>
+          setAttendance((a) => ({
+            ...a,
+            [student.id]: {
+              remarks: undefined,
+              status: a[student.id]?.status,
+            },
+          }))
+        }
       />
     ),
     [attendance]
@@ -283,6 +322,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
     marginTop: 8,
+  },
+  studentRemarkActions: {
+    flexDirection: "row",
   },
   studentRemarkInput: {
     borderColor: "gray",
