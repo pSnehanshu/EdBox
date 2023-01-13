@@ -1,7 +1,6 @@
 import { memo, useCallback, useState } from "react";
 import {
   ActivityIndicator,
-  Button,
   Keyboard,
   ListRenderItem,
   Pressable,
@@ -21,9 +20,12 @@ interface StudentItemProps {
   student: Student;
   status?: AttendanceStatus;
   remarks?: string;
-  onStatusSelected: (status: AttendanceStatus | undefined) => void;
-  onAddRemarksPress: () => void;
-  onRemoveRemarksPress: () => void;
+  onStatusSelected: (
+    studentId: string,
+    status: AttendanceStatus | undefined
+  ) => void;
+  onAddRemarksPress: (student: Student) => void;
+  onRemarks: (studentId: string, remarks: string | undefined) => void;
 }
 const StudentItem = memo(
   ({
@@ -32,7 +34,7 @@ const StudentItem = memo(
     remarks,
     onStatusSelected,
     onAddRemarksPress,
-    onRemoveRemarksPress,
+    onRemarks,
   }: StudentItemProps) => {
     const color = useColorScheme();
     const btnBgColor = color === "dark" ? "black" : "white";
@@ -48,7 +50,7 @@ const StudentItem = memo(
           {remarks ? <Text>Remarks: {remarks}</Text> : null}
 
           <View style={styles.studentRemarkActions}>
-            <Pressable onPress={onAddRemarksPress}>
+            <Pressable onPress={() => onAddRemarksPress(student)}>
               <Text
                 style={{
                   textDecorationLine: "underline",
@@ -60,7 +62,7 @@ const StudentItem = memo(
             </Pressable>
 
             {remarks ? (
-              <Pressable onPress={onRemoveRemarksPress}>
+              <Pressable onPress={() => onRemarks(student.id, undefined)}>
                 <Text
                   style={{
                     textDecorationLine: "underline",
@@ -86,7 +88,10 @@ const StudentItem = memo(
               backgroundColor: status === "present" ? "green" : btnBgColor,
             }}
             onPress={() =>
-              onStatusSelected(status === "present" ? undefined : "present")
+              onStatusSelected(
+                student.id,
+                status === "present" ? undefined : "present"
+              )
             }
           >
             Present
@@ -100,7 +105,10 @@ const StudentItem = memo(
               backgroundColor: status === "absent" ? "red" : btnBgColor,
             }}
             onPress={() =>
-              onStatusSelected(status === "absent" ? undefined : "absent")
+              onStatusSelected(
+                student.id,
+                status === "absent" ? undefined : "absent"
+              )
             }
           >
             Absent
@@ -208,6 +216,9 @@ export default function AttendanceTakerScreen({
       },
       { getNextPageParam: (lastPage) => lastPage.cursor }
     );
+  const fetchNextPage = useCallback(() => {
+    studentsQuery.fetchNextPage();
+  }, []);
 
   const [attendance, setAttendance] = useState<
     Record<
@@ -218,6 +229,30 @@ export default function AttendanceTakerScreen({
       }
     >
   >({});
+  const setAttendanceStatus = useCallback(
+    (studentId: string, status: AttendanceStatus | undefined) => {
+      setAttendance((a) => ({
+        ...a,
+        [studentId]: {
+          status,
+          remarks: a[studentId]?.remarks,
+        },
+      }));
+    },
+    []
+  );
+  const setAttendanceRemarks = useCallback(
+    (studentId: string, remarks: string | undefined) => {
+      setAttendance((a) => ({
+        ...a,
+        [studentId]: {
+          remarks,
+          status: a[studentId]?.status,
+        },
+      }));
+    },
+    []
+  );
   const [studentForRemarks, setStudentForRemarks] = useState<Student>();
 
   const renderItem = useCallback<ListRenderItem<Student>>(
@@ -226,25 +261,9 @@ export default function AttendanceTakerScreen({
         student={student}
         status={attendance[student.id]?.status}
         remarks={attendance[student.id]?.remarks}
-        onStatusSelected={(status) =>
-          setAttendance((a) => ({
-            ...a,
-            [student.id]: {
-              remarks: a[student.id]?.remarks,
-              status,
-            },
-          }))
-        }
-        onAddRemarksPress={() => setStudentForRemarks(student)}
-        onRemoveRemarksPress={() =>
-          setAttendance((a) => ({
-            ...a,
-            [student.id]: {
-              remarks: undefined,
-              status: a[student.id]?.status,
-            },
-          }))
-        }
+        onStatusSelected={setAttendanceStatus}
+        onAddRemarksPress={setStudentForRemarks}
+        onRemarks={setAttendanceRemarks}
       />
     ),
     [attendance]
@@ -296,7 +315,7 @@ export default function AttendanceTakerScreen({
         ListEmptyComponent={
           studentsQuery.isFetched ? <Text>No students here!</Text> : null
         }
-        onEndReached={() => studentsQuery.fetchNextPage()}
+        onEndReached={fetchNextPage}
         onEndReachedThreshold={0.5}
       />
     </View>
