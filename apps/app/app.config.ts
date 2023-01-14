@@ -26,8 +26,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       foregroundImage: "./assets/images/adaptive-icon.png",
       backgroundColor: "#ffffff",
     },
+    package: "com.indorhino.software.schooltalk.sample",
   },
   web: {
     favicon: "./assets/images/favicon.png",
+  },
+  extra: {
+    eas: {
+      projectId: "967f9a25-6a24-476d-8d3c-1dc7db20ec80",
+    },
   },
 });

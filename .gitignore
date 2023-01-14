@@ -25,3 +25,5 @@ jspm_packages/
 
 # Log files
 *.log
+
+tmp
