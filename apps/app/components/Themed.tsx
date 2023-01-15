@@ -3,13 +3,14 @@
  * https://docs.expo.io/guides/color-schemes/
  */
 
-import { ComponentPropsWithRef } from "react";
+import { ComponentProps, ComponentPropsWithRef } from "react";
 import {
   Text as DefaultText,
   View as DefaultView,
   TextInput as DefaultTextInput,
   FlatList as DefaultList,
 } from "react-native";
+import { Card as CardRNE } from "@rneui/base";
 
 import Colors from "../constants/Colors";
 import useColorScheme from "../utils/useColorScheme";
@@ -40,6 +41,7 @@ export type ListProps<ItemT> = ThemeProps &
   DefaultList<ItemT>["props"] & {
     innerRef?: ComponentPropsWithRef<typeof DefaultList<ItemT>>["ref"];
   };
+export type CardProps = ThemeProps & ComponentProps<typeof CardRNE>;
 
 export function Text(props: TextProps) {
   const { style, lightColor, darkColor, ...otherProps } = props;
@@ -87,5 +89,25 @@ export function TextInput(props: TextInputProps) {
       style={[{ color, backgroundColor }, style]}
       {...otherProps}
     />
+  );
+}
+
+export function Card(props: CardProps) {
+  const { lightColor, darkColor, ...otherProps } = props;
+  const backgroundColor = useThemeColor(
+    { light: lightColor, dark: darkColor },
+    "background"
+  );
+
+  return (
+    <CardRNE
+      {...otherProps}
+      containerStyle={{
+        ...(props.containerStyle as Object),
+        backgroundColor,
+      }}
+    >
+      {props.children}
+    </CardRNE>
   );
 }

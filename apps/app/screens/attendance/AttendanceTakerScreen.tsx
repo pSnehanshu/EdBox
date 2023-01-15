@@ -16,14 +16,14 @@ import {
   Pressable,
   StyleSheet,
 } from "react-native";
-import { Card, Dialog, Text as TextRNE } from "@rneui/themed";
+import { Dialog } from "@rneui/themed";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Spinner from "react-native-loading-spinner-overlay";
 import type { AttendanceStatus } from "@prisma/client";
 import Toast from "react-native-toast-message";
 import { RouterInput, Student } from "schooltalk-shared/types";
 import _ from "lodash";
-import { List, Text, TextInput, View } from "../../components/Themed";
+import { Card, List, Text, TextInput, View } from "../../components/Themed";
 import { RootStackScreenProps } from "../../types";
 import { trpc } from "../../utils/trpc";
 import useColorScheme from "../../utils/useColorScheme";
@@ -450,7 +450,7 @@ export default function AttendanceTakerScreen({
         refreshing={studentsQuery.isFetching}
         ListHeaderComponent={
           isAttendanceTaken ? (
-            <Card>
+            <Card containerStyle={styles.attendanceTakenAlertBox}>
               <Text>
                 Attendance for this period has been taken by{" "}
                 {attendanceTakenByTeacher} on {attendanceTakenOnDate}.
@@ -531,6 +531,9 @@ export default function AttendanceTakerScreen({
 
 const styles = StyleSheet.create({
   container: { height: "100%" },
+  attendanceTakenAlertBox: {
+    marginBottom: 16,
+  },
   listFooter: {
     padding: 8,
     marginTop: 16,
