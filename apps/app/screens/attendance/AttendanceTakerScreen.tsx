@@ -234,7 +234,6 @@ export default function AttendanceTakerScreen({
   route: {
     params: { periodId },
   },
-  navigation,
 }: RootStackScreenProps<"AttendanceTaker">) {
   const utils = trpc.useContext();
 
@@ -319,7 +318,8 @@ export default function AttendanceTakerScreen({
         text1: "Attendance marked succesfully",
         visibilityTime: 2000,
       });
-      navigation.goBack();
+      periodAttendanceQuery.refetch();
+      utils.school.routine.fetchForTeacher.invalidate();
     },
     onError(error, variables, context) {
       console.error(error);
@@ -413,6 +413,11 @@ export default function AttendanceTakerScreen({
     [attendance]
   );
 
+  const refetchData = useCallback(() => {
+    studentsQuery.refetch();
+    periodAttendanceQuery.refetch();
+  }, []);
+
   if (studentsQuery.isLoading || submitAttendanceMutation.isLoading)
     return <Spinner visible />;
 
@@ -435,7 +440,7 @@ export default function AttendanceTakerScreen({
       <List
         data={students}
         renderItem={renderItem}
-        onRefresh={utils.school.routine.fetchPeriodStudents.invalidate}
+        onRefresh={refetchData}
         refreshing={studentsQuery.isFetching}
         ListHeaderComponent={
           isAttendanceTaken ? (

@@ -1,5 +1,6 @@
 import { ComponentProps, useCallback, useState, memo, useMemo } from "react";
 import {
+  RefreshControl,
   StyleProp,
   StyleSheet,
   useWindowDimensions,
@@ -27,6 +28,8 @@ type TimelineOnPressProp = NonNullable<
 interface DayRoutineProps {
   day: DayOfWeek;
   periods: RoutinePeriod[];
+  onRefresh: () => void;
+  isFetching: boolean;
 }
 type GapPeriod = {
   is_gap: true;
@@ -52,118 +55,127 @@ type TimelineData<T = unknown> = {
   data: T;
 };
 
-const DayRoutine = memo(({ periods }: DayRoutineProps) => {
-  type CustomPeriodType = (RoutinePeriod & { is_gap: false }) | GapPeriod;
-  type RoutineTimelineData = TimelineData<CustomPeriodType>;
+const DayRoutine = memo(
+  ({ periods, isFetching, onRefresh }: DayRoutineProps) => {
+    type CustomPeriodType = (RoutinePeriod & { is_gap: false }) | GapPeriod;
+    type RoutineTimelineData = TimelineData<CustomPeriodType>;
 
-  const data = useMemo<RoutineTimelineData[]>(() => {
-    // Sort
-    const sorted = _.sortBy(periods.slice(), (p) =>
-      parseFloat(`${p.start_hour}.${p.start_min}`)
-    );
-    // Insert gaps
-    const withGaps: CustomPeriodType[] = [];
-    sorted.forEach((p, i) => {
-      // First insert the gap, then insert the period
-      if (i === 0) {
-        withGaps.push({
-          ...p,
-          is_gap: false,
-        });
-      } else {
-        const previous = sorted[i - 1];
-        const hasGap =
-          previous.end_hour !== p.start_hour
-            ? true
-            : previous.end_min !== p.start_min;
-        if (hasGap) {
-          const gap: GapPeriod = {
-            is_gap: true,
-            start_hour: previous.end_hour,
-            start_min: previous.end_min,
-            end_hour: p.start_hour,
-            end_min: p.start_min,
-          };
+    const data = useMemo<RoutineTimelineData[]>(() => {
+      // Sort
+      const sorted = _.sortBy(periods.slice(), (p) =>
+        parseFloat(`${p.start_hour}.${p.start_min}`)
+      );
+      // Insert gaps
+      const withGaps: CustomPeriodType[] = [];
+      sorted.forEach((p, i) => {
+        // First insert the gap, then insert the period
+        if (i === 0) {
+          withGaps.push({
+            ...p,
+            is_gap: false,
+          });
+        } else {
+          const previous = sorted[i - 1];
+          const hasGap =
+            previous.end_hour !== p.start_hour
+              ? true
+              : previous.end_min !== p.start_min;
+          if (hasGap) {
+            const gap: GapPeriod = {
+              is_gap: true,
+              start_hour: previous.end_hour,
+              start_min: previous.end_min,
+              end_hour: p.start_hour,
+              end_min: p.start_min,
+            };
 
-          withGaps.push(gap);
+            withGaps.push(gap);
+          }
+
+          withGaps.push({
+            ...p,
+            is_gap: false,
+          });
         }
+      });
 
-        withGaps.push({
-          ...p,
-          is_gap: false,
-        });
+      return withGaps.map((p) => {
+        const isPM =
+          p.start_hour > 12
+            ? true
+            : p.start_hour === 12
+            ? p.start_min > 0
+            : false;
+        let startHour: number | string =
+          p.start_hour > 12 ? p.start_hour - 12 : p.start_hour;
+        startHour = startHour < 10 ? `0${startHour}` : `${startHour}`;
+        const startMin: string =
+          p.start_min < 10 ? `0${p.start_min}` : `${p.start_min}`;
+
+        const time = `${startHour}:${startMin} ${isPM ? "pm" : "am"}`;
+
+        // TODO: Show duration & End of day
+        if (p.is_gap) {
+          return {
+            time,
+            title: "Gap :)",
+            description: "Enjoy your time off.",
+            data: p,
+          };
+        } else {
+          const isAttendanceTaken = p.AttendancesTaken.length > 0;
+
+          return {
+            time,
+            title: `${p.Subject.name} - Class ${
+              p.Class.name ?? p.Class.numeric_id
+            } (${p.Section.name ?? p.Section.numeric_id})`,
+            description: isAttendanceTaken
+              ? "Attendance taken, tap to view"
+              : "Tap to take attendance",
+            data: p,
+          };
+        }
+      });
+    }, periods);
+    const navigation = useNavigation();
+
+    const onEventPress = useCallback<TimelineOnPressProp>((e) => {
+      const { data } = e as any as RoutineTimelineData;
+      if (!data.is_gap) {
+        navigation.navigate("AttendanceTaker", { periodId: data.id });
       }
-    });
+    }, []);
 
-    return withGaps.map((p) => {
-      const isPM =
-        p.start_hour > 12
-          ? true
-          : p.start_hour === 12
-          ? p.start_min > 0
-          : false;
-      let startHour: number | string =
-        p.start_hour > 12 ? p.start_hour - 12 : p.start_hour;
-      startHour = startHour < 10 ? `0${startHour}` : `${startHour}`;
-      const startMin: string =
-        p.start_min < 10 ? `0${p.start_min}` : `${p.start_min}`;
+    const colorScheme = useColorScheme();
+    const textColor = colorScheme === "dark" ? "white" : "black";
 
-      const time = `${startHour}:${startMin} ${isPM ? "pm" : "am"}`;
-
-      // TODO: Show duration & End of day
-      if (p.is_gap) {
-        return {
-          time,
-          title: "Gap :)",
-          description: "Enjoy your time off.",
-          data: p,
-        };
-      } else {
-        const isAttendanceTaken = p.AttendancesTaken.length > 0;
-
-        return {
-          time,
-          title: `${p.Subject.name} - Class ${
-            p.Class.name ?? p.Class.numeric_id
-          } (${p.Section.name ?? p.Section.numeric_id})`,
-          description: isAttendanceTaken
-            ? "Attendance taken, tap to view"
-            : "Tap to take attendance",
-          data: p,
-        };
-      }
-    });
-  }, periods);
-  const navigation = useNavigation();
-
-  const onEventPress = useCallback<TimelineOnPressProp>((e) => {
-    const { data } = e as any as RoutineTimelineData;
-    if (!data.is_gap) {
-      navigation.navigate("AttendanceTaker", { periodId: data.id });
-    }
-  }, []);
-
-  const colorScheme = useColorScheme();
-  const textColor = colorScheme === "dark" ? "white" : "black";
-
-  return (
-    <Timeline
-      data={data}
-      separator
-      style={styles.timeline}
-      onEventPress={onEventPress}
-      titleStyle={{
-        color: textColor,
-      }}
-      descriptionStyle={{
-        color: textColor,
-      }}
-      timeStyle={{
-        color: textColor,
-      }}
-    />
-  );
-});
+    return (
+      <Timeline
+        data={data}
+        separator
+        style={styles.timeline}
+        onEventPress={onEventPress}
+        titleStyle={{
+          color: textColor,
+        }}
+        descriptionStyle={{
+          color: textColor,
+        }}
+        timeStyle={{
+          color: textColor,
+        }}
+        options={
+          {
+            refreshControl: (
+              <RefreshControl refreshing={isFetching} onRefresh={onRefresh} />
+            ),
+          } as any
+        }
+      />
+    );
+  }
+);
 
 const routes: TabRoute[] = [
   { key: "mon", title: "Monday" },
@@ -183,6 +195,9 @@ export default function RoutineScreen() {
     // Calculating the index of day-of-week. 0-Mon,1-Tue,so on...
     () => parseInt(format(new Date(), "i"), 10) - 1
   );
+  const refreshList = useCallback(() => {
+    routineQuery.refetch();
+  }, []);
   const renderScene = useCallback<RenderSceneProp>(
     ({ route }) => (
       <DayRoutine
@@ -190,9 +205,11 @@ export default function RoutineScreen() {
         periods={
           routineQuery.isFetched ? routineQuery.data?.[route.key] ?? [] : []
         }
+        isFetching={routineQuery.isRefetching}
+        onRefresh={refreshList}
       />
     ),
-    [routineQuery.isFetched]
+    [routineQuery.fetchStatus]
   );
   const renderTabBar = useCallback<RenderTabBarProp>(
     (props) => (
