@@ -315,7 +315,7 @@ export default function AttendanceTakerScreen({
       Toast.show({
         position: "bottom",
         type: "success",
-        text1: "Attendance marked succesfully",
+        text1: "Attendance recorded succesfully",
         visibilityTime: 2000,
       });
       periodAttendanceQuery.refetch();
@@ -418,6 +418,38 @@ export default function AttendanceTakerScreen({
     [attendance]
   );
 
+  const submitAttendance = useCallback(() => {
+    if (totalRemaining > 0) {
+      Alert.alert(
+        "Attendance not complete yet!",
+        `Take attendance of the remaining ${totalRemaining} students before you submit.`
+      );
+    } else {
+      // Prepare attendance object
+      const finalAttendance: Record<
+        string,
+        {
+          status: AttendanceStatus;
+          remarks?: string;
+        }
+      > = {};
+
+      Object.entries(attendance).forEach(([studentId, { status, remarks }]) => {
+        finalAttendance[studentId] = {
+          remarks,
+          status: status!,
+        };
+      });
+
+      // Run the mutation
+      submitAttendanceMutation.mutate({
+        date: new Date().toISOString(),
+        periodId,
+        studentsAttendance: finalAttendance,
+      });
+    }
+  }, [attendance]);
+
   const refetchData = useCallback(() => {
     studentsQuery.refetch();
     periodAttendanceQuery.refetch();
@@ -485,39 +517,7 @@ export default function AttendanceTakerScreen({
             <MaterialCommunityIcons.Button
               name="cloud-upload"
               size={30}
-              onPress={() => {
-                if (totalRemaining > 0) {
-                  Alert.alert(
-                    "Attendance not complete yet!",
-                    `Take attendance of the remaining ${totalRemaining} students before you submit.`
-                  );
-                } else {
-                  // Prepare attendance object
-                  const finalAttendance: Record<
-                    string,
-                    {
-                      status: AttendanceStatus;
-                      remarks?: string;
-                    }
-                  > = {};
-
-                  Object.entries(attendance).forEach(
-                    ([studentId, { status, remarks }]) => {
-                      finalAttendance[studentId] = {
-                        remarks,
-                        status: status!,
-                      };
-                    }
-                  );
-
-                  // Run the mutation
-                  submitAttendanceMutation.mutate({
-                    date: new Date().toISOString(),
-                    periodId,
-                    studentsAttendance: finalAttendance,
-                  });
-                }
-              }}
+              onPress={submitAttendance}
               style={{ height: "100%" }}
             >
               Submit attendance
