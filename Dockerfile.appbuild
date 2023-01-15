@@ -4,8 +4,7 @@ RUN node -v
 # Install OpenJDK
 
 RUN apt-get update && \
-    apt-get install default-jre -y
-RUN java --version
+    apt-get install default-jre default-jdk -y
 
 # Download and setup Android SDK, and set $ANDROID_HOME var
 
@@ -25,6 +24,15 @@ RUN mkdir -p android_sdk/cmdline-tools/latest && \
 # Accept all licensed
 RUN yes | sdkmanager --licenses
 
+# Pre-install necessary packages
+RUN sdkmanager --install "patcher;v4" 
+RUN sdkmanager --install "ndk;21.4.7075529" 
+RUN sdkmanager --install "cmake;3.18.1" 
+RUN sdkmanager --install "emulator" 
+RUN sdkmanager --install "platform-tools" 
+RUN sdkmanager --install "tools" 
+RUN sdkmanager --install "build-tools;30.0.3" 
+RUN sdkmanager --install "platforms;android-31"
 
 # Set up project
 
