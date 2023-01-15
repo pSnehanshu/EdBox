@@ -1,11 +1,12 @@
 import type { School as DBSchool, User as DBUser } from "@prisma/client";
-import type { inferRouterOutputs } from "@trpc/server";
+import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "../../apps/backend/trpc";
 
 export type ArrayElement<ArrayType extends readonly unknown[]> =
   ArrayType extends readonly (infer ElementType)[] ? ElementType : never;
 
-type RouterOutput = inferRouterOutputs<AppRouter>;
+export type RouterOutput = inferRouterOutputs<AppRouter>;
+export type RouterInput = inferRouterInputs<AppRouter>;
 
 export type Message = ArrayElement<
   RouterOutput["school"]["messaging"]["fetchGroupMessages"]["messages"]

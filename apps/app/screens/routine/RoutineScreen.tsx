@@ -139,12 +139,7 @@ const DayRoutine = memo(({ periods }: DayRoutineProps) => {
   const onEventPress = useCallback<TimelineOnPressProp>((e) => {
     const { data } = e as any as RoutineTimelineData;
     if (!data.is_gap) {
-      const isAttendanceTaken = data.AttendancesTaken.length > 0;
-      if (isAttendanceTaken) {
-        alert("View attendance");
-      } else {
-        navigation.navigate("AttendanceTaker", { periodId: data.id });
-      }
+      navigation.navigate("AttendanceTaker", { periodId: data.id });
     }
   }, []);
 

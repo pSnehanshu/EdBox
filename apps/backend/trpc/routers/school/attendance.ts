@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AttendanceStatus } from "@prisma/client";
+import { AttendanceStatus, Month } from "@prisma/client";
 import { everyLimit } from "schooltalk-shared/async";
 import { NumberMonthMapping } from "schooltalk-shared/mics";
 import { authProcedure, router, teacherProcedure } from "../../trpc";
@@ -139,10 +139,11 @@ const attendanceRouter = router({
     .input(
       z.object({
         periodId: z.string().cuid(),
-        date: z
-          .string()
-          .datetime()
-          .transform((v) => new Date(v)),
+        date: z.object({
+          year: z.number().int(),
+          month: z.nativeEnum(Month),
+          day: z.number().int().min(1).max(31),
+        }),
       })
     )
     .query(async ({ input, ctx }) => {
@@ -160,11 +161,12 @@ const attendanceRouter = router({
           class_id: true,
           AttendancesTaken: {
             where: {
-              year: getYear(input.date),
-              month: NumberMonthMapping[getMonth(input.date)],
-              day: getDate(input.date),
+              year: input.date.year,
+              month: input.date.month,
+              day: input.date.day,
             },
             select: {
+              created_at: true,
               StudentAttendances: {
                 select: {
                   status: true,
@@ -207,7 +209,7 @@ const attendanceRouter = router({
         });
       }
 
-      return period;
+      return period.AttendancesTaken[0] ?? null;
     }),
 });
 

@@ -2,6 +2,7 @@ import {
   ComponentProps,
   memo,
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -15,17 +16,19 @@ import {
   Pressable,
   StyleSheet,
 } from "react-native";
-import { Dialog } from "@rneui/themed";
+import { Card, Dialog, Text as TextRNE } from "@rneui/themed";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Spinner from "react-native-loading-spinner-overlay";
 import type { AttendanceStatus } from "@prisma/client";
 import Toast from "react-native-toast-message";
-import { Student } from "schooltalk-shared/types";
+import { RouterInput, Student } from "schooltalk-shared/types";
 import _ from "lodash";
 import { List, Text, TextInput, View } from "../../components/Themed";
 import { RootStackScreenProps } from "../../types";
 import { trpc } from "../../utils/trpc";
 import useColorScheme from "../../utils/useColorScheme";
+import { format, getDate, getMonth, getYear } from "date-fns";
+import { NumberMonthMapping } from "schooltalk-shared/mics";
 
 /** Height of a student row */
 const STUDENT_ITEM_HEIGHT: number = 200;
@@ -34,6 +37,7 @@ interface StudentItemProps {
   student: Student;
   status?: AttendanceStatus;
   remarks?: string;
+  showRemarkActions: boolean;
   onStatusSelected: (
     studentId: string,
     status: AttendanceStatus | undefined
@@ -46,6 +50,7 @@ const StudentItem = memo(
     student,
     status,
     remarks,
+    showRemarkActions,
     onStatusSelected,
     onAddRemarksPress,
     onRemarks,
@@ -63,32 +68,34 @@ const StudentItem = memo(
 
           {remarks ? <Text>Remarks: {remarks}</Text> : null}
 
-          <View style={styles.studentRemarkActions}>
-            <Pressable onPress={() => onAddRemarksPress(student)}>
-              <Text
-                style={{
-                  textDecorationLine: "underline",
-                  color: "#09c",
-                }}
-              >
-                {remarks ? "Edit remark" : "Add remarks"}
-              </Text>
-            </Pressable>
-
-            {remarks ? (
-              <Pressable onPress={() => onRemarks(student.id, undefined)}>
+          {showRemarkActions ? (
+            <View style={styles.studentRemarkActions}>
+              <Pressable onPress={() => onAddRemarksPress(student)}>
                 <Text
                   style={{
                     textDecorationLine: "underline",
-                    color: "red",
-                    marginLeft: 4,
+                    color: "#09c",
                   }}
                 >
-                  Remove remark
+                  {remarks ? "Edit remark" : "Add remarks"}
                 </Text>
               </Pressable>
-            ) : null}
-          </View>
+
+              {remarks ? (
+                <Pressable onPress={() => onRemarks(student.id, undefined)}>
+                  <Text
+                    style={{
+                      textDecorationLine: "underline",
+                      color: "red",
+                      marginLeft: 4,
+                    }}
+                  >
+                    Remove remark
+                  </Text>
+                </Pressable>
+              ) : null}
+            </View>
+          ) : null}
         </View>
 
         {/* Attendance status selector */}
@@ -137,7 +144,7 @@ interface RemarksEditorProps {
   isVisible: boolean;
   student?: Student;
   remarks: string;
-  onRemarksSet: (remark: string | undefined) => void;
+  onRemarksSet: (studentId: string, remark: string | undefined) => void;
   onClose: () => void;
 }
 function RemarksEditor({
@@ -190,7 +197,7 @@ function RemarksEditor({
             <Dialog.Button
               title="SAVE"
               onPress={() => {
-                if (tmpRemarks) onRemarksSet(tmpRemarks);
+                if (tmpRemarks) onRemarksSet(student.id, tmpRemarks);
                 closeRemarksDialog();
               }}
               buttonStyle={{
@@ -229,8 +236,68 @@ export default function AttendanceTakerScreen({
   },
   navigation,
 }: RootStackScreenProps<"AttendanceTaker">) {
-  // TODO: Check if attendance is already taken
   const utils = trpc.useContext();
+
+  // State to store attendance status and remarks
+  const [attendance, setAttendance] = useState<
+    Record<
+      string,
+      {
+        status?: AttendanceStatus;
+        remarks?: string;
+      }
+    >
+  >({});
+
+  // To check if attendance already taken
+  const dateToday = useMemo<
+    RouterInput["school"]["attendance"]["fetchForPeriod"]["date"]
+  >(() => {
+    const today = new Date();
+    return {
+      year: getYear(today),
+      month: NumberMonthMapping[getMonth(today)],
+      day: getDate(today),
+    };
+  }, []);
+  const periodAttendanceQuery = trpc.school.attendance.fetchForPeriod.useQuery({
+    periodId,
+    date: dateToday,
+  });
+
+  const isAttendanceTaken =
+    periodAttendanceQuery.isFetched && !!periodAttendanceQuery.data;
+
+  const attendanceTakenByTeacher =
+    periodAttendanceQuery.data?.Teacher?.User?.name ?? null;
+
+  const attendanceTakenOnDate = useMemo(() => {
+    if (!periodAttendanceQuery.data?.created_at) return null;
+
+    return format(
+      new Date(periodAttendanceQuery.data.created_at),
+      "do LLLL, yyyy hh:mm bbb"
+    );
+  }, [periodAttendanceQuery.data?.created_at]);
+
+  // Populate attendance state if taken
+  useEffect(() => {
+    if (isAttendanceTaken) {
+      const existingAttendance: typeof attendance = {};
+      periodAttendanceQuery.data.StudentAttendances.forEach((attendance) => {
+        existingAttendance[attendance.Student.id] = {
+          remarks: attendance.remarks ?? undefined,
+          status: attendance.status,
+        };
+      });
+      setAttendance(existingAttendance);
+    } else {
+      // Reset the attendance state as it hasn't been taken
+      setAttendance({});
+    }
+  }, [isAttendanceTaken]);
+
+  // Fetch all students of this period -> section
   const studentsQuery =
     trpc.school.routine.fetchPeriodStudents.useInfiniteQuery(
       {
@@ -275,15 +342,6 @@ export default function AttendanceTakerScreen({
   }, [studentsQuery.fetchStatus]);
 
   const studentsList = useRef<FlatList<Student>>();
-  const [attendance, setAttendance] = useState<
-    Record<
-      string,
-      {
-        status?: AttendanceStatus;
-        remarks?: string;
-      }
-    >
-  >({});
 
   const totalStudents = useMemo(
     () => _.last(studentsQuery.data?.pages)?.total ?? 0,
@@ -300,6 +358,10 @@ export default function AttendanceTakerScreen({
 
   const setAttendanceStatus = useCallback(
     (studentId: string, status: AttendanceStatus | undefined) => {
+      if (isAttendanceTaken) {
+        return;
+      }
+
       setAttendance((a) => ({
         ...a,
         [studentId]: {
@@ -316,10 +378,14 @@ export default function AttendanceTakerScreen({
           viewPosition: 0.5,
         });
     },
-    [students]
+    [students, isAttendanceTaken]
   );
   const setAttendanceRemarks = useCallback(
     (studentId: string, remarks: string | undefined) => {
+      if (isAttendanceTaken) {
+        return;
+      }
+
       setAttendance((a) => ({
         ...a,
         [studentId]: {
@@ -328,7 +394,7 @@ export default function AttendanceTakerScreen({
         },
       }));
     },
-    []
+    [isAttendanceTaken]
   );
   const [studentForRemarks, setStudentForRemarks] = useState<Student>();
 
@@ -338,6 +404,7 @@ export default function AttendanceTakerScreen({
         student={student}
         status={attendance[student.id]?.status}
         remarks={attendance[student.id]?.remarks}
+        showRemarkActions={!isAttendanceTaken}
         onStatusSelected={setAttendanceStatus}
         onAddRemarksPress={setStudentForRemarks}
         onRemarks={setAttendanceRemarks}
@@ -361,17 +428,7 @@ export default function AttendanceTakerScreen({
         }
         isVisible={!!studentForRemarks}
         onClose={() => setStudentForRemarks(undefined)}
-        onRemarksSet={(remarks) => {
-          if (studentForRemarks) {
-            setAttendance((a) => ({
-              ...a,
-              [studentForRemarks.id]: {
-                remarks: remarks?.trim(),
-                status: a[studentForRemarks.id]?.status,
-              },
-            }));
-          }
-        }}
+        onRemarksSet={setAttendanceRemarks}
       />
 
       {/* The list of students */}
@@ -380,6 +437,16 @@ export default function AttendanceTakerScreen({
         renderItem={renderItem}
         onRefresh={utils.school.routine.fetchPeriodStudents.invalidate}
         refreshing={studentsQuery.isFetching}
+        ListHeaderComponent={
+          isAttendanceTaken ? (
+            <Card>
+              <Text>
+                Attendance for this period has been taken by{" "}
+                {attendanceTakenByTeacher} on {attendanceTakenOnDate}.
+              </Text>
+            </Card>
+          ) : null
+        }
         ListFooterComponent={
           <View style={styles.listFooter}>
             {studentsQuery.isFetchingNextPage ? (
@@ -400,49 +467,51 @@ export default function AttendanceTakerScreen({
         <View style={styles.submitPanelStats}>
           <Text style={{ color: "green" }}>Present: {totalPresent}</Text>
           <Text style={{ color: "red" }}>Absent: {totalAbsent}</Text>
-          <Text>Remaining: {totalRemaining}</Text>
+          {isAttendanceTaken ? null : <Text>Remaining: {totalRemaining}</Text>}
         </View>
         <View style={styles.submitPanelBtn}>
-          <MaterialCommunityIcons.Button
-            name="cloud-upload"
-            size={30}
-            onPress={() => {
-              if (totalRemaining > 0) {
-                Alert.alert(
-                  "Attendance not complete yet!",
-                  `Take attendance of the remaining ${totalRemaining} students before you submit.`
-                );
-              } else {
-                // Prepare attendance object
-                const finalAttendance: Record<
-                  string,
-                  {
-                    status: AttendanceStatus;
-                    remarks?: string;
-                  }
-                > = {};
+          {isAttendanceTaken ? null : (
+            <MaterialCommunityIcons.Button
+              name="cloud-upload"
+              size={30}
+              onPress={() => {
+                if (totalRemaining > 0) {
+                  Alert.alert(
+                    "Attendance not complete yet!",
+                    `Take attendance of the remaining ${totalRemaining} students before you submit.`
+                  );
+                } else {
+                  // Prepare attendance object
+                  const finalAttendance: Record<
+                    string,
+                    {
+                      status: AttendanceStatus;
+                      remarks?: string;
+                    }
+                  > = {};
 
-                Object.entries(attendance).forEach(
-                  ([studentId, { status, remarks }]) => {
-                    finalAttendance[studentId] = {
-                      remarks,
-                      status: status!,
-                    };
-                  }
-                );
+                  Object.entries(attendance).forEach(
+                    ([studentId, { status, remarks }]) => {
+                      finalAttendance[studentId] = {
+                        remarks,
+                        status: status!,
+                      };
+                    }
+                  );
 
-                // Run the mutation
-                submitAttendanceMutation.mutate({
-                  date: new Date().toISOString(),
-                  periodId,
-                  studentsAttendance: finalAttendance,
-                });
-              }
-            }}
-            style={{ height: "100%" }}
-          >
-            Submit attendance
-          </MaterialCommunityIcons.Button>
+                  // Run the mutation
+                  submitAttendanceMutation.mutate({
+                    date: new Date().toISOString(),
+                    periodId,
+                    studentsAttendance: finalAttendance,
+                  });
+                }
+              }}
+              style={{ height: "100%" }}
+            >
+              Submit attendance
+            </MaterialCommunityIcons.Button>
+          )}
         </View>
       </View>
     </View>
