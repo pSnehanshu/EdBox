@@ -19,6 +19,7 @@ import { Dialog } from "@rneui/themed";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Spinner from "react-native-loading-spinner-overlay";
 import type { AttendanceStatus } from "@prisma/client";
+import Toast from "react-native-toast-message";
 import { Student } from "schooltalk-shared/types";
 import _ from "lodash";
 import { List, Text, TextInput, View } from "../../components/Themed";
@@ -226,6 +227,7 @@ export default function AttendanceTakerScreen({
   route: {
     params: { periodId },
   },
+  navigation,
 }: RootStackScreenProps<"AttendanceTaker">) {
   // TODO: Check if attendance is already taken
   const utils = trpc.useContext();
@@ -240,6 +242,28 @@ export default function AttendanceTakerScreen({
   const fetchNextPage = useCallback(() => {
     studentsQuery.fetchNextPage();
   }, []);
+
+  // Submit attendance mutation
+  const submitAttendanceMutation = trpc.school.attendance.create.useMutation({
+    onSuccess() {
+      Toast.show({
+        position: "bottom",
+        type: "success",
+        text1: "Attendance marked succesfully",
+        visibilityTime: 2000,
+      });
+      navigation.goBack();
+    },
+    onError(error, variables, context) {
+      console.error(error);
+      Toast.show({
+        position: "bottom",
+        type: "error",
+        text1: "Something went wrong",
+        text2: "Please try after sometime",
+      });
+    },
+  });
 
   const students = useMemo<Student[]>(() => {
     const students: Student[] = [];
@@ -322,7 +346,8 @@ export default function AttendanceTakerScreen({
     [attendance]
   );
 
-  if (studentsQuery.isLoading) return <Spinner visible />;
+  if (studentsQuery.isLoading || submitAttendanceMutation.isLoading)
+    return <Spinner visible />;
 
   return (
     <View style={styles.container}>
@@ -388,7 +413,30 @@ export default function AttendanceTakerScreen({
                   `Take attendance of the remaining ${totalRemaining} students before you submit.`
                 );
               } else {
-                // TODO: Submit to server
+                // Prepare attendance object
+                const finalAttendance: Record<
+                  string,
+                  {
+                    status: AttendanceStatus;
+                    remarks?: string;
+                  }
+                > = {};
+
+                Object.entries(attendance).forEach(
+                  ([studentId, { status, remarks }]) => {
+                    finalAttendance[studentId] = {
+                      remarks,
+                      status: status!,
+                    };
+                  }
+                );
+
+                // Run the mutation
+                submitAttendanceMutation.mutate({
+                  date: new Date().toISOString(),
+                  periodId,
+                  studentsAttendance: finalAttendance,
+                });
               }
             }}
             style={{ height: "100%" }}

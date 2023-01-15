@@ -10,7 +10,11 @@ const ConfigSchema = z.object({
   schoolId: z.string().cuid(),
 });
 
-export default ConfigSchema.parse({
+const config = ConfigSchema.parse({
   backendHost: process.env.HOSTNAME,
   schoolId: process.env.SCHOOLID,
 });
+
+console.log("Final config:", config);
+
+export default config;
