@@ -11,3 +11,23 @@ yarn start
 ```
 
 Then scan the QR code with the [Expo Go](https://docs.expo.dev/get-started/installation/#expo-go-app-for-android-and-ios) app.
+
+# Build APK
+
+To build APK, you will need a few things (Assuming you're using Ubuntu 20):
+
+1. Generate `keystore` file. You have to perform this step only the first time.
+   1. Install OpenJDK: `apt-get update && apt-get install default-jre`.
+   2. Verify it is installed: `java --version`.
+   3. Follow these instructions: [Click here](https://docs.expo.dev/app-signing/local-credentials/#android-credentials)
+   4. You should now have a `apps/app/android/keysotres/release.keystore` and a `apps/app/credentials.json` file.
+2. Generate Expo Login token. You have to perform this step only the first time.
+   1. Follow these instructions: [Link](https://docs.expo.dev/accounts/programmatic-access/)
+   2. Once the token is generated, copy it somewhere.
+3. Go to the root directory of this project.
+4. Run `docker build . -f ./Dockerfile.appbuild --build-arg expo_auth_token=$EXPO_TOKEN -t schooltalk-app-builder`. Replace `$EXPO_TOKEN` with the token obtained from step #2. Wait for the command to finish. It may take several minutes.
+6. Note down the path of the generated APK file from the previous command's output.
+7. Then extract the APK file using [this method](https://stackoverflow.com/a/31316636/9990365). Put the appropriate image name, which is `schooltalk-app-builder`.
+
+> TODO: Figure out a way to pass environment variables.
+> 
