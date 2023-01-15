@@ -320,6 +320,11 @@ export default function AttendanceTakerScreen({
       });
       periodAttendanceQuery.refetch();
       utils.school.routine.fetchForTeacher.invalidate();
+
+      // Scroll to top
+      studentsList.current?.scrollToOffset?.({
+        offset: 0,
+      });
     },
     onError(error, variables, context) {
       console.error(error);
@@ -418,11 +423,12 @@ export default function AttendanceTakerScreen({
     periodAttendanceQuery.refetch();
   }, []);
 
-  if (studentsQuery.isLoading || submitAttendanceMutation.isLoading)
-    return <Spinner visible />;
-
   return (
     <View style={styles.container}>
+      <Spinner
+        visible={studentsQuery.isLoading || submitAttendanceMutation.isLoading}
+      />
+
       {/* Why is this not inside <StudentItem />? Answer: https://stackoverflow.com/q/62825753/9990365 */}
       <RemarksEditor
         student={studentForRemarks}
