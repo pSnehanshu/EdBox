@@ -56,4 +56,4 @@ RUN eas whoami
 
 # Try to build android app
 WORKDIR /home/ubuntu/schooltalk/apps/app
-RUN eas build --platform android --profile preview --local
+RUN NODE_OPTIONS='-r dotenv/config' eas build --platform android --profile preview --local
