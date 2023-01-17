@@ -50,7 +50,7 @@ function GroupItem(props: GroupItemProps) {
       style={({ pressed }) => {
         return {
           ...styles.chatGroup,
-          backgroundColor: pressed ? "rgb(210, 230, 255)" : undefined,
+          opacity: pressed ? 0.5 : 1,
         };
       }}
       onPress={props.onClick}
