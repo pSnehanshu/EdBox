@@ -94,7 +94,7 @@ export default function ChatsListScreen() {
 
     return _.sortBy(groups, (group) => {
       const t = groupTimeMapping[group.identifier];
-      return t ?? new Date();
+      return t ?? new Date("1970-01-01T00:00:00Z"); // This is to keep empty chats at the bottom
     }).reverse();
   }, [groupTimeMapping, groups?.length]);
 
@@ -102,6 +102,7 @@ export default function ChatsListScreen() {
     <SafeAreaView style={styles.container}>
       <List
         data={sortedGroups}
+        keyExtractor={(g) => g.identifier}
         renderItem={({ item: group }) => (
           <GroupItem
             group={group}
