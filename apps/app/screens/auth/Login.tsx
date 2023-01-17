@@ -50,17 +50,16 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
               keyboardType="email-address"
               autoComplete="email"
             />
+            <Button
+              title="Generate OTP"
+              onPress={() => {
+                requestOtp.mutate({
+                  email,
+                  schoolId: school.id,
+                });
+              }}
+            />
           </View>
-
-          <Button
-            title="Generate OTP"
-            onPress={() => {
-              requestOtp.mutate({
-                email,
-                schoolId: school.id,
-              });
-            }}
-          />
         </>
       ) : (
         <>
@@ -73,18 +72,17 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
               autoFocus
               keyboardType="number-pad"
             />
+            <Button
+              title="Login"
+              onPress={() =>
+                submitOTP.mutate({
+                  email,
+                  otp,
+                  schoolId: school.id,
+                })
+              }
+            />
           </View>
-
-          <Button
-            title="Login"
-            onPress={() =>
-              submitOTP.mutate({
-                email,
-                otp,
-                schoolId: school.id,
-              })
-            }
-          />
         </>
       )}
     </View>
