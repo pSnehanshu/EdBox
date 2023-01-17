@@ -1,8 +1,4 @@
 import { useNavigation } from "@react-navigation/native";
-import {
-  createNativeStackNavigator,
-  NativeStackScreenProps,
-} from "@react-navigation/native-stack";
 import { format, isToday, isYesterday, isThisYear } from "date-fns";
 import _ from "lodash";
 import { useEffect, useMemo, useState } from "react";
@@ -10,25 +6,8 @@ import { SafeAreaView, StyleSheet, Pressable, Image } from "react-native";
 import { Group } from "schooltalk-shared/types";
 import { Message } from "schooltalk-shared/types";
 import { List, Text, View } from "../../components/Themed";
-import { ChatsTabParamList } from "../../types";
 import { useMessages } from "../../utils/messages-repository";
 import { trpc } from "../../utils/trpc";
-
-const ChatStack = createNativeStackNavigator<ChatsTabParamList>();
-
-export default function ChatsTabScreen() {
-  return (
-    <ChatStack.Navigator initialRouteName="ChatList">
-      <ChatStack.Screen
-        name="ChatList"
-        component={ChatsListScreen}
-        options={{
-          headerShown: false,
-        }}
-      />
-    </ChatStack.Navigator>
-  );
-}
 
 interface GroupItemProps {
   onClick?: () => void;
@@ -97,10 +76,7 @@ function GroupItem(props: GroupItemProps) {
   );
 }
 
-function ChatsListScreen({}: NativeStackScreenProps<
-  ChatsTabParamList,
-  "ChatList"
->) {
+export default function ChatsListScreen() {
   const navigation = useNavigation();
   const {
     isLoading,

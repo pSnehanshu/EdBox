@@ -8,13 +8,14 @@ import {
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { ColorSchemeName, Pressable } from "react-native";
 import * as WebBrowser from "expo-web-browser";
+import { useContext } from "react";
 import Colors from "../constants/Colors";
-import useColorScheme, { ColorSchemeContext } from "../utils/useColorScheme";
+import { ColorSchemeContext } from "../utils/useColorScheme";
 import { useSchool } from "../utils/useSchool";
 import LoginScreen from "../screens/auth/Login";
 import PreLoginScreen from "../screens/auth/PreLogin";
 import HomeTabScreen from "../screens/HomeTabScreen";
-import ChatsTabScreen from "../screens/chat/ChatsTabScreen";
+import ChatsListScreen from "../screens/chat/ChatsTabScreen";
 import { RootStackParamList, RootTabParamList } from "../types";
 import { useCurrentUser } from "../utils/auth";
 import LinkingConfiguration from "./LinkingConfiguration";
@@ -25,7 +26,6 @@ import { navigationRef } from "./navRef";
 import RoutineScreen from "../screens/routine/RoutineScreen";
 import AttendanceTakerScreen from "../screens/attendance/AttendanceTakerScreen";
 import { View } from "../components/Themed";
-import { useContext } from "react";
 
 export default function Navigation({
   colorScheme,
@@ -173,7 +173,7 @@ function BottomTabNavigator() {
       />
       <BottomTab.Screen
         name="ChatsTab"
-        component={ChatsTabScreen}
+        component={ChatsListScreen}
         options={{
           title: `Chats ${socket.isConnected ? "" : "(connecting...)"}`,
           headerTitle: "Chats",
