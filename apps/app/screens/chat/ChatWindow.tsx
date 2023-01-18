@@ -84,13 +84,14 @@ export default function ChatWindowScreen({
         onEndReachedThreshold={1}
         initialNumToRender={10}
         ListFooterComponent={chatEndElement}
+        ListHeaderComponent={<View style={styles.messagesHeadElement} />}
       />
 
       <View style={styles.composer}>
         <TextInput
           value={messageText}
           placeholder="Message"
-          onChangeText={(t) => setMessageText(t)}
+          onChangeText={setMessageText}
           style={styles.composerText}
         />
 
@@ -117,11 +118,16 @@ const styles = StyleSheet.create({
   messages: {
     flexGrow: 1,
   },
+  messagesHeadElement: {
+    height: 16,
+  },
   composer: {
     flex: 0,
     flexDirection: "row",
     width: "100%",
     padding: 8,
+    borderTopColor: "gray",
+    borderTopWidth: 0.5,
   },
   composerText: {
     width: "80%",
