@@ -28,6 +28,9 @@ import StudentRoutineScreen from "../screens/routine/role-wise-routine/StudentRo
 import AttendanceTakerScreen from "../screens/attendance/AttendanceTakerScreen";
 import { View } from "../components/Themed";
 import { getUserRole } from "schooltalk-shared/misc";
+import { trpc } from "../utils/trpc";
+import Toast from "react-native-toast-message";
+import { useDB } from "../utils/db";
 
 export default function Navigation({
   colorScheme,
@@ -111,6 +114,40 @@ function BottomTabNavigator() {
   const { scheme, change } = useContext(ColorSchemeContext);
   const socket = useSocket();
   const school = useSchool();
+  const utils = trpc.useContext();
+  const db = useDB();
+  const logoutMutation = trpc.auth.logout.useMutation({
+    onSuccess() {
+      Toast.show({
+        type: "success",
+        text1: "You have been logged out",
+        position: "top",
+      });
+      utils.auth.whoami.invalidate();
+
+      // Clear all SQLite data
+      db.transaction(
+        (tx) => {
+          tx.executeSql("DELETE FROM messages");
+          tx.executeSql("DELETE FROM groups");
+        },
+        (error) => {
+          console.error("Failed to delete all SQLite data", error);
+        },
+        () => {
+          console.log("Deleted all SQLite data!");
+        }
+      );
+    },
+    onError(error, variables, context) {
+      Toast.show({
+        type: "error",
+        text1: "Failed to logout",
+        text2: "Please try again later",
+        position: "top",
+      });
+    },
+  });
   const { user } = useCurrentUser();
   const role = user ? getUserRole(user) : "none";
 
@@ -173,6 +210,20 @@ function BottomTabNavigator() {
                       ? "moon-waning-crescent"
                       : "weather-sunny"
                   }
+                  size={25}
+                  color={Colors[scheme].text}
+                  style={{ marginRight: 15 }}
+                />
+              </Pressable>
+
+              <Pressable
+                onPress={() => logoutMutation.mutate()}
+                style={({ pressed }) => ({
+                  opacity: pressed ? 0.5 : 1,
+                })}
+              >
+                <MaterialCommunityIcons
+                  name="power"
                   size={25}
                   color={Colors[scheme].text}
                   style={{ marginRight: 15 }}

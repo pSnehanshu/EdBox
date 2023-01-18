@@ -71,7 +71,7 @@ export function useCurrentUser() {
 
   useEffect(() => {
     (async () => {
-      if (!whoami.isLoading) {
+      if (!whoami.isFetching) {
         if (whoami.isError) {
           const error = whoami.error;
           if (error.data?.code === "UNAUTHORIZED") {
@@ -88,7 +88,7 @@ export function useCurrentUser() {
         }
       }
     })();
-  }, [whoami.isLoading]);
+  }, [whoami.isFetching]);
 
   return {
     isLoggedIn: !!user,

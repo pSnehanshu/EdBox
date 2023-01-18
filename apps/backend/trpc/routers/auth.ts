@@ -119,6 +119,23 @@ const authRouter = router({
   whoami: authProcedure.query(({ ctx }) =>
     _.omit(ctx.user, ["password", "otp", "otp_expiry", "School"])
   ),
+  logout: authProcedure.mutation(async ({ ctx }) => {
+    try {
+      await prisma.loginSession.delete({
+        where: {
+          id: ctx.session.id,
+        },
+      });
+
+      return null;
+    } catch (error) {
+      console.error("Logout failed", error);
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: (error as any)?.message ?? "Something went wrong",
+      });
+    }
+  }),
 });
 
 export default authRouter;
