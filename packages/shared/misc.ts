@@ -1,9 +1,23 @@
 import { z } from "zod";
-import { Month } from "@prisma/client";
 import { getYear, getMonth, getDate } from "date-fns";
 import type { UnserializedUser, User } from "./types";
 
-export const NumberMonthMapping: Record<number, Month> = {
+const MonthSchema = z.enum([
+  "jan",
+  "feb",
+  "mar",
+  "apr",
+  "may",
+  "jun",
+  "jul",
+  "aug",
+  "sep",
+  "oct",
+  "nov",
+  "dec",
+]);
+
+export const NumberMonthMapping: Record<number, z.infer<typeof MonthSchema>> = {
   0: "jan",
   1: "feb",
   2: "mar",
@@ -60,7 +74,7 @@ export function getUserRole(user: UnserializedUser | User) {
 export const dateOfAttendance = z
   .object({
     year: z.number().int(),
-    month: z.nativeEnum(Month),
+    month: MonthSchema,
     day: z.number().int().min(1).max(31),
   })
   .default(() => {
