@@ -11,7 +11,6 @@ import {
   FlatList as DefaultList,
 } from "react-native";
 import { Card as CardRNE } from "@rneui/base";
-
 import Colors from "../constants/Colors";
 import useColorScheme from "../utils/useColorScheme";
 
@@ -83,10 +82,15 @@ export function TextInput(props: TextInputProps) {
     { light: lightColor, dark: darkColor },
     "background"
   );
+  const placeholderTextColor = useThemeColor(
+    { light: lightColor, dark: darkColor },
+    "placeholderColor"
+  );
 
   return (
     <DefaultTextInput
       style={[{ color, backgroundColor }, style]}
+      placeholderTextColor={placeholderTextColor}
       {...otherProps}
     />
   );
