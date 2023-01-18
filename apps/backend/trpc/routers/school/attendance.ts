@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { AttendanceStatus, Month } from "@prisma/client";
 import { everyLimit } from "schooltalk-shared/async";
-import { NumberMonthMapping } from "schooltalk-shared/mics";
+import { NumberMonthMapping } from "schooltalk-shared/misc";
 import { authProcedure, router, teacherProcedure } from "../../trpc";
 import prisma from "../../../prisma";
 import { TRPCError } from "@trpc/server";

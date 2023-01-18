@@ -28,7 +28,7 @@ import { RootStackScreenProps } from "../../types";
 import { trpc } from "../../utils/trpc";
 import useColorScheme from "../../utils/useColorScheme";
 import { format, getDate, getMonth, getYear } from "date-fns";
-import { NumberMonthMapping } from "schooltalk-shared/mics";
+import { NumberMonthMapping } from "schooltalk-shared/misc";
 
 /** Height of a student row */
 const STUDENT_ITEM_HEIGHT: number = 200;

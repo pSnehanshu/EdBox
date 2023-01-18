@@ -2,7 +2,7 @@ import { DayOfWeek } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { getDate, getMonth, getYear } from "date-fns";
 import _ from "lodash";
-import { NumberMonthMapping } from "schooltalk-shared/mics";
+import { NumberMonthMapping } from "schooltalk-shared/misc";
 import { z } from "zod";
 import prisma from "../../../prisma";
 import { authProcedure, router, teacherProcedure } from "../../trpc";
