@@ -23,9 +23,11 @@ import { SocketProvider, useSocket } from "../utils/socketio";
 import { MessagesProvider } from "../utils/messages-repository";
 import ChatWindowScreen from "../screens/chat/ChatWindow";
 import { navigationRef } from "./navRef";
-import RoutineScreen from "../screens/routine/RoutineScreen";
+import TeacherRoutineScreen from "../screens/routine/role-wise-routine/TeacherRoutineScreen";
+import StudentRoutineScreen from "../screens/routine/role-wise-routine/StudentRoutineScreen";
 import AttendanceTakerScreen from "../screens/attendance/AttendanceTakerScreen";
 import { View } from "../components/Themed";
+import { getUserRole } from "schooltalk-shared/misc";
 
 export default function Navigation({
   colorScheme,
@@ -109,6 +111,15 @@ function BottomTabNavigator() {
   const { scheme, change } = useContext(ColorSchemeContext);
   const socket = useSocket();
   const school = useSchool();
+  const { user } = useCurrentUser();
+  const role = user ? getUserRole(user) : "none";
+
+  const RoutineScreen =
+    role === "teacher"
+      ? TeacherRoutineScreen
+      : role === "student"
+      ? StudentRoutineScreen
+      : () => <></>;
 
   return (
     <BottomTab.Navigator
@@ -188,22 +199,24 @@ function BottomTabNavigator() {
           ),
         }}
       />
-      <BottomTab.Screen
-        name="Routine"
-        component={RoutineScreen}
-        options={{
-          title: "Routine",
-          headerShown: true,
-          tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons
-              name="timetable"
-              size={30}
-              style={{ marginBottom: -3 }}
-              color={color}
-            />
-          ),
-        }}
-      />
+      {role === "student" || role === "teacher" ? (
+        <BottomTab.Screen
+          name="Routine"
+          component={RoutineScreen}
+          options={{
+            title: "Routine",
+            headerShown: true,
+            tabBarIcon: ({ color }) => (
+              <MaterialCommunityIcons
+                name="timetable"
+                size={30}
+                style={{ marginBottom: -3 }}
+                color={color}
+              />
+            ),
+          }}
+        />
+      ) : null}
     </BottomTab.Navigator>
   );
 }

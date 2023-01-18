@@ -1,4 +1,6 @@
-import type { Month } from "@prisma/client";
+import { z } from "zod";
+import { Month } from "@prisma/client";
+import { getYear, getMonth, getDate } from "date-fns";
 import type { UnserializedUser, User } from "./types";
 
 export const NumberMonthMapping: Record<number, Month> = {
@@ -53,3 +55,19 @@ export function getUserRole(user: UnserializedUser | User) {
   // This user has no role
   return "none";
 }
+
+/** The format for defining date of attendance */
+export const dateOfAttendance = z
+  .object({
+    year: z.number().int(),
+    month: z.nativeEnum(Month),
+    day: z.number().int().min(1).max(31),
+  })
+  .default(() => {
+    const now = new Date();
+    return {
+      year: getYear(now),
+      month: NumberMonthMapping[getMonth(now)],
+      day: getDate(now),
+    };
+  });

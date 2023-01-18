@@ -50,5 +50,32 @@ export const teacherMiddleware = t.middleware(({ ctx, next }) => {
   });
 });
 
+/** Verify that the user is a student */
+export const studentMiddleware = t.middleware(({ ctx, next }) => {
+  if (!ctx.session) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "You are not logged in",
+    });
+  }
+
+  if (getUserRole(ctx.session.User) !== "student") {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Not a student",
+    });
+  }
+
+  return next({
+    ctx: {
+      ...ctx,
+      student: ctx.session.User.Student!,
+    },
+  });
+});
+
 /** Procedure with `teacherMiddleware` pre-applied */
 export const teacherProcedure = authProcedure.use(teacherMiddleware);
+
+/** Procedure with `studentMiddleware` pre-applied */
+export const studentProcedure = authProcedure.use(studentMiddleware);

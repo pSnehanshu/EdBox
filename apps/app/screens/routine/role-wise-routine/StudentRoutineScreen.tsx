@@ -1,63 +1,34 @@
-import { ComponentProps, useCallback, useState, memo, useMemo } from "react";
-import {
-  RefreshControl,
-  StyleProp,
-  StyleSheet,
-  useWindowDimensions,
-  ViewStyle,
-} from "react-native";
+import { useCallback, useState, memo, useMemo } from "react";
+import { RefreshControl, StyleSheet, useWindowDimensions } from "react-native";
 import _ from "lodash";
 import { format } from "date-fns";
 import { TabView, TabBar } from "react-native-tab-view";
 import Spinner from "react-native-loading-spinner-overlay";
 import Timeline from "react-native-timeline-flatlist";
 import { useNavigation } from "@react-navigation/native";
-import { DayOfWeek, RoutinePeriod } from "schooltalk-shared/types";
-import { trpc } from "../../utils/trpc";
-import { Text } from "../../components/Themed";
-import useColorScheme from "../../utils/useColorScheme";
-
-type TabRoute = { key: DayOfWeek; title: string };
-type RenderSceneProp = ComponentProps<typeof TabView<TabRoute>>["renderScene"];
-type RenderTabBarProp = NonNullable<
-  ComponentProps<typeof TabView<TabRoute>>["renderTabBar"]
->;
-type TimelineOnPressProp = NonNullable<
-  ComponentProps<typeof Timeline>["onEventPress"]
->;
-interface DayRoutineProps {
-  day: DayOfWeek;
-  periods: RoutinePeriod[];
-  onRefresh: () => void;
-  isFetching: boolean;
-}
-type GapPeriod = {
-  is_gap: true;
-  start_hour: number;
-  start_min: number;
-  end_hour: number;
-  end_min: number;
-};
-
-/** Copied from https://github.com/Eugnis/react-native-timeline-flatlist/blob/9f08aaaf50fcd95398e1b47d0d39f063e7d2825f/lib/index.d.ts#L5-L17 */
-type TimelineData<T = unknown> = {
-  time?: string;
-  title?: string;
-  description?: any;
-  lineWidth?: number;
-  lineColor?: string;
-  eventContainerStyle?: StyleProp<ViewStyle>;
-  circleSize?: number;
-  circleColor?: string;
-  dotColor?: string;
-  icon?: string | React.ReactNode;
-  position?: "left" | "right";
-  data: T;
-};
+import { StudentRoutinePeriod } from "schooltalk-shared/types";
+import { trpc } from "../../../utils/trpc";
+import { Text } from "../../../components/Themed";
+import useColorScheme from "../../../utils/useColorScheme";
+import {
+  DayRoutineProps,
+  GapPeriod,
+  RenderSceneProp,
+  RenderTabBarProp,
+  RoutineRoutes,
+  TimelineData,
+  TimelineOnPressProp,
+} from "./routine-types";
 
 const DayRoutine = memo(
-  ({ periods, isFetching, onRefresh }: DayRoutineProps) => {
-    type CustomPeriodType = (RoutinePeriod & { is_gap: false }) | GapPeriod;
+  ({
+    periods,
+    isFetching,
+    onRefresh,
+  }: DayRoutineProps<StudentRoutinePeriod>) => {
+    type CustomPeriodType =
+      | (StudentRoutinePeriod & { is_gap: false })
+      | GapPeriod;
     type RoutineTimelineData = TimelineData<CustomPeriodType>;
 
     const data = useMemo<RoutineTimelineData[]>(() => {
@@ -177,18 +148,8 @@ const DayRoutine = memo(
   }
 );
 
-const routes: TabRoute[] = [
-  { key: "mon", title: "Monday" },
-  { key: "tue", title: "Tuesday" },
-  { key: "wed", title: "Wednesday" },
-  { key: "thu", title: "Thursday" },
-  { key: "fri", title: "Friday" },
-  { key: "sat", title: "Saturday" },
-  { key: "sun", title: "Sunday" },
-];
-
-export default function RoutineScreen() {
-  const routineQuery = trpc.school.routine.fetchForTeacher.useQuery({});
+export default function StudentRoutineScreen() {
+  const routineQuery = trpc.school.routine.fetchForStudent.useQuery({});
   const layout = useWindowDimensions();
   const color = useColorScheme();
   const [index, setIndex] = useState(
@@ -237,7 +198,7 @@ export default function RoutineScreen() {
 
   return (
     <TabView
-      navigationState={{ index, routes }}
+      navigationState={{ index, routes: RoutineRoutes }}
       renderScene={renderScene}
       onIndexChange={setIndex}
       initialLayout={{ width: layout.width }}

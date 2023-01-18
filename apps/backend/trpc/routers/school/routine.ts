@@ -1,24 +1,20 @@
 import { DayOfWeek } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
-import { getDate, getMonth, getYear } from "date-fns";
 import _ from "lodash";
-import { NumberMonthMapping } from "schooltalk-shared/misc";
+import { dateOfAttendance } from "schooltalk-shared/misc";
 import { z } from "zod";
 import prisma from "../../../prisma";
-import { authProcedure, router, teacherProcedure } from "../../trpc";
+import {
+  authProcedure,
+  router,
+  studentProcedure,
+  teacherProcedure,
+} from "../../trpc";
 import classStdRouter from "./class-std";
 
 const routineRouter = router({
   fetchForTeacher: teacherProcedure
-    .input(
-      z.object({
-        dateOfAttendance: z
-          .string()
-          .datetime()
-          .default(new Date().toISOString())
-          .transform((v) => new Date(v)),
-      })
-    )
+    .input(z.object({ dateOfAttendance }))
     .query(async ({ input, ctx }) => {
       const periods = await prisma.routinePeriod.findMany({
         where: {
@@ -53,9 +49,9 @@ const routineRouter = router({
           },
           AttendancesTaken: {
             where: {
-              year: getYear(input.dateOfAttendance),
-              month: NumberMonthMapping[getMonth(input.dateOfAttendance)],
-              day: getDate(input.dateOfAttendance),
+              year: input.dateOfAttendance.year,
+              month: input.dateOfAttendance.month,
+              day: input.dateOfAttendance.day,
             },
             select: {
               id: true,
@@ -63,6 +59,102 @@ const routineRouter = router({
           },
         },
       });
+
+      return _.groupBy(periods, "day_of_week") as Record<
+        DayOfWeek,
+        typeof periods | undefined
+      >;
+    }),
+  fetchForStudent: studentProcedure
+    .input(z.object({ dateOfAttendance }))
+    .query(async ({ input, ctx }) => {
+      if (typeof ctx.student.section !== "number") {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Student not part of any section",
+        });
+      }
+
+      // Fetch routine via student -> batch -> class
+      const student = await prisma.student.findFirst({
+        where: {
+          id: ctx.student.id,
+          CurrentBatch: {
+            is_active: true,
+            Class: {
+              is_active: true,
+            },
+          },
+          User: {
+            is_active: true,
+          },
+        },
+        select: {
+          CurrentBatch: {
+            select: {
+              Class: {
+                select: {
+                  Periods: {
+                    where: {
+                      section_id: ctx.student.section,
+                      school_id: ctx.user.school_id,
+                      is_active: true,
+                      Subject: {
+                        is_active: true,
+                      },
+                    },
+                    include: {
+                      Subject: {
+                        select: {
+                          id: true,
+                          name: true,
+                        },
+                      },
+                      Class: {
+                        select: {
+                          numeric_id: true,
+                          name: true,
+                        },
+                      },
+                      Section: {
+                        select: {
+                          numeric_id: true,
+                          name: true,
+                        },
+                      },
+                      AttendancesTaken: {
+                        where: {
+                          year: input.dateOfAttendance.year,
+                          month: input.dateOfAttendance.month,
+                          day: input.dateOfAttendance.day,
+                        },
+                        select: {
+                          id: true,
+                          StudentAttendances: {
+                            where: {
+                              student_id: ctx.student.id,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!student) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message:
+            "Student not found. Either batch, class, or user is inactive",
+        });
+      }
+
+      const periods = student.CurrentBatch?.Class?.Periods ?? [];
 
       return _.groupBy(periods, "day_of_week") as Record<
         DayOfWeek,

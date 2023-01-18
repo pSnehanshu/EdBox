@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { AttendanceStatus, Month } from "@prisma/client";
+import { AttendanceStatus } from "@prisma/client";
 import { everyLimit } from "schooltalk-shared/async";
-import { NumberMonthMapping } from "schooltalk-shared/misc";
+import { dateOfAttendance, NumberMonthMapping } from "schooltalk-shared/misc";
 import { authProcedure, router, teacherProcedure } from "../../trpc";
 import prisma from "../../../prisma";
 import { TRPCError } from "@trpc/server";
@@ -139,11 +139,7 @@ const attendanceRouter = router({
     .input(
       z.object({
         periodId: z.string().cuid(),
-        date: z.object({
-          year: z.number().int(),
-          month: z.nativeEnum(Month),
-          day: z.number().int().min(1).max(31),
-        }),
+        date: dateOfAttendance,
       })
     )
     .query(async ({ input, ctx }) => {

@@ -27,11 +27,19 @@ export type UnserializedUser = Extract<
 
 export type School = RouterOutput["school"]["schoolBasicInfo"];
 
-export type Routine = RouterOutput["school"]["routine"]["fetchForTeacher"];
+export type TeacherRoutine =
+  RouterOutput["school"]["routine"]["fetchForTeacher"];
+export type TeacherRoutinePeriod = ArrayElement<
+  NonNullable<TeacherRoutine["mon"]>
+>;
 
-export type RoutinePeriod = ArrayElement<NonNullable<Routine["mon"]>>;
+export type StudentRoutine =
+  RouterOutput["school"]["routine"]["fetchForStudent"];
+export type StudentRoutinePeriod = ArrayElement<
+  NonNullable<StudentRoutine["mon"]>
+>;
 
-export type DayOfWeek = RoutinePeriod["day_of_week"];
+export type DayOfWeek = TeacherRoutinePeriod["day_of_week"];
 
 export type Student = ArrayElement<
   RouterOutput["school"]["routine"]["fetchPeriodStudents"]["students"]
