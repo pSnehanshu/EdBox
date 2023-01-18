@@ -4,6 +4,7 @@ import { useCurrentUser } from "../utils/auth";
 import { Text, View } from "./Themed";
 import { Pressable, StyleSheet } from "react-native";
 import type { Message } from "schooltalk-shared/types";
+import { getTextColorForGivenBG, getUserColor } from "schooltalk-shared/misc";
 
 interface ChatMessageProps {
   message: Message;
@@ -30,13 +31,18 @@ function ChatMessage({ message }: ChatMessageProps) {
 
   const sender = message.Sender;
   const isSentByMe = user.id === sender.id;
-  const color = isSentByMe ? "black" : "white";
+
+  const userColor = useMemo(
+    () => getUserColor(message.Sender.id),
+    [message.Sender.id]
+  );
+  const color = useMemo(() => getTextColorForGivenBG(userColor), [userColor]);
 
   return (
     <View
       style={{
         ...styles.container,
-        backgroundColor: isSentByMe ? "lightblue" : "green",
+        backgroundColor: userColor,
         width: "75%",
         alignSelf: isSentByMe ? "flex-end" : "flex-start",
       }}

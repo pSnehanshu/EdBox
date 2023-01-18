@@ -85,3 +85,57 @@ export const dateOfAttendance = z
       day: getDate(now),
     };
   });
+
+/**
+ * Given a user Id, compute their color. Based on https://stackoverflow.com/a/16348977/9990365
+ * @param userId
+ */
+export function getUserColor(userId: string) {
+  let hash = 0;
+  for (let i = 0; i < userId.length; i++) {
+    hash = userId.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  let colour = "#";
+  for (let i = 0; i < 3; i++) {
+    let value = (hash >> (i * 8)) & 0xff;
+    colour += ("00" + value.toString(16)).slice(-2);
+  }
+  return colour;
+}
+
+/**
+ * Given a hex color, returns the R,G,B components. Based on https://stackoverflow.com/a/5624139/9990365
+ * @param hexColor Only long form (6 digit) is supported
+ */
+function hexToRgb(hexColor: string) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hexColor);
+  return result
+    ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
+    : null;
+}
+
+/**
+ * Given a hex color, returns a color with good contrast
+ * @param hexColor Only long form (6 digit) is supported
+ * @param defaultColor The color to use, in case invalid hex value is given
+ */
+export function getTextColorForGivenBG(
+  hexColor: string,
+  defaultColor: "black" | "white" = "black"
+) {
+  const rgb = hexToRgb(hexColor);
+  if (!rgb) return defaultColor;
+
+  const { r, g, b } = rgb;
+
+  // src: http://jsfiddle.net/alex_ball/PXJ2C/
+  const brightness = Math.round((r * 299 + g * 587 + b * 114) / 1000);
+  if (brightness > 125) {
+    return "black";
+  }
+  return "white";
+}
