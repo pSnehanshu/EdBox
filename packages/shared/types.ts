@@ -1,6 +1,7 @@
 import type { School as DBSchool, User as DBUser } from "@prisma/client";
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "../../apps/backend/trpc";
+import type { Context } from "../../apps/backend/trpc/context";
 
 export type ArrayElement<ArrayType extends readonly unknown[]> =
   ArrayType extends readonly (infer ElementType)[] ? ElementType : never;
@@ -18,6 +19,11 @@ export interface Group {
 }
 
 export type User = RouterOutput["auth"]["whoami"];
+
+export type UnserializedUser = Extract<
+  Context,
+  { session: object }
+>["session"]["User"];
 
 export type School = RouterOutput["school"]["schoolBasicInfo"];
 

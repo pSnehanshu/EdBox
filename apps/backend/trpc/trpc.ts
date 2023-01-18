@@ -1,4 +1,5 @@
 import { initTRPC, TRPCError } from "@trpc/server";
+import { getUserRole } from "schooltalk-shared/misc";
 import type { Context } from "./context";
 
 export const t = initTRPC.context<Context>().create();
@@ -27,8 +28,14 @@ export const authProcedure = t.procedure.use(
 
 /** Verify that the user is a teacher */
 export const teacherMiddleware = t.middleware(({ ctx, next }) => {
-  // Check if teacher
-  if (!ctx.session?.User.Teacher) {
+  if (!ctx.session) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "You are not logged in",
+    });
+  }
+
+  if (getUserRole(ctx.session.User) !== "teacher") {
     throw new TRPCError({
       code: "FORBIDDEN",
       message: "Not a teacher",
@@ -38,7 +45,7 @@ export const teacherMiddleware = t.middleware(({ ctx, next }) => {
   return next({
     ctx: {
       ...ctx,
-      teacher: ctx.session.User.Teacher,
+      teacher: ctx.session.User.Teacher!,
     },
   });
 });
