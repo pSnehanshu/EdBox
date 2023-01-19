@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
 import config from "../config";
 import { useRef, createContext, useEffect, useContext, useState } from "react";
-import { useAuthToken } from "./auth";
+import { getAuthToken } from "./auth";
 import { useSchool } from "../utils/useSchool";
 import { SocketClient } from "../types";
 
@@ -23,7 +23,6 @@ interface SocketProviderProps {
 export function SocketProvider({ children }: SocketProviderProps) {
   const school = useSchool();
   const socket = useRef<SocketClient>();
-  const authToken = useAuthToken();
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
@@ -32,7 +31,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
     (async () => {
       socket.current = io(`${config.backendHost}/${school.id}`, {
         auth: {
-          token: (await authToken.get()) ?? undefined,
+          token: (await getAuthToken()) ?? undefined,
         },
       });
 

@@ -8,7 +8,7 @@ import useCachedResources from "./utils/useCachedResources";
 import useColorScheme, { ColorSchemeContext } from "./utils/useColorScheme";
 import Navigation from "./navigation";
 import { useSchool } from "./utils/useSchool";
-import { useAuthToken } from "./utils/auth";
+import { getAuthToken } from "./utils/auth";
 import config from "./config";
 import { DBProvider } from "./utils/db";
 import Toast from "react-native-toast-message";
@@ -29,7 +29,6 @@ function AppWithSchool() {
 }
 
 export default function App() {
-  const authToken = useAuthToken();
   const isLoadingComplete = useCachedResources();
   const [colorScheme, setColorScheme] = useState<"light" | "dark">("light");
 
@@ -53,7 +52,7 @@ export default function App() {
           url: `${config.backendHost}/trpc`,
           async headers() {
             return {
-              "x-session-id": (await authToken.get()) ?? undefined,
+              "x-session-id": (await getAuthToken()) ?? undefined,
             };
           },
         }),

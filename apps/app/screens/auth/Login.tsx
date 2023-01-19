@@ -5,14 +5,14 @@ import { useSchool } from "../../utils/useSchool";
 import { RootStackScreenProps } from "../../types";
 import { trpc } from "../../utils/trpc";
 import Spinner from "react-native-loading-spinner-overlay";
-import { useAuthToken } from "../../utils/auth";
+import { useSetAuthToken } from "../../utils/auth";
 
 export default function LoginScreen({}: RootStackScreenProps<"Login">) {
   const school = useSchool();
-  const authToken = useAuthToken();
   const [step, setStep] = useState<"requestOTP" | "submitOTP">("requestOTP");
   const [email, setEmail] = useState("");
   const [otp, setOTP] = useState("");
+  const setAuthToken = useSetAuthToken();
   const requestOtp = trpc.auth.requestEmailLoginOTP.useMutation({
     onSuccess() {
       setStep("submitOTP");
@@ -20,7 +20,7 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
   });
   const submitOTP = trpc.auth.submitEmailLoginOTP.useMutation({
     onSuccess(data) {
-      authToken.set(data.token, new Date(data.expiry_date));
+      setAuthToken(data.token, new Date(data.expiry_date));
     },
   });
 
@@ -44,7 +44,7 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
             <Text>Email address:</Text>
             <TextInput
               value={email}
-              onChangeText={(v) => setEmail(v)}
+              onChangeText={setEmail}
               placeholder="Email address"
               autoFocus
               keyboardType="email-address"
@@ -67,7 +67,7 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
             <Text>Enter OTP:</Text>
             <TextInput
               value={otp}
-              onChangeText={(v) => setOTP(v)}
+              onChangeText={setOTP}
               placeholder="OTP"
               autoFocus
               keyboardType="number-pad"
