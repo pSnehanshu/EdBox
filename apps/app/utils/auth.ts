@@ -2,9 +2,11 @@ import { isPast, isValid, parseISO } from "date-fns";
 import * as SecureStore from "expo-secure-store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCallback, useEffect, useState } from "react";
-import { trpc } from "./trpc";
+import Toast from "react-native-toast-message";
 import type { User } from "schooltalk-shared/types";
+import { trpc } from "./trpc";
 import { AUTH_TOKEN, AUTH_TOKEN_EXPIRY, USER } from "./async-storage-keys";
+import { useDB } from "./db";
 
 /**
  * Get the current token
@@ -46,6 +48,50 @@ export function useSetAuthToken() {
     },
     []
   );
+}
+
+export function useLogout() {
+  const utils = trpc.useContext();
+  const db = useDB();
+  const logoutMutation = trpc.auth.logout.useMutation({
+    async onSuccess() {
+      Toast.show({
+        type: "success",
+        text1: "You have been logged out",
+        position: "top",
+      });
+
+      await SecureStore.deleteItemAsync(AUTH_TOKEN);
+      await SecureStore.deleteItemAsync(AUTH_TOKEN_EXPIRY);
+      await SecureStore.deleteItemAsync(USER);
+
+      await utils.auth.whoami.invalidate();
+
+      // Clear all SQLite data
+      db.transaction(
+        (tx) => {
+          tx.executeSql("DELETE FROM messages");
+          tx.executeSql("DELETE FROM groups");
+        },
+        (error) => {
+          console.error("Failed to delete all SQLite data", error);
+        },
+        () => {
+          console.log("Deleted all SQLite data!");
+        }
+      );
+    },
+    onError(error, variables, context) {
+      Toast.show({
+        type: "error",
+        text1: "Failed to logout",
+        text2: "Please try again later",
+        position: "top",
+      });
+    },
+  });
+
+  return useCallback(() => logoutMutation.mutate(), []);
 }
 
 /**
