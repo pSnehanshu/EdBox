@@ -5,17 +5,7 @@ import { getAuthToken } from "./auth";
 import { useSchool } from "../utils/useSchool";
 import { SocketClient } from "../types";
 
-const SocketContext = createContext<
-  | {
-      isConnected: false;
-    }
-  | {
-      isConnected: true;
-      client: SocketClient;
-    }
->({
-  isConnected: false,
-});
+const SocketContext = createContext<SocketClient | undefined>(undefined);
 
 interface SocketProviderProps {
   children: JSX.Element | JSX.Element[];
@@ -23,6 +13,7 @@ interface SocketProviderProps {
 export function SocketProvider({ children }: SocketProviderProps) {
   const school = useSchool();
   const socket = useRef<SocketClient>();
+  const [, setSocketIsSet] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
@@ -35,6 +26,8 @@ export function SocketProvider({ children }: SocketProviderProps) {
         },
       });
 
+      setSocketIsSet(true);
+
       socket.current.on("connect", () => setIsConnected(true));
       socket.current.on("disconnect", () => setIsConnected(false));
     })();
@@ -46,19 +39,12 @@ export function SocketProvider({ children }: SocketProviderProps) {
   }, [school?.id]);
 
   return (
-    <SocketContext.Provider
-      value={
-        isConnected && socket.current
-          ? { client: socket.current, isConnected }
-          : { isConnected: false }
-      }
-    >
+    <SocketContext.Provider value={socket.current}>
       {children}
     </SocketContext.Provider>
   );
 }
 
 export function useSocket() {
-  const socket = useContext(SocketContext);
-  return socket;
+  return useContext(SocketContext);
 }

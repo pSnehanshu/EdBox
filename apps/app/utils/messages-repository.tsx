@@ -358,14 +358,14 @@ export function MessagesProvider({ children }: MessagesProviderProp) {
   const db = useDB();
   const socket = useSocket();
   const messages = useRef<MessagesRepository>();
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    if (socket.isConnected && !isLoaded) {
-      messages.current = new MessagesRepository(db, socket.client);
+    if (socket && !messages.current) {
+      messages.current = new MessagesRepository(db, socket);
       setIsLoaded(true);
     }
-  }, [socket.isConnected]);
+  }, [socket]);
 
   if (!messages.current) return null;
 

@@ -19,7 +19,7 @@ import ChatsListScreen from "../screens/chat/ChatsTabScreen";
 import { RootStackParamList, RootTabParamList } from "../types";
 import { useCurrentUser, useLogout } from "../utils/auth";
 import LinkingConfiguration from "./LinkingConfiguration";
-import { SocketProvider, useSocket } from "../utils/socketio";
+import { SocketProvider } from "../utils/socketio";
 import { MessagesProvider } from "../utils/messages-repository";
 import ChatWindowScreen from "../screens/chat/ChatWindow";
 import { navigationRef } from "./navRef";
@@ -109,7 +109,6 @@ const BottomTab = createBottomTabNavigator<RootTabParamList>();
 
 function BottomTabNavigator() {
   const { scheme, change } = useContext(ColorSchemeContext);
-  const socket = useSocket();
   const school = useSchool();
   const logout = useLogout();
   const { user } = useCurrentUser();
@@ -201,12 +200,12 @@ function BottomTabNavigator() {
         name="ChatsTab"
         component={ChatsListScreen}
         options={{
-          title: `Chats ${socket.isConnected ? "" : "(connecting...)"}`,
+          title: "Chats",
           headerTitle: "Chats",
           headerShown: true,
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons
-              name={socket.isConnected ? "chat" : "chat-remove"}
+              name="chat"
               size={30}
               style={{ marginBottom: -3 }}
               color={color}
