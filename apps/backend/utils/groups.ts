@@ -73,8 +73,12 @@ async function getAutoGroups(
 
           // Subject group
           subjectGroups.push({
-            identifier: getSubjectGroupIdentifier(school.id, Subject.id),
-            name: `${Subject.name} - Class ${className} (${sectionName})`,
+            identifier: getSubjectGroupIdentifier(
+              school.id,
+              Subject.id,
+              Class.numeric_id
+            ),
+            name: `${Subject.name} - Class ${className}`,
           });
         }
       );
@@ -159,8 +163,12 @@ async function getAutoGroups(
           _.uniqBy(section.Periods, (p) => p.subject_id).forEach(
             ({ Subject }) => {
               subjectGroups.push({
-                name: `${Subject.name} - Class ${className} (${sectionName})`,
-                identifier: getSubjectGroupIdentifier(school.id, Subject.id),
+                name: `${Subject.name} - Class ${className}`,
+                identifier: getSubjectGroupIdentifier(
+                  school.id,
+                  Subject.id,
+                  Class.numeric_id
+                ),
               });
             }
           );

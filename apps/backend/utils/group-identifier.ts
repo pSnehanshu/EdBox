@@ -32,6 +32,7 @@ export const SchoolGroupIdentifier = AutoGroupIdentifierBase.extend({
 export const SubjectGroupIdentifier = AutoGroupIdentifierBase.extend({
   ty: z.literal("su"),
   su: cuid,
+  cl: int,
 });
 
 export const AutoGroupIdentifier = z.discriminatedUnion("ty", [
@@ -148,12 +149,17 @@ export function getSectionGroupIdentifier(
   return convertObjectToOrderedQueryString(id);
 }
 
-export function getSubjectGroupIdentifier(schoolId: string, subjectId: string) {
+export function getSubjectGroupIdentifier(
+  schoolId: string,
+  subjectId: string,
+  classNum: number
+) {
   const id: z.infer<typeof SubjectGroupIdentifier> = {
     gd: "a",
     ty: "su",
     sc: schoolId,
     su: subjectId,
+    cl: classNum,
   };
   return convertObjectToOrderedQueryString(id);
 }
@@ -169,6 +175,6 @@ export function getGroupIdentifier(idf: GroupIdentifier) {
     case "se":
       return getSectionGroupIdentifier(idf.sc, idf.cl, idf.se);
     case "su":
-      return getSubjectGroupIdentifier(idf.sc, idf.su);
+      return getSubjectGroupIdentifier(idf.sc, idf.su, idf.cl);
   }
 }

@@ -529,24 +529,37 @@ const messagingRouter = router({
           identifier,
         };
       } else {
-        const subject = await prisma.subject.findFirst({
-          where: {
-            id: input.groupIdentifier.su,
-            school_id: input.groupIdentifier.sc,
-            is_active: true,
-          },
-          select: {
-            name: true,
-          },
-        });
+        const [subject, Class] = await Promise.all([
+          prisma.subject.findFirst({
+            where: {
+              id: input.groupIdentifier.su,
+              school_id: input.groupIdentifier.sc,
+              is_active: true,
+            },
+            select: {
+              name: true,
+            },
+          }),
+          prisma.classStd.findUnique({
+            where: {
+              numeric_id_school_id: {
+                numeric_id: input.groupIdentifier.cl,
+                school_id: input.groupIdentifier.sc,
+              },
+            },
+          }),
+        ]);
 
-        if (!subject) {
+        if (!subject || !Class) {
           throw new TRPCError({
             code: "NOT_FOUND",
           });
         }
 
-        return { name: subject.name, identifier };
+        return {
+          name: `${subject.name} - Class ${Class.name ?? Class.numeric_id}`,
+          identifier,
+        };
       }
     }),
   fetchGroupMessages: authProcedure
