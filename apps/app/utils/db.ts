@@ -1,5 +1,12 @@
 import * as SQLite from "expo-sqlite";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  createElement,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { migrations as allMigrations } from "./db-migration";
 
 const dbContext = createContext<SQLite.WebSQLDatabase | null>(null);
@@ -26,7 +33,13 @@ export function DBProvider({ children }: DBProviderProps) {
 
   if (!isOpen || !db.current) return null;
 
-  return <dbContext.Provider value={db.current}>{children}</dbContext.Provider>;
+  return createElement(
+    dbContext.Provider,
+    {
+      value: db.current,
+    },
+    children
+  );
 }
 
 /**

@@ -1,6 +1,7 @@
 import { WebSQLDatabase } from "expo-sqlite";
 import {
   createContext,
+  createElement,
   useCallback,
   useContext,
   useEffect,
@@ -369,11 +370,10 @@ export function MessagesProvider({ children }: MessagesProviderProp) {
 
   if (!messages.current) return null;
 
-  return (
-    <MessagesRepositoryContext.Provider value={messages.current}>
-      {children}
-    </MessagesRepositoryContext.Provider>
-  );
+  return createElement(MessagesRepositoryContext.Provider, {
+    value: messages.current,
+    children,
+  });
 }
 
 export function useMessages() {

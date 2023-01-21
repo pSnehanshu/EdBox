@@ -1,8 +1,15 @@
 import { io } from "socket.io-client";
 import config from "../config";
-import { useRef, createContext, useEffect, useContext, useState } from "react";
+import {
+  useRef,
+  createContext,
+  createElement,
+  useEffect,
+  useContext,
+  useState,
+} from "react";
 import { getAuthToken } from "./auth";
-import { useSchool } from "../utils/useSchool";
+import { useSchool } from "./useSchool";
 import { SocketClient } from "../types";
 
 const SocketContext = createContext<SocketClient | undefined>(undefined);
@@ -38,10 +45,12 @@ export function SocketProvider({ children }: SocketProviderProps) {
     };
   }, [school?.id]);
 
-  return (
-    <SocketContext.Provider value={socket.current}>
-      {children}
-    </SocketContext.Provider>
+  return createElement(
+    SocketContext.Provider,
+    {
+      value: socket.current,
+    },
+    children
   );
 }
 
