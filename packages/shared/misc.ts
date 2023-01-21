@@ -140,7 +140,7 @@ export function getTextColorForGivenBG(
   return "white";
 }
 
-export async function allSettled<T extends readonly unknown[] | []>(
+export async function PromiseAllSettled<T extends readonly unknown[] | []>(
   promises: T
 ): Promise<{ -readonly [P in keyof T]: PromiseSettledResult<Awaited<T[P]>> }> {
   let wrappedPromises = promises.map((p) =>

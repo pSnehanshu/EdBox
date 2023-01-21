@@ -2,7 +2,7 @@ import { inferRouterInputs } from "@trpc/server";
 import { ResultSet, WebSQLDatabase } from "expo-sqlite";
 import _ from "lodash";
 import { useEffect, useMemo, useState } from "react";
-import { allSettled } from "schooltalk-shared/misc";
+import { PromiseAllSettled } from "schooltalk-shared/misc";
 import type { Group } from "schooltalk-shared/types";
 import { AppRouter } from "../../backend/trpc";
 import { useDB, useReadDB } from "./db";
@@ -176,7 +176,7 @@ export async function fetchUnseenGroupsInfo(
 
             // Now fetch the groups
             try {
-              const queryResults = await allSettled(
+              const queryResults = await PromiseAllSettled(
                 unsavedGroupIds.map((identifier) =>
                   trpcUtils.client.school.messaging.fetchGroupInfo.query({
                     groupIdentifier: identifier,

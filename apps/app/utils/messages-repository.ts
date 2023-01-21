@@ -1,4 +1,4 @@
-import { ResultSet, WebSQLDatabase } from "expo-sqlite";
+import type { WebSQLDatabase } from "expo-sqlite";
 import {
   createContext,
   createElement,
@@ -9,8 +9,7 @@ import {
   useState,
 } from "react";
 import { Subject } from "rxjs";
-import type { Group, Message } from "schooltalk-shared/types";
-import { allSettled } from "schooltalk-shared/misc";
+import type { Message } from "schooltalk-shared/types";
 import { SocketClient } from "../types";
 import { useDB } from "./db";
 import { useSocket } from "./socketio";
@@ -19,7 +18,7 @@ import _ from "lodash";
 import BigInt from "big-integer";
 import Toast from "react-native-toast-message";
 import { navigationRef } from "../navigation/navRef";
-import { fetchUnseenGroupsInfo } from "./groups";
+import { fetchUnseenGroupsInfo, insertGroups } from "./groups";
 
 export class MessagesRepository {
   /** The observable representing all received messages */
@@ -297,64 +296,22 @@ export class MessagesRepository {
    */
   insertMessagesToDB(
     messages: Message[],
-    trpcUtils?: ReturnType<typeof trpc.useContext>
+    trpcUtils: ReturnType<typeof trpc.useContext>
   ): Promise<void> {
     return new Promise<void>(async (resolve, reject) => {
       if (messages.length < 1) return resolve();
 
-      // Fetch missing group infos
-      const insertGroupsArgs: Array<string | number | null> = [];
-      let insertGroupsSQL = "";
-
-      // Flag to check whether `fetchUnseenGroupsInfo` was executed sucessfully
-      let groupsInfoFetchedFromServer = false;
-
-      // If `trpcUtils` isn't passed down, we can't fetch from server, hence skip
-      if (trpcUtils) {
-        try {
-          // INSERT OR "REPLACE" because we are fetchig fresh data from server.
-          // Even if record already exists, replace because we have fresher data
-          insertGroupsSQL = `INSERT OR REPLACE INTO groups (id, obj) VALUES `;
-
-          // Fetch all unseen groups, groups that don't exist in the local SQLite
-          const groupsToInsert = await fetchUnseenGroupsInfo(
-            this.db,
-            messages.map((m) => m.group_identifier),
-            trpcUtils
-          );
-
-          // If there are any, generate SQL to insert their info
-          if (Object.values(groupsToInsert).length > 0) {
-            insertGroupsSQL += Object.entries(groupsToInsert)
-              .map(([identifier, obj]) => {
-                insertGroupsArgs.push(
-                  identifier,
-                  obj ? JSON.stringify(obj) : "{}"
-                );
-                return "(?,?)";
-              })
-              .join(",");
-
-            groupsInfoFetchedFromServer = true;
-          }
-        } catch (error) {
-          console.error("Failed to fetch groups from DB", error);
-          groupsInfoFetchedFromServer = false;
-        }
-      }
-
-      // If we didn't (or failed to) fetch groups from server, insert blank objects
-      if (!groupsInfoFetchedFromServer) {
-        // INSERT OR "IGNORE"... because here we're trying to insert empty objects.
-        // Incase the group already exists in SQLite, we don't want to overwrite.
-        insertGroupsSQL = `INSERT OR IGNORE INTO groups (id, obj) VALUES `;
-        insertGroupsSQL += messages
-          .map((m) => {
-            // TODO: Insert the actual group object, and change to INSERT OR REPLACE
-            insertGroupsArgs.push(m.group_identifier, "{}");
-            return "(?,?)";
-          })
-          .join(",");
+      try {
+        // Fetch all unseen groups, groups that don't exist in the local SQLite
+        const groupsToInsert = await fetchUnseenGroupsInfo(
+          this.db,
+          messages.map((m) => m.group_identifier),
+          trpcUtils
+        );
+        // Insert those groups
+        insertGroups(this.db, Object.values(groupsToInsert));
+      } catch (error) {
+        console.error("Failed to fetch or save unseen groups", error);
       }
 
       const insertMessagesArgs: Array<string | number | null> = [];
@@ -373,10 +330,6 @@ export class MessagesRepository {
 
       this.db.transaction(
         (tx) => {
-          // 1. Create all unknown groups
-          tx.executeSql(insertGroupsSQL, insertGroupsArgs);
-
-          // 2. Insert the messages
           tx.executeSql(insertMessagesSQL, insertMessagesArgs);
         },
         reject,
