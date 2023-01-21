@@ -60,7 +60,11 @@ function RootNavigator() {
   return isLoggedIn ? (
     <SocketProvider>
       <MessagesProvider>
-        <Stack.Navigator>
+        <Stack.Navigator
+          screenOptions={{
+            animation: "fade_from_bottom",
+          }}
+        >
           <Stack.Screen
             name="Root"
             component={BottomTabNavigator}
