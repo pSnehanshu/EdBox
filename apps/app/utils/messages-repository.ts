@@ -19,6 +19,7 @@ import _ from "lodash";
 import BigInt from "big-integer";
 import Toast from "react-native-toast-message";
 import { navigationRef } from "../navigation/navRef";
+import { fetchUnseenGroupsInfo } from "./groups";
 
 export class MessagesRepository {
   /** The observable representing all received messages */
@@ -316,7 +317,8 @@ export class MessagesRepository {
           insertGroupsSQL = `INSERT OR REPLACE INTO groups (id, obj) VALUES `;
 
           // Fetch all unseen groups, groups that don't exist in the local SQLite
-          const groupsToInsert = await this.fetchUnseenGroupsInfo(
+          const groupsToInsert = await fetchUnseenGroupsInfo(
+            this.db,
             messages.map((m) => m.group_identifier),
             trpcUtils
           );
@@ -379,77 +381,6 @@ export class MessagesRepository {
         },
         reject,
         resolve
-      );
-    });
-  }
-
-  /**
-   * Fetch those groups which aren't already saved in the DB.
-   * @param _requiredGroupIds
-   * @param trpcUtils
-   * @returns
-   */
-  fetchUnseenGroupsInfo(
-    _requiredGroupIds: string[],
-    trpcUtils: ReturnType<typeof trpc.useContext>
-  ): Promise<Record<string, Group | null>> {
-    const requiredGroupIds = _.uniq(_requiredGroupIds);
-
-    return new Promise((resolve, reject) => {
-      this.db.exec(
-        [
-          {
-            sql: `SELECT id FROM groups WHERE id IN (${requiredGroupIds
-              .map(() => "?")
-              .join(",")})`,
-            args: requiredGroupIds,
-          },
-        ],
-        true,
-        async (err, resultSet) => {
-          if (err) {
-            reject(err);
-          } else if (resultSet && resultSet.length > 0) {
-            // @ts-ignore
-            if (!resultSet[0].error) {
-              const result = resultSet[0] as ResultSet;
-
-              const unsavedGroupIds = requiredGroupIds.filter((identifier) => {
-                return result.rows.some((g) => g.id === identifier);
-              });
-
-              // Now fetch the groups
-              try {
-                const queryResults = await allSettled(
-                  unsavedGroupIds.map((identifier) =>
-                    trpcUtils.client.school.messaging.fetchGroupInfo.query({
-                      groupIdentifier: identifier,
-                    })
-                  )
-                );
-
-                // Generate final result
-                const finalMap: Awaited<
-                  ReturnType<typeof this.fetchUnseenGroupsInfo>
-                > = {};
-
-                queryResults.map((result, i) => {
-                  const groupId = unsavedGroupIds[i];
-                  if (result.status === "fulfilled") {
-                    finalMap[groupId] = result.value;
-                  } else {
-                    finalMap[groupId] = null;
-                  }
-                });
-
-                resolve(finalMap);
-              } catch (error) {
-                console.error("trpc fetch group error", error);
-                reject(error);
-              }
-            }
-          }
-        }
       );
     });
   }

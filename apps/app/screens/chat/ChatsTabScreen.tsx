@@ -6,6 +6,7 @@ import { SafeAreaView, StyleSheet, Pressable, Image } from "react-native";
 import { Group } from "schooltalk-shared/types";
 import { Message } from "schooltalk-shared/types";
 import { List, Text, View } from "../../components/Themed";
+import { useGetUserGroups } from "../../utils/groups";
 import { useMessages } from "../../utils/messages-repository";
 import { trpc } from "../../utils/trpc";
 
@@ -78,11 +79,7 @@ function GroupItem(props: GroupItemProps) {
 
 export default function ChatsListScreen() {
   const navigation = useNavigation();
-  const {
-    isLoading,
-    isError,
-    data: groups,
-  } = trpc.school.messaging.fetchGroups.useQuery({
+  const { isLoading, groups } = useGetUserGroups({
     page: 1,
   });
   const [groupTimeMapping, setGroupTimeMapping] = useState<
