@@ -33,8 +33,7 @@ export const migrations: Migration[] = [
         obj TEXT NOT NULL,
         created_at TEXT NOT NULL,
         group_identifier TEXT NOT NULL,
-        sort_key INTEGER NOT NULL,
-        FOREIGN KEY(group_identifier) REFERENCES groups(id) ON DELETE CASCADE
+        sort_key INTEGER NOT NULL
       );`
       );
       tx.executeSql(

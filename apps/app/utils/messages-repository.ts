@@ -1,4 +1,4 @@
-import { WebSQLDatabase } from "expo-sqlite";
+import { ResultSet, WebSQLDatabase } from "expo-sqlite";
 import {
   createContext,
   createElement,
@@ -9,7 +9,8 @@ import {
   useState,
 } from "react";
 import { Subject } from "rxjs";
-import type { Message } from "schooltalk-shared/types";
+import type { Group, Message } from "schooltalk-shared/types";
+import { allSettled } from "schooltalk-shared/misc";
 import { SocketClient } from "../types";
 import { useDB } from "./db";
 import { useSocket } from "./socketio";
@@ -165,13 +166,12 @@ export class MessagesRepository {
           // Start loading
           setIsLoading(true);
 
-          const serverPromise = utils.school.messaging.fetchGroupMessages.fetch(
-            {
+          const serverPromise =
+            utils.client.school.messaging.fetchGroupMessages.query({
               groupIdentifier,
               limit,
               cursor,
-            }
-          );
+            });
 
           // 1. Fetch from local
           const dbMessages = await this.fetchMessagesFromDB({
@@ -187,7 +187,7 @@ export class MessagesRepository {
           const serverMessages = await serverPromise;
 
           // 4. Save server data into local
-          await this.insertMessagesToDB(serverMessages.messages);
+          await this.insertMessagesToDB(serverMessages.messages, utils);
 
           // 5. Re-fetch from local
           const dbMessages2 = await this.fetchMessagesFromDB({
@@ -294,33 +294,81 @@ export class MessagesRepository {
    * Insert messages (and groups) to SQLite.
    * @param messages
    */
-  insertMessagesToDB(messages: Message[]): Promise<void> {
-    if (messages.length < 1) return Promise.resolve();
+  insertMessagesToDB(
+    messages: Message[],
+    trpcUtils?: ReturnType<typeof trpc.useContext>
+  ): Promise<void> {
+    return new Promise<void>(async (resolve, reject) => {
+      if (messages.length < 1) return resolve();
 
-    const insertGroupsArgs: Array<string | number | null> = [];
-    const insertGroupsSQL = `INSERT OR IGNORE INTO groups (id, obj) VALUES ${messages
-      .map((m) => {
-        // TODO: Insert the actual group object, and change to INSERT OR REPLACE
-        insertGroupsArgs.push(m.group_identifier, "{}");
-        return "(?,?)";
-      })
-      .join(",")}`;
+      // Fetch missing group infos
+      const insertGroupsArgs: Array<string | number | null> = [];
+      let insertGroupsSQL = "";
 
-    const insertMessagesArgs: Array<string | number | null> = [];
-    const insertMessagesSQL = `INSERT OR REPLACE INTO messages (id, obj, created_at, group_identifier, sort_key) VALUES ${messages
-      .map((m) => {
-        insertMessagesArgs.push(
-          m.id,
-          JSON.stringify(m),
-          m.created_at,
-          m.group_identifier,
-          m.sort_key
-        );
-        return "(?,?,?,?,?)";
-      })
-      .join(",")}`;
+      // Flag to check whether `fetchUnseenGroupsInfo` was executed sucessfully
+      let groupsInfoFetchedFromServer = false;
 
-    return new Promise<void>((resolve, reject) => {
+      // If `trpcUtils` isn't passed down, we can't fetch from server, hence skip
+      if (trpcUtils) {
+        try {
+          // INSERT OR "REPLACE" because we are fetchig fresh data from server.
+          // Even if record already exists, replace because we have fresher data
+          insertGroupsSQL = `INSERT OR REPLACE INTO groups (id, obj) VALUES `;
+
+          // Fetch all unseen groups, groups that don't exist in the local SQLite
+          const groupsToInsert = await this.fetchUnseenGroupsInfo(
+            messages.map((m) => m.group_identifier),
+            trpcUtils
+          );
+
+          // If there are any, generate SQL to insert their info
+          if (Object.values(groupsToInsert).length > 0) {
+            insertGroupsSQL += Object.entries(groupsToInsert)
+              .map(([identifier, obj]) => {
+                insertGroupsArgs.push(
+                  identifier,
+                  obj ? JSON.stringify(obj) : "{}"
+                );
+                return "(?,?)";
+              })
+              .join(",");
+
+            groupsInfoFetchedFromServer = true;
+          }
+        } catch (error) {
+          console.error("Failed to fetch groups from DB", error);
+          groupsInfoFetchedFromServer = false;
+        }
+      }
+
+      // If we didn't (or failed to) fetch groups from server, insert blank objects
+      if (!groupsInfoFetchedFromServer) {
+        // INSERT OR "IGNORE"... because here we're trying to insert empty objects.
+        // Incase the group already exists in SQLite, we don't want to overwrite.
+        insertGroupsSQL = `INSERT OR IGNORE INTO groups (id, obj) VALUES `;
+        insertGroupsSQL += messages
+          .map((m) => {
+            // TODO: Insert the actual group object, and change to INSERT OR REPLACE
+            insertGroupsArgs.push(m.group_identifier, "{}");
+            return "(?,?)";
+          })
+          .join(",");
+      }
+
+      const insertMessagesArgs: Array<string | number | null> = [];
+      const insertMessagesSQL = `INSERT OR REPLACE INTO messages (id, obj, created_at, group_identifier, sort_key) VALUES ${messages
+        .map((m) => {
+          insertMessagesArgs.push(
+            m.id,
+            JSON.stringify(m),
+            m.created_at,
+            m.group_identifier,
+            m.sort_key
+          );
+          return "(?,?,?,?,?)";
+        })
+        .join(",")}`;
+
       this.db.transaction(
         (tx) => {
           // 1. Create all unknown groups
@@ -331,6 +379,77 @@ export class MessagesRepository {
         },
         reject,
         resolve
+      );
+    });
+  }
+
+  /**
+   * Fetch those groups which aren't already saved in the DB.
+   * @param _requiredGroupIds
+   * @param trpcUtils
+   * @returns
+   */
+  fetchUnseenGroupsInfo(
+    _requiredGroupIds: string[],
+    trpcUtils: ReturnType<typeof trpc.useContext>
+  ): Promise<Record<string, Group | null>> {
+    const requiredGroupIds = _.uniq(_requiredGroupIds);
+
+    return new Promise((resolve, reject) => {
+      this.db.exec(
+        [
+          {
+            sql: `SELECT id FROM groups WHERE id IN (${requiredGroupIds
+              .map(() => "?")
+              .join(",")})`,
+            args: requiredGroupIds,
+          },
+        ],
+        true,
+        async (err, resultSet) => {
+          if (err) {
+            reject(err);
+          } else if (resultSet && resultSet.length > 0) {
+            // @ts-ignore
+            if (!resultSet[0].error) {
+              const result = resultSet[0] as ResultSet;
+
+              const unsavedGroupIds = requiredGroupIds.filter((identifier) => {
+                return result.rows.some((g) => g.id === identifier);
+              });
+
+              // Now fetch the groups
+              try {
+                const queryResults = await allSettled(
+                  unsavedGroupIds.map((identifier) =>
+                    trpcUtils.client.school.messaging.fetchGroupInfo.query({
+                      groupIdentifier: identifier,
+                    })
+                  )
+                );
+
+                // Generate final result
+                const finalMap: Awaited<
+                  ReturnType<typeof this.fetchUnseenGroupsInfo>
+                > = {};
+
+                queryResults.map((result, i) => {
+                  const groupId = unsavedGroupIds[i];
+                  if (result.status === "fulfilled") {
+                    finalMap[groupId] = result.value;
+                  } else {
+                    finalMap[groupId] = null;
+                  }
+                });
+
+                resolve(finalMap);
+              } catch (error) {
+                console.error("trpc fetch group error", error);
+                reject(error);
+              }
+            }
+          }
+        }
       );
     });
   }
