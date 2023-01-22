@@ -70,6 +70,51 @@ export function getUserRole(user: UnserializedUser | User) {
   return "none";
 }
 
+/** Get appropritate display name based on gender and role */
+export function getDisplayName(user: UnserializedUser | User) {
+  const role = getUserRole(user);
+  const sirMam = user.gender
+    ? user.gender === "Female"
+      ? "ma'am"
+      : "sir"
+    : "sir";
+
+  function onlySurnameFull(fullName: string) {
+    const splitted = fullName.split(" ");
+    if (splitted.length < 2) return fullName;
+    const surname = splitted.pop();
+    if (!surname) return fullName;
+    const initials = splitted.map((s) => s[0].toUpperCase()).join(".");
+    return `${initials}. ${surname}`;
+  }
+
+  function onlyFirstNameFull(fullName: string) {
+    const splitted = fullName.split(" ");
+    if (splitted.length < 2) return fullName;
+    const firstName = splitted.shift();
+    if (!firstName) return fullName;
+    const initials = splitted.map((s) => s[0].toUpperCase()).join(".");
+    return `${firstName} ${initials}.`;
+  }
+
+  switch (role) {
+    case "principal":
+      return `Principal ${sirMam}`;
+    case "vice_principal":
+      return `Vice principal ${sirMam}`;
+    case "teacher":
+      return `${onlySurnameFull(user.name)} ${sirMam}`;
+    case "staff":
+      return `${user.name} (staff member)`;
+    case "student":
+      return onlyFirstNameFull(user.name);
+    case "parent":
+      return `${onlySurnameFull(user.name)} (guardian)`;
+    default:
+      return user.name;
+  }
+}
+
 /** The format for defining date of attendance */
 export const dateOfAttendance = z
   .object({
@@ -140,6 +185,10 @@ export function getTextColorForGivenBG(
   return "white";
 }
 
+/**
+ * Handwritten implementation of Promise.allSettled because React Native doesn't support it.
+ * @param promises Array of promises
+ */
 export async function PromiseAllSettled<T extends readonly unknown[] | []>(
   promises: T
 ): Promise<{ -readonly [P in keyof T]: PromiseSettledResult<Awaited<T[P]>> }> {

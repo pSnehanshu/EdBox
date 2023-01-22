@@ -3,6 +3,7 @@ import { format, isToday, isYesterday, isThisYear } from "date-fns";
 import _ from "lodash";
 import { useEffect, useMemo, useState } from "react";
 import { SafeAreaView, StyleSheet, Pressable, Image } from "react-native";
+import { getDisplayName } from "schooltalk-shared/misc";
 import { Group } from "schooltalk-shared/types";
 import { Message } from "schooltalk-shared/types";
 import { List, Text, View } from "../../components/Themed";
@@ -64,9 +65,12 @@ function GroupItem(props: GroupItemProps) {
         <Text style={styles.chatGroupName}>{props.group.name}</Text>
         <Text style={styles.chatGroupLastMessage}>
           {lastMessage
-            ? _.truncate(`${lastMessage.Sender?.name}: ${lastMessage.text}`, {
-                length: 45,
-              })
+            ? _.truncate(
+                `${getDisplayName(lastMessage.Sender)}: ${lastMessage.text}`,
+                {
+                  length: 45,
+                }
+              )
             : "Tap to chat"}
         </Text>
       </View>

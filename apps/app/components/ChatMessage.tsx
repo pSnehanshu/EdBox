@@ -4,7 +4,11 @@ import { useCurrentUser } from "../utils/auth";
 import { Text, View } from "./Themed";
 import { Pressable, StyleSheet } from "react-native";
 import type { Message } from "schooltalk-shared/types";
-import { getTextColorForGivenBG, getUserColor } from "schooltalk-shared/misc";
+import {
+  getDisplayName,
+  getTextColorForGivenBG,
+  getUserColor,
+} from "schooltalk-shared/misc";
 
 interface ChatMessageProps {
   message: Message;
@@ -54,7 +58,9 @@ function ChatMessage({ message }: ChatMessageProps) {
             alert(`User: ${sender.name}\nID: ${sender.id}`);
           }}
         >
-          <Text style={{ ...styles.senderName, color }}>{sender.name}</Text>
+          <Text style={{ ...styles.senderName, color }}>
+            {getDisplayName(sender)}
+          </Text>
         </Pressable>
       )}
       <Text style={{ ...styles.body, color }}>{message.text}</Text>
