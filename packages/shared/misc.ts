@@ -32,42 +32,52 @@ export const NumberMonthMapping: Record<number, z.infer<typeof MonthSchema>> = {
   11: "dec",
 };
 
+export enum StaticRole {
+  none,
+  principal,
+  vice_principal,
+  teacher,
+  student,
+  staff,
+  parent,
+}
+
 /**
  * Given a user, get the role
  * @param user The user in question
  * @returns The role
  */
-export function getUserRole(user: UnserializedUser | User) {
+export function getUserRole(user: UnserializedUser | User): StaticRole {
   // Principal and vice principal have highest priority
   if (
     user.Staff &&
     (user.Staff.role === "principal" || user.Staff.role === "vice_principal")
   ) {
-    return user.Staff.role;
+    return StaticRole[user.Staff.role];
   }
 
   // Teacher has 2nd highest priority
   if (user.Teacher) {
-    return "teacher";
+    return StaticRole.teacher;
   }
 
   // Student has 3rd highest priority
   if (user.Student) {
-    return "student";
+    return StaticRole.student;
   }
 
   // Non-principal staff has 4th highest priority
   if (user.Staff) {
-    return "staff";
+    return StaticRole.staff;
   }
 
   // Parents has the 5th highest priority
   if (user.Parent) {
-    return "parent";
+    return StaticRole.parent;
   }
 
   // This user has no role
-  return "none";
+  return StaticRole.none;
 }
 
 /** Get appropritate display name based on gender and role */
@@ -98,17 +108,17 @@ export function getDisplayName(user: UnserializedUser | User) {
   }
 
   switch (role) {
-    case "principal":
+    case StaticRole.principal:
       return `Principal ${sirMam}`;
-    case "vice_principal":
+    case StaticRole.vice_principal:
       return `Vice principal ${sirMam}`;
-    case "teacher":
+    case StaticRole.teacher:
       return `${onlySurnameFull(user.name)} ${sirMam}`;
-    case "staff":
+    case StaticRole.staff:
       return `${user.name} (staff member)`;
-    case "student":
+    case StaticRole.student:
       return onlyFirstNameFull(user.name);
-    case "parent":
+    case StaticRole.parent:
       return `${onlySurnameFull(user.name)} (guardian)`;
     default:
       return user.name;

@@ -1,5 +1,5 @@
 import { initTRPC, TRPCError } from "@trpc/server";
-import { getUserRole } from "schooltalk-shared/misc";
+import { getUserRole, StaticRole } from "schooltalk-shared/misc";
 import type { Context } from "./context";
 
 export const t = initTRPC.context<Context>().create();
@@ -35,7 +35,7 @@ export const teacherMiddleware = t.middleware(({ ctx, next }) => {
     });
   }
 
-  if (getUserRole(ctx.session.User) !== "teacher") {
+  if (getUserRole(ctx.session.User) !== StaticRole.teacher) {
     throw new TRPCError({
       code: "FORBIDDEN",
       message: "Not a teacher",
@@ -59,7 +59,7 @@ export const studentMiddleware = t.middleware(({ ctx, next }) => {
     });
   }
 
-  if (getUserRole(ctx.session.User) !== "student") {
+  if (getUserRole(ctx.session.User) !== StaticRole.student) {
     throw new TRPCError({
       code: "FORBIDDEN",
       message: "Not a student",

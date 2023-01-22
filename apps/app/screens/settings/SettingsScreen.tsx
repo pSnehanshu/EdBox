@@ -10,7 +10,7 @@ import { List, Text, View } from "../../components/Themed";
 import { ColorSchemeContext } from "../../utils/useColorScheme";
 import { useCallback, useContext, useMemo } from "react";
 import { useCurrentUser, useLogout } from "../../utils/auth";
-import { getUserRole } from "schooltalk-shared/misc";
+import { getUserRole, StaticRole } from "schooltalk-shared/misc";
 import { SettingsOption } from "../../types";
 
 export function SettingsScreen() {
@@ -18,7 +18,7 @@ export function SettingsScreen() {
   const iconColor = colorScheme === "dark" ? "white" : "black";
   const navigation = useNavigation();
   const { user } = useCurrentUser();
-  const role = user ? getUserRole(user) : "none";
+  const role = user ? getUserRole(user) : StaticRole.none;
   const logout = useLogout();
 
   const settingsOptions = useMemo<SettingsOption[]>(() => {
@@ -39,7 +39,7 @@ export function SettingsScreen() {
       },
     });
 
-    if (role === "principal" || role === "vice_principal") {
+    if (role === StaticRole.principal || role === StaticRole.vice_principal) {
       items.push({
         title: "School settings",
         subtitle: "Manage classes, subjects, routine etc.",
