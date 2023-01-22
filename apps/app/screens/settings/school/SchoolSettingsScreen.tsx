@@ -8,11 +8,13 @@ import {
 } from "react-native";
 import { getUserRole } from "schooltalk-shared/misc";
 import { List, Text, View } from "../../../components/Themed";
-import { SettingsOption } from "../../../types";
+import { RootStackScreenProps, SettingsOption } from "../../../types";
 import { useCurrentUser } from "../../../utils/auth";
 import useColorScheme from "../../../utils/useColorScheme";
 
-export default function SchoolSettingsScreen() {
+export default function SchoolSettingsScreen({
+  navigation,
+}: RootStackScreenProps<"SchoolSettings">) {
   const colorScheme = useColorScheme();
   const iconColor = colorScheme === "dark" ? "white" : "black";
   const { user } = useCurrentUser();
@@ -27,7 +29,7 @@ export default function SchoolSettingsScreen() {
         subtitle: "Manage classes and sections in your school",
         icon: <Entypo name="blackboard" size={30} color={iconColor} />,
         onPress() {
-          //
+          navigation.navigate("ClassSectionSettings");
         },
       },
       {
@@ -35,7 +37,7 @@ export default function SchoolSettingsScreen() {
         subtitle: "Add, edit, remove subjects",
         icon: <Entypo name="open-book" size={30} color={iconColor} />,
         onPress() {
-          //
+          navigation.navigate("SubjectsSettings");
         },
       },
       {
@@ -49,7 +51,7 @@ export default function SchoolSettingsScreen() {
           />
         ),
         onPress() {
-          //
+          navigation.navigate("RoutineSettingsScreen");
         },
       },
       {
@@ -57,7 +59,7 @@ export default function SchoolSettingsScreen() {
         subtitle: "Manage teachers, students, staff, and parents",
         icon: <Ionicons name="people-outline" size={30} color={iconColor} />,
         onPress() {
-          //
+          navigation.navigate("PeopleSettings");
         },
       }
     );

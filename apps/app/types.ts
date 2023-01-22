@@ -25,6 +25,10 @@ export type RootStackParamList = {
   AttendanceTaker: { periodId: string };
   NotFound: undefined;
   SchoolSettings: undefined;
+  SubjectsSettings: undefined;
+  ClassSectionSettings: undefined;
+  RoutineSettingsScreen: undefined;
+  PeopleSettings: undefined;
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> =

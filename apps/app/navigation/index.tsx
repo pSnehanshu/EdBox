@@ -30,6 +30,10 @@ import { View } from "../components/Themed";
 import { getUserRole } from "schooltalk-shared/misc";
 import { SettingsScreen } from "../screens/settings/SettingsScreen";
 import SchoolSettingsScreen from "../screens/settings/school/SchoolSettingsScreen";
+import SubjectsSettingsScreen from "../screens/settings/school/SubjectsSettingsScreen";
+import ClassSectionSettingsScreen from "../screens/settings/school/ClassSectionSettingsScreen";
+import { RoutineSettingsScreen } from "../screens/settings/school/RoutineSettingsScreen";
+import { PeopleSettingsScreen } from "../screens/settings/school/PeopleSettingsScreen";
 
 export default function Navigation({
   colorScheme,
@@ -90,14 +94,48 @@ function RootNavigator() {
             }}
           />
           {role === "principal" || role === "vice_principal" ? (
-            <Stack.Screen
-              name="SchoolSettings"
-              component={SchoolSettingsScreen}
-              options={{
-                headerShown: true,
-                title: "School settings",
-              }}
-            />
+            <>
+              <Stack.Screen
+                name="SchoolSettings"
+                component={SchoolSettingsScreen}
+                options={{
+                  headerShown: true,
+                  title: "School settings",
+                }}
+              />
+              <Stack.Screen
+                name="SubjectsSettings"
+                component={SubjectsSettingsScreen}
+                options={{
+                  headerShown: true,
+                  title: "Subjects",
+                }}
+              />
+              <Stack.Screen
+                name="ClassSectionSettings"
+                component={ClassSectionSettingsScreen}
+                options={{
+                  headerShown: true,
+                  title: "Classes & Sections",
+                }}
+              />
+              <Stack.Screen
+                name="RoutineSettingsScreen"
+                component={RoutineSettingsScreen}
+                options={{
+                  headerShown: true,
+                  title: "Routine (Timetable)",
+                }}
+              />
+              <Stack.Screen
+                name="PeopleSettings"
+                component={PeopleSettingsScreen}
+                options={{
+                  headerShown: true,
+                  title: "People",
+                }}
+              />
+            </>
           ) : null}
         </Stack.Navigator>
       </MessagesProvider>
