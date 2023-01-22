@@ -29,6 +29,7 @@ import AttendanceTakerScreen from "../screens/attendance/AttendanceTakerScreen";
 import { View } from "../components/Themed";
 import { getUserRole } from "schooltalk-shared/misc";
 import { SettingsScreen } from "../screens/settings/SettingsScreen";
+import SchoolSettingsScreen from "../screens/settings/school/SchoolSettingsScreen";
 
 export default function Navigation({
   colorScheme,
@@ -54,7 +55,8 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
   const school = useSchool();
-  const { isLoggedIn } = useCurrentUser();
+  const { isLoggedIn, user } = useCurrentUser();
+  const role = user ? getUserRole(user) : "none";
 
   if (!school) return null;
 
@@ -87,6 +89,16 @@ function RootNavigator() {
               title: "Take Attendance",
             }}
           />
+          {role === "principal" || role === "vice_principal" ? (
+            <Stack.Screen
+              name="SchoolSettings"
+              component={SchoolSettingsScreen}
+              options={{
+                headerShown: true,
+                title: "School settings",
+              }}
+            />
+          ) : null}
         </Stack.Navigator>
       </MessagesProvider>
     </SocketProvider>

@@ -11,13 +11,7 @@ import { ColorSchemeContext } from "../../utils/useColorScheme";
 import { useCallback, useContext, useMemo } from "react";
 import { useCurrentUser, useLogout } from "../../utils/auth";
 import { getUserRole } from "schooltalk-shared/misc";
-
-interface SettingsOption {
-  title: string;
-  subtitle?: string;
-  icon?: JSX.Element;
-  onPress?: () => void;
-}
+import { SettingsOption } from "../../types";
 
 export function SettingsScreen() {
   const { scheme: colorScheme, change } = useContext(ColorSchemeContext);
@@ -51,7 +45,7 @@ export function SettingsScreen() {
         subtitle: "Manage classes, subjects, routine etc.",
         icon: <FontAwesome5 name="school" size={25} color={iconColor} />,
         onPress() {
-          alert("School Settings");
+          navigation.navigate("SchoolSettings");
         },
       });
     }

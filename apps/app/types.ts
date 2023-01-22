@@ -24,6 +24,7 @@ export type RootStackParamList = {
   ChatWindow: Group;
   AttendanceTaker: { periodId: string };
   NotFound: undefined;
+  SchoolSettings: undefined;
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> =
@@ -43,3 +44,10 @@ export type RootTabScreenProps<Screen extends keyof RootTabParamList> =
   >;
 
 export type SocketClient = Socket<ServerToClientEvents, ClientToServerEvents>;
+
+export interface SettingsOption {
+  title: string;
+  subtitle?: string;
+  icon?: JSX.Element;
+  onPress?: () => void;
+}
