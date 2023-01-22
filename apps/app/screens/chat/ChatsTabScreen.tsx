@@ -9,7 +9,6 @@ import { Message } from "schooltalk-shared/types";
 import { List, Text, View } from "../../components/Themed";
 import { useGetUserGroups } from "../../utils/groups";
 import { useMessages } from "../../utils/messages-repository";
-import { trpc } from "../../utils/trpc";
 
 interface GroupItemProps {
   onClick?: () => void;

@@ -17,7 +17,7 @@ import PreLoginScreen from "../screens/auth/PreLogin";
 import HomeTabScreen from "../screens/HomeTabScreen";
 import ChatsListScreen from "../screens/chat/ChatsTabScreen";
 import { RootStackParamList, RootTabParamList } from "../types";
-import { useCurrentUser, useLogout } from "../utils/auth";
+import { useCurrentUser } from "../utils/auth";
 import LinkingConfiguration from "./LinkingConfiguration";
 import { SocketProvider } from "../utils/socketio";
 import { MessagesProvider } from "../utils/messages-repository";
@@ -28,6 +28,7 @@ import StudentRoutineScreen from "../screens/routine/role-wise-routine/StudentRo
 import AttendanceTakerScreen from "../screens/attendance/AttendanceTakerScreen";
 import { View } from "../components/Themed";
 import { getUserRole } from "schooltalk-shared/misc";
+import { SettingsScreen } from "../screens/settings/SettingsScreen";
 
 export default function Navigation({
   colorScheme,
@@ -112,9 +113,8 @@ function RootNavigator() {
 const BottomTab = createBottomTabNavigator<RootTabParamList>();
 
 function BottomTabNavigator() {
-  const { scheme, change } = useContext(ColorSchemeContext);
+  const { scheme } = useContext(ColorSchemeContext);
   const school = useSchool();
-  const logout = useLogout();
   const { user } = useCurrentUser();
   const role = user ? getUserRole(user) : "none";
 
@@ -164,38 +164,6 @@ function BottomTabNavigator() {
                   />
                 </Pressable>
               ) : null}
-
-              <Pressable
-                onPress={() => change(scheme === "light" ? "dark" : "light")}
-                style={({ pressed }) => ({
-                  opacity: pressed ? 0.5 : 1,
-                })}
-              >
-                <MaterialCommunityIcons
-                  name={
-                    scheme === "light"
-                      ? "moon-waning-crescent"
-                      : "weather-sunny"
-                  }
-                  size={25}
-                  color={Colors[scheme].text}
-                  style={{ marginRight: 15 }}
-                />
-              </Pressable>
-
-              <Pressable
-                onPress={logout}
-                style={({ pressed }) => ({
-                  opacity: pressed ? 0.5 : 1,
-                })}
-              >
-                <MaterialCommunityIcons
-                  name="power"
-                  size={25}
-                  color={Colors[scheme].text}
-                  style={{ marginRight: 15 }}
-                />
-              </Pressable>
             </View>
           ),
         }}
@@ -205,7 +173,6 @@ function BottomTabNavigator() {
         component={ChatsListScreen}
         options={{
           title: "Chats",
-          headerTitle: "Chats",
           headerShown: true,
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons
@@ -235,6 +202,22 @@ function BottomTabNavigator() {
           }}
         />
       ) : null}
+      <BottomTab.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{
+          title: "Settings",
+          headerShown: true,
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons
+              name="cog"
+              size={30}
+              style={{ marginBottom: -3 }}
+              color={color}
+            />
+          ),
+        }}
+      />
     </BottomTab.Navigator>
   );
 }
