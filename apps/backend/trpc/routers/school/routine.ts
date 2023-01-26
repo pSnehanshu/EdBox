@@ -9,10 +9,37 @@ import {
   router,
   studentProcedure,
   teacherProcedure,
+  principalProcedure,
 } from "../../trpc";
 import classStdRouter from "./class-std";
 
 const routineRouter = router({
+  fetchForSchool: principalProcedure.query(async ({ ctx }) => {
+    const school = await prisma.school.findUnique({
+      where: {
+        id: ctx.user.school_id,
+      },
+      select: {
+        is_active: true,
+        Periods: {
+          include: {
+            Teacher: true,
+            Class: true,
+            Section: true,
+            Subject: true,
+          },
+        },
+      },
+    });
+
+    if (!school || !school.is_active) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+      });
+    }
+
+    return school.Periods;
+  }),
   fetchForTeacher: teacherProcedure
     .input(z.object({ dateOfAttendance }))
     .query(async ({ input, ctx }) => {

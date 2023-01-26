@@ -1,3 +1,107 @@
+import { ComponentProps, useCallback, useState } from "react";
+import { ListRenderItem, useWindowDimensions } from "react-native";
+import { TabBar, TabView } from "react-native-tab-view";
+import { StaticRole } from "schooltalk-shared/misc";
+import { User } from "schooltalk-shared/types";
+import { List, Text, View } from "../../../components/Themed";
+import { trpc } from "../../../utils/trpc";
+import useColorScheme from "../../../utils/useColorScheme";
+
+type TabRoute = { key: keyof typeof StaticRole; title: string };
+type RenderSceneProp = ComponentProps<typeof TabView<TabRoute>>["renderScene"];
+type RenderTabBarProp = NonNullable<
+  ComponentProps<typeof TabView<TabRoute>>["renderTabBar"]
+>;
+
+const Routes: TabRoute[] = [
+  {
+    key: "teacher",
+    title: "Teachers",
+  },
+  {
+    key: "student",
+    title: "Students",
+  },
+  {
+    key: "staff",
+    title: "Staff members",
+  },
+  {
+    key: "parent",
+    title: "Parents",
+  },
+  {
+    key: "principal",
+    title: "Principal",
+  },
+  {
+    key: "vice_principal",
+    title: "Vice Principal",
+  },
+];
+
+interface PeopleListProps {
+  role: StaticRole;
+}
+function PeopleList({ role }: PeopleListProps) {
+  const [page, setPage] = useState(1);
+  const peopleQuery = trpc.school.people.fetchPeople.useQuery({
+    role,
+    page,
+  });
+
+  const renderItem = useCallback<ListRenderItem<User>>(({ item: user }) => {
+    return (
+      <View>
+        <Text>{user.name}</Text>
+      </View>
+    );
+  }, []);
+
+  return (
+    <List
+      onRefresh={peopleQuery.refetch}
+      refreshing={peopleQuery.isFetching}
+      data={peopleQuery.data ?? []}
+      renderItem={renderItem}
+    />
+  );
+}
+
 export function PeopleSettingsScreen() {
-  return <></>;
+  const [index, setIndex] = useState(0);
+  const layout = useWindowDimensions();
+  const color = useColorScheme();
+
+  const renderTabBar = useCallback<RenderTabBarProp>(
+    (props) => (
+      <TabBar
+        {...props}
+        indicatorStyle={{
+          backgroundColor: "#09c",
+        }}
+        style={{
+          backgroundColor: color === "dark" ? "black" : "white",
+          width: "auto",
+        }}
+        labelStyle={{
+          color: color === "dark" ? "white" : "black",
+        }}
+        activeColor="#09c"
+        scrollEnabled
+      />
+    ),
+    [color]
+  );
+
+  return (
+    <TabView
+      navigationState={{ index, routes: Routes }}
+      renderScene={({ route }) => <PeopleList role={StaticRole[route.key]} />}
+      onIndexChange={setIndex}
+      initialLayout={{ width: layout.width }}
+      renderTabBar={renderTabBar}
+      lazy
+    />
+  );
 }

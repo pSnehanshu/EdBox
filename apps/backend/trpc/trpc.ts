@@ -79,3 +79,30 @@ export const teacherProcedure = authProcedure.use(teacherMiddleware);
 
 /** Procedure with `studentMiddleware` pre-applied */
 export const studentProcedure = authProcedure.use(studentMiddleware);
+
+export const principalMiddleware = t.middleware(({ ctx, next }) => {
+  if (!ctx.session) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "You are not logged in",
+    });
+  }
+
+  const role = getUserRole(ctx.session.User);
+
+  if (!(role === StaticRole.principal || role === StaticRole.vice_principal)) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "You are not principal",
+    });
+  }
+
+  return next({
+    ctx: {
+      ...ctx,
+      principal: ctx.session.User.Staff!,
+    },
+  });
+});
+
+export const principalProcedure = authProcedure.use(principalMiddleware);

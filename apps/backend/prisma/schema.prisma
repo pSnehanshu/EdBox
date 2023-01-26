@@ -86,6 +86,7 @@ model Subject {
 
 model ClassStd {
   numeric_id Int             @db.SmallInt
+  order      Float           @default(0) @db.Real
   name       String?         @db.VarChar(50)
   school_id  String          @db.VarChar(32)
   School     School          @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
