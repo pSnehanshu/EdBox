@@ -308,9 +308,9 @@ model CustomGroupMembers {
 }
 
 model Message {
-  id                String     @id @default(cuid()) @db.VarChar(32)
+  id                String     @default(cuid()) @db.VarChar(32)
   parent_message_id String?    @db.VarChar(32)
-  ParentMessage     Message?   @relation("Replies", fields: [parent_message_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  ParentMessage     Message?   @relation("Replies", fields: [parent_message_id, school_id], references: [id, school_id], onDelete: Cascade, onUpdate: Cascade)
   school_id         String     @db.VarChar(32)
   School            School     @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   text              String     @db.Text
@@ -323,9 +323,10 @@ model Message {
   is_active         Boolean    @default(true)
   created_at        DateTime   @default(now())
   updated_at        DateTime   @updatedAt
-  Replies           Message[]  @relation("Replies")
   sort_key          BigInt     @unique @default(autoincrement()) @db.BigInt
+  Replies           Message[]  @relation("Replies")
 
+  @@id([id, school_id])
   @@index([group_identifier, school_id])
 }
 
