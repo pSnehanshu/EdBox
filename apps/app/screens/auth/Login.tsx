@@ -12,13 +12,15 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
   const [step, setStep] = useState<"requestOTP" | "submitOTP">("requestOTP");
   const [email, setEmail] = useState("");
   const [otp, setOTP] = useState("");
+  const [userId, setUserId] = useState<string | null>(null);
   const setAuthToken = useSetAuthToken();
   const requestOtp = trpc.auth.requestEmailLoginOTP.useMutation({
-    onSuccess() {
+    onSuccess(data) {
+      setUserId(data.userId);
       setStep("submitOTP");
     },
   });
-  const submitOTP = trpc.auth.submitEmailLoginOTP.useMutation({
+  const submitOTP = trpc.auth.submitLoginOTP.useMutation({
     onSuccess(data) {
       setAuthToken(data.token, new Date(data.expiry_date));
     },
@@ -52,12 +54,12 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
             />
             <Button
               title="Generate OTP"
-              onPress={() => {
+              onPress={() =>
                 requestOtp.mutate({
                   email,
                   schoolId: school.id,
-                });
-              }}
+                })
+              }
             />
           </View>
         </>
@@ -74,13 +76,17 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
             />
             <Button
               title="Login"
-              onPress={() =>
-                submitOTP.mutate({
-                  email,
-                  otp,
-                  schoolId: school.id,
-                })
-              }
+              onPress={() => {
+                if (userId) {
+                  submitOTP.mutate({
+                    userId,
+                    otp,
+                    schoolId: school.id,
+                  });
+                } else {
+                  alert("User ID is still null");
+                }
+              }}
             />
           </View>
         </>

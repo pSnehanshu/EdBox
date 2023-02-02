@@ -1,3 +1,4 @@
+import { User } from "@prisma/client";
 import { router, publicProcedure, authProcedure } from "../trpc";
 import { z } from "zod";
 import prisma from "../../prisma";
@@ -5,6 +6,23 @@ import { TRPCError } from "@trpc/server";
 import { addMinutes, addMonths, isFuture, isPast } from "date-fns";
 import _ from "lodash";
 import CONFIG from "../../config";
+
+function generateUserOTP(user: Pick<User, "otp" | "otp_expiry">) {
+  // Generate OTP
+  let otp = (
+    Math.floor(Math.random() * 9 * 10 ** (CONFIG.otpLength - 1)) +
+    10 ** (CONFIG.otpLength - 1)
+  ).toString();
+
+  if (user.otp && user.otp_expiry && isFuture(user.otp_expiry)) {
+    // An OTP exists, reuse it
+    otp = user.otp;
+  }
+
+  const expiry = addMinutes(new Date(), 10);
+
+  return { otp, expiry };
+}
 
 const authRouter = router({
   requestEmailLoginOTP: publicProcedure
@@ -37,42 +55,35 @@ const authRouter = router({
       // User exists, and is active
 
       // Generate OTP
-      let otp = (
-        Math.floor(Math.random() * 9 * 10 ** (CONFIG.otpLength - 1)) +
-        10 ** (CONFIG.otpLength - 1)
-      ).toString();
-
-      if (user.otp && user.otp_expiry && isFuture(user.otp_expiry)) {
-        // An OTP exists, reuse it
-        otp = user.otp;
-      }
-
-      const otpExpiry = addMinutes(new Date(), 10);
+      const { otp, expiry } = generateUserOTP(user);
 
       await prisma.user.update({
         where: { id: user.id },
-        data: { otp, otp_expiry: otpExpiry },
+        data: { otp, otp_expiry: expiry },
       });
 
       // TODO: Send the email with the OTP
-      console.log(input.email, { otp, otpExpiry });
+      console.log(input.email, { otp, expiry });
 
-      return;
+      return { userId: user.id };
     }),
-  submitEmailLoginOTP: publicProcedure
+  requestPhoneNumberOTP: publicProcedure
     .input(
       z.object({
-        otp: z.string().regex(/^\d+$/).length(CONFIG.otpLength),
-        email: z.string().email(),
+        isd: z.number().int().default(91),
+        phoneNumber: z
+          .string()
+          .regex(/^\d+$/, "Phone number must be a 10 digit number"),
         schoolId: z.string().cuid(),
       })
     )
     .mutation(async ({ input }) => {
-      // Fetch the user object
-      const user = await prisma.user.findFirst({
+      const user = await prisma.user.findUnique({
         where: {
-          email: input.email,
-          school_id: input.schoolId,
+          phone_school_id: {
+            phone: `${input.isd}${input.phoneNumber}`,
+            school_id: input.schoolId,
+          },
         },
         select: {
           id: true,
@@ -83,6 +94,48 @@ const authRouter = router({
       });
 
       if (!user || !user.is_active) {
+        return;
+      }
+
+      // User exists, and is active
+
+      // Generate OTP
+      const { otp, expiry } = generateUserOTP(user);
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { otp, otp_expiry: expiry },
+      });
+
+      // TODO: Send the email with the OTP
+      console.log(input.phoneNumber, { otp, expiry });
+
+      return { userId: user.id };
+    }),
+  submitLoginOTP: publicProcedure
+    .input(
+      z.object({
+        otp: z.string().regex(/^\d+$/).length(CONFIG.otpLength),
+        userId: z.string().cuid(),
+        schoolId: z.string().cuid(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      // Fetch the user object
+      const user = await prisma.user.findUnique({
+        where: {
+          id: input.userId,
+        },
+        select: {
+          id: true,
+          is_active: true,
+          otp: true,
+          otp_expiry: true,
+          school_id: true,
+        },
+      });
+
+      if (!user || !user.is_active || user.school_id !== input.schoolId) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
@@ -116,6 +169,7 @@ const authRouter = router({
         expiry_date: session.expiry_date,
       };
     }),
+
   whoami: authProcedure.query(({ ctx }) =>
     _.omit(ctx.user, ["password", "otp", "otp_expiry", "School"])
   ),
