@@ -6,6 +6,11 @@
   "author": "Snehanshu <hello@snehanshu.com>",
   "license": "UNLICENSED",
   "private": true,
+  "scripts": {
+    "dev:app": "yarn workspace schooltalk-app start",
+    "dev:backend": "yarn workspace schooltalk-backend dev",
+    "start:backend": "yarn workspace schooltalk-backend start"
+  },
   "workspaces": [
     "apps/*",
     "packages/*"
