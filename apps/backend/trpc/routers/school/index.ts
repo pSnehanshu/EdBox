@@ -8,6 +8,7 @@ import attendanceRouter from "./attendance";
 import classStdRouter from "./class-std";
 import subjectRouter from "./subject";
 import peopleRouter from "./people";
+import examRouter from "./exam";
 
 const schoolRouter = router({
   schoolBasicInfo: publicProcedure
@@ -43,6 +44,7 @@ const schoolRouter = router({
   class: classStdRouter,
   subject: subjectRouter,
   people: peopleRouter,
+  exam: examRouter,
 });
 
 export default schoolRouter;

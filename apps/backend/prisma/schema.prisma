@@ -34,6 +34,8 @@ model School {
   Periods            RoutinePeriod[]
   AttendancesTaken   PeriodAttendance[]
   StudentAttendances StudentAttendance[]
+  Exams              Exam[]
+  Tests              ExamTest[]
 }
 
 model User {
@@ -62,6 +64,7 @@ model User {
   CustomGroups        CustomGroupMembers[]
   CreatedCustomGroups CustomGroup[]
   Messages            Message[]
+  TestsCreated        ExamTest[]
 
   @@unique([email, school_id])
   @@unique([phone, school_id])
@@ -74,14 +77,15 @@ enum Gender {
 }
 
 model Subject {
-  id         String          @id @default(cuid()) @db.VarChar(32)
-  name       String          @db.VarChar(50)
-  school_id  String          @db.VarChar(32)
-  School     School          @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  is_active  Boolean         @default(true)
-  created_at DateTime        @default(now())
-  updated_at DateTime        @updatedAt
+  id         String               @id @default(cuid()) @db.VarChar(32)
+  name       String               @db.VarChar(50)
+  school_id  String               @db.VarChar(32)
+  School     School               @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  is_active  Boolean              @default(true)
+  created_at DateTime             @default(now())
+  updated_at DateTime             @updatedAt
   Periods    RoutinePeriod[]
+  Tests      TestSubjectMapping[]
 }
 
 model ClassStd {
@@ -96,6 +100,7 @@ model ClassStd {
   Sections   ClassSection[]
   Batch      StudentsBatch?
   Periods    RoutinePeriod[]
+  Tests      ExamTest[]
 
   @@id([numeric_id, school_id])
 }
@@ -108,6 +113,7 @@ model ClassSection {
   Class      ClassStd        @relation(fields: [class_id, school_id], references: [numeric_id, school_id], onDelete: Cascade, onUpdate: Cascade)
   name       String?         @db.VarChar(10)
   Periods    RoutinePeriod[]
+  Tests      ExamTest[]
 
   @@id([numeric_id, class_id, school_id])
 }
@@ -232,6 +238,7 @@ model Student {
   Parents           ParentStudent_mapping[]
   User              User?
   Attendances       StudentAttendance[]
+  TestResults       ExamTestResult[]
 
   @@unique([roll_num, section, current_batch_num])
 }
@@ -343,4 +350,58 @@ model LoginSession {
   User        User     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   expiry_date DateTime
   created_at  DateTime @default(now())
+}
+
+model Exam {
+  id         String     @id @default(cuid()) @db.VarChar(32)
+  name       String     @db.VarChar(100)
+  school_id  String     @db.VarChar(32)
+  School     School     @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  is_active  Boolean    @default(true)
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+  Tests      ExamTest[]
+}
+
+model ExamTest {
+  id              String               @id @default(cuid()) @db.VarChar(32)
+  exam_id         String?              @db.VarChar(32) // Test can be part of an Exam or it can be independent
+  Exam            Exam?                @relation(fields: [exam_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  school_id       String               @db.VarChar(32)
+  School          School               @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  subject_name    String?              @db.VarChar(100) // A custom subject name can be set if the test is not related to any one subject
+  class_id        Int                  @db.SmallInt
+  Class           ClassStd             @relation(fields: [class_id, school_id], references: [numeric_id, school_id], onDelete: Restrict, onUpdate: Cascade)
+  section_id      Int?                 @db.SmallInt // If section_id is not defined, it is assumed that all sections have the Test
+  Section         ClassSection?        @relation(fields: [section_id, class_id, school_id], references: [numeric_id, class_id, school_id], onDelete: Cascade, onUpdate: Cascade)
+  date_of_exam    DateTime
+  is_active       Boolean              @default(true)
+  creator_user_id String?              @db.VarChar(32)
+  CreatorUser     User?                @relation(fields: [creator_user_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  created_at      DateTime             @default(now())
+  updated_at      DateTime             @updatedAt
+  Subjects        TestSubjectMapping[]
+  Results         ExamTestResult[]
+}
+
+model TestSubjectMapping {
+  test_id    String   @db.VarChar(32)
+  Test       ExamTest @relation(fields: [test_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  subject_id String   @db.VarChar(32)
+  Subject    Subject  @relation(fields: [subject_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([test_id, subject_id])
+}
+
+model ExamTestResult {
+  id                   String          @id @default(cuid()) @db.VarChar(32)
+  test_id              String          @db.VarChar(32)
+  Test                 ExamTest        @relation(fields: [test_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  student_id           String          @db.VarChar(32)
+  Student              Student         @relation(fields: [student_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  overwrites_result_id String?         @unique @db.VarChar(32)
+  OverwritesResult     ExamTestResult? @relation("overwrite", fields: [overwrites_result_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  created_at           DateTime        @default(now())
+  updated_at           DateTime        @updatedAt
+  OverwrittenByResult  ExamTestResult? @relation("overwrite")
 }
