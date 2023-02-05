@@ -3,10 +3,11 @@ import _ from "lodash";
 import { StaticRole } from "schooltalk-shared/misc";
 import { z } from "zod";
 import prisma from "../../../prisma";
-import { principalProcedure, router } from "../../trpc";
+import { principalMiddleware, t } from "../../trpc";
 
-const peopleRouter = router({
-  fetchPeople: principalProcedure
+const peopleRouter = t.router({
+  fetchPeople: t.procedure
+    .use(principalMiddleware)
     .input(
       z.object({
         page: z.number().int().min(1).default(1),

@@ -4,7 +4,7 @@ import _ from "lodash";
 import { StaticRole } from "schooltalk-shared/misc";
 import { z } from "zod";
 import prisma from "../../../prisma";
-import { authProcedure, roleMiddleware, router, t } from "../../trpc";
+import { authMiddleware, roleMiddleware, t } from "../../trpc";
 
 const examTestSchema = z.object({
   name: z.string().max(100).trim().optional(),
@@ -18,8 +18,9 @@ const examTestSchema = z.object({
   subjectIds: z.string().cuid().array(),
 });
 
-const examRouter = router({
-  createTest: authProcedure
+const examRouter = t.router({
+  createTest: t.procedure
+    .use(authMiddleware)
     .use(
       roleMiddleware([
         StaticRole.principal,
@@ -49,7 +50,8 @@ const examRouter = router({
 
       return test;
     }),
-  updateTest: authProcedure
+  updateTest: t.procedure
+    .use(authMiddleware)
     .use(
       roleMiddleware([
         StaticRole.principal,
@@ -136,7 +138,8 @@ const examRouter = router({
         });
       });
     }),
-  deleteTest: authProcedure
+  deleteTest: t.procedure
+    .use(authMiddleware)
     .use(
       roleMiddleware([
         StaticRole.principal,
@@ -158,7 +161,8 @@ const examRouter = router({
         },
       });
     }),
-  fetchTestsForSection: authProcedure
+  fetchTestsForSection: t.procedure
+    .use(authMiddleware)
     .input(
       z.object({
         section_id: z.number().int(),
@@ -191,7 +195,8 @@ const examRouter = router({
 
       return tests;
     }),
-  createExam: authProcedure
+  createExam: t.procedure
+    .use(authMiddleware)
     .use(
       roleMiddleware([
         StaticRole.principal,
@@ -236,7 +241,8 @@ const examRouter = router({
 
       return exam;
     }),
-  updateExam: authProcedure
+  updateExam: t.procedure
+    .use(authMiddleware)
     .use(
       roleMiddleware([
         StaticRole.principal,
@@ -262,7 +268,8 @@ const examRouter = router({
         },
       });
     }),
-  fetchExamsForSection: authProcedure
+  fetchExamsForSection: t.procedure
+    .use(authMiddleware)
     .input(
       z.object({
         section_id: z.number().int(),

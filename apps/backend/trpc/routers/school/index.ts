@@ -1,4 +1,4 @@
-import { router, publicProcedure, authProcedure } from "../../trpc";
+import { t } from "../../trpc";
 import { z } from "zod";
 import prisma from "../../../prisma";
 import { TRPCError } from "@trpc/server";
@@ -10,8 +10,8 @@ import subjectRouter from "./subject";
 import peopleRouter from "./people";
 import examRouter from "./exam";
 
-const schoolRouter = router({
-  schoolBasicInfo: publicProcedure
+const schoolRouter = t.router({
+  schoolBasicInfo: t.procedure
     .input(
       z.object({
         schoolId: z.string().cuid(),

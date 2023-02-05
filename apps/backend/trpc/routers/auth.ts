@@ -1,5 +1,5 @@
 import { User } from "@prisma/client";
-import { router, publicProcedure, authProcedure } from "../trpc";
+import { t, authMiddleware } from "../trpc";
 import { z } from "zod";
 import prisma from "../../prisma";
 import { TRPCError } from "@trpc/server";
@@ -24,8 +24,8 @@ function generateUserOTP(user: Pick<User, "otp" | "otp_expiry">) {
   return { otp, expiry };
 }
 
-const authRouter = router({
-  requestEmailLoginOTP: publicProcedure
+const authRouter = t.router({
+  requestEmailLoginOTP: t.procedure
     .input(
       z.object({
         email: z.string().email(),
@@ -67,7 +67,7 @@ const authRouter = router({
 
       return { userId: user.id };
     }),
-  requestPhoneNumberOTP: publicProcedure
+  requestPhoneNumberOTP: t.procedure
     .input(
       z.object({
         isd: z.number().int().default(91),
@@ -112,7 +112,7 @@ const authRouter = router({
 
       return { userId: user.id };
     }),
-  submitLoginOTP: publicProcedure
+  submitLoginOTP: t.procedure
     .input(
       z.object({
         otp: z.string().regex(/^\d+$/).length(CONFIG.otpLength),
@@ -170,10 +170,12 @@ const authRouter = router({
       };
     }),
 
-  whoami: authProcedure.query(({ ctx }) =>
-    _.omit(ctx.user, ["password", "otp", "otp_expiry", "School"])
-  ),
-  logout: authProcedure.mutation(async ({ ctx }) => {
+  whoami: t.procedure
+    .use(authMiddleware)
+    .query(({ ctx }) =>
+      _.omit(ctx.user, ["password", "otp", "otp_expiry", "School"])
+    ),
+  logout: t.procedure.use(authMiddleware).mutation(async ({ ctx }) => {
     try {
       await prisma.loginSession.delete({
         where: {

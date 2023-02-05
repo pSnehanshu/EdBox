@@ -8,10 +8,11 @@ import {
   convertObjectToOrderedQueryString,
   groupIdentifierSchema,
 } from "../../../utils/group-identifier";
-import { router, authProcedure } from "../../trpc";
+import { t, authMiddleware } from "../../trpc";
 
-const messagingRouter = router({
-  fetchGroups: authProcedure
+const messagingRouter = t.router({
+  fetchGroups: t.procedure
+    .use(authMiddleware)
     .input(
       z.object({
         limit: z.number().int().min(1).max(20).default(10),
@@ -25,7 +26,8 @@ const messagingRouter = router({
         page: input.page,
       })
     ),
-  createGroup: authProcedure
+  createGroup: t.procedure
+    .use(authMiddleware)
     .input(
       z.object({
         name: z.string().max(50).trim(),
@@ -48,7 +50,8 @@ const messagingRouter = router({
 
       return group;
     }),
-  addMemberToGroup: authProcedure
+  addMemberToGroup: t.procedure
+    .use(authMiddleware)
     .input(
       z.object({
         groupId: z.string().cuid(),
@@ -129,7 +132,8 @@ const messagingRouter = router({
 
       return member;
     }),
-  removeMemberFromGroup: authProcedure
+  removeMemberFromGroup: t.procedure
+    .use(authMiddleware)
     .input(
       z.object({
         groupId: z.string().cuid(),
@@ -215,7 +219,8 @@ const messagingRouter = router({
         },
       });
     }),
-  makeMemberAdmin: authProcedure
+  makeMemberAdmin: t.procedure
+    .use(authMiddleware)
     .input(
       z.object({
         groupId: z.string().cuid(),
@@ -300,7 +305,8 @@ const messagingRouter = router({
         });
       }
     }),
-  giveUpAdminRole: authProcedure
+  giveUpAdminRole: t.procedure
+    .use(authMiddleware)
     .input(
       z.object({
         groupId: z.string().cuid(),
@@ -350,7 +356,8 @@ const messagingRouter = router({
         data: { is_admin: false },
       });
     }),
-  updateGroupDetails: authProcedure
+  updateGroupDetails: t.procedure
+    .use(authMiddleware)
     .input(
       z.object({
         groupId: z.string().cuid(),
@@ -411,7 +418,8 @@ const messagingRouter = router({
 
       return updatedGroup;
     }),
-  fetchGroupInfo: authProcedure
+  fetchGroupInfo: t.procedure
+    .use(authMiddleware)
     .input(
       z.object({
         groupIdentifier: groupIdentifierSchema,
@@ -562,7 +570,8 @@ const messagingRouter = router({
         };
       }
     }),
-  fetchGroupMessages: authProcedure
+  fetchGroupMessages: t.procedure
+    .use(authMiddleware)
     .input(
       z.object({
         groupIdentifier: groupIdentifierSchema,

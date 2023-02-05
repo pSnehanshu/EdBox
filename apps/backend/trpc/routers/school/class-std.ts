@@ -1,10 +1,11 @@
 import { z } from "zod";
 import type { Prisma } from "@prisma/client";
 import prisma from "../../../prisma";
-import { authProcedure, router } from "../../trpc";
+import { authMiddleware, t } from "../../trpc";
 
-const classStdRouter = router({
-  fetchSectionStudents: authProcedure
+const classStdRouter = t.router({
+  fetchSectionStudents: t.procedure
+    .use(authMiddleware)
     .input(
       z.object({
         sectionId: z.number().int(),
@@ -91,26 +92,28 @@ const classStdRouter = router({
 
       return { students, total, cursor };
     }),
-  fetchClassesAndSections: authProcedure.query(async ({ ctx }) => {
-    const classes = await prisma.classStd.findMany({
-      where: {
-        school_id: ctx.user.school_id,
-        is_active: true,
-      },
-      include: {
-        Sections: {
-          orderBy: {
-            numeric_id: "asc",
+  fetchClassesAndSections: t.procedure
+    .use(authMiddleware)
+    .query(async ({ ctx }) => {
+      const classes = await prisma.classStd.findMany({
+        where: {
+          school_id: ctx.user.school_id,
+          is_active: true,
+        },
+        include: {
+          Sections: {
+            orderBy: {
+              numeric_id: "asc",
+            },
           },
         },
-      },
-      orderBy: {
-        order: "asc",
-      },
-    });
+        orderBy: {
+          order: "asc",
+        },
+      });
 
-    return classes;
-  }),
+      return classes;
+    }),
 });
 
 export default classStdRouter;
