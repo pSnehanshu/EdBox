@@ -106,3 +106,23 @@ export const principalMiddleware = t.middleware(({ ctx, next }) => {
 });
 
 export const principalProcedure = authProcedure.use(principalMiddleware);
+
+export const roleMiddleware = (allowedRoles: StaticRole[]) =>
+  t.middleware(({ ctx, next }) => {
+    if (!ctx.session) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "You are not logged in",
+      });
+    }
+
+    const role = getUserRole(ctx.session.User);
+
+    if (!allowedRoles.includes(role)) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+      });
+    }
+
+    return next({ ctx });
+  });
