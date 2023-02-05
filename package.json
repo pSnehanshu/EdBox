@@ -9,7 +9,8 @@
   "scripts": {
     "dev:app": "yarn workspace schooltalk-app start",
     "dev:backend": "yarn workspace schooltalk-backend dev",
-    "start:backend": "yarn workspace schooltalk-backend start"
+    "start:backend": "yarn workspace schooltalk-backend start",
+    "migrate:dev": "yarn workspace schooltalk-backend migrate:dev"
   },
   "workspaces": [
     "apps/*",
