@@ -36,6 +36,7 @@ model School {
   StudentAttendances StudentAttendance[]
   Exams              Exam[]
   Tests              ExamTest[]
+  DynamicRoles       DynamicRole[]
 }
 
 model User {
@@ -65,6 +66,7 @@ model User {
   CreatedCustomGroups CustomGroup[]
   Messages            Message[]
   TestsCreated        ExamTest[]
+  DynamicRoles        RoleUserMapping[]
 
   @@unique([email, school_id])
   @@unique([phone, school_id])
@@ -405,4 +407,24 @@ model ExamTestResult {
   created_at           DateTime        @default(now())
   updated_at           DateTime        @updatedAt
   OverwrittenByResult  ExamTestResult? @relation("overwrite")
+}
+
+model DynamicRole {
+  id          String            @id @default(cuid()) @db.VarChar(32)
+  school_id   String            @db.VarChar(32)
+  School      School            @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  permissions Int[]             @db.SmallInt
+  is_active   Boolean           @default(true)
+  created_at  DateTime          @default(now())
+  updated_at  DateTime          @updatedAt
+  Users       RoleUserMapping[]
+}
+
+model RoleUserMapping {
+  user_id String      @db.VarChar(32)
+  User    User        @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  role_id String      @db.VarChar(32)
+  Role    DynamicRole @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([user_id, role_id])
 }
