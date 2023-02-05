@@ -2902,10 +2902,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@trpc/server@npm:^10.7.0, @trpc/server@npm:^10.8.1":
-  version: 10.8.1
-  resolution: "@trpc/server@npm:10.8.1"
-  checksum: 91f86aad0166f98ee67e271d5c8f6301d832f351fb884f82ff4e95eef6edd7d0fc2b6dc777aea1951bce0d68e7ae3e622315847112daac70558aafadfc05f62e
+"@trpc/server@npm:^10.10.0":
+  version: 10.10.0
+  resolution: "@trpc/server@npm:10.10.0"
+  checksum: a50724416886d6ec406c87e03086baa4abb2509ea87984a96f1a1a891a67ffd2e13fdfcde9bc490ca2bb41083d7beb5d59d889446b3341af887d1d6281b5fe41
   languageName: node
   linkType: hard
 
@@ -10785,7 +10785,7 @@ __metadata:
     "@tanstack/react-query": ^4.20.4
     "@trpc/client": ^10.7.0
     "@trpc/react-query": ^10.7.0
-    "@trpc/server": ^10.7.0
+    "@trpc/server": ^10.10.0
     "@types/lodash": ^4.14.191
     "@types/react": ~18.0.24
     "@types/react-native": ~0.70.6
@@ -10834,7 +10834,7 @@ __metadata:
   resolution: "schooltalk-backend@workspace:apps/backend"
   dependencies:
     "@prisma/client": ^4.8.0
-    "@trpc/server": ^10.7.0
+    "@trpc/server": ^10.10.0
     "@types/express": ^4.17.15
     "@types/lodash": ^4.14.191
     "@types/node": ^18.11.18
@@ -10866,7 +10866,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "schooltalk@workspace:."
   dependencies:
-    "@trpc/server": ^10.8.1
+    "@trpc/server": ^10.10.0
     core-js: ^3.27.2
   languageName: unknown
   linkType: soft
