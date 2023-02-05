@@ -1,5 +1,7 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import { getUserRole, StaticRole } from "schooltalk-shared/misc";
+import { Permissions } from "schooltalk-shared/permissions.enum";
+import { userHasPermissions } from "../utils/permissions";
 import type { Context } from "./context";
 
 export const t = initTRPC.context<Context>().create();
@@ -87,6 +89,27 @@ export const roleMiddleware = (allowedRoles: StaticRole[]) =>
     if (!allowedRoles.includes(role)) {
       throw new TRPCError({
         code: "FORBIDDEN",
+      });
+    }
+
+    return next({ ctx });
+  });
+
+export const dynamicRoleMiddleware = (
+  permissions: Permissions[],
+  mode: "all" | "some"
+) =>
+  authMiddleware.unstable_pipe(async ({ ctx, next }) => {
+    const hasPermission = await userHasPermissions(
+      ctx.user.id,
+      permissions,
+      mode
+    );
+
+    if (!hasPermission) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "User does not have enough permissions",
       });
     }
 
