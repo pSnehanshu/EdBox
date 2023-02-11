@@ -27,7 +27,7 @@ import TeacherRoutineScreen from "../screens/routine/role-wise-routine/TeacherRo
 import StudentRoutineScreen from "../screens/routine/role-wise-routine/StudentRoutineScreen";
 import AttendanceTakerScreen from "../screens/attendance/AttendanceTakerScreen";
 import { View } from "../components/Themed";
-import { getUserRole, StaticRole } from "schooltalk-shared/misc";
+import { hasUserStaticRoles, StaticRole } from "schooltalk-shared/misc";
 import { SettingsScreen } from "../screens/settings/SettingsScreen";
 import SchoolSettingsScreen from "../screens/settings/school/SchoolSettingsScreen";
 import SubjectsSettingsScreen from "../screens/settings/school/SubjectsSettingsScreen";
@@ -60,7 +60,6 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 function RootNavigator() {
   const school = useSchool();
   const { isLoggedIn, user } = useCurrentUser();
-  const role = user ? getUserRole(user) : StaticRole.none;
 
   if (!school) return null;
 
@@ -93,8 +92,11 @@ function RootNavigator() {
               title: "Take Attendance",
             }}
           />
-          {role === StaticRole.principal ||
-          role === StaticRole.vice_principal ? (
+          {hasUserStaticRoles(
+            user,
+            [StaticRole.principal, StaticRole.vice_principal],
+            "some"
+          ) ? (
             <>
               <Stack.Screen
                 name="SchoolSettings"
@@ -167,14 +169,9 @@ function BottomTabNavigator() {
   const { scheme } = useContext(ColorSchemeContext);
   const school = useSchool();
   const { user } = useCurrentUser();
-  const role = user ? getUserRole(user) : StaticRole.none;
-
-  const RoutineScreen =
-    role === StaticRole.teacher
-      ? TeacherRoutineScreen
-      : role === StaticRole.student
-      ? StudentRoutineScreen
-      : () => <></>;
+  const isTeacher = hasUserStaticRoles(user, [StaticRole.teacher], "all");
+  const isStudent = hasUserStaticRoles(user, [StaticRole.student], "all");
+  const isStudentAndTeacher = isTeacher && isStudent;
 
   return (
     <BottomTab.Navigator
@@ -235,12 +232,30 @@ function BottomTabNavigator() {
           ),
         }}
       />
-      {role === StaticRole.student || role === StaticRole.teacher ? (
+      {isTeacher ? (
         <BottomTab.Screen
           name="Routine"
-          component={RoutineScreen}
+          component={TeacherRoutineScreen}
           options={{
-            title: "Routine",
+            title: `${isStudentAndTeacher ? "Teacher " : ""}Routine`,
+            headerShown: true,
+            tabBarIcon: ({ color }) => (
+              <MaterialCommunityIcons
+                name="timetable"
+                size={30}
+                style={{ marginBottom: -3 }}
+                color={color}
+              />
+            ),
+          }}
+        />
+      ) : null}
+      {isStudent ? (
+        <BottomTab.Screen
+          name="Routine"
+          component={StudentRoutineScreen}
+          options={{
+            title: `${isStudentAndTeacher ? "Student " : ""}Routine`,
             headerShown: true,
             tabBarIcon: ({ color }) => (
               <MaterialCommunityIcons

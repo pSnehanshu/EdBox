@@ -1,5 +1,5 @@
 import { initTRPC, TRPCError } from "@trpc/server";
-import { getUserRole, StaticRole } from "schooltalk-shared/misc";
+import { hasUserStaticRoles, StaticRole } from "schooltalk-shared/misc";
 import { Permissions } from "schooltalk-shared/permissions.enum";
 import { userHasPermissions } from "../utils/permissions";
 import type { Context } from "./context";
@@ -25,7 +25,7 @@ export const authMiddleware = t.middleware(({ ctx, next }) => {
 /** Verify that the user is a teacher */
 export const teacherMiddleware = authMiddleware.unstable_pipe(
   ({ ctx, next }) => {
-    if (getUserRole(ctx.session.User) !== StaticRole.teacher) {
+    if (hasUserStaticRoles(ctx.user, [StaticRole.teacher])) {
       throw new TRPCError({
         code: "FORBIDDEN",
         message: "Not a teacher",
@@ -44,7 +44,7 @@ export const teacherMiddleware = authMiddleware.unstable_pipe(
 /** Verify that the user is a student */
 export const studentMiddleware = authMiddleware.unstable_pipe(
   ({ ctx, next }) => {
-    if (getUserRole(ctx.session.User) !== StaticRole.student) {
+    if (hasUserStaticRoles(ctx.user, [StaticRole.student])) {
       throw new TRPCError({
         code: "FORBIDDEN",
         message: "Not a student",
@@ -62,10 +62,11 @@ export const studentMiddleware = authMiddleware.unstable_pipe(
 
 export const principalMiddleware = authMiddleware.unstable_pipe(
   ({ ctx, next }) => {
-    const role = getUserRole(ctx.session.User);
-
     if (
-      !(role === StaticRole.principal || role === StaticRole.vice_principal)
+      !hasUserStaticRoles(ctx.user, [
+        StaticRole.principal,
+        StaticRole.vice_principal,
+      ])
     ) {
       throw new TRPCError({
         code: "FORBIDDEN",
@@ -84,9 +85,7 @@ export const principalMiddleware = authMiddleware.unstable_pipe(
 
 export const roleMiddleware = (allowedRoles: StaticRole[]) =>
   authMiddleware.unstable_pipe(({ ctx, next }) => {
-    const role = getUserRole(ctx.session.User);
-
-    if (!allowedRoles.includes(role)) {
+    if (!hasUserStaticRoles(ctx.user, allowedRoles)) {
       throw new TRPCError({
         code: "FORBIDDEN",
       });

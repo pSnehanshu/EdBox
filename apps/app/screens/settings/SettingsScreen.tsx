@@ -10,7 +10,7 @@ import { List, Text, View } from "../../components/Themed";
 import { ColorSchemeContext } from "../../utils/useColorScheme";
 import { useCallback, useContext, useMemo } from "react";
 import { useCurrentUser, useLogout } from "../../utils/auth";
-import { getUserRole, StaticRole } from "schooltalk-shared/misc";
+import { hasUserStaticRoles, StaticRole } from "schooltalk-shared/misc";
 import { SettingsOption } from "../../types";
 
 export function SettingsScreen() {
@@ -18,7 +18,11 @@ export function SettingsScreen() {
   const iconColor = colorScheme === "dark" ? "white" : "black";
   const navigation = useNavigation();
   const { user } = useCurrentUser();
-  const role = user ? getUserRole(user) : StaticRole.none;
+  const isPrincipal = hasUserStaticRoles(
+    user,
+    [StaticRole.principal, StaticRole.vice_principal],
+    "some"
+  );
   const logout = useLogout();
 
   const settingsOptions = useMemo<SettingsOption[]>(() => {
@@ -39,7 +43,7 @@ export function SettingsScreen() {
       },
     });
 
-    if (role === StaticRole.principal || role === StaticRole.vice_principal) {
+    if (isPrincipal) {
       items.push({
         title: "School settings",
         subtitle: "Manage classes, subjects, routine etc.",
@@ -89,7 +93,7 @@ export function SettingsScreen() {
     );
 
     return items;
-  }, [iconColor, role, colorScheme]);
+  }, [iconColor, isPrincipal, colorScheme]);
 
   const renderItem = useCallback<ListRenderItem<SettingsOption>>(({ item }) => {
     return (

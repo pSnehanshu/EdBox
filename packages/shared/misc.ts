@@ -43,11 +43,15 @@ export enum StaticRole {
 }
 
 /**
- * Given a user, get the role
+ * Given a user, get the role based on the roles hierarchy
  * @param user The user in question
  * @returns The role
  */
-export function getUserRole(user: UnserializedUser | User): StaticRole {
+export function getUserRoleHierarchical(
+  user: UnserializedUser | User | null | undefined
+): StaticRole {
+  if (!user) return StaticRole.none;
+
   // Principal and vice principal have highest priority
   if (
     user.Staff &&
@@ -80,9 +84,66 @@ export function getUserRole(user: UnserializedUser | User): StaticRole {
   return StaticRole.none;
 }
 
+/**
+ * Get all the static roles a use poses.
+ * @param user
+ */
+export function getUserStaticRoles(
+  user: UnserializedUser | User | null | undefined
+): StaticRole[] {
+  if (!user) return [];
+
+  const roles: StaticRole[] = [];
+
+  if (user.teacher_id) roles.push(StaticRole.teacher);
+  if (user.student_id) roles.push(StaticRole.student);
+  if (user.parent_id) roles.push(StaticRole.parent);
+  if (user.staff_id) {
+    switch (user.Staff?.role) {
+      case "principal":
+        roles.push(StaticRole.principal);
+        break;
+      case "vice_principal":
+        roles.push(StaticRole.vice_principal);
+        break;
+      case "others":
+        roles.push(StaticRole.staff);
+        break;
+      default:
+        console.warn(
+          `User ${user.id} has staff_id defined, but the Staff object is not attached. The role is ${user.Staff?.role}. Please act on it asap.`
+        );
+    }
+  }
+
+  return roles;
+}
+
+/**
+ * Check if the user has the static roles.
+ * @param user
+ * @param requiredRoles
+ * @param mode all: The user must have all the roles; some: The user must have at least one of the roles.
+ */
+export function hasUserStaticRoles(
+  user: UnserializedUser | User | null | undefined,
+  requiredRoles: StaticRole[],
+  mode: "all" | "some" = "all"
+): boolean {
+  const roles = getUserStaticRoles(user);
+
+  if (mode === "all") {
+    return requiredRoles.every((r1) => roles.findIndex((r2) => r2 === r1) >= 0);
+  }
+
+  // mode: some
+  return requiredRoles.some((r1) => roles.findIndex((r2) => r2 === r1) >= 0);
+}
+
 /** Get appropritate display name based on gender and role */
 export function getDisplayName(user: UnserializedUser | User) {
-  const role = getUserRole(user);
+  const role = getUserRoleHierarchical(user);
+
   const sirMam = user.gender
     ? user.gender === "Female"
       ? "ma'am"

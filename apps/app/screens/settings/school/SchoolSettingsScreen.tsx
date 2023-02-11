@@ -6,10 +6,8 @@ import {
   SafeAreaView,
   StyleSheet,
 } from "react-native";
-import { getUserRole } from "schooltalk-shared/misc";
 import { List, Text, View } from "../../../components/Themed";
 import { RootStackScreenProps, SettingsOption } from "../../../types";
-import { useCurrentUser } from "../../../utils/auth";
 import useColorScheme from "../../../utils/useColorScheme";
 
 export default function SchoolSettingsScreen({
@@ -17,8 +15,6 @@ export default function SchoolSettingsScreen({
 }: RootStackScreenProps<"SchoolSettings">) {
   const colorScheme = useColorScheme();
   const iconColor = colorScheme === "dark" ? "white" : "black";
-  const { user } = useCurrentUser();
-  const role = user ? getUserRole(user) : "none";
 
   const settingsOptions = useMemo<SettingsOption[]>(() => {
     const items: SettingsOption[] = [];
@@ -65,7 +61,7 @@ export default function SchoolSettingsScreen({
     );
 
     return items;
-  }, [iconColor, role, colorScheme]);
+  }, [iconColor, colorScheme]);
 
   const renderItem = useCallback<ListRenderItem<SettingsOption>>(({ item }) => {
     return (
