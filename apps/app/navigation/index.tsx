@@ -34,6 +34,7 @@ import SubjectsSettingsScreen from "../screens/settings/school/SubjectsSettingsS
 import ClassSectionSettingsScreen from "../screens/settings/school/ClassSectionSettingsScreen";
 import { RoutineSettingsScreen } from "../screens/settings/school/RoutineSettingsScreen";
 import { PeopleSettingsScreen } from "../screens/settings/school/PeopleSettingsScreen";
+import StudentExamList from "../screens/exam/student/ExamList";
 
 export default function Navigation({
   colorScheme,
@@ -84,14 +85,16 @@ function RootNavigator() {
               title: `${route.params.name ?? "Messages"}`,
             })}
           />
-          <Stack.Screen
-            name="AttendanceTaker"
-            component={AttendanceTakerScreen}
-            options={{
-              headerShown: true,
-              title: "Take Attendance",
-            }}
-          />
+          {hasUserStaticRoles(user, [StaticRole.teacher]) ? (
+            <Stack.Screen
+              name="AttendanceTaker"
+              component={AttendanceTakerScreen}
+              options={{
+                headerShown: true,
+                title: "Take Attendance",
+              }}
+            />
+          ) : null}
           {hasUserStaticRoles(
             user,
             [StaticRole.principal, StaticRole.vice_principal],
@@ -251,22 +254,41 @@ function BottomTabNavigator() {
         />
       ) : null}
       {isStudent ? (
-        <BottomTab.Screen
-          name="Routine"
-          component={StudentRoutineScreen}
-          options={{
-            title: `${isStudentAndTeacher ? "Student " : ""}Routine`,
-            headerShown: true,
-            tabBarIcon: ({ color }) => (
-              <MaterialCommunityIcons
-                name="timetable"
-                size={30}
-                style={{ marginBottom: -3 }}
-                color={color}
-              />
-            ),
-          }}
-        />
+        <>
+          <BottomTab.Screen
+            name="Routine"
+            component={StudentRoutineScreen}
+            options={{
+              title: `${isStudentAndTeacher ? "Student " : ""}Routine`,
+              headerShown: true,
+              tabBarIcon: ({ color }) => (
+                <MaterialCommunityIcons
+                  name="timetable"
+                  size={30}
+                  style={{ marginBottom: -3 }}
+                  color={color}
+                />
+              ),
+            }}
+          />
+
+          <BottomTab.Screen
+            name="ExamsTab"
+            component={StudentExamList}
+            options={{
+              title: `${isStudentAndTeacher ? "Student " : ""}Exams`,
+              headerShown: true,
+              tabBarIcon: ({ color }) => (
+                <MaterialCommunityIcons
+                  name="test-tube"
+                  size={30}
+                  style={{ marginBottom: -3 }}
+                  color={color}
+                />
+              ),
+            }}
+          />
+        </>
       ) : null}
       <BottomTab.Screen
         name="Settings"

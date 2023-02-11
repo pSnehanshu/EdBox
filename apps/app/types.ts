@@ -39,6 +39,7 @@ export type RootTabParamList = {
   ChatsTab: undefined;
   Routine: undefined;
   Settings: undefined;
+  ExamsTab: undefined;
 };
 
 export type RootTabScreenProps<Screen extends keyof RootTabParamList> =
