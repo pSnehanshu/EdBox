@@ -7,7 +7,7 @@ This is the backend for SchoolTalk. The main packages used are [Typescript](http
 First generate the prisma types:
 
 ```bash
-yarn exec prisma generate
+yarn prisma:generate
 ```
 
 Now you can run it
