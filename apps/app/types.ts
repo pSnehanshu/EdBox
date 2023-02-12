@@ -29,6 +29,7 @@ export type RootStackParamList = {
   ClassSectionSettings: undefined;
   RoutineSettingsScreen: undefined;
   PeopleSettings: undefined;
+  ExamDetailsStudent: { testId: string };
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> =

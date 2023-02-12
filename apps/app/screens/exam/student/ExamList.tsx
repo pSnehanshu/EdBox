@@ -17,6 +17,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { List, Text, View } from "../../../components/Themed";
 import { trpc } from "../../../utils/trpc";
 import useColorScheme from "../../../utils/useColorScheme";
+import { useNavigation } from "@react-navigation/native";
 
 const ExamComp: React.FC<{
   exam: Extract<ExamItem, { type: "exam" }>["item"];
@@ -92,6 +93,7 @@ const TestComp: React.FC<{
   test: Extract<ExamItem, { type: "test" }>["item"];
   style?: StyleProp<ViewStyle>;
 }> = ({ test, style }) => {
+  const navigation = useNavigation();
   const { Subjects: _subs } = test;
   const Subjects = _.clone(_subs);
 
@@ -122,9 +124,9 @@ const TestComp: React.FC<{
         opacity: pressed ? 0.5 : 1,
         width: "100%",
       })}
-      onPress={() => {
-        alert(`Test id: ${test.id}`);
-      }}
+      onPress={() =>
+        navigation.navigate("ExamDetailsStudent", { testId: test.id })
+      }
     >
       <View style={[styles.testContainer, style]}>
         <View style={styles.testContainerMain}>

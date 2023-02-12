@@ -26,6 +26,38 @@ const examTestSchema = z.object({
 });
 
 const examRouter = t.router({
+  getTestInfo: t.procedure
+    .use(authMiddleware)
+    .input(
+      z.object({
+        testId: z.string().cuid(),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const test = await prisma.examTest.findUnique({
+        where: { id: input.testId },
+        include: {
+          Exam: true,
+          Subjects: {
+            where: {
+              Subject: {
+                is_active: true,
+              },
+            },
+            include: {
+              Subject: true,
+            },
+          },
+        },
+      });
+
+      if (!test || !test.is_active || test.school_id !== ctx.user.school_id)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+        });
+
+      return test;
+    }),
   createTest: t.procedure
     .use(
       roleMiddleware([
