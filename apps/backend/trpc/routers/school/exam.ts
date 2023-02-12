@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { parseISO } from "date-fns";
 import _ from "lodash";
 import { StaticRole } from "schooltalk-shared/misc";
+import type { ArrayElement } from "schooltalk-shared/types";
 import { z } from "zod";
 import prisma from "../../../prisma";
 import { authMiddleware, roleMiddleware, t } from "../../trpc";
@@ -436,6 +437,123 @@ const examRouter = t.router({
         school_id: ctx.user.school_id,
         class_id: student.CurrentBatch.class_id,
         section_id: student.section,
+      });
+    }),
+  fetchExamsAndTestsForStudent: t.procedure
+    .use(roleMiddleware([StaticRole.student]))
+    .input(
+      z.object({
+        after_date: dateStringSchema,
+        limit: z.number().int().min(1).max(100).default(10),
+        page: z.number().int().min(1).default(1),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const student = await prisma.student.findUnique({
+        where: {
+          id: ctx.user.student_id!,
+        },
+        include: {
+          CurrentBatch: true,
+        },
+      });
+
+      if (
+        !student ||
+        !student.CurrentBatch?.is_active ||
+        !student.CurrentBatch.class_id
+      )
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Student not found",
+        });
+
+      const tests = await prisma.examTest.findMany({
+        where: {
+          school_id: ctx.user.school_id,
+          class_id: student.CurrentBatch.class_id,
+          date_of_exam: { gte: input.after_date },
+          is_active: true,
+          OR: [{ section_id: student.section }, { section_id: null }],
+          AND: [
+            {
+              OR: [
+                { exam_id: null },
+                {
+                  Exam: {
+                    is_active: true,
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        include: {
+          Exam: {
+            include: {
+              Tests: {
+                where: {
+                  is_active: true,
+                  class_id: student.CurrentBatch.class_id,
+                  OR: [{ section_id: student.section }, { section_id: null }],
+                },
+                orderBy: {
+                  date_of_exam: "asc",
+                },
+              },
+            },
+          },
+        },
+        orderBy: {
+          date_of_exam: "asc",
+        },
+        take: input.limit,
+        skip: (input.page - 1) * input.limit,
+      });
+
+      // Extract the exams
+      const exams = _.uniqBy(
+        tests.filter((t) => t.Exam).map((t) => t.Exam!),
+        "id"
+      );
+
+      // Filter out the independent tests (tests not under any exam)
+      const independentTests = tests.filter((t) => !t.Exam) as Array<
+        ArrayElement<typeof tests> & { Exam: null }
+      >;
+
+      type ExamItem =
+        | {
+            type: "exam";
+            item: ArrayElement<typeof exams>;
+          }
+        | {
+            type: "test";
+            item: typeof independentTests[0];
+          };
+
+      const items: ExamItem[] = [];
+
+      exams.forEach((e) => {
+        items.push({
+          type: "exam",
+          item: e,
+        });
+      });
+      independentTests.forEach((t) => {
+        items.push({
+          type: "test",
+          item: t,
+        });
+      });
+
+      // Sort the items
+      return _.sortBy(items, ({ type, item }) => {
+        if (type === "test") {
+          return item.date_of_exam;
+        } else {
+          return item.Tests[0]?.date_of_exam;
+        }
       });
     }),
 });

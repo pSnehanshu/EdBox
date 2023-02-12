@@ -1,5 +1,6 @@
 // This screen shows a time line with the exams and class tests
 
+import { Button } from "@rneui/base";
 import React from "react";
 import { ScrollView } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
@@ -7,16 +8,14 @@ import { Text } from "../../../components/Themed";
 import { trpc } from "../../../utils/trpc";
 
 const ExamListScreen: React.FC = () => {
-  const testsQuery = trpc.school.exam.fetchTestsForStudent.useQuery({});
-  const examsQuery = trpc.school.exam.fetchExamsForStudent.useQuery({});
-  const isLoading = testsQuery.isLoading || examsQuery.isLoading;
+  const query = trpc.school.exam.fetchExamsAndTestsForStudent.useQuery({});
 
-  if (isLoading) return <Spinner visible />;
+  if (query.isLoading) return <Spinner visible />;
 
   return (
     <ScrollView>
-      <Text>{JSON.stringify(testsQuery.data, null, 2)}</Text>
-      <Text>{JSON.stringify(examsQuery.data, null, 2)}</Text>
+      <Button onPress={() => query.refetch()}>Refresh</Button>
+      <Text>{JSON.stringify(query.data, null, 2)}</Text>
     </ScrollView>
   );
 };
