@@ -45,6 +45,10 @@ export type Student = ArrayElement<
   RouterOutput["school"]["routine"]["fetchPeriodStudents"]["students"]
 >;
 
+export type ExamItem = ArrayElement<
+  RouterOutput["school"]["exam"]["fetchExamsAndTestsForStudent"]
+>;
+
 export interface ServerToClientEvents {
   newMessage: (msg: Message) => void;
 }

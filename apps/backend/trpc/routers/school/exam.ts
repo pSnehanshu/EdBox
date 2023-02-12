@@ -25,95 +25,6 @@ const examTestSchema = z.object({
   subjectIds: z.string().cuid().array(),
 });
 
-function fetchTestsForSection(input: {
-  class_id: number;
-  section_id: number;
-  school_id: string;
-  limit: number;
-  page: number;
-  after_date: Date;
-}) {
-  return prisma.examTest.findMany({
-    where: {
-      AND: [
-        { class_id: input.class_id },
-        { school_id: input.school_id },
-        { is_active: true },
-        {
-          date_of_exam: {
-            gte: input.after_date,
-          },
-        },
-      ],
-      OR: [{ section_id: input.section_id }, { section_id: null }],
-    },
-    take: input.limit,
-    skip: (input.page - 1) * input.limit,
-    include: {
-      Subjects: true,
-    },
-  });
-}
-
-async function fetchExamsForSection(input: {
-  class_id: number;
-  section_id: number;
-  after_date: Date;
-  school_id: string;
-}) {
-  const exams = await prisma.exam.findMany({
-    where: {
-      school_id: input.school_id,
-      is_active: true,
-      Tests: {
-        // Fetch those exams, where there is at least
-        // one Test that satisfies the following
-        some: {
-          AND: [
-            // Class must match
-            { class_id: input.class_id },
-            // There is at least one test that will occur in the future
-            {
-              date_of_exam: {
-                gte: input.after_date,
-              },
-            },
-            // Test is active
-            { is_active: true },
-          ],
-          // Test should be for this section or for the whole class (section:null)
-          OR: [{ section_id: input.section_id }, { section_id: null }],
-        },
-      },
-    },
-    include: {
-      Tests: {
-        where: {
-          AND: [
-            { class_id: input.class_id },
-            {
-              OR: [{ section_id: input.section_id }, { section_id: null }],
-            },
-          ],
-        },
-        include: {
-          Subjects: true,
-        },
-      },
-    },
-  });
-
-  // Sort
-  const sortedExams = _.sortBy(exams, (e) => {
-    const [earliestTest] = _.sortBy(e.Tests, (t) => t.date_of_exam);
-    if (earliestTest) {
-      return earliestTest.date_of_exam;
-    }
-  });
-
-  return sortedExams;
-}
-
 const examRouter = t.router({
   createTest: t.procedure
     .use(
@@ -254,63 +165,6 @@ const examRouter = t.router({
         },
       });
     }),
-  fetchTestsForSection: t.procedure
-    .use(authMiddleware)
-    .input(
-      z.object({
-        section_id: z.number().int(),
-        class_id: z.number().int(),
-        after_date: dateStringSchema,
-        limit: z.number().int().min(1).max(100).default(20),
-        page: z.number().int().min(1).default(1),
-      })
-    )
-    .query(({ input, ctx }) =>
-      fetchTestsForSection({
-        ...input,
-        school_id: ctx.user.school_id,
-      })
-    ),
-  fetchTestsForStudent: t.procedure
-    .use(roleMiddleware([StaticRole.student]))
-    .input(
-      z.object({
-        after_date: dateStringSchema,
-        limit: z.number().int().min(1).max(100).default(20),
-        page: z.number().int().min(1).default(1),
-      })
-    )
-    .query(async ({ input, ctx }) => {
-      const student = await prisma.student.findUnique({
-        where: { id: ctx.user.student_id! },
-        include: {
-          CurrentBatch: {
-            select: {
-              class_id: true,
-              is_active: true,
-            },
-          },
-        },
-      });
-
-      if (
-        !student ||
-        !student.CurrentBatch?.is_active ||
-        typeof student.CurrentBatch.class_id !== "number" ||
-        typeof student.section !== "number"
-      )
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Student not found",
-        });
-
-      return fetchTestsForSection({
-        ...input,
-        class_id: student.CurrentBatch.class_id,
-        section_id: student.section,
-        school_id: ctx.user.school_id,
-      });
-    }),
   createExam: t.procedure
     .use(
       roleMiddleware([
@@ -382,63 +236,6 @@ const examRouter = t.router({
         },
       });
     }),
-  fetchExamsForSection: t.procedure
-    .use(authMiddleware)
-    .input(
-      z.object({
-        section_id: z.number().int(),
-        class_id: z.number().int(),
-        after_date: dateStringSchema,
-        // limit: z.number().int().min(1).max(100).default(5),
-        // page: z.number().int().min(1).default(1),
-      })
-    )
-    .query(({ input, ctx }) => {
-      return fetchExamsForSection({
-        ...input,
-        school_id: ctx.user.school_id,
-      });
-    }),
-  fetchExamsForStudent: t.procedure
-    .use(roleMiddleware([StaticRole.student]))
-    .input(
-      z.object({
-        after_date: dateStringSchema,
-        // limit: z.number().int().min(1).max(100).default(5),
-        // page: z.number().int().min(1).default(1),
-      })
-    )
-    .query(async ({ input, ctx }) => {
-      const student = await prisma.student.findUnique({
-        where: { id: ctx.user.student_id! },
-        include: {
-          CurrentBatch: {
-            select: {
-              class_id: true,
-              is_active: true,
-            },
-          },
-        },
-      });
-
-      if (
-        !student ||
-        !student.CurrentBatch?.is_active ||
-        typeof student.CurrentBatch.class_id !== "number" ||
-        typeof student.section !== "number"
-      )
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Student not found",
-        });
-
-      return fetchExamsForSection({
-        ...input,
-        school_id: ctx.user.school_id,
-        class_id: student.CurrentBatch.class_id,
-        section_id: student.section,
-      });
-    }),
   fetchExamsAndTestsForStudent: t.procedure
     .use(roleMiddleware([StaticRole.student]))
     .input(
@@ -500,7 +297,29 @@ const examRouter = t.router({
                 orderBy: {
                   date_of_exam: "asc",
                 },
+                include: {
+                  Subjects: {
+                    where: {
+                      Subject: {
+                        is_active: true,
+                      },
+                    },
+                    include: {
+                      Subject: true,
+                    },
+                  },
+                },
               },
+            },
+          },
+          Subjects: {
+            where: {
+              Subject: {
+                is_active: true,
+              },
+            },
+            include: {
+              Subject: true,
             },
           },
         },
@@ -519,7 +338,7 @@ const examRouter = t.router({
 
       // Filter out the independent tests (tests not under any exam)
       const independentTests = tests.filter((t) => !t.Exam) as Array<
-        ArrayElement<typeof tests> & { Exam: null }
+        ArrayElement<typeof tests> & { Exam: null | undefined }
       >;
 
       type ExamItem =

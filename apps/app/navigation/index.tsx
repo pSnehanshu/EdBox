@@ -1,4 +1,4 @@
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons, FontAwesome } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
   NavigationContainer,
@@ -279,8 +279,8 @@ function BottomTabNavigator() {
               title: `${isStudentAndTeacher ? "Student " : ""}Exams`,
               headerShown: true,
               tabBarIcon: ({ color }) => (
-                <MaterialCommunityIcons
-                  name="test-tube"
+                <FontAwesome
+                  name="pencil-square-o"
                   size={30}
                   style={{ marginBottom: -3 }}
                   color={color}
