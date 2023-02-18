@@ -197,6 +197,51 @@ const examRouter = t.router({
         },
       });
     }),
+  getExamInfo: t.procedure
+    .use(authMiddleware)
+    .input(
+      z.object({
+        examId: z.string().cuid(),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const exam = await prisma.exam.findFirst({
+        where: {
+          id: input.examId,
+          school_id: ctx.user.school_id,
+          is_active: true,
+        },
+        include: {
+          Tests: {
+            where: {
+              is_active: true,
+            },
+            orderBy: {
+              date_of_exam: "asc",
+            },
+            include: {
+              Subjects: {
+                where: {
+                  Subject: {
+                    is_active: true,
+                  },
+                },
+                include: {
+                  Subject: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!exam)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+        });
+
+      return exam;
+    }),
   createExam: t.procedure
     .use(
       roleMiddleware([

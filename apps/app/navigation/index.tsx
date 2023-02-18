@@ -36,6 +36,7 @@ import { RoutineSettingsScreen } from "../screens/settings/school/RoutineSetting
 import { PeopleSettingsScreen } from "../screens/settings/school/PeopleSettingsScreen";
 import StudentExamList from "../screens/exam/student/ExamList";
 import TestDetailsStudentScreen from "../screens/exam/student/TestDetails";
+import ExamDetailsStudentScreen from "../screens/exam/student/ExamDetails";
 
 export default function Navigation({
   colorScheme,
@@ -145,14 +146,24 @@ function RootNavigator() {
             </>
           ) : null}
           {hasUserStaticRoles(user, [StaticRole.student]) ? (
-            <Stack.Screen
-              name="TestDetailsStudent"
-              component={TestDetailsStudentScreen}
-              options={{
-                headerShown: true,
-                title: "Test information",
-              }}
-            />
+            <>
+              <Stack.Screen
+                name="TestDetailsStudent"
+                component={TestDetailsStudentScreen}
+                options={{
+                  headerShown: true,
+                  title: "Test information",
+                }}
+              />
+              <Stack.Screen
+                name="ExamDetailsStudent"
+                component={ExamDetailsStudentScreen}
+                options={{
+                  headerShown: true,
+                  title: "Exam information",
+                }}
+              />
+            </>
           ) : null}
         </Stack.Navigator>
       </MessagesProvider>

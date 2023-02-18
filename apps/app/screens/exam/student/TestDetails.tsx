@@ -7,13 +7,13 @@ import { trpc } from "../../../utils/trpc";
 import { View } from "../../../components/Themed";
 import { addMinutes, format, parseISO } from "date-fns";
 
-const ExamDetailsStudentScreen: React.FC<
+const TestDetailsStudentScreen: React.FC<
   RootStackScreenProps<"TestDetailsStudent">
 > = ({
   route: {
     params: { testId },
   },
-  navigation: { setOptions },
+  navigation,
 }) => {
   const testQuery = trpc.school.exam.getTestInfo.useQuery({ testId });
 
@@ -29,13 +29,13 @@ const ExamDetailsStudentScreen: React.FC<
 
       const remainingSubjectCount = subjectsCount > 0 ? subjectsCount - 1 : 0;
 
-      setOptions({
+      navigation.setOptions({
         title: `${firstSubjectName}${
           remainingSubjectCount > 0 ? ` and ${remainingSubjectCount} more` : ""
         }`,
       });
     }
-  }, [testQuery.isFetched]);
+  }, [testQuery.isFetching]);
 
   // Preparing timing data
   const [date, startTime, endTime, duration] = useMemo(() => {
@@ -99,11 +99,19 @@ const ExamDetailsStudentScreen: React.FC<
         <Card>
           <Card.Title>Exam: {test.Exam.name}</Card.Title>
           <Card.Divider />
-          <Button>View full schedule</Button>
+          <Button
+            onPress={() =>
+              navigation.navigate("ExamDetailsStudent", {
+                examId: test.Exam?.id!,
+              })
+            }
+          >
+            View full schedule
+          </Button>
         </Card>
       )}
     </ScrollView>
   );
 };
 
-export default ExamDetailsStudentScreen;
+export default TestDetailsStudentScreen;
