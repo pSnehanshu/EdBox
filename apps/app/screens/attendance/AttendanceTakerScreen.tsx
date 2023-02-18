@@ -16,14 +16,14 @@ import {
   Pressable,
   StyleSheet,
 } from "react-native";
-import { Dialog } from "@rneui/themed";
+import { Card, Dialog } from "@rneui/themed";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Spinner from "react-native-loading-spinner-overlay";
 import type { AttendanceStatus } from "@prisma/client";
 import Toast from "react-native-toast-message";
 import { RouterInput, Student } from "schooltalk-shared/types";
 import _ from "lodash";
-import { Card, List, Text, TextInput, View } from "../../components/Themed";
+import { List, Text, TextInput, View } from "../../components/Themed";
 import { RootStackScreenProps } from "../../types";
 import { trpc } from "../../utils/trpc";
 import useColorScheme from "../../utils/useColorScheme";
@@ -154,7 +154,6 @@ function RemarksEditor({
   onRemarksSet,
   onClose,
 }: RemarksEditorProps) {
-  const color = useColorScheme();
   const [tmpRemarks, setTmpRemarks] = useState<string | undefined>(undefined);
   const closeRemarksDialog = useCallback(() => {
     Keyboard.dismiss();
@@ -166,21 +165,10 @@ function RemarksEditor({
   }, []);
 
   return (
-    <Dialog
-      isVisible={isVisible}
-      onBackdropPress={closeRemarksDialog}
-      overlayStyle={{
-        backgroundColor: color === "dark" ? "#222" : "white",
-      }}
-    >
+    <Dialog isVisible={isVisible} onBackdropPress={closeRemarksDialog}>
       {student ? (
         <>
-          <Dialog.Title
-            title={student.User?.name}
-            titleStyle={{
-              color: color === "dark" ? "white" : "black",
-            }}
-          />
+          <Dialog.Title title={student.User?.name} />
           <Text>Write attendance remarks:</Text>
 
           <TextInput

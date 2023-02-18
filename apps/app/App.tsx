@@ -3,9 +3,13 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
 import { useCallback, useEffect, useState } from "react";
+import { ThemeProvider } from "@rneui/themed";
 import { trpc } from "./utils/trpc";
 import useCachedResources from "./utils/useCachedResources";
-import useColorScheme, { ColorSchemeContext } from "./utils/useColorScheme";
+import useColorScheme, {
+  ColorSchemeContext,
+  theme,
+} from "./utils/useColorScheme";
 import Navigation from "./navigation";
 import { useSchool } from "./utils/useSchool";
 import { getAuthToken } from "./utils/auth";
@@ -66,11 +70,13 @@ export default function App() {
     <DBProvider>
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
         <QueryClientProvider client={queryClient}>
-          <ColorSchemeContext.Provider
-            value={{ scheme: colorScheme, change: setAndSaveColorScheme }}
-          >
-            <AppWithSchool />
-          </ColorSchemeContext.Provider>
+          <ThemeProvider theme={theme}>
+            <ColorSchemeContext.Provider
+              value={{ scheme: colorScheme, change: setAndSaveColorScheme }}
+            >
+              <AppWithSchool />
+            </ColorSchemeContext.Provider>
+          </ThemeProvider>
         </QueryClientProvider>
       </trpc.Provider>
       <Toast />

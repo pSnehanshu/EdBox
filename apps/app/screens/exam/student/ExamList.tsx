@@ -12,7 +12,7 @@ import Spinner from "react-native-loading-spinner-overlay";
 import type { ExamItem } from "schooltalk-shared/types";
 import _ from "lodash";
 import { format, parseISO } from "date-fns";
-import { ListItem, Divider } from "@rneui/base";
+import { ListItem, Divider } from "@rneui/themed";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { List, Text, View } from "../../../components/Themed";
 import { trpc } from "../../../utils/trpc";
@@ -25,8 +25,6 @@ const ExamComp: React.FC<{
   const { Tests } = exam;
   const [isExpanded, setExpanded] = useState(false);
   const scheme = useColorScheme();
-  const textColor = scheme === "dark" ? "white" : "black";
-  const bgColor = scheme === "dark" ? "black" : "white";
 
   const startDate = useMemo(() => {
     const isoDate = Tests.at(0)?.date_of_exam;
@@ -51,35 +49,26 @@ const ExamComp: React.FC<{
       content={
         <View style={styles.examHeading}>
           <ListItem.Content>
-            <ListItem.Title style={{ color: textColor }}>
-              {exam.name} examination
-            </ListItem.Title>
+            <ListItem.Title>{exam.name} examination</ListItem.Title>
           </ListItem.Content>
-          <ListItem.Subtitle style={{ color: textColor }}>
+          <ListItem.Subtitle>
             {startDate} - {endDate}
           </ListItem.Subtitle>
         </View>
       }
       bottomDivider
-      containerStyle={{
-        backgroundColor: bgColor,
-      }}
       isExpanded={isExpanded}
       onPress={() => setExpanded((v) => !v)}
       icon={
         <MaterialCommunityIcons
           name="chevron-down"
-          color={textColor}
           size={24}
+          color={scheme === "dark" ? "white" : "black"}
         />
       }
     >
       {Tests.map((test) => (
-        <ListItem
-          key={test.id}
-          bottomDivider
-          containerStyle={{ backgroundColor: bgColor }}
-        >
+        <ListItem key={test.id} bottomDivider>
           <ListItem.Content>
             <TestComp test={{ ...test, Exam: null }} style={{ padding: 8 }} />
           </ListItem.Content>

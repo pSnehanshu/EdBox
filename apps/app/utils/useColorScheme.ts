@@ -1,10 +1,15 @@
-import { createContext, useContext } from "react";
+import { createTheme, useThemeMode } from "@rneui/themed";
+import { createContext, useContext, useEffect } from "react";
 import {
   ColorSchemeName,
   useColorScheme as _useColorScheme,
 } from "react-native";
 
 type ColorScheme = NonNullable<ColorSchemeName>;
+
+export const theme = createTheme({
+  mode: "dark",
+});
 
 export const ColorSchemeContext = createContext<{
   scheme: ColorScheme;
@@ -16,5 +21,11 @@ export const ColorSchemeContext = createContext<{
 // makes it a bit easier to work with.
 export default function useColorScheme(): ColorScheme {
   const { scheme } = useContext(ColorSchemeContext);
+  const { mode, setMode } = useThemeMode();
+
+  useEffect(() => {
+    setMode(scheme);
+  }, [scheme]);
+
   return scheme; // _useColorScheme() as NonNullable<ColorSchemeName>;
 }

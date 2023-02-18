@@ -44,7 +44,6 @@ function TheClass({
   const isOnTop = index === 0;
   const isOnBottom = index === total - 1;
 
-  const bgColor = colorScheme === "dark" ? "black" : "white";
   const color = colorScheme === "dark" ? "white" : "black";
 
   return (
@@ -67,14 +66,12 @@ function TheClass({
           <AntDesign.Button
             onPress={onMoveUp}
             name="caretup"
-            backgroundColor={bgColor}
             iconStyle={{ color: isOnTop ? "gray" : color }}
             style={styles.classActionsMoveBtn}
           />
           <AntDesign.Button
             onPress={onMoveDown}
             name="caretdown"
-            backgroundColor={bgColor}
             iconStyle={{ color: isOnBottom ? "gray" : color }}
             style={styles.classActionsMoveBtn}
           />
