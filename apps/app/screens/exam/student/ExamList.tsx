@@ -114,7 +114,7 @@ const TestComp: React.FC<{
         width: "100%",
       })}
       onPress={() =>
-        navigation.navigate("ExamDetailsStudent", { testId: test.id })
+        navigation.navigate("TestDetailsStudent", { testId: test.id })
       }
     >
       <View style={[styles.testContainer, style]}>
