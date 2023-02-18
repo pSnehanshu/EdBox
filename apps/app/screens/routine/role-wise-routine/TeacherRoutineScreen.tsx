@@ -19,6 +19,7 @@ import {
   TimelineData,
   TimelineOnPressProp,
 } from "./routine-types";
+import { NoClassesToday } from "../../../components/RoutineNoClasses";
 
 const DayRoutine = memo(
   ({
@@ -120,6 +121,8 @@ const DayRoutine = memo(
 
     const colorScheme = useColorScheme();
     const textColor = colorScheme === "dark" ? "white" : "black";
+
+    if (data.length < 1) return <NoClassesToday />;
 
     return (
       <Timeline

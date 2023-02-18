@@ -5,10 +5,10 @@ import { format } from "date-fns";
 import { TabView, TabBar } from "react-native-tab-view";
 import Spinner from "react-native-loading-spinner-overlay";
 import Timeline from "react-native-timeline-flatlist";
+import { Text } from "@rneui/themed";
 import { useNavigation } from "@react-navigation/native";
-import { StudentRoutinePeriod } from "schooltalk-shared/types";
+import type { StudentRoutinePeriod } from "schooltalk-shared/types";
 import { trpc } from "../../../utils/trpc";
-import { Text } from "../../../components/Themed";
 import useColorScheme from "../../../utils/useColorScheme";
 import {
   DayRoutineProps,
@@ -19,6 +19,7 @@ import {
   TimelineData,
   TimelineOnPressProp,
 } from "./routine-types";
+import { NoClassesToday } from "../../../components/RoutineNoClasses";
 
 const DayRoutine = memo(
   ({
@@ -120,6 +121,8 @@ const DayRoutine = memo(
 
     const colorScheme = useColorScheme();
     const textColor = colorScheme === "dark" ? "white" : "black";
+
+    if (data.length < 1) return <NoClassesToday />;
 
     return (
       <Timeline
