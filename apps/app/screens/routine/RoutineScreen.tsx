@@ -5,31 +5,27 @@ import { format } from "date-fns";
 import { TabView, TabBar } from "react-native-tab-view";
 import Spinner from "react-native-loading-spinner-overlay";
 import Timeline from "react-native-timeline-flatlist";
+import { Text } from "@rneui/themed";
 import { useNavigation } from "@react-navigation/native";
-import { TeacherRoutinePeriod } from "schooltalk-shared/types";
-import { trpc } from "../../../utils/trpc";
-import { Text } from "../../../components/Themed";
-import useColorScheme from "../../../utils/useColorScheme";
+import { trpc } from "../../utils/trpc";
+import useColorScheme from "../../utils/useColorScheme";
 import {
   DayRoutineProps,
   GapPeriod,
   RenderSceneProp,
   RenderTabBarProp,
+  RoutinePeriod,
   RoutineRoutes,
   TimelineData,
   TimelineOnPressProp,
 } from "./routine-types";
-import { NoClassesToday } from "../../../components/RoutineNoClasses";
+import { NoClassesToday } from "../../components/RoutineNoClasses";
+import { getUserRoleHierarchical, StaticRole } from "schooltalk-shared/misc";
+import { useCurrentUser } from "../../utils/auth";
 
 const DayRoutine = memo(
-  ({
-    periods,
-    isFetching,
-    onRefresh,
-  }: DayRoutineProps<TeacherRoutinePeriod>) => {
-    type CustomPeriodType =
-      | (TeacherRoutinePeriod & { is_gap: false })
-      | GapPeriod;
+  ({ periods, isFetching, onRefresh }: DayRoutineProps<RoutinePeriod>) => {
+    type CustomPeriodType = (RoutinePeriod & { is_gap: false }) | GapPeriod;
     type RoutineTimelineData = TimelineData<CustomPeriodType>;
 
     const data = useMemo<RoutineTimelineData[]>(() => {
@@ -151,8 +147,15 @@ const DayRoutine = memo(
   }
 );
 
-export default function TeacherRoutineScreen() {
-  const routineQuery = trpc.school.routine.fetchForTeacher.useQuery({});
+export default function RoutineScreen() {
+  const { user } = useCurrentUser();
+  const hierarchicalRole = getUserRoleHierarchical(user);
+
+  const routineQuery =
+    hierarchicalRole === StaticRole.student
+      ? trpc.school.routine.fetchForStudent.useQuery({})
+      : trpc.school.routine.fetchForTeacher.useQuery({});
+
   const layout = useWindowDimensions();
   const color = useColorScheme();
   const [index, setIndex] = useState(

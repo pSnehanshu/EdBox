@@ -8,6 +8,8 @@ import {
   TeacherRoutinePeriod,
 } from "schooltalk-shared/types";
 
+export type RoutinePeriod = TeacherRoutinePeriod | StudentRoutinePeriod;
+
 export type TabRoute = { key: DayOfWeek; title: string };
 export type RenderSceneProp = ComponentProps<
   typeof TabView<TabRoute>
@@ -18,9 +20,7 @@ export type RenderTabBarProp = NonNullable<
 export type TimelineOnPressProp = NonNullable<
   ComponentProps<typeof Timeline>["onEventPress"]
 >;
-export interface DayRoutineProps<
-  RoleType extends TeacherRoutinePeriod | StudentRoutinePeriod
-> {
+export interface DayRoutineProps<RoleType extends RoutinePeriod> {
   day: DayOfWeek;
   periods: RoleType[];
   onRefresh: () => void;

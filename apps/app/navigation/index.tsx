@@ -23,8 +23,6 @@ import { SocketProvider } from "../utils/socketio";
 import { MessagesProvider } from "../utils/messages-repository";
 import ChatWindowScreen from "../screens/chat/ChatWindow";
 import { navigationRef } from "./navRef";
-import TeacherRoutineScreen from "../screens/routine/role-wise-routine/TeacherRoutineScreen";
-import StudentRoutineScreen from "../screens/routine/role-wise-routine/StudentRoutineScreen";
 import AttendanceTakerScreen from "../screens/attendance/AttendanceTakerScreen";
 import { View } from "../components/Themed";
 import { hasUserStaticRoles, StaticRole } from "schooltalk-shared/misc";
@@ -37,6 +35,7 @@ import { PeopleSettingsScreen } from "../screens/settings/school/PeopleSettingsS
 import StudentExamList from "../screens/exam/student/ExamList";
 import TestDetailsStudentScreen from "../screens/exam/student/TestDetails";
 import ExamDetailsStudentScreen from "../screens/exam/student/ExamDetails";
+import RoutineScreen from "../screens/routine/RoutineScreen";
 
 export default function Navigation({
   colorScheme,
@@ -194,9 +193,12 @@ function BottomTabNavigator() {
   const { scheme } = useContext(ColorSchemeContext);
   const school = useSchool();
   const { user } = useCurrentUser();
-  const isTeacher = hasUserStaticRoles(user, [StaticRole.teacher], "all");
   const isStudent = hasUserStaticRoles(user, [StaticRole.student], "all");
-  const isStudentAndTeacher = isTeacher && isStudent;
+  const isStudentOrTeacher = hasUserStaticRoles(
+    user,
+    [StaticRole.teacher, StaticRole.student],
+    "some"
+  );
 
   return (
     <BottomTab.Navigator
@@ -257,12 +259,12 @@ function BottomTabNavigator() {
           ),
         }}
       />
-      {isTeacher ? (
+      {isStudentOrTeacher ? (
         <BottomTab.Screen
           name="Routine"
-          component={TeacherRoutineScreen}
+          component={RoutineScreen}
           options={{
-            title: `${isStudentAndTeacher ? "Teacher " : ""}Routine`,
+            title: "Routine",
             headerShown: true,
             tabBarIcon: ({ color }) => (
               <MaterialCommunityIcons
@@ -275,30 +277,14 @@ function BottomTabNavigator() {
           }}
         />
       ) : null}
+
       {isStudent ? (
         <>
-          <BottomTab.Screen
-            name="Routine"
-            component={StudentRoutineScreen}
-            options={{
-              title: `${isStudentAndTeacher ? "Student " : ""}Routine`,
-              headerShown: true,
-              tabBarIcon: ({ color }) => (
-                <MaterialCommunityIcons
-                  name="timetable"
-                  size={30}
-                  style={{ marginBottom: -3 }}
-                  color={color}
-                />
-              ),
-            }}
-          />
-
           <BottomTab.Screen
             name="ExamsTab"
             component={StudentExamList}
             options={{
-              title: `${isStudentAndTeacher ? "Student " : ""}Exams`,
+              title: "Exams",
               headerShown: true,
               tabBarIcon: ({ color }) => (
                 <FontAwesome
