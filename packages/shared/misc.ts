@@ -128,7 +128,7 @@ export function getUserStaticRoles(
 export function hasUserStaticRoles(
   user: UnserializedUser | User | null | undefined,
   requiredRoles: StaticRole[],
-  mode: "all" | "some" = "all"
+  mode: "all" | "some"
 ): boolean {
   const roles = getUserStaticRoles(user);
 

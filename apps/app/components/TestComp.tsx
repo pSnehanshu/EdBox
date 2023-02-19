@@ -45,7 +45,7 @@ export const TestComp: React.FC<{
         opacity: pressed ? 0.5 : 1,
         width: "100%",
       })}
-      onPress={() => navigation.push("TestDetailsStudent", { testId: test.id })}
+      onPress={() => navigation.push("TestDetails", { testId: test.id })}
     >
       <View style={[styles.testContainer, style]}>
         <View style={styles.testContainerMain}>

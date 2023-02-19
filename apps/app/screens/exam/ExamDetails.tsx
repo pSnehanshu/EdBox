@@ -3,13 +3,13 @@ import { differenceInDays, parseISO } from "date-fns";
 import { useMemo } from "react";
 import { useEffect } from "react";
 import Spinner from "react-native-loading-spinner-overlay";
-import { TestComp } from "../../../components/TestComp";
-import { List } from "../../../components/Themed";
-import { RootStackScreenProps } from "../../../utils/types/common";
-import { trpc } from "../../../utils/trpc";
+import { TestComp } from "../../components/TestComp";
+import { List } from "../../components/Themed";
+import { RootStackScreenProps } from "../../utils/types/common";
+import { trpc } from "../../utils/trpc";
 
 const ExamDetailsStudentScreen: React.FC<
-  RootStackScreenProps<"ExamDetailsStudent">
+  RootStackScreenProps<"ExamDetails">
 > = ({
   route: {
     params: { examId },

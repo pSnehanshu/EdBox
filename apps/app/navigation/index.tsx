@@ -32,9 +32,9 @@ import SubjectsSettingsScreen from "../screens/settings/school/SubjectsSettingsS
 import ClassSectionSettingsScreen from "../screens/settings/school/ClassSectionSettingsScreen";
 import { RoutineSettingsScreen } from "../screens/settings/school/RoutineSettingsScreen";
 import { PeopleSettingsScreen } from "../screens/settings/school/PeopleSettingsScreen";
-import StudentExamList from "../screens/exam/student/ExamList";
-import TestDetailsStudentScreen from "../screens/exam/student/TestDetails";
-import ExamDetailsStudentScreen from "../screens/exam/student/ExamDetails";
+import ExamList from "../screens/exam/ExamList";
+import TestDetailsScreen from "../screens/exam/TestDetails";
+import ExamDetailsScreen from "../screens/exam/ExamDetails";
 import RoutineScreen from "../screens/routine/RoutineScreen";
 
 export default function Navigation({
@@ -86,7 +86,7 @@ function RootNavigator() {
               title: `${route.params.name ?? "Messages"}`,
             })}
           />
-          {hasUserStaticRoles(user, [StaticRole.teacher]) ? (
+          {hasUserStaticRoles(user, [StaticRole.teacher], "all") ? (
             <Stack.Screen
               name="AttendanceTaker"
               component={AttendanceTakerScreen}
@@ -144,19 +144,23 @@ function RootNavigator() {
               />
             </>
           ) : null}
-          {hasUserStaticRoles(user, [StaticRole.student]) ? (
+          {hasUserStaticRoles(
+            user,
+            [StaticRole.teacher, StaticRole.student],
+            "some"
+          ) ? (
             <>
               <Stack.Screen
-                name="TestDetailsStudent"
-                component={TestDetailsStudentScreen}
+                name="TestDetails"
+                component={TestDetailsScreen}
                 options={{
                   headerShown: true,
                   title: "Test information",
                 }}
               />
               <Stack.Screen
-                name="ExamDetailsStudent"
-                component={ExamDetailsStudentScreen}
+                name="ExamDetails"
+                component={ExamDetailsScreen}
                 options={{
                   headerShown: true,
                   title: "Exam information",
@@ -193,7 +197,6 @@ function BottomTabNavigator() {
   const { scheme } = useContext(ColorSchemeContext);
   const school = useSchool();
   const { user } = useCurrentUser();
-  const isStudent = hasUserStaticRoles(user, [StaticRole.student], "all");
   const isStudentOrTeacher = hasUserStaticRoles(
     user,
     [StaticRole.teacher, StaticRole.student],
@@ -260,29 +263,27 @@ function BottomTabNavigator() {
         }}
       />
       {isStudentOrTeacher ? (
-        <BottomTab.Screen
-          name="Routine"
-          component={RoutineScreen}
-          options={{
-            title: "Routine",
-            headerShown: true,
-            tabBarIcon: ({ color }) => (
-              <MaterialCommunityIcons
-                name="timetable"
-                size={30}
-                style={{ marginBottom: -3 }}
-                color={color}
-              />
-            ),
-          }}
-        />
-      ) : null}
-
-      {isStudent ? (
         <>
           <BottomTab.Screen
+            name="Routine"
+            component={RoutineScreen}
+            options={{
+              title: "Routine",
+              headerShown: true,
+              tabBarIcon: ({ color }) => (
+                <MaterialCommunityIcons
+                  name="timetable"
+                  size={30}
+                  style={{ marginBottom: -3 }}
+                  color={color}
+                />
+              ),
+            }}
+          />
+
+          <BottomTab.Screen
             name="ExamsTab"
-            component={StudentExamList}
+            component={ExamList}
             options={{
               title: "Exams",
               headerShown: true,
@@ -298,6 +299,7 @@ function BottomTabNavigator() {
           />
         </>
       ) : null}
+
       <BottomTab.Screen
         name="Settings"
         component={SettingsScreen}

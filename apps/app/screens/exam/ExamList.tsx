@@ -14,11 +14,10 @@ import _ from "lodash";
 import { format, parseISO } from "date-fns";
 import { ListItem, Divider } from "@rneui/themed";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { List, Text, View } from "../../../components/Themed";
-import { trpc } from "../../../utils/trpc";
-import useColorScheme from "../../../utils/useColorScheme";
-import { useNavigation } from "@react-navigation/native";
-import { TestComp } from "../../../components/TestComp";
+import { List, Text, View } from "../../components/Themed";
+import { trpc } from "../../utils/trpc";
+import useColorScheme from "../../utils/useColorScheme";
+import { TestComp } from "../../components/TestComp";
 
 const ExamComp: React.FC<{
   exam: Extract<ExamItem, { type: "exam" }>["item"];
