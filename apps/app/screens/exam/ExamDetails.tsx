@@ -47,7 +47,7 @@ const ExamDetailsStudentScreen: React.FC<
     <List
       keyExtractor={(t) => t.id}
       data={exam.Tests}
-      renderItem={({ item }) => <TestComp test={{ ...item, Exam: null }} />}
+      renderItem={({ item }) => <TestComp test={item} />}
       ListHeaderComponent={
         <Card>
           <Card.Title>Details</Card.Title>

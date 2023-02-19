@@ -18,6 +18,8 @@ import { List, Text, View } from "../../components/Themed";
 import { trpc } from "../../utils/trpc";
 import useColorScheme from "../../utils/useColorScheme";
 import { TestComp } from "../../components/TestComp";
+import { useCurrentUser } from "../../utils/auth";
+import { getUserRoleHierarchical, StaticRole } from "schooltalk-shared/misc";
 
 const ExamComp: React.FC<{
   exam: Extract<ExamItem, { type: "exam" }>["item"];
@@ -70,7 +72,7 @@ const ExamComp: React.FC<{
       {Tests.map((test) => (
         <ListItem key={test.id} bottomDivider>
           <ListItem.Content>
-            <TestComp test={{ ...test, Exam: null }} style={{ padding: 8 }} />
+            <TestComp test={test} style={{ padding: 8 }} />
           </ListItem.Content>
         </ListItem>
       ))}
@@ -79,7 +81,13 @@ const ExamComp: React.FC<{
 };
 
 const ExamListScreen: React.FC = () => {
-  const query = trpc.school.exam.fetchExamsAndTestsForStudent.useQuery({});
+  const { user } = useCurrentUser();
+  const hierarchicalRole = getUserRoleHierarchical(user);
+
+  const query =
+    hierarchicalRole === StaticRole.student
+      ? trpc.school.exam.fetchExamsAndTestsForStudent.useQuery({})
+      : trpc.school.exam.fetchExamsAndTestsForStudent.useQuery({});
 
   if (query.isLoading) return <Spinner visible />;
 

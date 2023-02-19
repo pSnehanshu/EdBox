@@ -2,7 +2,6 @@ import { TRPCError } from "@trpc/server";
 import { parseISO } from "date-fns";
 import _ from "lodash";
 import { StaticRole } from "schooltalk-shared/misc";
-import type { ArrayElement } from "schooltalk-shared/types";
 import { z } from "zod";
 import prisma from "../../../prisma";
 import { authMiddleware, roleMiddleware, t } from "../../trpc";
@@ -24,6 +23,47 @@ const examTestSchema = z.object({
   duration_minutes: z.number().int().min(0).default(0),
   subjectIds: z.string().cuid().array(),
 });
+
+type ExamTest = NonNullable<
+  Awaited<
+    ReturnType<
+      typeof prisma.examTest.findFirst<{
+        include: {
+          Exam: {
+            include: {
+              Tests: {
+                include: {
+                  Subjects: {
+                    include: {
+                      Subject: true;
+                    };
+                  };
+                };
+              };
+            };
+          };
+          Subjects: {
+            include: {
+              Subject: true;
+            };
+          };
+        };
+      }>
+    >
+  >
+>;
+
+type IndependentTest = Omit<ExamTest, "Exam">;
+
+type ExamItem =
+  | {
+      type: "exam";
+      item: NonNullable<ExamTest["Exam"]>;
+    }
+  | {
+      type: "test";
+      item: IndependentTest;
+    };
 
 const examRouter = t.router({
   getTestInfo: t.procedure
@@ -322,7 +362,7 @@ const examRouter = t.router({
         page: z.number().int().min(1).default(1),
       })
     )
-    .query(async ({ input, ctx }) => {
+    .query(async ({ input, ctx }): Promise<ExamItem[]> => {
       const student = await prisma.student.findUnique({
         where: {
           id: ctx.user.student_id!,
@@ -342,7 +382,7 @@ const examRouter = t.router({
           message: "Student not found",
         });
 
-      const tests = await prisma.examTest.findMany({
+      const tests: ExamTest[] = await prisma.examTest.findMany({
         where: {
           school_id: ctx.user.school_id,
           class_id: student.CurrentBatch.class_id,
@@ -414,19 +454,7 @@ const examRouter = t.router({
       );
 
       // Filter out the independent tests (tests not under any exam)
-      const independentTests = tests.filter((t) => !t.Exam) as Array<
-        ArrayElement<typeof tests> & { Exam: null | undefined }
-      >;
-
-      type ExamItem =
-        | {
-            type: "exam";
-            item: ArrayElement<typeof exams>;
-          }
-        | {
-            type: "test";
-            item: typeof independentTests[0];
-          };
+      const independentTests = tests.filter((t) => !t.Exam);
 
       const items: ExamItem[] = [];
 
