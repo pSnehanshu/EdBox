@@ -1,21 +1,54 @@
-import { useEffect, useMemo } from "react";
-import { ScrollView } from "react-native";
+import { useCallback, useEffect, useMemo } from "react";
+import { Alert, Pressable, ScrollView, StyleSheet } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
 import { Text, Card, Button } from "@rneui/themed";
+import _ from "lodash";
 import { RootStackScreenProps } from "../../utils/types/common";
 import { trpc } from "../../utils/trpc";
 import { View } from "../../components/Themed";
 import { addMinutes, format, parseISO } from "date-fns";
+import { ArrayElement } from "schooltalk-shared/types";
+import { hasUserStaticRoles, StaticRole } from "schooltalk-shared/misc";
+import { useCurrentUser } from "../../utils/auth";
 
-const TestDetailsStudentScreen: React.FC<
-  RootStackScreenProps<"TestDetails">
-> = ({
+const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
   route: {
     params: { testId },
   },
   navigation,
 }) => {
-  const testQuery = trpc.school.exam.getTestInfo.useQuery({ testId });
+  const { user } = useCurrentUser();
+
+  // Fetch the class and section the user belongs to
+  const classAndSectionQuery = trpc.school.people.getStudentClass.useQuery(
+    undefined,
+    {
+      retry(failureCount, error) {
+        const statusCode = error.data?.httpStatus ?? 0;
+        if (statusCode >= 500 && failureCount <= 3) {
+          // If server error, retry at most 3 times
+          return true;
+        }
+        return false;
+      },
+    }
+  );
+
+  const testQuery = trpc.school.exam.getTestInfo.useQuery(
+    {
+      testId,
+      periodsFilter:
+        hasUserStaticRoles(user, [StaticRole.student], "all") &&
+        typeof classAndSectionQuery.data?.class_id === "number"
+          ? {
+              // Filter out periods (and teachers) if the user is a student
+              class_id: classAndSectionQuery.data.class_id,
+              section_id: classAndSectionQuery.data.section_id ?? undefined,
+            }
+          : undefined,
+    },
+    { enabled: classAndSectionQuery.isFetched }
+  );
 
   // Set screen title
   useEffect(() => {
@@ -64,7 +97,22 @@ const TestDetailsStudentScreen: React.FC<
     return ["", "", "", ""];
   }, [testQuery.data?.date_of_exam]);
 
-  if (testQuery.isLoading || !testQuery.data) return <Spinner visible />;
+  /** Get a list of teachers that teach the given subject */
+  const getSubjectTeachers = useCallback(
+    (subject: ArrayElement<typeof test["Subjects"]>["Subject"]) => {
+      const teachers = subject.Periods.map((period) => period.Teacher);
+      const uniqueTeachers = _.uniqBy(teachers, (t) => t?.id);
+      const nonNullTeachers: NonNullable<ArrayElement<typeof teachers>>[] = [];
+      uniqueTeachers.forEach((t) => {
+        if (t) nonNullTeachers.push(t);
+      });
+      return nonNullTeachers;
+    },
+    []
+  );
+
+  if (classAndSectionQuery.isLoading || testQuery.isLoading || !testQuery.data)
+    return <Spinner visible />;
 
   const { data: test } = testQuery;
 
@@ -73,11 +121,31 @@ const TestDetailsStudentScreen: React.FC<
       <Card>
         <Card.Title>Subject{test.Subjects.length > 1 ? "s" : ""}</Card.Title>
         <Card.Divider />
-        {test.Subjects.map(({ Subject }) => (
-          <View key={Subject.id}>
-            <Text>{Subject.name}</Text>
-          </View>
-        ))}
+        {test.Subjects.map(({ Subject }) => {
+          const teachers = getSubjectTeachers(Subject);
+          return (
+            <View key={Subject.id} style={styles.singleSubject}>
+              <Text>{Subject.name}</Text>
+
+              <Pressable
+                style={({ pressed }) => [
+                  styles.subjectTeacher,
+                  { opacity: pressed ? 0.5 : 1 },
+                ]}
+                onPress={() => {
+                  Alert.alert(
+                    "List of teachers",
+                    `${teachers
+                      .map((t, i) => `${i + 1}. ${t.User?.name}`)
+                      .join("\n")}`
+                  );
+                }}
+              >
+                <Text>({teachers.length} teachers)</Text>
+              </Pressable>
+            </View>
+          );
+        })}
 
         {test.subject_name && (
           <View>
@@ -114,4 +182,13 @@ const TestDetailsStudentScreen: React.FC<
   );
 };
 
-export default TestDetailsStudentScreen;
+export default TestDetailsScreen;
+
+const styles = StyleSheet.create({
+  singleSubject: {
+    flexDirection: "row",
+  },
+  subjectTeacher: {
+    marginLeft: 8,
+  },
+});

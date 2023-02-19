@@ -1,9 +1,10 @@
 import type { Prisma } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
 import _ from "lodash";
 import { StaticRole } from "schooltalk-shared/misc";
 import { z } from "zod";
 import prisma from "../../../prisma";
-import { principalMiddleware, t } from "../../trpc";
+import { principalMiddleware, studentMiddleware, t } from "../../trpc";
 
 const peopleRouter = t.router({
   fetchPeople: t.procedure
@@ -86,6 +87,38 @@ const peopleRouter = t.router({
 
       return users.map((u) => _.omit(u, ["password", "otp", "otp_expiry"]));
     }),
+  getStudentClass: t.procedure.use(studentMiddleware).query(async ({ ctx }) => {
+    const student = await prisma.student.findFirst({
+      where: {
+        id: ctx.user.student_id!,
+        school_id: ctx.user.school_id,
+        CurrentBatch: {
+          is_active: true,
+          Class: {
+            is_active: true,
+          },
+        },
+      },
+      select: {
+        section: true,
+        CurrentBatch: {
+          select: {
+            class_id: true,
+          },
+        },
+      },
+    });
+
+    if (!student)
+      throw new TRPCError({
+        code: "NOT_FOUND",
+      });
+
+    return {
+      class_id: student.CurrentBatch?.class_id,
+      section_id: student.section,
+    };
+  }),
 });
 
 export default peopleRouter;

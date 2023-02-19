@@ -169,7 +169,6 @@ const authRouter = t.router({
         expiry_date: session.expiry_date,
       };
     }),
-
   whoami: t.procedure
     .use(authMiddleware)
     .query(({ ctx }) =>

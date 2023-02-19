@@ -71,6 +71,12 @@ const examRouter = t.router({
     .input(
       z.object({
         testId: z.string().cuid(),
+        periodsFilter: z
+          .object({
+            class_id: z.number().int(),
+            section_id: z.number().int().optional(),
+          })
+          .optional(),
       })
     )
     .query(async ({ input, ctx }) => {
@@ -85,7 +91,25 @@ const examRouter = t.router({
               },
             },
             include: {
-              Subject: true,
+              Subject: {
+                include: {
+                  Periods: {
+                    where: {
+                      is_active: true,
+                      school_id: ctx.user.school_id,
+                      class_id: input.periodsFilter?.class_id,
+                      section_id: input.periodsFilter?.section_id,
+                    },
+                    include: {
+                      Teacher: {
+                        include: {
+                          User: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
             },
           },
         },
