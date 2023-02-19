@@ -6,7 +6,7 @@ import _ from "lodash";
 import { useMemo } from "react";
 import { Pressable, StyleProp, StyleSheet, ViewStyle } from "react-native";
 import type { ExamItem } from "schooltalk-shared/types";
-import type { RootStackParamList } from "../types";
+import type { RootStackParamList } from "../utils/types/common";
 import { View } from "./Themed";
 
 export const TestComp: React.FC<{

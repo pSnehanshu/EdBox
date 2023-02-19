@@ -18,7 +18,7 @@ import {
   RoutineRoutes,
   TimelineData,
   TimelineOnPressProp,
-} from "./routine-types";
+} from "../../utils/types/routine-types";
 import { NoClassesToday } from "../../components/RoutineNoClasses";
 import { getUserRoleHierarchical, StaticRole } from "schooltalk-shared/misc";
 import { useCurrentUser } from "../../utils/auth";

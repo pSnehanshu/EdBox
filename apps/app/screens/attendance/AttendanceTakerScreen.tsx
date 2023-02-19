@@ -24,7 +24,7 @@ import Toast from "react-native-toast-message";
 import { RouterInput, Student } from "schooltalk-shared/types";
 import _ from "lodash";
 import { List, Text, TextInput, View } from "../../components/Themed";
-import { RootStackScreenProps } from "../../types";
+import { RootStackScreenProps } from "../../utils/types/common";
 import { trpc } from "../../utils/trpc";
 import useColorScheme from "../../utils/useColorScheme";
 import { format, getDate, getMonth, getYear } from "date-fns";

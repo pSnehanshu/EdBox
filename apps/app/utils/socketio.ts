@@ -10,7 +10,7 @@ import {
 } from "react";
 import { getAuthToken } from "./auth";
 import { useSchool } from "./useSchool";
-import { SocketClient } from "../types";
+import { SocketClient } from "../utils/types/common";
 
 const SocketContext = createContext<SocketClient | undefined>(undefined);
 

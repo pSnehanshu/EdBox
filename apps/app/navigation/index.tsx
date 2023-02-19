@@ -16,7 +16,7 @@ import LoginScreen from "../screens/auth/Login";
 import PreLoginScreen from "../screens/auth/PreLogin";
 import HomeTabScreen from "../screens/HomeTabScreen";
 import ChatsListScreen from "../screens/chat/ChatsTabScreen";
-import { RootStackParamList, RootTabParamList } from "../types";
+import { RootStackParamList, RootTabParamList } from "../utils/types/common";
 import { useCurrentUser } from "../utils/auth";
 import LinkingConfiguration from "./LinkingConfiguration";
 import { SocketProvider } from "../utils/socketio";

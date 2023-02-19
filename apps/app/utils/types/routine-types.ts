@@ -2,7 +2,7 @@ import { ComponentProps } from "react";
 import { StyleProp, ViewStyle } from "react-native";
 import { TabView } from "react-native-tab-view";
 import Timeline from "react-native-timeline-flatlist";
-import {
+import type {
   DayOfWeek,
   StudentRoutinePeriod,
   TeacherRoutinePeriod,

@@ -7,7 +7,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { List, Text, TextInput, View } from "../../components/Themed";
-import { RootStackParamList } from "../../types";
+import { RootStackParamList } from "../../utils/types/common";
 import ChatMessage from "../../components/ChatMessage";
 import { Ionicons } from "@expo/vector-icons";
 import { useMessages } from "../../utils/messages-repository";

@@ -11,7 +11,7 @@ import { ColorSchemeContext } from "../../utils/useColorScheme";
 import { useCallback, useContext, useMemo } from "react";
 import { useCurrentUser, useLogout } from "../../utils/auth";
 import { hasUserStaticRoles, StaticRole } from "schooltalk-shared/misc";
-import { SettingsOption } from "../../types";
+import { SettingsOption } from "../../utils/types/common";
 
 export function SettingsScreen() {
   const { scheme: colorScheme, change } = useContext(ColorSchemeContext);

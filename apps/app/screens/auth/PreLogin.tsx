@@ -3,7 +3,7 @@ import { WebView } from "react-native-webview";
 import { View } from "../../components/Themed";
 import { useSchool } from "../../utils/useSchool";
 import * as WebBrowser from "expo-web-browser";
-import { RootStackScreenProps } from "../../types";
+import { RootStackScreenProps } from "../../utils/types/common";
 
 export default function PreLoginScreen({
   navigation,

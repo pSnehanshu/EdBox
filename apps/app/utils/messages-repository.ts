@@ -10,7 +10,7 @@ import {
 } from "react";
 import { Subject } from "rxjs";
 import type { Message } from "schooltalk-shared/types";
-import { SocketClient } from "../types";
+import { SocketClient } from "../utils/types/common";
 import { useDB } from "./db";
 import { useSocket } from "./socketio";
 import { trpc } from "./trpc";

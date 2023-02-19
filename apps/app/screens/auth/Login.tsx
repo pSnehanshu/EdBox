@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "react-native";
 import { View, Text, TextInput } from "../../components/Themed";
 import { useSchool } from "../../utils/useSchool";
-import { RootStackScreenProps } from "../../types";
+import { RootStackScreenProps } from "../../utils/types/common";
 import { trpc } from "../../utils/trpc";
 import Spinner from "react-native-loading-spinner-overlay";
 import { useSetAuthToken } from "../../utils/auth";

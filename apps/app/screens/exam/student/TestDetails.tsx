@@ -2,7 +2,7 @@ import { useEffect, useMemo } from "react";
 import { ScrollView } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
 import { Text, Card, Button } from "@rneui/themed";
-import { RootStackScreenProps } from "../../../types";
+import { RootStackScreenProps } from "../../../utils/types/common";
 import { trpc } from "../../../utils/trpc";
 import { View } from "../../../components/Themed";
 import { addMinutes, format, parseISO } from "date-fns";

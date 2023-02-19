@@ -7,7 +7,10 @@ import {
   StyleSheet,
 } from "react-native";
 import { List, Text, View } from "../../../components/Themed";
-import { RootStackScreenProps, SettingsOption } from "../../../types";
+import {
+  RootStackScreenProps,
+  SettingsOption,
+} from "../../../utils/types/common";
 import useColorScheme from "../../../utils/useColorScheme";
 
 export default function SchoolSettingsScreen({
