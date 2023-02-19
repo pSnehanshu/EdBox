@@ -480,6 +480,123 @@ const examRouter = t.router({
         }
       });
     }),
+  fetchExamsAndTestsForTeacher: t.procedure
+    .use(roleMiddleware([StaticRole.teacher]))
+    .input(
+      z.object({
+        after_date: dateStringSchema,
+        limit: z.number().int().min(1).max(100).default(10),
+        page: z.number().int().min(1).default(1),
+      })
+    )
+    .query(async ({ input, ctx }): Promise<ExamItem[]> => {
+      const tests: ExamTest[] = await prisma.examTest.findMany({
+        where: {
+          is_active: true,
+          school_id: ctx.user.school_id,
+          Subjects: {
+            some: {
+              Subject: {
+                is_active: true,
+                Periods: {
+                  some: {
+                    is_active: true,
+                    teacher_id: ctx.user.Teacher?.id,
+                  },
+                },
+              },
+            },
+          },
+        },
+        include: {
+          Exam: {
+            include: {
+              Tests: {
+                where: {
+                  is_active: true,
+                  Subjects: {
+                    some: {
+                      Subject: {
+                        is_active: true,
+                        Periods: {
+                          some: {
+                            is_active: true,
+                            teacher_id: ctx.user.Teacher?.id,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                orderBy: {
+                  date_of_exam: "asc",
+                },
+                include: {
+                  Subjects: {
+                    where: {
+                      Subject: {
+                        is_active: true,
+                      },
+                    },
+                    include: {
+                      Subject: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          Subjects: {
+            where: {
+              Subject: {
+                is_active: true,
+              },
+            },
+            include: {
+              Subject: true,
+            },
+          },
+        },
+        orderBy: {
+          date_of_exam: "asc",
+        },
+        take: input.limit,
+        skip: (input.page - 1) * input.limit,
+      });
+
+      // Extract the exams
+      const exams = _.uniqBy(
+        tests.filter((t) => t.Exam).map((t) => t.Exam!),
+        "id"
+      );
+
+      // Filter out the independent tests (tests not under any exam)
+      const independentTests = tests.filter((t) => !t.Exam);
+
+      const items: ExamItem[] = [];
+
+      exams.forEach((e) => {
+        items.push({
+          type: "exam",
+          item: e,
+        });
+      });
+      independentTests.forEach((t) => {
+        items.push({
+          type: "test",
+          item: t,
+        });
+      });
+
+      // Sort the items
+      return _.sortBy(items, ({ type, item }) => {
+        if (type === "test") {
+          return item.date_of_exam;
+        } else {
+          return item.Tests[0]?.date_of_exam;
+        }
+      });
+    }),
 });
 
 export default examRouter;

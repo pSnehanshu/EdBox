@@ -87,7 +87,7 @@ const ExamListScreen: React.FC = () => {
   const query =
     hierarchicalRole === StaticRole.student
       ? trpc.school.exam.fetchExamsAndTestsForStudent.useQuery({})
-      : trpc.school.exam.fetchExamsAndTestsForStudent.useQuery({});
+      : trpc.school.exam.fetchExamsAndTestsForTeacher.useQuery({});
 
   if (query.isLoading) return <Spinner visible />;
 
