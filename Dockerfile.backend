@@ -42,11 +42,16 @@ COPY --from=build /var/www/apps/backend/build ./apps/backend
 COPY --from=build /var/www/packages/shared ./packages/shared
 COPY --from=build /var/www/node_modules node_modules
 
-# Copy yarn files
+# Copy yarn files and others
 COPY .yarn/releases .yarn/releases
 COPY .yarn/plugins .yarn/plugins
 COPY .yarnrc.yml package.json yarn.lock ./
+COPY apps/backend/package.json apps/backend/
+COPY apps/backend/prisma apps/backend/prisma
 
 EXPOSE 5080
+ENV NODE_ENV=production
 
-CMD ["yarn", "node", "apps/backend/server.js"]
+# Migrate and start
+CMD yarn workspace schooltalk-backend run migrate \
+  && yarn node apps/backend/server.js
