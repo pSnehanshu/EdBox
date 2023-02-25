@@ -15,3 +15,27 @@ Now you can run it
 ```bash
 yarn dev
 ```
+
+# Deploy
+
+To deploy, first create the docker image. Run this command from the root directory.
+
+```bash
+docker build -t ghcr.io/psnehanshu/schooltalk:latest -f ./Dockerfile.backend . 
+```
+
+Then push it to the registry.
+
+```bash
+docker push ghcr.io/psnehanshu/schooltalk:latest
+```
+
+To run it:
+
+```bash
+docker run \
+  -p 5080:5080 \
+  -e DATABASE_URL="postgresql://user:password@hostname:5432/dbname?schema=public" \
+  --name schooltalk -d \
+  ghcr.io/psnehanshu/schooltalk:latest
+```
