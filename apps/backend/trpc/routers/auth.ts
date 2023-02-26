@@ -191,6 +191,79 @@ const authRouter = t.router({
       });
     }
   }),
+  rollNumberLoginRequestOTP: t.procedure
+    .input(
+      z.object({
+        class_id: z.number().int(),
+        section_id: z.number().int(),
+        school_id: z.string().cuid(),
+        rollnum: z.number().int(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      // First fetch student and parents
+      const student = await prisma.student.findFirst({
+        where: {
+          school_id: input.school_id,
+          roll_num: input.rollnum,
+          section: input.section_id,
+          CurrentBatch: {
+            is_active: true,
+            class_id: input.class_id,
+            Class: {
+              is_active: true,
+              Sections: {
+                some: {
+                  numeric_id: input.section_id,
+                },
+              },
+            },
+          },
+          User: {
+            is_active: true,
+          },
+        },
+        include: {
+          Parents: {
+            where: {
+              Parent: {
+                User: {
+                  is_active: true,
+                },
+              },
+            },
+            include: {
+              Parent: {
+                include: {
+                  User: true,
+                },
+              },
+            },
+          },
+          User: true,
+        },
+      });
+
+      if (!student || !student.User) throw new TRPCError({ code: "NOT_FOUND" });
+
+      // Send OTP to parents
+      const parentsPhoneNumbers = student.Parents.map(
+        (p) => p.Parent.User?.phone
+      );
+
+      // Generate OTP
+      const { otp, expiry } = generateUserOTP(student.User);
+
+      await prisma.user.update({
+        where: { id: student.User.id },
+        data: { otp, otp_expiry: expiry },
+      });
+
+      // TODO: Send the SMS with the OTP
+      console.log(parentsPhoneNumbers, { otp, expiry });
+
+      return { userId: student.User.id };
+    }),
 });
 
 export default authRouter;
