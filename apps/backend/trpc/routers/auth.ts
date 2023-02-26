@@ -107,7 +107,7 @@ const authRouter = t.router({
         data: { otp, otp_expiry: expiry },
       });
 
-      // TODO: Send the email with the OTP
+      // TODO: Send the SMS with the OTP
       console.log(input.phoneNumber, { otp, expiry });
 
       return { userId: user.id };

@@ -93,11 +93,15 @@ const classStdRouter = t.router({
       return { students, total, cursor };
     }),
   fetchClassesAndSections: t.procedure
-    .use(authMiddleware)
-    .query(async ({ ctx }) => {
+    .input(
+      z.object({
+        schoolId: z.string().cuid(),
+      })
+    )
+    .query(async ({ input }) => {
       const classes = await prisma.classStd.findMany({
         where: {
-          school_id: ctx.user.school_id,
+          school_id: input.schoolId,
           is_active: true,
         },
         include: {
