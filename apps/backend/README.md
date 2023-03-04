@@ -39,3 +39,24 @@ docker run \
   --name schooltalk -d \
   ghcr.io/psnehanshu/schooltalk:latest
 ```
+
+
+# Deploy to Fly.io
+
+First, authenticate with GitHub registry using [personal access token](https://github.com/settings/tokens). Required permission is `read:packages`.
+
+The pull the image locally:
+
+```bash
+docker pull ghcr.io/psnehanshu/schooltalk_backend:main
+```
+
+Then, 
+
+- [Install flyctl](https://fly.io/docs/hands-on/install-flyctl/)
+- [login to flyctl](https://fly.io/docs/getting-started/log-in-to-fly/).
+- Push to Fly.io using:
+
+```bash
+fly deploy --local-only
+```
