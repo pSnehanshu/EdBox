@@ -2403,10 +2403,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@prisma/engines@npm:4.9.0":
-  version: 4.9.0
-  resolution: "@prisma/engines@npm:4.9.0"
-  checksum: b73306b3e34ebb544f797342cb594f4a73602c6e63961e31e9158f02afdfc209f2cc1d59ae87cbb0165b3dff58eaa145c601ac2a1cfc460e8e439cea8425a3ed
+"@prisma/engines@npm:4.10.1":
+  version: 4.10.1
+  resolution: "@prisma/engines@npm:4.10.1"
+  checksum: 359e32db3155640315661055d8e6430d60c10ff057b5d4c070164587d872ab6d4c292cee5ac35d364c1a2f6da0265fa847023c5cc1a4bf3c067fbecbbb638273
   languageName: node
   linkType: hard
 
@@ -9813,15 +9813,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prisma@npm:latest":
-  version: 4.9.0
-  resolution: "prisma@npm:4.9.0"
+"prisma@npm:^4.10.1":
+  version: 4.10.1
+  resolution: "prisma@npm:4.10.1"
   dependencies:
-    "@prisma/engines": 4.9.0
+    "@prisma/engines": 4.10.1
   bin:
     prisma: build/index.js
     prisma2: build/index.js
-  checksum: 82f680008a61824a40f3daae9e0e5766f33d28c6641d04e0ee0918c2cb42110579187f3fce2d08ec8baa1124b3115229e9d83d7f64987bf46f6403f56b07e711
+  checksum: e4078909ad07bcfbe19e10aa0822dca47622b099b4ad6f48da743d47a658e25662de757b5b0e3bbfcd04c0b346dfcfe4d1fa6f0486312dfd8b193b32795ed5ce
   languageName: node
   linkType: hard
 
@@ -10881,7 +10881,7 @@ __metadata:
     express: ^4.18.2
     lodash: ^4.17.21
     nodemon: ^2.0.20
-    prisma: latest
+    prisma: ^4.10.1
     schooltalk-shared: "*"
     socket.io: ^4.5.4
     ts-node: ^10.9.1
@@ -10896,6 +10896,7 @@ __metadata:
   dependencies:
     "@types/async": ^3.2.16
     async: ^3.2.4
+    typescript: ^4.9.4
   languageName: unknown
   linkType: soft
 
