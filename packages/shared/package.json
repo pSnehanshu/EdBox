@@ -6,10 +6,14 @@
   "author": "Snehanshu Phukon",
   "license": "UNLICENSED",
   "private": true,
+  "scripts": {
+    "build": "tsc"
+  },
   "dependencies": {
     "async": "^3.2.4"
   },
   "devDependencies": {
-    "@types/async": "^3.2.16"
+    "@types/async": "^3.2.16",
+    "typescript": "^4.9.4"
   }
 }
