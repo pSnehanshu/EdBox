@@ -6,6 +6,7 @@ import { TRPCError } from "@trpc/server";
 import { addMinutes, addMonths, isFuture, isPast } from "date-fns";
 import _ from "lodash";
 import CONFIG from "../../config";
+import { sendSMS } from "../../utils/sms.service";
 
 function generateUserOTP(user: Pick<User, "otp" | "otp_expiry">) {
   // Generate OTP
@@ -90,6 +91,11 @@ const authRouter = t.router({
           is_active: true,
           otp: true,
           otp_expiry: true,
+          School: {
+            select: {
+              name: true,
+            },
+          },
         },
       });
 
@@ -107,8 +113,13 @@ const authRouter = t.router({
         data: { otp, otp_expiry: expiry },
       });
 
-      // TODO: Send the SMS with the OTP
-      console.log(input.phoneNumber, { otp, expiry });
+      // Send the SMS with the OTP
+      // TODO: Add a limit or budget will be exhausted
+      await sendSMS(
+        { isd: input.isd, number: input.phoneNumber },
+        "login_otp_self",
+        { otp, school: user.School.name }
+      );
 
       return { userId: user.id };
     }),
