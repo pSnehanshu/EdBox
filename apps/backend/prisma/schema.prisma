@@ -4,6 +4,9 @@
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["native"]
+  // Error: Segmentation fault (core dumped).
+  // Fix: https://github.com/prisma/prisma/issues/10649#issuecomment-1003642803
+  engineType    = "binary"
 }
 
 datasource db {
