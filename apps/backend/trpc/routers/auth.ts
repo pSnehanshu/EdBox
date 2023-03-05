@@ -81,8 +81,9 @@ const authRouter = t.router({
     .mutation(async ({ input }) => {
       const user = await prisma.user.findUnique({
         where: {
-          phone_school_id: {
-            phone: `${input.isd}${input.phoneNumber}`,
+          phone_isd_code_phone_school_id: {
+            phone: input.phoneNumber,
+            phone_isd_code: input.isd,
             school_id: input.schoolId,
           },
         },
@@ -252,15 +253,21 @@ const authRouter = t.router({
             },
           },
           User: true,
+          School: {
+            select: {
+              name: true,
+            },
+          },
         },
       });
 
       if (!student || !student.User) throw new TRPCError({ code: "NOT_FOUND" });
 
       // Send OTP to parents
-      const parentsPhoneNumbers = student.Parents.map(
-        (p) => p.Parent.User?.phone
-      );
+      const parentsPhoneNumbers = student.Parents.map((p) => ({
+        number: p.Parent.User?.phone,
+        isd: p.Parent.User?.phone_isd_code,
+      }));
 
       // Generate OTP
       const { otp, expiry } = generateUserOTP(student.User);
@@ -270,8 +277,26 @@ const authRouter = t.router({
         data: { otp, otp_expiry: expiry },
       });
 
-      // TODO: Send the SMS with the OTP
-      console.log(parentsPhoneNumbers, { otp, expiry });
+      // Send the SMS with the OTP
+      await Promise.allSettled(
+        parentsPhoneNumbers.map((phone) =>
+          phone.number
+            ? // TODO: Add a limit or budget will be exhausted
+              sendSMS(
+                {
+                  number: phone.number,
+                  isd: phone.isd,
+                },
+                "login_otp_student",
+                {
+                  otp,
+                  student: student.User?.name!,
+                  school: student.School.name,
+                }
+              )
+            : null
+        )
+      );
 
       return { userId: student.User.id };
     }),
