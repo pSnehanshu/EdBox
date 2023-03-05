@@ -10,11 +10,11 @@ import { useSetAuthToken } from "../../utils/auth";
 export default function LoginScreen({}: RootStackScreenProps<"Login">) {
   const school = useSchool();
   const [step, setStep] = useState<"requestOTP" | "submitOTP">("requestOTP");
-  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [otp, setOTP] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
   const setAuthToken = useSetAuthToken();
-  const requestOtp = trpc.auth.requestEmailLoginOTP.useMutation({
+  const requestOtp = trpc.auth.requestPhoneNumberOTP.useMutation({
     onSuccess(data) {
       setUserId(data.userId);
       setStep("submitOTP");
@@ -43,20 +43,20 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
       {step === "requestOTP" ? (
         <>
           <View>
-            <Text>Email address:</Text>
+            <Text>Phone number:</Text>
             <TextInput
-              value={email}
-              onChangeText={setEmail}
-              placeholder="Email address"
+              value={phone}
+              onChangeText={setPhone}
+              placeholder="Phone"
               autoFocus
-              keyboardType="email-address"
-              autoComplete="email"
+              keyboardType="phone-pad"
+              autoComplete="tel"
             />
             <Button
               title="Generate OTP"
               onPress={() =>
                 requestOtp.mutate({
-                  email,
+                  phoneNumber: phone,
                   schoolId: school.id,
                 })
               }
