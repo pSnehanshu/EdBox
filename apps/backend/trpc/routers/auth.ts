@@ -114,6 +114,7 @@ const authRouter = t.router({
       });
 
       // Send the SMS with the OTP
+      // TODO: Add a limit or budget will be exhausted
       await sendSMS(
         { isd: input.isd, number: input.phoneNumber },
         "login_otp_self",
