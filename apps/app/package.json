@@ -48,6 +48,7 @@
     "react-native-pager-view": "6.0.1",
     "react-native-safe-area-context": "4.4.1",
     "react-native-screens": "~3.18.0",
+    "react-native-select-dropdown": "^3.3.0",
     "react-native-tab-view": "^3.3.4",
     "react-native-timeline-flatlist": "^0.8.0",
     "react-native-toast-message": "^2.1.5",
