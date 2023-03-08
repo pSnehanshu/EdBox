@@ -55,6 +55,7 @@ ENV EXPO_TOKEN=$expo_auth_token
 RUN eas whoami
 
 # Try to build android app
+ARG profile=preview
 WORKDIR /home/ubuntu/schooltalk/apps/app
 RUN export $(grep -v '^#' .env | xargs) && \
-    eas build --platform android --profile preview --local
+    eas build --platform android --profile $profile --local

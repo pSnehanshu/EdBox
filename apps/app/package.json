@@ -9,7 +9,8 @@
     "ios": "npm run typecheck && NODE_OPTIONS='-r dotenv/config' expo start --ios",
     "web": "npm run typecheck && NODE_OPTIONS='-r dotenv/config' expo start --web",
     "test": "jest --watchAll",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "expo": "NODE_OPTIONS='-r dotenv/config' expo"
   },
   "jest": {
     "preset": "jest-expo"
