@@ -15,18 +15,18 @@ import { useSetAuthToken } from "../utils/auth";
 import { useSchool } from "../utils/useSchool";
 
 interface props {
-    otp: string;
-    visible: boolean;
-    // setOTP: any;
-    setOTP: (otp:string ) => void;
-    userId:string | null;
+  otp: string;
+  visible: boolean;
+  // setOTP: any;
+  setOTP: (otp: string) => void;
+  userId: string | null;
 }
 
-export default function OtpPopup({otp,visible,setOTP,userId}:props) {
+export default function OtpPopup({ otp, visible, setOTP, userId }: props) {
   const setAuthToken = useSetAuthToken();
   const school = useSchool();
   const [modalVisible, setModalVisible] = useState(false);
-  
+
   const submitOTP = trpc.auth.submitLoginOTP.useMutation({
     onSuccess(data) {
       setAuthToken(data.token, new Date(data.expiry_date));
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
   button: {
     borderRadius: 15,
     padding: 12,
-    marginBottom : 24,
+    marginBottom: 24,
     backgroundColor: Colors.semi_black,
     width: "70%",
   },
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
   mainText: {
     fontSize: 24,
     marginBottom: 12,
-    fontWeight: 'bold'
+    fontWeight: "bold",
   },
   subText: {
     fontSize: 16,
@@ -135,9 +135,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 15,
     padding: 10,
-    width: '70%',
+    width: "70%",
     letterSpacing: 25,
-    textAlign: "center"
-
+    textAlign: "center",
   },
 });
