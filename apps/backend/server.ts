@@ -5,6 +5,7 @@ import * as trpcExpress from "@trpc/server/adapters/express";
 import { appRouter as trpcRouter } from "./trpc";
 import { createContext } from "./trpc/context";
 import initSocketIo from "./socketio";
+import expoUpdates from "./expo-updates";
 
 const app = express();
 app.use(bodyParser.json());
@@ -19,6 +20,9 @@ app.use(
     createContext,
   })
 );
+
+// Updates
+app.use("/updates", expoUpdates);
 
 const port = parseInt(process.env.PORT ?? "5080", 10);
 const httpServer = app.listen(port, () =>
