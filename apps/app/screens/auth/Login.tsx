@@ -10,6 +10,7 @@ import SelectDropdown from 'react-native-select-dropdown'
 import { AntDesign } from '@expo/vector-icons'
 import config from "../../config";
 import { FontAwesome } from "@expo/vector-icons";
+import OtpPopup from "../../components/OtpPopup";
 
 export default function LoginScreen({}: RootStackScreenProps<"Login">) {
   const school = useSchool();
@@ -50,6 +51,14 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
       setStep("submitOTP");
     },
   });
+
+  const requestrollNumberOTP = trpc.auth.rollNumberLoginRequestOTP.useMutation({
+    onSuccess(data) {
+      setUserId(data.userId);
+      setStep("submitOTP");
+    },
+  })
+
   const submitOTP = trpc.auth.submitLoginOTP.useMutation({
     onSuccess(data) {
       setAuthToken(data.token, new Date(data.expiry_date));
@@ -65,10 +74,6 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
       style={{
         height:"100%"
       }}
-      // style={{
-      //   flex: 1,
-      //   justifyContent: "space-between",
-      // }}
     >
       <Spinner
         visible={requestOtp.isLoading || submitOTP.isLoading}
@@ -109,7 +114,6 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
       </View>
 
       {step === "requestOTP" ?
-      
       formType==="others" ?
       (
         <>
@@ -129,10 +133,11 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
               style={styles.main_button}
               // title="Request OTP"
               onPress={() =>
-                requestOtp.mutate({
-                  phoneNumber: phone,
-                  schoolId: school.id,
-                })
+                setStep("submitOTP")
+                // requestOtp.mutate({
+                //   phoneNumber: phone,
+                //   schoolId: school.id,
+                // })
               }
             >
               <Text style={styles.default_button_text}>Request OTP</Text>
@@ -170,13 +175,13 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
                   // }}
                 
                   dropdownIconPosition={'right'}
-                  // dropdownStyle={styles.dropdown1DropdownStyle}
-                  // rowStyle={styles.dropdown1RowStyle}
-                  // rowTextStyle={styles.dropdown1RowTxtStyle}
+                  dropdownStyle={styles.dropdown1DropdownStyle}
+                  rowStyle={styles.dropdown1RowStyle}
+                  rowTextStyle={styles.dropdown1RowTxtStyle}
               />
             </View>
             <View style={{width:"45%",marginLeft:10}}>
-              <Text style={styles.text_class}>Class</Text>
+              <Text style={styles.text_class}>Section</Text>
               <SelectDropdown
                   data={allSeections}
                   // defaultValueByIndex={1}
@@ -211,7 +216,7 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
               style={styles.input}
               value={phone}
               onChangeText={setPhone}
-              placeholder="Phone"
+              placeholder="Roll number"
               autoFocus
               keyboardType="phone-pad"
               autoComplete="tel"
@@ -220,9 +225,12 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
               style={styles.main_button}
               // title="Request OTP"
               onPress={() =>
-                requestOtp.mutate({
-                  phoneNumber: phone,
-                  schoolId: school.id,
+                // setStep("submitOTP")
+                requestrollNumberOTP.mutate({
+                  class_id: 1,
+                  section_id: 1,
+                  school_id: school.id,
+                  rollnum: 1
                 })
               }
             >
@@ -232,11 +240,10 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
           </View>
         </>
       )
-      
-      
       :(
         <>
-          <View>
+        <OtpPopup otp={otp} setOTP={setOTP} visible={true} userId={userId}/>
+          {/* <View>
             <Text>Enter OTP:</Text>
             <TextInput
               value={otp}
@@ -259,7 +266,7 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
                 }
               }}
             />
-          </View>
+          </View> */}
         </>
       )}
     </View>
@@ -368,5 +375,5 @@ const styles = StyleSheet.create({
   dropdown1BtnTxtStyle: {color: '#858585', textAlign: 'left', fontSize:14},
   dropdown1DropdownStyle: {backgroundColor: '#EFEFEF'},
   dropdown1RowStyle: {backgroundColor: '#EFEFEF', borderBottomColor: '#C5C5C5'},
-  dropdown1RowTxtStyle: {color: '#444', textAlign: 'left'},
+  dropdown1RowTxtStyle: {color: '#2A2A2A', textAlign: 'left'},
 });
