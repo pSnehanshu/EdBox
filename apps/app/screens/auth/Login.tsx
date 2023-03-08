@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button, StyleSheet, Pressable } from "react-native";
+import { StyleSheet, Pressable } from "react-native";
 import { View, Text, TextInput } from "../../components/Themed";
 import { useSchool } from "../../utils/useSchool";
 import { RootStackScreenProps } from "../../utils/types/common";
@@ -7,7 +7,6 @@ import { trpc } from "../../utils/trpc";
 import Spinner from "react-native-loading-spinner-overlay";
 import { useSetAuthToken } from "../../utils/auth";
 import SelectDropdown from "react-native-select-dropdown";
-import { AntDesign } from "@expo/vector-icons";
 import config from "../../config";
 import { FontAwesome } from "@expo/vector-icons";
 import OtpPopup from "../../components/OtpPopup";
@@ -19,34 +18,35 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
   const [otp, setOTP] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
   const [formType, setFormType] = useState<"others" | "student">("student");
-  const [sections, setSections] = useState({});
-  const [selectedClass, setSelectedClass] = useState<number | null>(null);
-  const [allSeections, setAllSeections] = useState<any | null>(null);
-
+  const [selectedClassIndex, setSelectedClassIndex] = useState<number | null>(
+    null
+  );
+  const [allSections, setAllSections] = useState<string[]>([]);
+  const [selectedSectionIndex, setSelectedSectionIndex] = useState<
+    number | null
+  >(null);
   const setAuthToken = useSetAuthToken();
+
   // fetchClassesAndSections
   const classesAndSectionsData =
     trpc.school.class.fetchClassesAndSections.useQuery({
       schoolId: config.schoolId,
     });
-  console.log(allSeections, "result...");
-  const allClassesData = classesAndSectionsData.data?.map(
-    (a) => `Class ` + a.name
+  console.log(allSections, "result...");
+  const allClassesNames = classesAndSectionsData.data?.map(
+    (a) => `Class ` + (a.name ?? a.numeric_id)
   );
   console.log(classesAndSectionsData.data, "result...");
 
   useEffect(() => {
-    if (selectedClass) {
-      const result = classesAndSectionsData.data?.filter(
-        (a) => a.numeric_id === selectedClass
-      );
-      // console.log(result,"result")
-      let temp = result?.map((item) => item.Sections).flat();
-      // console.log(temp,"result")
-      const allSectionData = temp?.map((a) => "Section" + a.name);
-      setAllSeections(allSectionData);
+    if (selectedClassIndex && classesAndSectionsData.data) {
+      const theClass = classesAndSectionsData.data.at(selectedClassIndex);
+      const allSectionData =
+        theClass?.Sections.map((a) => "Section" + a.name) ?? [];
+
+      setAllSections(allSectionData);
     }
-  }, [selectedClass]);
+  }, [selectedClassIndex]);
 
   const requestOtp = trpc.auth.requestPhoneNumberOTP.useMutation({
     onSuccess(data) {
@@ -168,12 +168,12 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
                 <View style={{ width: "45%" }}>
                   <Text style={styles.text_class}>Class</Text>
                   <SelectDropdown
-                    data={allClassesData ?? []}
+                    data={allClassesNames ?? []}
                     // defaultValueByIndex={1}
                     // defaultValue={'Egypt'}
                     onSelect={(selectedItem, index) => {
                       console.log(selectedItem, index);
-                      setSelectedClass(index);
+                      setSelectedClassIndex(index);
                     }}
                     defaultButtonText={"Select Class"}
                     buttonTextAfterSelection={(selectedItem, index) => {
@@ -198,11 +198,12 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
                 <View style={{ width: "45%", marginLeft: 10 }}>
                   <Text style={styles.text_class}>Section</Text>
                   <SelectDropdown
-                    data={allSeections}
+                    data={allSections}
                     // defaultValueByIndex={1}
                     // defaultValue={'Egypt'}
                     onSelect={(selectedItem, index) => {
                       console.log(selectedItem, index);
+                      setSelectedSectionIndex(index);
                     }}
                     defaultButtonText={"Select Sections"}
                     buttonTextAfterSelection={(selectedItem, index) => {
