@@ -10,22 +10,35 @@ import {
   View,
   TextInput,
 } from "react-native";
+import { trpc } from "../utils/trpc";
+import { useSetAuthToken } from "../utils/auth";
+import { useSchool } from "../utils/useSchool";
 
 interface props {
-    otp: number;
-    setp: boolean;
+    otp: string;
+    visible: boolean;
     // setOTP: any;
-    setOTP: (otp:number ) => void;
+    setOTP: (otp:string ) => void;
+    userId:string | null;
 }
 
-export default function OtpPopup({otp,setp,setOTP}:props) {
+export default function OtpPopup({otp,visible,setOTP,userId}:props) {
+  const setAuthToken = useSetAuthToken();
+  const school = useSchool();
   const [modalVisible, setModalVisible] = useState(false);
+  
+  const submitOTP = trpc.auth.submitLoginOTP.useMutation({
+    onSuccess(data) {
+      setAuthToken(data.token, new Date(data.expiry_date));
+    },
+  });
+  if (!school) return null;
   return (
     <View style={styles.centeredView}>
       <Modal
         animationType="slide"
         transparent={true}
-        visible={false}
+        visible={visible}
         onRequestClose={() => {
           Alert.alert("Modal has been closed.");
           setModalVisible(!modalVisible);
@@ -48,7 +61,17 @@ export default function OtpPopup({otp,setp,setOTP}:props) {
             />
             <Pressable
               style={styles.button}
-              onPress={() => console.log("cick")}
+              onPress={() => {
+                if (userId) {
+                  submitOTP.mutate({
+                    userId,
+                    otp,
+                    schoolId: school.id,
+                  });
+                } else {
+                  alert("User ID is still null");
+                }
+              }}
             >
               <Text style={styles.textStyle}>Submit</Text>
             </Pressable>
@@ -61,6 +84,7 @@ export default function OtpPopup({otp,setp,setOTP}:props) {
 
 const styles = StyleSheet.create({
   centeredView: {
+    backgroundColor: "rgba(255, 255, 255, .7)",
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
@@ -72,7 +96,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     padding: 35,
     alignItems: "center",
-    shadowColor: "#000",
+    // shadowColor: "",
     width: "90%",
     shadowOffset: {
       width: 0,
@@ -80,7 +104,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.25,
     shadowRadius: 4,
-    elevation: 5,
+    elevation: 3,
   },
   button: {
     borderRadius: 15,
