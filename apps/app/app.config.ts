@@ -1,39 +1,49 @@
 import { ExpoConfig, ConfigContext } from "expo/config";
 
-export default ({ config }: ConfigContext): ExpoConfig => ({
-  ...config,
-  name: "SchoolTalk",
-  slug: "SchoolTalk",
-  version: "1.0.0",
-  orientation: "portrait",
-  icon: "./assets/images/icon.png",
-  scheme: "myapp",
-  userInterfaceStyle: "automatic",
-  splash: {
-    image: "./assets/images/splash.png",
-    resizeMode: "contain",
-    backgroundColor: "#ffffff",
-  },
-  updates: {
-    fallbackToCacheTimeout: 0,
-  },
-  assetBundlePatterns: ["**/*"],
-  ios: {
-    supportsTablet: true,
-  },
-  android: {
-    adaptiveIcon: {
-      foregroundImage: "./assets/images/adaptive-icon.png",
+export default ({ config }: ConfigContext): ExpoConfig => {
+  const expoConfig: ExpoConfig = {
+    ...config,
+    name: "SchoolTalk",
+    slug: "SchoolTalk",
+    version: "1.0.0",
+    orientation: "portrait",
+    icon: "./assets/images/icon.png",
+    scheme: "myapp",
+    userInterfaceStyle: "automatic",
+    splash: {
+      image: "./assets/images/splash.png",
+      resizeMode: "contain",
       backgroundColor: "#ffffff",
     },
-    package: "com.indorhino.software.schooltalk.sample",
-  },
-  web: {
-    favicon: "./assets/images/favicon.png",
-  },
-  extra: {
-    eas: {
-      projectId: "967f9a25-6a24-476d-8d3c-1dc7db20ec80",
+    updates: {
+      url: new URL("/updates/manifest", process.env.HOSTNAME ?? "/").href,
+      fallbackToCacheTimeout: 0,
     },
-  },
-});
+    assetBundlePatterns: ["**/*"],
+    ios: {
+      supportsTablet: true,
+      buildNumber: "1.0.0",
+    },
+    android: {
+      adaptiveIcon: {
+        foregroundImage: "./assets/images/adaptive-icon.png",
+        backgroundColor: "#ffffff",
+      },
+      package: "com.indorhino.software.schooltalk.sample",
+      versionCode: 1,
+    },
+    web: {
+      favicon: "./assets/images/favicon.png",
+    },
+    extra: {
+      eas: {
+        projectId: "967f9a25-6a24-476d-8d3c-1dc7db20ec80",
+      },
+    },
+    runtimeVersion: {
+      policy: "nativeVersion",
+    },
+  };
+
+  return expoConfig;
+};
