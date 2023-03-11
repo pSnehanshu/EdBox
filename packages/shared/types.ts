@@ -57,7 +57,7 @@ export interface ClientToServerEvents {
   messageCreate: (
     groupIdentifier: string,
     text: string,
-    callback: (message: Message) => void
+    callback: (message: Message) => void,
   ) => void;
 }
 

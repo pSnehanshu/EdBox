@@ -91,7 +91,7 @@ export function PeopleSettingsScreen() {
         scrollEnabled
       />
     ),
-    [color]
+    [color],
   );
 
   return (

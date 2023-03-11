@@ -22,9 +22,9 @@ const attendanceRouter = t.router({
           z.object({
             status: z.nativeEnum(AttendanceStatus),
             remarks: z.string().max(200).trim().optional(),
-          })
+          }),
         ),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       // Check if period is valid
@@ -98,7 +98,7 @@ const attendanceRouter = t.router({
           }
 
           return result;
-        }
+        },
       );
 
       if (!allStudentsOk) {
@@ -124,7 +124,7 @@ const attendanceRouter = t.router({
                   student_id: studentId,
                   status: data.status,
                   remarks: data.remarks,
-                })
+                }),
               ),
             },
           },
@@ -142,7 +142,7 @@ const attendanceRouter = t.router({
       z.object({
         periodId: z.string().cuid(),
         date: dateOfAttendance,
-      })
+      }),
     )
     .query(async ({ input, ctx }) => {
       // Check if period is valid

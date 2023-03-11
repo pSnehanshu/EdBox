@@ -17,7 +17,7 @@ const AuthKeyTemplateIDs: Record<keyof AuthKeyTemplateInputs, number> = {
 export async function sendSMS<T extends keyof AuthKeyTemplateInputs>(
   phoneNumber: string | { isd?: number; number: string },
   template: T,
-  params: AuthKeyTemplateInputs[T]
+  params: AuthKeyTemplateInputs[T],
 ) {
   // Prepare destination
   const mobile =
@@ -57,7 +57,7 @@ export async function sendSMS<T extends keyof AuthKeyTemplateInputs>(
       {
         params,
         templateId,
-      }
+      },
     );
   }
 }

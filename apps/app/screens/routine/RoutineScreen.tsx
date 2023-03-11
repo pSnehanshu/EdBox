@@ -31,7 +31,7 @@ const DayRoutine = memo(
     const data = useMemo<RoutineTimelineData[]>(() => {
       // Sort
       const sorted = _.sortBy(periods.slice(), (p) =>
-        parseFloat(`${p.start_hour}.${p.start_min}`)
+        parseFloat(`${p.start_hour}.${p.start_min}`),
       );
       // Insert gaps
       const withGaps: CustomPeriodType[] = [];
@@ -144,7 +144,7 @@ const DayRoutine = memo(
         }
       />
     );
-  }
+  },
 );
 
 export default function RoutineScreen() {
@@ -160,7 +160,7 @@ export default function RoutineScreen() {
   const color = useColorScheme();
   const [index, setIndex] = useState(
     // Calculating the index of day-of-week. 0-Mon,1-Tue,so on...
-    () => parseInt(format(new Date(), "i"), 10) - 1
+    () => parseInt(format(new Date(), "i"), 10) - 1,
   );
   const refreshList = useCallback(() => {
     routineQuery.refetch();
@@ -176,7 +176,7 @@ export default function RoutineScreen() {
         onRefresh={refreshList}
       />
     ),
-    [routineQuery.fetchStatus]
+    [routineQuery.fetchStatus],
   );
   const renderTabBar = useCallback<RenderTabBarProp>(
     (props) => (
@@ -196,7 +196,7 @@ export default function RoutineScreen() {
         scrollEnabled
       />
     ),
-    [color]
+    [color],
   );
 
   if (routineQuery.isLoading) return <Spinner visible />;

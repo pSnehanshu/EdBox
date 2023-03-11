@@ -31,7 +31,7 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
         }
         return false;
       },
-    }
+    },
   );
 
   const testQuery = trpc.school.exam.getTestInfo.useQuery(
@@ -47,7 +47,7 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
             }
           : undefined,
     },
-    { enabled: classAndSectionQuery.isFetched }
+    { enabled: classAndSectionQuery.isFetched },
   );
 
   // Set screen title
@@ -99,7 +99,7 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
 
   /** Get a list of teachers that teach the given subject */
   const getSubjectTeachers = useCallback(
-    (subject: ArrayElement<typeof test["Subjects"]>["Subject"]) => {
+    (subject: ArrayElement<(typeof test)["Subjects"]>["Subject"]) => {
       const teachers = subject.Periods.map((period) => period.Teacher);
       const uniqueTeachers = _.uniqBy(teachers, (t) => t?.id);
       const nonNullTeachers: NonNullable<ArrayElement<typeof teachers>>[] = [];
@@ -108,7 +108,7 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
       });
       return nonNullTeachers;
     },
-    []
+    [],
   );
 
   if (classAndSectionQuery.isLoading || testQuery.isLoading || !testQuery.data)
@@ -137,7 +137,7 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
                     "List of teachers",
                     `${teachers
                       .map((t, i) => `${i + 1}. ${t.User?.name}`)
-                      .join("\n")}`
+                      .join("\n")}`,
                   );
                 }}
               >

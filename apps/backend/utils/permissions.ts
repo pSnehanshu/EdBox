@@ -12,7 +12,7 @@ import prisma from "../prisma";
 export async function userHasPermissions(
   userId: string,
   permissions: Permissions[],
-  mode: "all" | "some" = "all"
+  mode: "all" | "some" = "all",
 ): Promise<boolean> {
   const user = await prisma.user.findUniqueOrThrow({
     where: {
@@ -35,14 +35,14 @@ export async function userHasPermissions(
 
   const roles = user.DynamicRoles.map((d) => d.Role).filter(
     // Ignore roles not part of their school
-    (r) => r.school_id === user.school_id
+    (r) => r.school_id === user.school_id,
   );
 
   const userPermissions = _.uniq(
     roles.reduce<Permissions[]>(
       (permissions, role) => permissions.concat(role.permissions),
-      []
-    )
+      [],
+    ),
   );
 
   if (mode === "all") {

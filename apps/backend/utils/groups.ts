@@ -20,7 +20,7 @@ async function getAutoGroups(
   user: Pick<
     User,
     "school_id" | "teacher_id" | "student_id" | "parent_id" | "staff_id"
-  >
+  >,
 ): Promise<Group[]> {
   const school = await prisma.school.findUnique({
     where: { id: user.school_id },
@@ -76,11 +76,11 @@ async function getAutoGroups(
             identifier: getSubjectGroupIdentifier(
               school.id,
               Subject.id,
-              Class.numeric_id
+              Class.numeric_id,
             ),
             name: `${Subject.name} - Class ${className}`,
           });
-        }
+        },
       );
 
       // Class groups
@@ -154,7 +154,7 @@ async function getAutoGroups(
             identifier: getSectionGroupIdentifier(
               school.id,
               Class.numeric_id,
-              section.numeric_id
+              section.numeric_id,
             ),
             name: `Class ${className} (${sectionName})`,
           });
@@ -167,10 +167,10 @@ async function getAutoGroups(
                 identifier: getSubjectGroupIdentifier(
                   school.id,
                   Subject.id,
-                  Class.numeric_id
+                  Class.numeric_id,
                 ),
               });
-            }
+            },
           );
         }
       }
@@ -197,7 +197,7 @@ export async function getUserGroups(
     User,
     "id" | "school_id" | "teacher_id" | "student_id" | "parent_id" | "staff_id"
   >,
-  pagination?: { page: number; limit: number }
+  pagination?: { page: number; limit: number },
 ): Promise<Group[]> {
   // Fetch all custom groups
   const customGroupMembers = await prisma.customGroupMembers.findMany({
@@ -252,7 +252,7 @@ export async function getGroupMembers(
   pagination?: {
     limit: number;
     page: number;
-  }
+  },
 ): Promise<Membership[]> {
   const groupIdentifierString =
     convertObjectToOrderedQueryString(groupIdentifier);

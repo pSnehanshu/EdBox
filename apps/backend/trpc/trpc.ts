@@ -38,7 +38,7 @@ export const teacherMiddleware = authMiddleware.unstable_pipe(
         teacher: ctx.session.User.Teacher!,
       },
     });
-  }
+  },
 );
 
 /** Verify that the user is a student */
@@ -57,7 +57,7 @@ export const studentMiddleware = authMiddleware.unstable_pipe(
         student: ctx.session.User.Student!,
       },
     });
-  }
+  },
 );
 
 export const principalMiddleware = authMiddleware.unstable_pipe(
@@ -66,7 +66,7 @@ export const principalMiddleware = authMiddleware.unstable_pipe(
       !hasUserStaticRoles(
         ctx.user,
         [StaticRole.principal, StaticRole.vice_principal],
-        "some"
+        "some",
       )
     ) {
       throw new TRPCError({
@@ -81,7 +81,7 @@ export const principalMiddleware = authMiddleware.unstable_pipe(
         principal: ctx.session.User.Staff!,
       },
     });
-  }
+  },
 );
 
 export const roleMiddleware = (allowedRoles: StaticRole[]) =>
@@ -97,13 +97,13 @@ export const roleMiddleware = (allowedRoles: StaticRole[]) =>
 
 export const dynamicRoleMiddleware = (
   permissions: Permissions[],
-  mode: "all" | "some"
+  mode: "all" | "some",
 ) =>
   authMiddleware.unstable_pipe(async ({ ctx, next }) => {
     const hasPermission = await userHasPermissions(
       ctx.user.id,
       permissions,
-      mode
+      mode,
     );
 
     if (!hasPermission) {

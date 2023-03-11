@@ -38,7 +38,7 @@ export class MessagesRepository {
     // Forward group messages to group observers
     this.allMessagesObservable.subscribe((message) => {
       const groupObservable = this.groupMessagesObservableMap.get(
-        message.group_identifier
+        message.group_identifier,
       );
 
       if (groupObservable) {
@@ -54,9 +54,9 @@ export class MessagesRepository {
         message.text,
         (createdMessage) => {
           this.getGroupMessageObservable(message.groupIdentifier).next(
-            createdMessage
+            createdMessage,
           );
-        }
+        },
       );
     });
 
@@ -98,7 +98,7 @@ export class MessagesRepository {
 
   useGroupMessageReceived(
     groupIdentifier: string,
-    onReceive: (message: Message) => void
+    onReceive: (message: Message) => void,
   ) {
     useEffect(() => {
       const observable = this.getGroupMessageObservable(groupIdentifier);
@@ -157,7 +157,7 @@ export class MessagesRepository {
             .value();
         });
       },
-      []
+      [],
     );
 
     const fetchMessages = useCallback(
@@ -205,7 +205,7 @@ export class MessagesRepository {
           setIsLoading(false);
         }
       },
-      [groupIdentifier, limit, setMessagesReconcile]
+      [groupIdentifier, limit, setMessagesReconcile],
     );
 
     const fetchNextPage = useCallback(() => {
@@ -270,7 +270,7 @@ export class MessagesRepository {
           args,
           (tx, result) => {
             const localMessages = result.rows._array.map(
-              (row) => JSON.parse(row.obj) as Message
+              (row) => JSON.parse(row.obj) as Message,
             );
 
             let cursor: string | undefined = undefined;
@@ -284,7 +284,7 @@ export class MessagesRepository {
           (tx, error) => {
             reject(error);
             return true;
-          }
+          },
         );
       });
     });
@@ -296,7 +296,7 @@ export class MessagesRepository {
    */
   insertMessagesToDB(
     messages: Message[],
-    trpcUtils: ReturnType<typeof trpc.useContext>
+    trpcUtils: ReturnType<typeof trpc.useContext>,
   ): Promise<void> {
     return new Promise<void>(async (resolve, reject) => {
       if (messages.length < 1) return resolve();
@@ -306,7 +306,7 @@ export class MessagesRepository {
         const groupsToInsert = await fetchUnseenGroupsInfo(
           this.db,
           messages.map((m) => m.group_identifier),
-          trpcUtils
+          trpcUtils,
         );
         // Insert those groups
         insertGroups(this.db, Object.values(groupsToInsert));
@@ -322,7 +322,7 @@ export class MessagesRepository {
             JSON.stringify(m),
             m.created_at,
             m.group_identifier,
-            m.sort_key
+            m.sort_key,
           );
           return "(?,?,?,?,?)";
         })
@@ -333,7 +333,7 @@ export class MessagesRepository {
           tx.executeSql(insertMessagesSQL, insertMessagesArgs);
         },
         reject,
-        resolve
+        resolve,
       );
     });
   }
@@ -352,7 +352,7 @@ export class MessagesRepository {
 }
 
 const MessagesRepositoryContext = createContext<MessagesRepository | null>(
-  null
+  null,
 );
 
 interface MessagesProviderProp {
