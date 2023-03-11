@@ -16,10 +16,14 @@ const s3 = new S3Client({
 /** Express Router */
 const app = express.Router();
 
-// app.use((req, res, next) => {
-//   console.log(`${req.method} ${req.path}`);
-//   next();
-// });
+if (process.env.NODE_ENV !== "production") {
+  app.use((req, res, next) => {
+    console.log(`${req.method} ${req.path}`);
+    console.log("Query", req.query);
+    console.log("Headers", req.headers);
+    next();
+  });
+}
 
 // Necessary types
 type Asset = {
@@ -147,8 +151,8 @@ app.get<string, {}, Manifest>("/manifest", async (req, res) => {
         Key: metadataFileKey,
       }),
     )
-    .catch((err: unknown) => {
-      console.error(err);
+    .catch((err: any) => {
+      console.error("S3 error", err?.message);
     });
 
   // If it doesn't exist, throw
