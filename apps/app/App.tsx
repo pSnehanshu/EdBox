@@ -4,7 +4,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
 import { useCallback, useEffect, useState } from "react";
 import { ThemeProvider } from "@rneui/themed";
-import * as Updates from "expo-updates";
 import { trpc } from "./utils/trpc";
 import useCachedResources from "./utils/useCachedResources";
 import useColorScheme, {
@@ -20,22 +19,6 @@ import Toast from "react-native-toast-message";
 import SchoolNotFound from "./screens/SchoolNotFound";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { COLOR_SCHEME } from "./utils/async-storage-keys";
-
-// Code for checking updates
-Updates.checkForUpdateAsync()
-  .then((result) => {
-    console.log("checkForUpdateAsync result:", result);
-    if (result.isAvailable) {
-      return Updates.fetchUpdateAsync();
-    }
-  })
-  .then((result) => {
-    if (result) {
-      console.log("Update fetched, reloading...");
-      return Updates.reloadAsync();
-    }
-  })
-  .catch((err) => console.error("Error while checking for update:", err));
 
 function AppWithSchool() {
   const colorScheme = useColorScheme();

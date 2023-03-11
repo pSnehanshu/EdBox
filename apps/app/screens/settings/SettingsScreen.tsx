@@ -89,6 +89,9 @@ export function SettingsScreen() {
             color={iconColor}
           />
         ),
+        onPress() {
+          navigation.navigate("AboutApp");
+        },
       },
     );
 
