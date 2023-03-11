@@ -221,8 +221,9 @@ app.get<string, {}, Manifest>("/manifest", async (req, res) => {
   // Finally, return the manifest
   res.json({
     id: updateId,
-    // TODO: Make this correct
-    createdAt: new Date().toISOString(),
+    createdAt: metadataFileResponse.LastModified
+      ? metadataFileResponse.LastModified.toISOString()
+      : new Date().toISOString(),
     metadata: {},
     assets,
     launchAsset: {
