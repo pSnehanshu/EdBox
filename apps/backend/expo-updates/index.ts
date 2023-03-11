@@ -74,7 +74,7 @@ const manifestHeaderSchema = z.object({
  */
 async function getAssetMetadata(
   asset: z.infer<typeof MetadataAssetSchema>,
-  basePath: string
+  basePath: string,
 ): Promise<Asset> {
   const path = `${basePath}/${asset.path}`;
   const assetHash = await getAssetFileHashAndKey(path);
@@ -102,13 +102,13 @@ async function getAssetMetadata(
  * @param s3key The key of the file in S3
  */
 async function getAssetFileHashAndKey(
-  s3key: string
+  s3key: string,
 ): Promise<{ hash: string; key: string } | null> {
   const fileResponse = await s3.send(
     new GetObjectCommand({
       Bucket: "schooltalk-expo-update-assets",
       Key: s3key,
-    })
+    }),
   );
 
   if (!fileResponse.Body) {
@@ -145,7 +145,7 @@ app.get<string, {}, Manifest>("/manifest", async (req, res) => {
       new GetObjectCommand({
         Bucket: "schooltalk-expo-update-assets",
         Key: metadataFileKey,
-      })
+      }),
     )
     .catch((err: unknown) => {
       console.error(err);
@@ -159,7 +159,7 @@ app.get<string, {}, Manifest>("/manifest", async (req, res) => {
 
   /** metadata.json as string */
   const metadataFile = await metadataFileResponse.Body.transformToString(
-    "utf-8"
+    "utf-8",
   );
 
   /** The parsed file, ensure it is of correct format */
@@ -175,7 +175,7 @@ app.get<string, {}, Manifest>("/manifest", async (req, res) => {
   const platformMetadata = metadata.fileMetadata[headers["expo-platform"]];
   if (!platformMetadata) {
     console.error(
-      `No updates for ${headers["expo-platform"]} in file ${metadataFileKey}`
+      `No updates for ${headers["expo-platform"]} in file ${metadataFileKey}`,
     );
     return res.sendStatus(404);
   }
@@ -196,8 +196,8 @@ app.get<string, {}, Manifest>("/manifest", async (req, res) => {
   try {
     assets = await Promise.all(
       platformMetadata.assets.map((asset) =>
-        getAssetMetadata(asset, `updates/${headers["expo-runtime-version"]}`)
-      )
+        getAssetMetadata(asset, `updates/${headers["expo-runtime-version"]}`),
+      ),
     );
   } catch (error) {
     console.error(error);

@@ -26,7 +26,7 @@ To build APK, you will need a few things (Assuming you're using Ubuntu 20):
    2. Once the token is generated, copy it somewhere.
 3. Go to the root directory of this project.
 4. Run `docker build . -f ./Dockerfile.appbuild --build-arg expo_auth_token=$EXPO_TOKEN -t schooltalk-app-builder`. Replace `$EXPO_TOKEN` with the token obtained from step #2. Wait for the command to finish. It may take several minutes.
-   - You can additionally pass the build arg `profile`. Defaults to `preview`. 
+   - You can additionally pass the build arg `profile`. Defaults to `preview`.
 5. Note down the path of the generated APK file from the previous command's output.
 6. Then extract the APK file using [this method](https://stackoverflow.com/a/31316636/9990365). Put the appropriate image name, which is `schooltalk-app-builder`.
 

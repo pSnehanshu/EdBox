@@ -18,7 +18,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     updates: {
       url: new URL(
         "/updates/manifest",
-        process.env.HOSTNAME ?? "http://localhost"
+        process.env.HOSTNAME ?? "http://localhost",
       ).href,
       fallbackToCacheTimeout: 0,
     },
