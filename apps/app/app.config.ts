@@ -16,7 +16,10 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       backgroundColor: "#ffffff",
     },
     updates: {
-      url: new URL("/updates/manifest", process.env.HOSTNAME ?? "/").href,
+      url: new URL(
+        "/updates/manifest",
+        process.env.HOSTNAME ?? "http://localhost"
+      ).href,
       fallbackToCacheTimeout: 0,
     },
     assetBundlePatterns: ["**/*"],
