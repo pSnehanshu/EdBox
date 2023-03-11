@@ -147,7 +147,7 @@ app.get<string, {}, Manifest>("/manifest", async (req, res) => {
         Key: metadataFileKey,
       })
     )
-    .catch((err) => {
+    .catch((err: unknown) => {
       console.error(err);
     });
 
