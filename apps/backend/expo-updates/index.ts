@@ -3,6 +3,7 @@ import { z } from "zod";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import crypto from "node:crypto";
 import mime from "mime";
+import UUIDbyString from "uuid-by-string";
 
 /** The S3 client */
 const s3 = new S3Client({
@@ -184,11 +185,11 @@ app.get<string, {}, Manifest>("/manifest", async (req, res) => {
     return res.sendStatus(404);
   }
 
-  /** Unique ID of the update based on the hash of the metadata.json file */
-  const updateId = crypto
-    .createHash("sha256")
-    .update(metadataFile)
-    .digest("hex");
+  /** Unique ID of the update based on the hash of the metadata.json file. It must be UUID. */
+  const updateId = UUIDbyString(
+    crypto.createHash("sha256").update(metadataFile).digest("base64"),
+    5,
+  );
 
   // Update is available, return the manifest json
   res.setHeader("expo-protocol-version", 0);
