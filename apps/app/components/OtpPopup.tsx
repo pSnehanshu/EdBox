@@ -13,23 +13,23 @@ import {
 import { trpc } from "../utils/trpc";
 import { useSetAuthToken } from "../utils/auth";
 import { useSchool } from "../utils/useSchool";
+import Spinner from "react-native-loading-spinner-overlay/lib";
 
 interface props {
-  otp: string;
   visible: boolean;
-  // setOTP: any;
-  setOTP: (otp: string) => void;
   userId: string | null;
 }
 
-export default function OtpPopup({ otp, visible, setOTP, userId }: props) {
+export default function OtpPopup({ visible, userId }: props) {
   const setAuthToken = useSetAuthToken();
   const school = useSchool();
   const [modalVisible, setModalVisible] = useState(false);
+  const [otp, setOtp] = useState<string | null>(null);
 
   const submitOTP = trpc.auth.submitLoginOTP.useMutation({
     onSuccess(data) {
       setAuthToken(data.token, new Date(data.expiry_date));
+      console.log(data, "student");
     },
   });
   if (!school) return null;
@@ -53,16 +53,16 @@ export default function OtpPopup({ otp, visible, setOTP, userId }: props) {
             <Text style={styles.subText}>+91-********89</Text>
             <TextInput
               style={styles.inputText}
-              // onChangeText={onChangeText}
-              // value={text}
+              value={otp ?? ""}
+              onChangeText={setOtp}
               autoFocus
-              keyboardType="number-pad"
-              maxLength={5}
+              keyboardType="phone-pad"
+              maxLength={6}
             />
             <Pressable
               style={styles.button}
               onPress={() => {
-                if (userId) {
+                if (userId && otp) {
                   submitOTP.mutate({
                     userId,
                     otp,

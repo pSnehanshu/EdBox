@@ -15,6 +15,7 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
   const school = useSchool();
   const [step, setStep] = useState<"requestOTP" | "submitOTP">("requestOTP");
   const [phone, setPhone] = useState("");
+  const [rollNo, setRollNo] = useState<string | null>(null);
   const [otp, setOTP] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
   const [formType, setFormType] = useState<"others" | "student">("student");
@@ -25,9 +26,17 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
   const [selectedSectionIndex, setSelectedSectionIndex] = useState<
     number | null
   >(null);
+
+  interface ClassObject {
+    numeric_id: number;
+    Sections: any;
+  }
+  const [selectedClassObject, setSelectedClassObject] =
+    useState<ClassObject | null>(null);
+  const [insufficientData, setInsufficientData] = useState(false);
+
   const setAuthToken = useSetAuthToken();
 
-  // fetchClassesAndSections
   const classesAndSectionsData =
     trpc.school.class.fetchClassesAndSections.useQuery({
       schoolId: config.schoolId,
@@ -43,7 +52,7 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
       const theClass = classesAndSectionsData.data.at(selectedClassIndex);
       const allSectionData =
         theClass?.Sections.map((a) => "Section" + a.name) ?? [];
-
+      setSelectedClassObject(theClass ?? null);
       setAllSections(allSectionData);
     }
   }, [selectedClassIndex]);
@@ -51,12 +60,14 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
   const requestOtp = trpc.auth.requestPhoneNumberOTP.useMutation({
     onSuccess(data) {
       setUserId(data.userId);
+      // console.log(data, "student");
       setStep("submitOTP");
     },
   });
 
   const requestrollNumberOTP = trpc.auth.rollNumberLoginRequestOTP.useMutation({
     onSuccess(data) {
+      console.log(data, "student");
       setUserId(data.userId);
       setStep("submitOTP");
     },
@@ -70,8 +81,6 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
 
   if (!school) return null;
 
-  const countries = ["Egypt", "Canada", "Australia", "Ireland"];
-
   return (
     <View
       style={{
@@ -79,7 +88,11 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
       }}
     >
       <Spinner
-        visible={requestOtp.isLoading || submitOTP.isLoading}
+        visible={
+          requestOtp.isLoading ||
+          submitOTP.isLoading ||
+          requestrollNumberOTP.isLoading
+        }
         textContent="Please wait..."
       />
       {/* login */}
@@ -141,13 +154,11 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
               />
               <Pressable
                 style={styles.main_button}
-                // title="Request OTP"
-                onPress={
-                  () => setStep("submitOTP")
-                  // requestOtp.mutate({
-                  //   phoneNumber: phone,
-                  //   schoolId: school.id,
-                  // })
+                onPress={() =>
+                  requestOtp.mutate({
+                    phoneNumber: phone,
+                    schoolId: school.id,
+                  })
                 }
               >
                 <Text style={styles.default_button_text}>Request OTP</Text>
@@ -169,8 +180,6 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
                   <Text style={styles.text_class}>Class</Text>
                   <SelectDropdown
                     data={allClassesNames ?? []}
-                    // defaultValueByIndex={1}
-                    // defaultValue={'Egypt'}
                     onSelect={(selectedItem, index) => {
                       console.log(selectedItem, index);
                       setSelectedClassIndex(index);
@@ -188,7 +197,6 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
                     //   // return <FontAwesome name={isOpened ? 'chevron-up' : 'chevron-down'} color={'#FFF'} size={18} />;
                     //   return <FontAwesome name={'chevron-up'} color={'#FFF'} size={18} />;
                     // }}
-
                     dropdownIconPosition={"right"}
                     dropdownStyle={styles.dropdown1DropdownStyle}
                     rowStyle={styles.dropdown1RowStyle}
@@ -199,8 +207,6 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
                   <Text style={styles.text_class}>Section</Text>
                   <SelectDropdown
                     data={allSections}
-                    // defaultValueByIndex={1}
-                    // defaultValue={'Egypt'}
                     onSelect={(selectedItem, index) => {
                       console.log(selectedItem, index);
                       setSelectedSectionIndex(index);
@@ -214,16 +220,6 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
                     }}
                     buttonStyle={styles.dropdown1BtnStyle}
                     buttonTextStyle={styles.dropdown1BtnTxtStyle}
-                    renderDropdownIcon={(isOpened) => {
-                      // return <FontAwesome name={isOpened ? 'chevron-up' : 'chevron-down'} color={'#FFF'} size={18} />;
-                      return (
-                        <FontAwesome
-                          name={"chevron-up"}
-                          color={"#FFF"}
-                          size={18}
-                        />
-                      );
-                    }}
                     dropdownIconPosition={"right"}
                     dropdownStyle={styles.dropdown1DropdownStyle}
                     rowStyle={styles.dropdown1RowStyle}
@@ -235,25 +231,40 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
                 <Text style={styles.text}>Roll number:</Text>
                 <TextInput
                   style={styles.input}
-                  value={phone}
-                  onChangeText={setPhone}
+                  value={rollNo ?? ""}
+                  onChangeText={setRollNo}
                   placeholder="Roll number"
                   autoFocus
                   keyboardType="phone-pad"
                   autoComplete="tel"
                 />
+                {insufficientData && (
+                  <Text style={styles.text}> Please fill all the values</Text>
+                )}
                 <Pressable
                   style={styles.main_button}
-                  // title="Request OTP"
-                  onPress={() =>
-                    // setStep("submitOTP")
-                    requestrollNumberOTP.mutate({
-                      class_id: 1,
-                      section_id: 1,
-                      school_id: school.id,
-                      rollnum: 1,
-                    })
-                  }
+                  onPress={() => {
+                    console.log(
+                      "student data",
+                      selectedClassObject?.numeric_id,
+                      selectedClassObject?.Sections.at(selectedSectionIndex)
+                        .numeric_id,
+                      rollNo
+                    );
+
+                    if (rollNo && selectedClassObject) {
+                      requestrollNumberOTP.mutate({
+                        class_id: selectedClassObject?.numeric_id,
+                        section_id:
+                          selectedClassObject?.Sections.at(selectedSectionIndex)
+                            .numeric_id,
+                        school_id: school.id,
+                        rollnum: Number(rollNo),
+                      });
+                    } else {
+                      setInsufficientData(true);
+                    }
+                  }}
                 >
                   <Text style={styles.default_button_text}>Request OTP</Text>
                 </Pressable>
@@ -263,7 +274,7 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
         )
       ) : (
         <>
-          <OtpPopup otp={otp} setOTP={setOTP} visible={true} userId={userId} />
+          <OtpPopup visible={true} userId={userId} />
           {/* <View>
             <Text>Enter OTP:</Text>
             <TextInput
