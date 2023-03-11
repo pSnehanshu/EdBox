@@ -11,7 +11,8 @@
     "dev:backend": "yarn workspace schooltalk-backend dev",
     "start:backend": "yarn workspace schooltalk-backend start",
     "migrate:dev": "yarn workspace schooltalk-backend migrate:dev",
-    "prisma:generate": "yarn workspace schooltalk-backend prisma:generate"
+    "prisma:generate": "yarn workspace schooltalk-backend prisma:generate",
+    "pretty": "prettier . -w"
   },
   "workspaces": [
     "apps/*",
@@ -21,5 +22,8 @@
     "@trpc/server": "^10.10.0",
     "core-js": "^3.27.2"
   },
-  "packageManager": "yarn@3.3.1"
+  "packageManager": "yarn@3.3.1",
+  "devDependencies": {
+    "prettier": "^2.8.4"
+  }
 }
