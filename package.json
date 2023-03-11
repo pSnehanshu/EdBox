@@ -10,8 +10,8 @@
     "dev:app": "yarn workspace schooltalk-app start",
     "dev:backend": "yarn workspace schooltalk-backend dev",
     "start:backend": "yarn workspace schooltalk-backend start",
-    "migrate:dev": "yarn workspace schooltalk-backend migrate:dev",
-    "prisma:generate": "yarn workspace schooltalk-backend prisma:generate"
+    "expo": "yarn workspace schooltalk-app expo",
+    "prisma": "yarn workspace schooltalk-backend prisma"
   },
   "workspaces": [
     "apps/*",

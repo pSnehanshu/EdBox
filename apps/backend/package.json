@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit",
     "migrate:dev": "prisma migrate dev",
     "migrate": "prisma migrate deploy",
-    "prisma:generate": "prisma generate"
+    "prisma": "prisma"
   },
   "repository": {
     "type": "git",
