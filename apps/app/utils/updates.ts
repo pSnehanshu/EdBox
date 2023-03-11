@@ -21,6 +21,8 @@ export function useUpdates(autoCheck = true) {
         text1: "Failed to check for updates",
         text2: typeof error?.message === "string" ? error.message : "",
       });
+
+      alert(error?.message);
     }
     setIsChecking(false);
   }, []);
@@ -36,6 +38,7 @@ export function useUpdates(autoCheck = true) {
         text1: "Failed to fetch update",
         text2: typeof error?.message === "string" ? error.message : "",
       });
+      alert(error?.message);
     }
   }, []);
 
