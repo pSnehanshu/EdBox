@@ -15,7 +15,7 @@ import useColorScheme from "../utils/useColorScheme";
 
 export function useThemeColor(
   props: { light?: string; dark?: string },
-  colorName: keyof typeof Colors.light & keyof typeof Colors.dark
+  colorName: keyof typeof Colors.light & keyof typeof Colors.dark,
 ) {
   const theme = useColorScheme();
   const colorFromProps = props[theme];
@@ -51,7 +51,7 @@ export function View(props: ViewProps) {
   const { style, lightColor, darkColor, ...otherProps } = props;
   const backgroundColor = useThemeColor(
     { light: lightColor, dark: darkColor },
-    "background"
+    "background",
   );
 
   return <DefaultView style={[{ backgroundColor }, style]} {...otherProps} />;
@@ -61,7 +61,7 @@ export function List<ItemT = any>(props: ListProps<ItemT>) {
   const { style, lightColor, darkColor, ...otherProps } = props;
   const backgroundColor = useThemeColor(
     { light: lightColor, dark: darkColor },
-    "background"
+    "background",
   );
 
   return (
@@ -78,11 +78,11 @@ export function TextInput(props: TextInputProps) {
   const color = useThemeColor({ light: lightColor, dark: darkColor }, "text");
   const backgroundColor = useThemeColor(
     { light: lightColor, dark: darkColor },
-    "background"
+    "background",
   );
   const placeholderTextColor = useThemeColor(
     { light: lightColor, dark: darkColor },
-    "placeholderColor"
+    "placeholderColor",
   );
 
   return (

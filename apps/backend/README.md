@@ -21,7 +21,7 @@ yarn dev
 To deploy, first create the docker image. Run this command from the root directory.
 
 ```bash
-docker build -t ghcr.io/psnehanshu/schooltalk_backend:latest -f ./Dockerfile.backend . 
+docker build -t ghcr.io/psnehanshu/schooltalk_backend:latest -f ./Dockerfile.backend .
 ```
 
 Then push it to the registry.
@@ -40,7 +40,6 @@ docker run \
   ghcr.io/psnehanshu/schooltalk_backend:latest
 ```
 
-
 # Deploy to Fly.io
 
 First, authenticate with GitHub registry using [personal access token](https://github.com/settings/tokens). Required permission is `read:packages`.
@@ -51,7 +50,7 @@ The pull the image locally:
 docker pull ghcr.io/psnehanshu/schooltalk_backend:main
 ```
 
-Then, 
+Then,
 
 - [Install flyctl](https://fly.io/docs/hands-on/install-flyctl/)
 - [login to flyctl](https://fly.io/docs/getting-started/log-in-to-fly/).

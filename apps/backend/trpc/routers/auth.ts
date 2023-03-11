@@ -31,7 +31,7 @@ const authRouter = t.router({
       z.object({
         email: z.string().email(),
         schoolId: z.string().cuid(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const user = await prisma.user.findUnique({
@@ -76,7 +76,7 @@ const authRouter = t.router({
           .string()
           .regex(/^\d+$/, "Phone number must be a 10 digit number"),
         schoolId: z.string().cuid(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const user = await prisma.user.findUnique({
@@ -118,7 +118,7 @@ const authRouter = t.router({
       await sendSMS(
         { isd: input.isd, number: input.phoneNumber },
         "login_otp_self",
-        { otp, school: user.School.name }
+        { otp, school: user.School.name },
       );
 
       return { userId: user.id };
@@ -129,7 +129,7 @@ const authRouter = t.router({
         otp: z.string().regex(/^\d+$/).length(CONFIG.otpLength),
         userId: z.string().cuid(),
         schoolId: z.string().cuid(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       // Fetch the user object
@@ -183,7 +183,7 @@ const authRouter = t.router({
   whoami: t.procedure
     .use(authMiddleware)
     .query(({ ctx }) =>
-      _.omit(ctx.user, ["password", "otp", "otp_expiry", "School"])
+      _.omit(ctx.user, ["password", "otp", "otp_expiry", "School"]),
     ),
   logout: t.procedure.use(authMiddleware).mutation(async ({ ctx }) => {
     try {

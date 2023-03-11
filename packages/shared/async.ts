@@ -8,7 +8,7 @@ import { everyLimit as _everyLimit } from "async";
 export async function everyLimit<T = unknown>(
   collection: T[],
   limit: number,
-  iterator: (item: T) => Promise<boolean>
+  iterator: (item: T) => Promise<boolean>,
 ): Promise<boolean> {
   return new Promise((resolve, reject) => {
     _everyLimit(
@@ -25,7 +25,7 @@ export async function everyLimit<T = unknown>(
         } else {
           resolve(!!result);
         }
-      }
+      },
     );
   });
 }

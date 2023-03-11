@@ -19,7 +19,7 @@ function GroupItem(props: GroupItemProps) {
   const Messages = useMessages();
   const { messages } = Messages.useFetchGroupMessages(
     props.group.identifier,
-    1
+    1,
   );
   const lastMessage = messages[0] as Message | undefined;
   const time = useMemo(() => {
@@ -68,7 +68,7 @@ function GroupItem(props: GroupItemProps) {
                 `${getDisplayName(lastMessage.Sender)}: ${lastMessage.text}`,
                 {
                   length: 45,
-                }
+                },
               )
             : "Tap to chat"}
         </Text>

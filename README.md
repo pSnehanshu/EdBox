@@ -1,4 +1,5 @@
 # schooltalk
+
 Communication app for teachers, students, parents, and administration.
 
 This is a monorepo managed using [Yarn workspaces](https://yarnpkg.com/features/workspaces/). First, [install Yarn](https://yarnpkg.com/getting-started/install). Make sure you install version 3.3.1 or higher.

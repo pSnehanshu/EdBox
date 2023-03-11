@@ -37,7 +37,7 @@ function TheClass({
   const getSectionName = useCallback(
     (section: ArrayElement<ClassStd["Sections"]>) =>
       section.name ?? section.numeric_id,
-    []
+    [],
   );
   const colorScheme = useColorScheme();
 
@@ -251,7 +251,7 @@ export default function ClassSectionSettingsScreen() {
       /** The classes that already existed, but aren't included in `newClasses`. */
       const existingOldClasses = classes.filter(
         (ec) =>
-          newClasses.findIndex((nc) => ec.numeric_id === nc.numeric_id) < 0
+          newClasses.findIndex((nc) => ec.numeric_id === nc.numeric_id) < 0,
       );
 
       return _.chain(existingOldClasses)
@@ -269,7 +269,7 @@ export default function ClassSectionSettingsScreen() {
         const class2 = classes[class2index];
         if (!class1 || !class2) {
           console.warn(
-            `Invalid class index received 1:${class1index} 2:${class2index}`
+            `Invalid class index received 1:${class1index} 2:${class2index}`,
           );
           return classes;
         }
@@ -296,7 +296,7 @@ export default function ClassSectionSettingsScreen() {
         return copy;
       });
     },
-    []
+    [],
   );
 
   const fetchClasses = useCallback(async () => {
@@ -327,7 +327,7 @@ export default function ClassSectionSettingsScreen() {
         />
       );
     },
-    [classes.length]
+    [classes.length],
   );
 
   const manageClassOptions = useMemo<

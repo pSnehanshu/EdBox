@@ -38,7 +38,7 @@ function ChatMessage({ message }: ChatMessageProps) {
 
   const userColor = useMemo(
     () => getUserColor(message.Sender.id),
-    [message.Sender.id]
+    [message.Sender.id],
   );
   const color = useMemo(() => getTextColorForGivenBG(userColor), [userColor]);
 

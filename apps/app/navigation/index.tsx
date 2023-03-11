@@ -99,7 +99,7 @@ function RootNavigator() {
           {hasUserStaticRoles(
             user,
             [StaticRole.principal, StaticRole.vice_principal],
-            "some"
+            "some",
           ) ? (
             <>
               <Stack.Screen
@@ -147,7 +147,7 @@ function RootNavigator() {
           {hasUserStaticRoles(
             user,
             [StaticRole.teacher, StaticRole.student],
-            "some"
+            "some",
           ) ? (
             <>
               <Stack.Screen
@@ -200,7 +200,7 @@ function BottomTabNavigator() {
   const isStudentOrTeacher = hasUserStaticRoles(
     user,
     [StaticRole.teacher, StaticRole.student],
-    "some"
+    "some",
   );
 
   return (

@@ -31,4 +31,3 @@ To build APK, you will need a few things (Assuming you're using Ubuntu 20):
 6. Then extract the APK file using [this method](https://stackoverflow.com/a/31316636/9990365). Put the appropriate image name, which is `schooltalk-app-builder`.
 
 > TODO: Figure out a way to pass environment variables.
-> 
