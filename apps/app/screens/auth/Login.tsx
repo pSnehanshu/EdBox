@@ -15,7 +15,7 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
 
   // Form States
   const [phone, setPhone] = useState("");
-  const [rollNo, setRollNo] = useState<string | null>(null);
+  const [rollnum, setRollNo] = useState<number>();
   const [userId, setUserId] = useState<string | null>(null);
   const [insufficientData, setInsufficientData] = useState(false);
 
@@ -213,12 +213,11 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
                 <Text style={styles.text}>Roll number:</Text>
                 <TextInput
                   style={styles.input}
-                  value={rollNo ?? ""}
-                  onChangeText={setRollNo}
+                  value={rollnum?.toString()}
+                  onChangeText={(r) => setRollNo(parseInt(r, 10))}
                   placeholder="Roll number"
                   autoFocus
-                  keyboardType="phone-pad"
-                  autoComplete="tel"
+                  keyboardType="number-pad"
                 />
                 {insufficientData && (
                   <Text style={styles.text}> Please fill all the values</Text>
@@ -226,14 +225,18 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
                 <Pressable
                   style={styles.main_button}
                   onPress={() => {
-                    if (rollNo && selectedClass && selectedSection) {
+                    if (
+                      typeof rollnum === "number" &&
+                      selectedClass &&
+                      selectedSection
+                    ) {
                       setInsufficientData(false);
 
                       requestrollNumberOTP.mutate({
                         class_id: selectedClass?.numeric_id,
                         section_id: selectedSection.numeric_id,
                         school_id: config.schoolId,
-                        rollnum: Number(rollNo),
+                        rollnum,
                       });
                     } else {
                       setInsufficientData(true);
