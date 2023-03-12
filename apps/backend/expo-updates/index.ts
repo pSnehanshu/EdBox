@@ -97,8 +97,10 @@ async function getAssetMetadata(
     contentType,
     key: assetHash.key,
     hash: assetHash.hash,
-    fileExtension: asset.ext,
-    url: `https://schooltalk-expo-update-assets.s3.ap-south-1.amazonaws.com/${path}`,
+    fileExtension: `.${asset.ext}`,
+    url: `http://192.168.29.42:5080/updates/asset?key=${encodeURIComponent(
+      `https://schooltalk-expo-update-assets.s3.ap-south-1.amazonaws.com/${path}`,
+    )}`,
   };
 }
 
@@ -229,13 +231,53 @@ app.get<string, {}, Manifest>("/manifest", async (req, res) => {
     launchAsset: {
       contentType: "application/javascript",
       key: bundleHash.key,
-      url: `https://schooltalk-expo-update-assets.s3.ap-south-1.amazonaws.com/updates/${headers["expo-runtime-version"]}/${platformMetadata.bundle}`,
-      fileExtension: ".bundle",
+      url: `http://192.168.29.42:5080/updates/asset?key=${encodeURIComponent(
+        `https://schooltalk-expo-update-assets.s3.ap-south-1.amazonaws.com/updates/${headers["expo-runtime-version"]}/${platformMetadata.bundle}`,
+      )}`,
       hash: bundleHash.hash,
     },
     extra: {},
     runtimeVersion: headers["expo-runtime-version"],
   });
+});
+
+app.get("/asset", async (req, res) => {
+  const { key } = req.query;
+
+  if (typeof key !== "string") {
+    return res.sendStatus(400);
+  }
+
+  res.redirect(key);
+
+  // try {
+  //   const { key } = req.query;
+
+  //   if (typeof key !== "string") {
+  //     return res.sendStatus(400);
+  //   }
+
+  //   const response = await s3.send(
+  //     new GetObjectCommand({
+  //       Bucket: "schooltalk-expo-update-assets",
+  //       Key: key,
+  //     }),
+  //   );
+
+  //   if (!response?.Body) {
+  //     return res.sendStatus(404);
+  //   }
+
+  //   const stream = await response.Body.transformToWebStream();
+
+  //   // @ts-ignore
+  //   const midStream = Stream.Readable.fromWeb(stream);
+
+  //   midStream.pipe(res);
+  // } catch (error) {
+  //   console.error(error);
+  //   res.sendStatus(404);
+  // }
 });
 
 export default app;
