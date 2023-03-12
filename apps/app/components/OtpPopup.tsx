@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Colors from "../constants/Colors";
 import {
+  Alert,
   Modal,
   StyleSheet,
   Text,
@@ -11,16 +12,16 @@ import {
 import { trpc } from "../utils/trpc";
 import { useSetAuthToken } from "../utils/auth";
 import config from "../config";
-import Toast from "react-native-toast-message";
+import Spinner from "react-native-loading-spinner-overlay";
 
 interface props {
   visible: boolean;
   userId: string | null;
+  onClose?: () => void;
 }
 
-export default function OtpPopup({ visible, userId }: props) {
+export default function OtpPopup({ visible, userId, onClose }: props) {
   const setAuthToken = useSetAuthToken();
-  const [modalVisible, setModalVisible] = useState(false);
   const [otp, setOtp] = useState<string | null>(null);
 
   const submitOTP = trpc.auth.submitLoginOTP.useMutation({
@@ -29,22 +30,19 @@ export default function OtpPopup({ visible, userId }: props) {
     },
     onError(error, variables, context) {
       console.error(error);
-      Toast.show({
-        type: "error",
-        text1: "Failed to submit OTP",
-      });
+      Alert.alert("Invalid OTP", "Looks like the OTP you entered is incorrect");
+      setOtp(null);
     },
   });
 
   return (
     <View style={styles.centeredView}>
+      <Spinner visible={submitOTP.isLoading} textContent="Please wait..." />
       <Modal
         animationType="slide"
         transparent={true}
         visible={visible}
-        onRequestClose={() => {
-          setModalVisible(!modalVisible);
-        }}
+        onRequestClose={() => onClose?.()}
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
@@ -70,12 +68,13 @@ export default function OtpPopup({ visible, userId }: props) {
                     otp,
                     schoolId: config.schoolId,
                   });
-                } else {
-                  alert("User ID is still null");
                 }
               }}
             >
               <Text style={styles.textStyle}>Submit</Text>
+            </Pressable>
+            <Pressable onPress={() => onClose?.()}>
+              <Text>Cancel</Text>
             </Pressable>
           </View>
         </View>

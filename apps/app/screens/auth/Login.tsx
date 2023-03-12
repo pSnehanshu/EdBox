@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { StyleSheet, Pressable } from "react-native";
+import { StyleSheet, Pressable, Alert } from "react-native";
 import type { ClassWithSections, Section } from "schooltalk-shared/types";
 import { View, Text, TextInput } from "../../components/Themed";
 import { RootStackScreenProps } from "../../utils/types/common";
@@ -250,9 +250,11 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
           </>
         )
       ) : (
-        <>
-          <OtpPopup visible={true} userId={userId} />
-        </>
+        <OtpPopup
+          visible={true}
+          userId={userId}
+          onClose={() => setStep("requestOTP")}
+        />
       )}
     </View>
   );
