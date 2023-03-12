@@ -5,7 +5,7 @@ import config from "../../config";
 import { useUpdates } from "../../utils/updates";
 
 const AboutAppScreen: React.FC = () => {
-  const { isChecking, isUpdateAvailable, check, update, Updates } =
+  const { isChecking, isUpdateAvailable, check, update, Updates, logs } =
     useUpdates();
 
   return (
@@ -39,6 +39,12 @@ const AboutAppScreen: React.FC = () => {
           </Button>
         </View>
       </Card>
+
+      <View>
+        {logs.map((log, i) => (
+          <Text key={i}>{JSON.stringify(log, null, 2)}</Text>
+        ))}
+      </View>
     </ScrollView>
   );
 };

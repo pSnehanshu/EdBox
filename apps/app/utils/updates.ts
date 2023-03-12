@@ -6,11 +6,15 @@ export function useUpdates(autoCheck = true) {
   const [isChecking, setIsChecking] = useState(false);
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
   const [manifest, setManifest] = useState<Updates.Manifest>();
+  const [logs, setLogs] = useState<Updates.UpdatesLogEntry[]>([]);
 
   const check = useCallback(async () => {
     setIsChecking(true);
 
     try {
+      const logs = await Updates.readLogEntriesAsync();
+      setLogs(logs);
+
       const result = await Updates.checkForUpdateAsync();
       setIsUpdateAvailable(result.isAvailable);
       setManifest(result.manifest);
@@ -58,5 +62,6 @@ export function useUpdates(autoCheck = true) {
     check,
     reload,
     update,
+    logs,
   };
 }
