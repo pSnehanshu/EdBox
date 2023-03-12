@@ -18,9 +18,15 @@ interface props {
   visible: boolean;
   userId: string | null;
   onClose?: () => void;
+  formType: string;
 }
 
-export default function OtpPopup({ visible, userId, onClose }: props) {
+export default function OtpPopup({
+  visible,
+  userId,
+  onClose,
+  formType,
+}: props) {
   const setAuthToken = useSetAuthToken();
   const [otp, setOtp] = useState<string | null>(null);
 
@@ -48,7 +54,8 @@ export default function OtpPopup({ visible, userId, onClose }: props) {
           <View style={styles.modalView}>
             <Text style={styles.mainText}>Verification Code</Text>
             <Text style={styles.subText}>
-              We have send the code to your parents Mobile No
+              We have send the code to your
+              {formType === "others" ? "parents" : ""} Mobile No
             </Text>
 
             <TextInput
@@ -109,9 +116,9 @@ const styles = StyleSheet.create({
   button: {
     borderRadius: 15,
     padding: 12,
-    marginBottom: 24,
+    marginBottom: 12,
     backgroundColor: Colors.semi_black,
-    width: "70%",
+    width: "90%",
   },
   textStyle: {
     color: "white",
@@ -130,11 +137,11 @@ const styles = StyleSheet.create({
   },
   inputText: {
     height: 40,
-    margin: 12,
+    margin: 16,
     borderWidth: 1,
     borderRadius: 15,
     padding: 10,
-    width: "70%",
+    width: "90%",
     letterSpacing: 25,
     textAlign: "center",
   },

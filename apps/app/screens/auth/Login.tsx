@@ -190,6 +190,7 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
                   <Text style={styles.text_class}>Section</Text>
                   <SelectDropdown
                     data={allSections}
+                    disabled={allSections.length === 0}
                     onSelect={(item, index) => {
                       const section = selectedClass?.Sections.at(index);
                       setSelectedSection(section);
@@ -255,6 +256,7 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
           visible={true}
           userId={userId}
           onClose={() => setStep("requestOTP")}
+          formType={formType}
         />
       )}
     </View>
@@ -349,8 +351,9 @@ const styles = StyleSheet.create({
   dropdown1BtnTxtStyle: { color: "#858585", textAlign: "left", fontSize: 14 },
   dropdown1DropdownStyle: { backgroundColor: "#EFEFEF" },
   dropdown1RowStyle: {
-    backgroundColor: "#EFEFEF",
+    backgroundColor: "white",
     borderBottomColor: "#C5C5C5",
+    height: 40,
   },
-  dropdown1RowTxtStyle: { color: "#2A2A2A", textAlign: "left" },
+  dropdown1RowTxtStyle: { color: "#2A2A2A", textAlign: "center" },
 });
