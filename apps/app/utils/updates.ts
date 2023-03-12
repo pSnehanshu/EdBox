@@ -8,6 +8,16 @@ export function useUpdates(autoCheck = true) {
   const [manifest, setManifest] = useState<Updates.Manifest>();
   const [logs, setLogs] = useState<Updates.UpdatesLogEntry[]>([]);
 
+  useEffect(() => {
+    Updates.addListener((event) => {
+      if (event.type === Updates.UpdateEventType.ERROR) {
+        alert(
+          `Update error: ${event.message}\n${JSON.stringify(event.manifest)}`,
+        );
+      }
+    });
+  }, []);
+
   const check = useCallback(async () => {
     setIsChecking(true);
 

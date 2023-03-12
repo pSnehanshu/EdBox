@@ -34,6 +34,12 @@ const AboutAppScreen: React.FC = () => {
             View config
           </Button>
 
+          <Button
+            onPress={() => alert(JSON.stringify(Updates.manifest, null, 2))}
+          >
+            Manifest
+          </Button>
+
           <Button onPress={check} disabled={isChecking}>
             {isChecking ? "Checking for update..." : "Check for updates"}
           </Button>
