@@ -17,12 +17,12 @@ app.use(
   trpcExpress.createExpressMiddleware({
     router: trpcRouter,
     createContext,
-  })
+  }),
 );
 
 const port = parseInt(process.env.PORT ?? "5080", 10);
 const httpServer = app.listen(port, () =>
-  console.log(`Running on port ${port}`)
+  console.log(`Running on port ${port}`),
 );
 
 initSocketIo(httpServer);

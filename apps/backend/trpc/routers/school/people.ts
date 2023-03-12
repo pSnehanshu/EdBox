@@ -22,7 +22,7 @@ const peopleRouter = t.router({
             by: "name",
           }),
         role: z.nativeEnum(StaticRole),
-      })
+      }),
     )
     .query(async ({ input, ctx }) => {
       // Determine role based WHERE based on input.role

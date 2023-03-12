@@ -20,7 +20,7 @@ export const migrations: Migration[] = [
         id TEXT NOT NULL PRIMARY KEY,
         obj TEXT NOT NULL
       );`,
-        []
+        [],
       );
     },
   },
@@ -34,10 +34,10 @@ export const migrations: Migration[] = [
         created_at TEXT NOT NULL,
         group_identifier TEXT NOT NULL,
         sort_key INTEGER NOT NULL
-      );`
+      );`,
       );
       tx.executeSql(
-        "CREATE UNIQUE INDEX messages_sort_key_unique_index ON messages(sort_key);"
+        "CREATE UNIQUE INDEX messages_sort_key_unique_index ON messages(sort_key);",
       );
     },
   },

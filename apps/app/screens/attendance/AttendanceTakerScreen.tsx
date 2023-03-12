@@ -40,7 +40,7 @@ interface StudentItemProps {
   showRemarkActions: boolean;
   onStatusSelected: (
     studentId: string,
-    status: AttendanceStatus | undefined
+    status: AttendanceStatus | undefined,
   ) => void;
   onAddRemarksPress: (student: Student) => void;
   onRemarks: (studentId: string, remarks: string | undefined) => void;
@@ -111,7 +111,7 @@ const StudentItem = memo(
             onPress={() =>
               onStatusSelected(
                 student.id,
-                status === "present" ? undefined : "present"
+                status === "present" ? undefined : "present",
               )
             }
           >
@@ -128,7 +128,7 @@ const StudentItem = memo(
             onPress={() =>
               onStatusSelected(
                 student.id,
-                status === "absent" ? undefined : "absent"
+                status === "absent" ? undefined : "absent",
               )
             }
           >
@@ -137,7 +137,7 @@ const StudentItem = memo(
         </View>
       </View>
     );
-  }
+  },
 );
 
 interface RemarksEditorProps {
@@ -263,7 +263,7 @@ export default function AttendanceTakerScreen({
 
     return format(
       new Date(periodAttendanceQuery.data.created_at),
-      "do LLLL, yyyy hh:mm bbb"
+      "do LLLL, yyyy hh:mm bbb",
     );
   }, [periodAttendanceQuery.data?.created_at]);
 
@@ -291,7 +291,7 @@ export default function AttendanceTakerScreen({
         periodId,
         limit: 20,
       },
-      { getNextPageParam: (lastPage) => lastPage.cursor }
+      { getNextPageParam: (lastPage) => lastPage.cursor },
     );
   const fetchNextPage = useCallback(() => {
     studentsQuery.fetchNextPage();
@@ -328,7 +328,7 @@ export default function AttendanceTakerScreen({
   const students = useMemo<Student[]>(() => {
     const students: Student[] = [];
     studentsQuery.data?.pages.forEach((page) =>
-      students.push(...page.students)
+      students.push(...page.students),
     );
 
     return students;
@@ -338,7 +338,7 @@ export default function AttendanceTakerScreen({
 
   const totalStudents = useMemo(
     () => _.last(studentsQuery.data?.pages)?.total ?? 0,
-    [studentsQuery.fetchStatus]
+    [studentsQuery.fetchStatus],
   );
 
   let totalPresent = 0;
@@ -371,7 +371,7 @@ export default function AttendanceTakerScreen({
           viewPosition: 0.5,
         });
     },
-    [students, isAttendanceTaken]
+    [students, isAttendanceTaken],
   );
   const setAttendanceRemarks = useCallback(
     (studentId: string, remarks: string | undefined) => {
@@ -387,7 +387,7 @@ export default function AttendanceTakerScreen({
         },
       }));
     },
-    [isAttendanceTaken]
+    [isAttendanceTaken],
   );
   const [studentForRemarks, setStudentForRemarks] = useState<Student>();
 
@@ -403,14 +403,14 @@ export default function AttendanceTakerScreen({
         onRemarks={setAttendanceRemarks}
       />
     ),
-    [attendance]
+    [attendance],
   );
 
   const submitAttendance = useCallback(() => {
     if (totalRemaining > 0) {
       Alert.alert(
         "Attendance not complete yet!",
-        `Take attendance of the remaining ${totalRemaining} students before you submit.`
+        `Take attendance of the remaining ${totalRemaining} students before you submit.`,
       );
     } else {
       // Prepare attendance object

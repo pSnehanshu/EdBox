@@ -60,7 +60,7 @@ export default function SchoolSettingsScreen({
         onPress() {
           navigation.navigate("PeopleSettings");
         },
-      }
+      },
     );
 
     return items;

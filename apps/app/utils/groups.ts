@@ -15,7 +15,7 @@ export function useGroupInfo(groupIdentifier: string) {
   const db = useDB();
   const dbResult = useReadDB<{ id: string; obj: string }>(
     "SELECT * FROM groups WHERE id = ?",
-    [groupIdentifier]
+    [groupIdentifier],
   );
   const groupQuery = trpc.school.messaging.fetchGroupInfo.useQuery({
     groupIdentifier,
@@ -48,7 +48,7 @@ export function useGroupInfo(groupIdentifier: string) {
  * Hook for fetching groups from SQLite and Server combined
  */
 export function useGetUserGroups(
-  input: inferRouterInputs<AppRouter>["school"]["messaging"]["fetchGroups"]
+  input: inferRouterInputs<AppRouter>["school"]["messaging"]["fetchGroups"],
 ) {
   const db = useDB();
   const utils = trpc.useContext();
@@ -83,7 +83,7 @@ export function useGetUserGroups(
         const unseenGroups = await fetchUnseenGroupsInfo(
           db,
           serverGroups.map((g) => g.identifier),
-          utils
+          utils,
         );
 
         await insertGroups(db, Object.values(unseenGroups));
@@ -131,7 +131,7 @@ export async function fetchUserGroupsFromSQLite(db: WebSQLDatabase) {
         (tx, err) => {
           reject(err);
           return true;
-        }
+        },
       );
     });
   });
@@ -146,7 +146,7 @@ export async function fetchUserGroupsFromSQLite(db: WebSQLDatabase) {
 export async function fetchUnseenGroupsInfo(
   db: WebSQLDatabase,
   groupIds: string[],
-  trpcUtils: ReturnType<typeof trpc.useContext>
+  trpcUtils: ReturnType<typeof trpc.useContext>,
 ): Promise<Record<string, Group>> {
   const _groupIds = _.uniq(groupIds);
 
@@ -179,8 +179,8 @@ export async function fetchUnseenGroupsInfo(
                 unsavedGroupIds.map((identifier) =>
                   trpcUtils.client.school.messaging.fetchGroupInfo.query({
                     groupIdentifier: identifier,
-                  })
-                )
+                  }),
+                ),
               );
 
               // Generate final result
@@ -202,7 +202,7 @@ export async function fetchUnseenGroupsInfo(
             }
           }
         }
-      }
+      },
     );
   });
 }
@@ -229,7 +229,7 @@ export async function insertGroups(db: WebSQLDatabase, groups: Group[]) {
         tx.executeSql(sql, args);
       },
       reject,
-      resolve
+      resolve,
     );
   });
 }

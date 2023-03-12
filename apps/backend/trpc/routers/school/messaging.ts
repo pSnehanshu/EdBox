@@ -18,20 +18,20 @@ const messagingRouter = t.router({
         limit: z.number().int().min(1).max(20).default(10),
         page: z.number().int().min(1),
         // sort: z.enum([/* "name_asc", "name_desc", */ "recent_message"]),
-      })
+      }),
     )
     .query(async ({ input, ctx }) =>
       getUserGroups(ctx.user, {
         limit: input.limit,
         page: input.page,
-      })
+      }),
     ),
   createGroup: t.procedure
     .use(authMiddleware)
     .input(
       z.object({
         name: z.string().max(50).trim(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       const group = await prisma.customGroup.create({
@@ -57,7 +57,7 @@ const messagingRouter = t.router({
         groupId: z.string().cuid(),
         userId: z.string().cuid(),
         isAdmin: z.boolean().default(false),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       // Fetch the invited user
@@ -94,10 +94,10 @@ const messagingRouter = t.router({
       }
 
       const currentUserMembership = group.Members.find(
-        (m) => m.user_id === ctx.user.id
+        (m) => m.user_id === ctx.user.id,
       );
       const addedUserMembership = group.Members.find(
-        (m) => m.user_id === addedUser.id
+        (m) => m.user_id === addedUser.id,
       );
 
       if (!currentUserMembership) {
@@ -138,7 +138,7 @@ const messagingRouter = t.router({
       z.object({
         groupId: z.string().cuid(),
         userId: z.string().cuid(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       // Fetch target user
@@ -179,7 +179,7 @@ const messagingRouter = t.router({
 
       // Make sure current user is admin
       const currentUserMembership = group.Members.find(
-        (m) => m.user_id === ctx.user.id
+        (m) => m.user_id === ctx.user.id,
       );
 
       if (!currentUserMembership || !currentUserMembership.is_admin) {
@@ -192,7 +192,7 @@ const messagingRouter = t.router({
 
       // Make sure target user is already a member
       const targetMembership = group.Members.find(
-        (m) => m.user_id === targetUser.id
+        (m) => m.user_id === targetUser.id,
       );
 
       if (!targetMembership) {
@@ -225,7 +225,7 @@ const messagingRouter = t.router({
       z.object({
         groupId: z.string().cuid(),
         userId: z.string().cuid(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       // Fetch target user
@@ -266,7 +266,7 @@ const messagingRouter = t.router({
 
       // Make sure current user is admin
       const currentUserMembership = group.Members.find(
-        (m) => m.user_id === ctx.user.id
+        (m) => m.user_id === ctx.user.id,
       );
 
       if (!currentUserMembership || !currentUserMembership.is_admin) {
@@ -279,7 +279,7 @@ const messagingRouter = t.router({
 
       // Make sure target user is already a member
       const targetMembership = group.Members.find(
-        (m) => m.user_id === targetUser.id
+        (m) => m.user_id === targetUser.id,
       );
 
       if (!targetMembership) {
@@ -310,7 +310,7 @@ const messagingRouter = t.router({
     .input(
       z.object({
         groupId: z.string().cuid(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       // Fetch group and memberships
@@ -334,7 +334,7 @@ const messagingRouter = t.router({
 
       // Make sure current user is admin
       const currentUserMembership = group.Members.find(
-        (m) => m.user_id === ctx.user.id
+        (m) => m.user_id === ctx.user.id,
       );
 
       if (!currentUserMembership || !currentUserMembership.is_admin) {
@@ -362,7 +362,7 @@ const messagingRouter = t.router({
       z.object({
         groupId: z.string().cuid(),
         name: z.string().max(50).optional(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       // Fetch group and memberships
@@ -386,7 +386,7 @@ const messagingRouter = t.router({
 
       // Make sure current user is admin
       const currentUserMembership = group.Members.find(
-        (m) => m.user_id === ctx.user.id
+        (m) => m.user_id === ctx.user.id,
       );
 
       if (!currentUserMembership || !currentUserMembership.is_admin) {
@@ -423,11 +423,11 @@ const messagingRouter = t.router({
     .input(
       z.object({
         groupIdentifier: groupIdentifierSchema,
-      })
+      }),
     )
     .query(async ({ input, ctx }): Promise<Group> => {
       const identifier = convertObjectToOrderedQueryString(
-        input.groupIdentifier
+        input.groupIdentifier,
       );
 
       if (input.groupIdentifier.sc !== ctx.user.school_id) {
@@ -581,7 +581,7 @@ const messagingRouter = t.router({
           .regex(/^\d+$/, "Must be a numeric string")
           .transform((v) => BigInt(v))
           .optional(),
-      })
+      }),
     )
     .query(async ({ input, ctx }) => {
       if (input.groupIdentifier.sc !== ctx.user.school_id) {
@@ -596,7 +596,7 @@ const messagingRouter = t.router({
           where: {
             school_id: ctx.user.school_id,
             group_identifier: convertObjectToOrderedQueryString(
-              input.groupIdentifier
+              input.groupIdentifier,
             ),
           },
           include: {

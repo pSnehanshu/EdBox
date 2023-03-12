@@ -15,7 +15,7 @@ const schoolRouter = t.router({
     .input(
       z.object({
         schoolId: z.string().cuid(),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const school = await prisma.school.findUnique({

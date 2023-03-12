@@ -21,7 +21,7 @@ export function SettingsScreen() {
   const isPrincipal = hasUserStaticRoles(
     user,
     [StaticRole.principal, StaticRole.vice_principal],
-    "some"
+    "some",
   );
   const logout = useLogout();
 
@@ -89,7 +89,7 @@ export function SettingsScreen() {
             color={iconColor}
           />
         ),
-      }
+      },
     );
 
     return items;

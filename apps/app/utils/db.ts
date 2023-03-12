@@ -38,7 +38,7 @@ export function DBProvider({ children }: DBProviderProps) {
     {
       value: db.current,
     },
-    children
+    children,
   );
 }
 
@@ -58,7 +58,7 @@ export function useDB() {
  */
 export function useReadDB<T = unknown>(
   sql: string,
-  args: Array<number | string | null> = []
+  args: Array<number | string | null> = [],
 ) {
   const db = useDB();
   const [result, setResult] = useState<T[]>();
@@ -79,14 +79,14 @@ export function useReadDB<T = unknown>(
           (tx, err) => {
             setError(err);
             return true;
-          }
+          },
         );
       },
       (err) => {
         setError(err);
         setIsLoading(false);
       },
-      () => setIsLoading(false)
+      () => setIsLoading(false),
     );
 
     return () => {
@@ -122,7 +122,7 @@ function migrate(db: SQLite.WebSQLDatabase) {
           sno INTEGER NOT NULL,
           name TEXT NOT NULL PRIMARY KEY,
           ran_at TEXT NOT NULL DEFAULT CURRENT_TIMSTAMP
-        )`
+        )`,
       );
 
       // Fetch migrations
@@ -140,12 +140,12 @@ function migrate(db: SQLite.WebSQLDatabase) {
 
           console.log(
             `To apply ${pendingMigrations.length} migrations`,
-            pendingMigrations.map((m) => m.name)
+            pendingMigrations.map((m) => m.name),
           );
         },
         (tx, err) => {
           return true;
-        }
+        },
       );
     },
     (err) => console.error(err),
@@ -158,7 +158,7 @@ function migrate(db: SQLite.WebSQLDatabase) {
           console.error(err);
           alert("Failed to apply migrations!");
         });
-    }
+    },
   );
 }
 
@@ -172,7 +172,7 @@ function migrate(db: SQLite.WebSQLDatabase) {
 export function executeMigrations(
   db: SQLite.WebSQLDatabase,
   migrations: Migration[],
-  migrationStartIndex: number
+  migrationStartIndex: number,
 ) {
   return new Promise((resolve, reject) => {
     db.transaction(
@@ -185,13 +185,13 @@ export function executeMigrations(
           const row = [sno, migration.name, new Date().toISOString()];
           tx.executeSql(
             "INSERT INTO _st_migrations (sno, name, ran_at) VALUES (?,?,?)",
-            row
+            row,
           );
           console.log("Migration ran", row);
         });
       },
       reject,
-      () => resolve(undefined)
+      () => resolve(undefined),
     );
   });
 }

@@ -17,7 +17,7 @@ const subjectRouter = t.router({
           .default({
             by: "name",
           }),
-      })
+      }),
     )
     .query(async ({ input, ctx }) => {
       const subjects = await prisma.subject.findMany({

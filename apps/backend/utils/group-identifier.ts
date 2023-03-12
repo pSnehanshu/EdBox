@@ -61,7 +61,7 @@ export function convertObjectToOrderedQueryString(obj: { [k: string]: any }) {
     .sort()
     .forEach((key) => {
       finalString.push(
-        `${encodeURIComponent(key)}=${encodeURIComponent(obj[key])}`
+        `${encodeURIComponent(key)}=${encodeURIComponent(obj[key])}`,
       );
     });
 
@@ -69,7 +69,7 @@ export function convertObjectToOrderedQueryString(obj: { [k: string]: any }) {
 }
 
 export function parseGroupIdentifierString(
-  identifier: string
+  identifier: string,
 ): GroupIdentifier {
   const opts = identifier.split("&");
   const final: Record<string, string | number> = {};
@@ -102,7 +102,7 @@ export const groupIdentifierSchema = z.string().transform((val, ctx) => {
 
 export function getCustomGroupIdentifier(
   schoolId: string,
-  groupId: string
+  groupId: string,
 ): string {
   const id: z.infer<typeof CustomGroupIdentifier> = {
     gd: "c",
@@ -123,7 +123,7 @@ export function getSchoolGroupIdentifier(schoolId: string): string {
 
 export function getClassGroupIdentifier(
   schoolId: string,
-  classNum: number
+  classNum: number,
 ): string {
   const id: z.infer<typeof ClassGroupIdentifier> = {
     gd: "a",
@@ -137,7 +137,7 @@ export function getClassGroupIdentifier(
 export function getSectionGroupIdentifier(
   schoolId: string,
   classNum: number,
-  sectionNum: number
+  sectionNum: number,
 ) {
   const id: z.infer<typeof SectionGroupIdentifier> = {
     gd: "a",
@@ -152,7 +152,7 @@ export function getSectionGroupIdentifier(
 export function getSubjectGroupIdentifier(
   schoolId: string,
   subjectId: string,
-  classNum: number
+  classNum: number,
 ) {
   const id: z.infer<typeof SubjectGroupIdentifier> = {
     gd: "a",

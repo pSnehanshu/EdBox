@@ -77,7 +77,7 @@ const examRouter = t.router({
             section_id: z.number().int().optional(),
           })
           .optional(),
-      })
+      }),
     )
     .query(async ({ input, ctx }) => {
       const test = await prisma.examTest.findUnique({
@@ -129,7 +129,7 @@ const examRouter = t.router({
         StaticRole.vice_principal,
         StaticRole.teacher,
         StaticRole.staff,
-      ])
+      ]),
     )
     .input(examTestSchema.extend({ exam_id: z.string().cuid().optional() }))
     .mutation(async ({ input, ctx }) => {
@@ -159,7 +159,7 @@ const examRouter = t.router({
         StaticRole.vice_principal,
         StaticRole.teacher,
         StaticRole.staff,
-      ])
+      ]),
     )
     .input(
       z.object({
@@ -172,7 +172,7 @@ const examRouter = t.router({
             subjectIds: true,
           })
           .partial(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       await prisma.$transaction(async (tx) => {
@@ -210,7 +210,7 @@ const examRouter = t.router({
 
         // Remove subjects that are not included in input
         const subjectsToRemove = test.Subjects.filter(
-          (s) => !input.data.subjectIds?.includes(s.subject_id)
+          (s) => !input.data.subjectIds?.includes(s.subject_id),
         );
 
         await Promise.all(
@@ -222,13 +222,13 @@ const examRouter = t.router({
                   test_id: test.id,
                 },
               },
-            })
-          )
+            }),
+          ),
         );
 
         // Attach the subjects not attached already
         const subjectsToAdd = input.data.subjectIds.filter(
-          (id) => test.Subjects.findIndex((s) => s.subject_id === id) >= 0
+          (id) => test.Subjects.findIndex((s) => s.subject_id === id) >= 0,
         );
 
         await tx.testSubjectMapping.createMany({
@@ -246,12 +246,12 @@ const examRouter = t.router({
         StaticRole.vice_principal,
         StaticRole.teacher,
         StaticRole.staff,
-      ])
+      ]),
     )
     .input(
       z.object({
         id: z.string().cuid(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       await prisma.examTest.deleteMany({
@@ -266,7 +266,7 @@ const examRouter = t.router({
     .input(
       z.object({
         examId: z.string().cuid(),
-      })
+      }),
     )
     .query(async ({ input, ctx }) => {
       const exam = await prisma.exam.findFirst({
@@ -313,13 +313,13 @@ const examRouter = t.router({
         StaticRole.vice_principal,
         StaticRole.teacher,
         StaticRole.staff,
-      ])
+      ]),
     )
     .input(
       z.object({
         name: z.string().max(100),
         tests: examTestSchema.array().default([]),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       const exam = await prisma.exam.create({
@@ -358,13 +358,13 @@ const examRouter = t.router({
         StaticRole.vice_principal,
         StaticRole.teacher,
         StaticRole.staff,
-      ])
+      ]),
     )
     .input(
       z.object({
         id: z.string().cuid(),
         name: z.string().max(100).optional(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       await prisma.exam.updateMany({
@@ -384,7 +384,7 @@ const examRouter = t.router({
         after_date: dateStringSchema,
         limit: z.number().int().min(1).max(100).default(10),
         page: z.number().int().min(1).default(1),
-      })
+      }),
     )
     .query(async ({ input, ctx }): Promise<ExamItem[]> => {
       const student = await prisma.student.findUnique({
@@ -474,7 +474,7 @@ const examRouter = t.router({
       // Extract the exams
       const exams = _.uniqBy(
         tests.filter((t) => t.Exam).map((t) => t.Exam!),
-        "id"
+        "id",
       );
 
       // Filter out the independent tests (tests not under any exam)
@@ -511,7 +511,7 @@ const examRouter = t.router({
         after_date: dateStringSchema,
         limit: z.number().int().min(1).max(100).default(10),
         page: z.number().int().min(1).default(1),
-      })
+      }),
     )
     .query(async ({ input, ctx }): Promise<ExamItem[]> => {
       const tests: ExamTest[] = await prisma.examTest.findMany({
@@ -591,7 +591,7 @@ const examRouter = t.router({
       // Extract the exams
       const exams = _.uniqBy(
         tests.filter((t) => t.Exam).map((t) => t.Exam!),
-        "id"
+        "id",
       );
 
       // Filter out the independent tests (tests not under any exam)

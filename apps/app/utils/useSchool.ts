@@ -5,7 +5,6 @@ import { trpc } from "../utils/trpc";
 import { SCHOOL } from "./async-storage-keys";
 import config from "../config";
 
-
 /**
  * Cache school object to avoid fetching from AsyncStorage over and over
  */

@@ -26,7 +26,7 @@ export default function ChatWindowScreen({
   const messages = useMessages();
   const groupMessages = messages.useFetchGroupMessages(
     groupInfo.identifier,
-    30
+    30,
   );
   const groupInfoQuery = useGroupInfo(groupInfo.identifier);
 

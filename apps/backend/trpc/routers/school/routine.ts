@@ -200,7 +200,7 @@ const routineRouter = t.router({
         limit: z.number().int().min(1).max(100).default(20),
         /** Roll number */
         cursor: z.number().int().nullish(),
-      })
+      }),
     )
     .query(async ({ input, ctx }) => {
       const period = await prisma.routinePeriod.findUnique({

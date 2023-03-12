@@ -50,7 +50,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
     {
       value: socket.current,
     },
-    children
+    children,
   );
 }
 

@@ -27,7 +27,7 @@ export const TestComp: React.FC<{
 
   const date = useMemo(
     () => format(parseISO(test.date_of_exam), "MMM d, yyyy hh:mm bbb"),
-    [test.date_of_exam]
+    [test.date_of_exam],
   );
   const duration = useMemo(() => {
     if (test.duration_minutes < 60) {

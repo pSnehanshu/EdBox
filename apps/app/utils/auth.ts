@@ -46,7 +46,7 @@ export function useSetAuthToken() {
       await setAuthToken(token, expiry);
       utils.auth.whoami.invalidate();
     },
-    []
+    [],
   );
 }
 
@@ -78,7 +78,7 @@ export function useLogout() {
         },
         () => {
           console.log("Deleted all SQLite data!");
-        }
+        },
       );
     },
     onError(error, variables, context) {

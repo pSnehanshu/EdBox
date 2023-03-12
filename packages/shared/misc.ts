@@ -48,7 +48,7 @@ export enum StaticRole {
  * @returns The role
  */
 export function getUserRoleHierarchical(
-  user: UnserializedUser | User | null | undefined
+  user: UnserializedUser | User | null | undefined,
 ): StaticRole {
   if (!user) return StaticRole.none;
 
@@ -89,7 +89,7 @@ export function getUserRoleHierarchical(
  * @param user
  */
 export function getUserStaticRoles(
-  user: UnserializedUser | User | null | undefined
+  user: UnserializedUser | User | null | undefined,
 ): StaticRole[] {
   if (!user) return [];
 
@@ -111,7 +111,7 @@ export function getUserStaticRoles(
         break;
       default:
         console.warn(
-          `User ${user.id} has staff_id defined, but the Staff object is not attached. The role is ${user.Staff?.role}. Please act on it asap.`
+          `User ${user.id} has staff_id defined, but the Staff object is not attached. The role is ${user.Staff?.role}. Please act on it asap.`,
         );
     }
   }
@@ -128,7 +128,7 @@ export function getUserStaticRoles(
 export function hasUserStaticRoles(
   user: UnserializedUser | User | null | undefined,
   requiredRoles: StaticRole[],
-  mode: "all" | "some"
+  mode: "all" | "some",
 ): boolean {
   const roles = getUserStaticRoles(user);
 
@@ -241,7 +241,7 @@ function hexToRgb(hexColor: string) {
  */
 export function getTextColorForGivenBG(
   hexColor: string,
-  defaultColor: "black" | "white" = "black"
+  defaultColor: "black" | "white" = "black",
 ) {
   const rgb = hexToRgb(hexColor);
   if (!rgb) return defaultColor;
