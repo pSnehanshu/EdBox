@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import { StyleSheet, Pressable } from "react-native";
 import type { ClassWithSections, Section } from "schooltalk-shared/types";
 import { View, Text, TextInput } from "../../components/Themed";
-import { useSchool } from "../../utils/useSchool";
 import { RootStackScreenProps } from "../../utils/types/common";
 import { trpc } from "../../utils/trpc";
 import Spinner from "react-native-loading-spinner-overlay";
@@ -12,7 +11,6 @@ import config from "../../config";
 import OtpPopup from "../../components/OtpPopup";
 
 export default function LoginScreen({}: RootStackScreenProps<"Login">) {
-  const school = useSchool();
   const setAuthToken = useSetAuthToken();
 
   // Form States
@@ -68,8 +66,6 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
       setAuthToken(data.token, new Date(data.expiry_date));
     },
   });
-
-  if (!school) return null;
 
   return (
     <View
@@ -147,7 +143,7 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
                 onPress={() =>
                   requestOtp.mutate({
                     phoneNumber: phone,
-                    schoolId: school.id,
+                    schoolId: config.schoolId,
                   })
                 }
               >
@@ -236,7 +232,7 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
                       requestrollNumberOTP.mutate({
                         class_id: selectedClass?.numeric_id,
                         section_id: selectedSection.numeric_id,
-                        school_id: school.id,
+                        school_id: config.schoolId,
                         rollnum: Number(rollNo),
                       });
                     } else {
