@@ -1,8 +1,6 @@
 import React, { useState } from "react";
-import { Dialog } from "@rneui/themed";
 import Colors from "../constants/Colors";
 import {
-  Alert,
   Modal,
   StyleSheet,
   Text,
@@ -12,8 +10,8 @@ import {
 } from "react-native";
 import { trpc } from "../utils/trpc";
 import { useSetAuthToken } from "../utils/auth";
-import { useSchool } from "../utils/useSchool";
-import Spinner from "react-native-loading-spinner-overlay/lib";
+import config from "../config";
+import Toast from "react-native-toast-message";
 
 interface props {
   visible: boolean;
@@ -22,17 +20,22 @@ interface props {
 
 export default function OtpPopup({ visible, userId }: props) {
   const setAuthToken = useSetAuthToken();
-  const school = useSchool();
   const [modalVisible, setModalVisible] = useState(false);
   const [otp, setOtp] = useState<string | null>(null);
 
   const submitOTP = trpc.auth.submitLoginOTP.useMutation({
     onSuccess(data) {
       setAuthToken(data.token, new Date(data.expiry_date));
-      console.log(data, "student");
+    },
+    onError(error, variables, context) {
+      console.error(error);
+      Toast.show({
+        type: "error",
+        text1: "Failed to submit OTP",
+      });
     },
   });
-  if (!school) return null;
+
   return (
     <View style={styles.centeredView}>
       <Modal
@@ -40,7 +43,6 @@ export default function OtpPopup({ visible, userId }: props) {
         transparent={true}
         visible={visible}
         onRequestClose={() => {
-          Alert.alert("Modal has been closed.");
           setModalVisible(!modalVisible);
         }}
       >
@@ -48,15 +50,15 @@ export default function OtpPopup({ visible, userId }: props) {
           <View style={styles.modalView}>
             <Text style={styles.mainText}>Verification Code</Text>
             <Text style={styles.subText}>
-              We have send the code to your/your parents Mobile No
+              We have send the code to your parents Mobile No
             </Text>
-            <Text style={styles.subText}>+91-********89</Text>
+
             <TextInput
               style={styles.inputText}
               value={otp ?? ""}
               onChangeText={setOtp}
               autoFocus
-              keyboardType="phone-pad"
+              keyboardType="number-pad"
               maxLength={6}
             />
             <Pressable
@@ -66,7 +68,7 @@ export default function OtpPopup({ visible, userId }: props) {
                   submitOTP.mutate({
                     userId,
                     otp,
-                    schoolId: school.id,
+                    schoolId: config.schoolId,
                   });
                 } else {
                   alert("User ID is still null");
@@ -96,7 +98,6 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     padding: 35,
     alignItems: "center",
-    // shadowColor: "",
     width: "90%",
     shadowOffset: {
       width: 0,
@@ -113,7 +114,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.semi_black,
     width: "70%",
   },
-
   textStyle: {
     color: "white",
     fontWeight: "bold",
