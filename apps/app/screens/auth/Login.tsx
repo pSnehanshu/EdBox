@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { StyleSheet, Pressable } from "react-native";
+import type { ClassWithSections, Section } from "schooltalk-shared/types";
 import { View, Text, TextInput } from "../../components/Themed";
 import { useSchool } from "../../utils/useSchool";
 import { RootStackScreenProps } from "../../utils/types/common";
@@ -10,65 +11,58 @@ import SelectDropdown from "react-native-select-dropdown";
 import config from "../../config";
 import OtpPopup from "../../components/OtpPopup";
 
-interface ClassObject {
-  numeric_id: number;
-  Sections: any;
-}
-
 export default function LoginScreen({}: RootStackScreenProps<"Login">) {
   const school = useSchool();
-  const [step, setStep] = useState<"requestOTP" | "submitOTP">("requestOTP");
+  const setAuthToken = useSetAuthToken();
+
+  // Form States
   const [phone, setPhone] = useState("");
   const [rollNo, setRollNo] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
-  const [formType, setFormType] = useState<"others" | "student">("student");
-  const [selectedClassIndex, setSelectedClassIndex] = useState<number | null>(
-    null,
-  );
-  const [allSections, setAllSections] = useState<string[]>([]);
-  const [selectedSectionIndex, setSelectedSectionIndex] = useState<
-    number | null
-  >(null);
-
-  const [selectedClassObject, setSelectedClassObject] =
-    useState<ClassObject | null>(null);
   const [insufficientData, setInsufficientData] = useState(false);
 
-  const setAuthToken = useSetAuthToken();
-
+  // Query
   const classesAndSectionsData =
     trpc.school.class.fetchClassesAndSections.useQuery({
       schoolId: config.schoolId,
     });
 
-  const allClassesNames = classesAndSectionsData.data?.map(
-    (a) => `Class ${a.name ?? a.numeric_id}`,
+  // Selection state
+  const [formType, setFormType] = useState<"others" | "student">("student");
+  const [step, setStep] = useState<"requestOTP" | "submitOTP">("requestOTP");
+  const [selectedClass, setSelectedClass] = useState<ClassWithSections>();
+  const [selectedSection, setSelectedSection] = useState<Section>();
+
+  // Derived data
+  const allClassesNames = useMemo(
+    () =>
+      classesAndSectionsData.data?.map(
+        (a) => `Class ${a.name ?? a.numeric_id}`,
+      ) ?? [],
+    [classesAndSectionsData.isFetching],
   );
-
-  useEffect(() => {
-    if (selectedClassIndex && classesAndSectionsData.data) {
-      const theClass = classesAndSectionsData.data.at(selectedClassIndex);
-      const allSectionData =
-        theClass?.Sections.map((a) => "Section" + a.name) ?? [];
-      setSelectedClassObject(theClass ?? null);
-      setAllSections(allSectionData);
+  const allSections = useMemo(() => {
+    if (selectedClass) {
+      return selectedClass.Sections.map(
+        (section) => `Section ${section.name ?? section.numeric_id}`,
+      );
     }
-  }, [selectedClassIndex]);
+    return [];
+  }, [selectedClass?.numeric_id]);
 
+  // Mutations
   const requestOtp = trpc.auth.requestPhoneNumberOTP.useMutation({
     onSuccess(data) {
       setUserId(data.userId);
       setStep("submitOTP");
     },
   });
-
   const requestrollNumberOTP = trpc.auth.rollNumberLoginRequestOTP.useMutation({
     onSuccess(data) {
       setUserId(data.userId);
       setStep("submitOTP");
     },
   });
-
   const submitOTP = trpc.auth.submitLoginOTP.useMutation({
     onSuccess(data) {
       setAuthToken(data.token, new Date(data.expiry_date));
@@ -175,9 +169,10 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
                 <View style={{ width: "45%" }}>
                   <Text style={styles.text_class}>Class</Text>
                   <SelectDropdown
-                    data={allClassesNames ?? []}
-                    onSelect={(selectedItem, index) => {
-                      setSelectedClassIndex(index);
+                    data={allClassesNames}
+                    onSelect={(item, index) => {
+                      const Class = classesAndSectionsData?.data?.at(index);
+                      setSelectedClass(Class);
                     }}
                     defaultButtonText={"Select Class"}
                     buttonTextAfterSelection={(selectedItem, index) => {
@@ -188,10 +183,6 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
                     }}
                     buttonStyle={styles.dropdown1BtnStyle}
                     buttonTextStyle={styles.dropdown1BtnTxtStyle}
-                    // renderDropdownIcon={isOpened => {
-                    //   // return <FontAwesome name={isOpened ? 'chevron-up' : 'chevron-down'} color={'#FFF'} size={18} />;
-                    //   return <FontAwesome name={'chevron-up'} color={'#FFF'} size={18} />;
-                    // }}
                     dropdownIconPosition={"right"}
                     dropdownStyle={styles.dropdown1DropdownStyle}
                     rowStyle={styles.dropdown1RowStyle}
@@ -202,8 +193,9 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
                   <Text style={styles.text_class}>Section</Text>
                   <SelectDropdown
                     data={allSections}
-                    onSelect={(selectedItem, index) => {
-                      setSelectedSectionIndex(index);
+                    onSelect={(item, index) => {
+                      const section = selectedClass?.Sections.at(index);
+                      setSelectedSection(section);
                     }}
                     defaultButtonText={"Select Sections"}
                     buttonTextAfterSelection={(selectedItem, index) => {
@@ -238,12 +230,12 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
                 <Pressable
                   style={styles.main_button}
                   onPress={() => {
-                    if (rollNo && selectedClassObject) {
+                    if (rollNo && selectedClass && selectedSection) {
+                      setInsufficientData(false);
+
                       requestrollNumberOTP.mutate({
-                        class_id: selectedClassObject?.numeric_id,
-                        section_id:
-                          selectedClassObject?.Sections.at(selectedSectionIndex)
-                            .numeric_id,
+                        class_id: selectedClass?.numeric_id,
+                        section_id: selectedSection.numeric_id,
                         school_id: school.id,
                         rollnum: Number(rollNo),
                       });
@@ -261,30 +253,6 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
       ) : (
         <>
           <OtpPopup visible={true} userId={userId} />
-          {/* <View>
-            <Text>Enter OTP:</Text>
-            <TextInput
-              value={otp}
-              onChangeText={setOTP}
-              placeholder="OTP"
-              autoFocus
-              keyboardType="number-pad"
-            />
-            <Button
-              title="Login"
-              onPress={() => {
-                if (userId) {
-                  submitOTP.mutate({
-                    userId,
-                    otp,
-                    schoolId: school.id,
-                  });
-                } else {
-                  alert("User ID is still null");
-                }
-              }}
-            />
-          </View> */}
         </>
       )}
     </View>
@@ -293,15 +261,10 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
 
 const styles = StyleSheet.create({
   container: {
-    // flex: 1,
     padding: 20,
     flexDirection: "row",
-    // height:"20%",
-    // borderWidth: 1,
-    // height: 10,
   },
   main_button: {
-    // flex: 1,
     backgroundColor: "black",
     padding: 10,
     paddingBottom: 16,
@@ -314,8 +277,6 @@ const styles = StyleSheet.create({
   class_Section: {
     flexGrow: 1,
     flexDirection: "row",
-    // justifyContent: "space-between",
-    // padding:"10px"
     paddingLeft: 20,
     paddingRight: 20,
   },
@@ -345,15 +306,12 @@ const styles = StyleSheet.create({
     color: "black",
     paddingTop: 6,
     paddingLeft: 24,
-    // textAlign: "center",
     fontSize: 18,
   },
   text_class: {
     color: "black",
     paddingTop: 6,
     paddingBottom: 8,
-    // paddingLeft: 24,
-    // textAlign: "center",
     fontSize: 18,
   },
   default_button_text: {
@@ -378,11 +336,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 15,
   },
-  //
   dropdown1BtnStyle: {
     width: "100%",
-    // paddingLeft: 24,
-    // paddingRight:24,
     height: 50,
     backgroundColor: "#FFF",
     borderRadius: 14,
