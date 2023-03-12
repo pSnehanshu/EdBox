@@ -20,7 +20,7 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
   const [userId, setUserId] = useState<string | null>(null);
   const [formType, setFormType] = useState<"others" | "student">("student");
   const [selectedClassIndex, setSelectedClassIndex] = useState<number | null>(
-    null
+    null,
   );
   const [allSections, setAllSections] = useState<string[]>([]);
   const [selectedSectionIndex, setSelectedSectionIndex] = useState<
@@ -43,7 +43,7 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
     });
   console.log(allSections, "result...");
   const allClassesNames = classesAndSectionsData.data?.map(
-    (a) => `Class ` + (a.name ?? a.numeric_id)
+    (a) => `Class ` + (a.name ?? a.numeric_id),
   );
   console.log(classesAndSectionsData.data, "result...");
 
@@ -249,7 +249,7 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
                       selectedClassObject?.numeric_id,
                       selectedClassObject?.Sections.at(selectedSectionIndex)
                         .numeric_id,
-                      rollNo
+                      rollNo,
                     );
 
                     if (rollNo && selectedClassObject) {

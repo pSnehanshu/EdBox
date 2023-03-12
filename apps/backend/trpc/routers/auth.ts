@@ -210,7 +210,7 @@ const authRouter = t.router({
         section_id: z.number().int(),
         school_id: z.string().cuid(),
         rollnum: z.number().int(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       // First fetch student and parents
@@ -292,10 +292,10 @@ const authRouter = t.router({
                   otp,
                   student: student.User?.name!,
                   school: student.School.name,
-                }
+                },
               )
-            : null
-        )
+            : null,
+        ),
       );
 
       return { userId: student.User.id };

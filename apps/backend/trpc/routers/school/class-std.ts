@@ -96,7 +96,7 @@ const classStdRouter = t.router({
     .input(
       z.object({
         schoolId: z.string().cuid(),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const classes = await prisma.classStd.findMany({
