@@ -28,6 +28,18 @@ const AboutAppScreen: React.FC = () => {
           {Updates.createdAt ? Updates.createdAt.toISOString() : "N/A"}
         </Text>
         <Text>Release channel: {Updates.releaseChannel}</Text>
+        <Text>
+          isEmbeddedLaunch: {Updates.isEmbeddedLaunch ? "true" : "false"}
+        </Text>
+        <Text>
+          isEmergencyLaunch: {Updates.isEmergencyLaunch ? "true" : "false"}
+        </Text>
+        <Text>
+          isUsingEmbeddedAssets:{" "}
+          {Updates.isUsingEmbeddedAssets ? "true" : "false"}
+        </Text>
+
+        <Text>localAssets: {JSON.stringify(Updates.localAssets, null, 2)}</Text>
 
         <View style={style.actionBtns}>
           <Button onPress={() => alert(JSON.stringify(config, null, 2))}>
