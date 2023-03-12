@@ -256,7 +256,11 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
           visible={true}
           userId={userId}
           onClose={() => setStep("requestOTP")}
-          formType={formType}
+          description={
+            formType === "student"
+              ? "OTP has been sent to your parent's phone number"
+              : "OTP has been sent to your phone number"
+          }
         />
       )}
     </View>

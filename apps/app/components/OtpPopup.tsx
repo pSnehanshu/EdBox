@@ -18,14 +18,14 @@ interface props {
   visible: boolean;
   userId: string | null;
   onClose?: () => void;
-  formType: string;
+  description?: string;
 }
 
 export default function OtpPopup({
   visible,
   userId,
   onClose,
-  formType,
+  description,
 }: props) {
   const setAuthToken = useSetAuthToken();
   const [otp, setOtp] = useState<string | null>(null);
@@ -53,10 +53,7 @@ export default function OtpPopup({
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <Text style={styles.mainText}>Verification Code</Text>
-            <Text style={styles.subText}>
-              We have send the code to your
-              {formType === "others" ? "parents" : ""} Mobile No
-            </Text>
+            {description && <Text style={styles.subText}>{description}</Text>}
 
             <TextInput
               style={styles.inputText}
