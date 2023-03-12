@@ -8,15 +8,18 @@ import Spinner from "react-native-loading-spinner-overlay";
 import { useSetAuthToken } from "../../utils/auth";
 import SelectDropdown from "react-native-select-dropdown";
 import config from "../../config";
-import { FontAwesome } from "@expo/vector-icons";
 import OtpPopup from "../../components/OtpPopup";
+
+interface ClassObject {
+  numeric_id: number;
+  Sections: any;
+}
 
 export default function LoginScreen({}: RootStackScreenProps<"Login">) {
   const school = useSchool();
   const [step, setStep] = useState<"requestOTP" | "submitOTP">("requestOTP");
   const [phone, setPhone] = useState("");
   const [rollNo, setRollNo] = useState<string | null>(null);
-  const [otp, setOTP] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
   const [formType, setFormType] = useState<"others" | "student">("student");
   const [selectedClassIndex, setSelectedClassIndex] = useState<number | null>(
@@ -27,10 +30,6 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
     number | null
   >(null);
 
-  interface ClassObject {
-    numeric_id: number;
-    Sections: any;
-  }
   const [selectedClassObject, setSelectedClassObject] =
     useState<ClassObject | null>(null);
   const [insufficientData, setInsufficientData] = useState(false);
@@ -41,11 +40,10 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
     trpc.school.class.fetchClassesAndSections.useQuery({
       schoolId: config.schoolId,
     });
-  console.log(allSections, "result...");
+
   const allClassesNames = classesAndSectionsData.data?.map(
-    (a) => `Class ` + (a.name ?? a.numeric_id),
+    (a) => `Class ${a.name ?? a.numeric_id}`,
   );
-  console.log(classesAndSectionsData.data, "result...");
 
   useEffect(() => {
     if (selectedClassIndex && classesAndSectionsData.data) {
@@ -60,14 +58,12 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
   const requestOtp = trpc.auth.requestPhoneNumberOTP.useMutation({
     onSuccess(data) {
       setUserId(data.userId);
-      // console.log(data, "student");
       setStep("submitOTP");
     },
   });
 
   const requestrollNumberOTP = trpc.auth.rollNumberLoginRequestOTP.useMutation({
     onSuccess(data) {
-      console.log(data, "student");
       setUserId(data.userId);
       setStep("submitOTP");
     },
@@ -181,7 +177,6 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
                   <SelectDropdown
                     data={allClassesNames ?? []}
                     onSelect={(selectedItem, index) => {
-                      console.log(selectedItem, index);
                       setSelectedClassIndex(index);
                     }}
                     defaultButtonText={"Select Class"}
@@ -208,7 +203,6 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
                   <SelectDropdown
                     data={allSections}
                     onSelect={(selectedItem, index) => {
-                      console.log(selectedItem, index);
                       setSelectedSectionIndex(index);
                     }}
                     defaultButtonText={"Select Sections"}
@@ -244,14 +238,6 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
                 <Pressable
                   style={styles.main_button}
                   onPress={() => {
-                    console.log(
-                      "student data",
-                      selectedClassObject?.numeric_id,
-                      selectedClassObject?.Sections.at(selectedSectionIndex)
-                        .numeric_id,
-                      rollNo,
-                    );
-
                     if (rollNo && selectedClassObject) {
                       requestrollNumberOTP.mutate({
                         class_id: selectedClassObject?.numeric_id,
