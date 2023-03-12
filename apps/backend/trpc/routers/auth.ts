@@ -101,7 +101,9 @@ const authRouter = t.router({
       });
 
       if (!user || !user.is_active) {
-        return;
+        throw new TRPCError({
+          code: "NOT_FOUND",
+        });
       }
 
       // User exists, and is active

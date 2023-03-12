@@ -5,14 +5,11 @@ import { View, Text, TextInput } from "../../components/Themed";
 import { RootStackScreenProps } from "../../utils/types/common";
 import { trpc } from "../../utils/trpc";
 import Spinner from "react-native-loading-spinner-overlay";
-import { useSetAuthToken } from "../../utils/auth";
 import SelectDropdown from "react-native-select-dropdown";
 import config from "../../config";
 import OtpPopup from "../../components/OtpPopup";
 
 export default function LoginScreen({}: RootStackScreenProps<"Login">) {
-  const setAuthToken = useSetAuthToken();
-
   // Form States
   const [phone, setPhone] = useState("");
   const [rollnum, setRollNo] = useState<number>();
@@ -26,7 +23,7 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
     });
 
   // Selection state
-  const [formType, setFormType] = useState<"others" | "student">("student");
+  const [formType, setFormType] = useState<"others" | "student">("others");
   const [step, setStep] = useState<"requestOTP" | "submitOTP">("requestOTP");
   const [selectedClass, setSelectedClass] = useState<ClassWithSections>();
   const [selectedSection, setSelectedSection] = useState<Section>();
@@ -54,16 +51,24 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
       setUserId(data.userId);
       setStep("submitOTP");
     },
+    onError(error, variables, context) {
+      console.error(error);
+      Alert.alert("Error", "Phone number isn't registered");
+      setPhone("");
+    },
   });
-  const requestrollNumberOTP = trpc.auth.rollNumberLoginRequestOTP.useMutation({
+  const requestRollNumberOTP = trpc.auth.rollNumberLoginRequestOTP.useMutation({
     onSuccess(data) {
       setUserId(data.userId);
       setStep("submitOTP");
     },
-  });
-  const submitOTP = trpc.auth.submitLoginOTP.useMutation({
-    onSuccess(data) {
-      setAuthToken(data.token, new Date(data.expiry_date));
+    onError(error, variables, context) {
+      console.error(error);
+      Alert.alert(
+        "Invalid data",
+        "Looks like the roll number is not registered",
+      );
+      setRollNo(undefined);
     },
   });
 
@@ -74,11 +79,7 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
       }}
     >
       <Spinner
-        visible={
-          requestOtp.isLoading ||
-          submitOTP.isLoading ||
-          requestrollNumberOTP.isLoading
-        }
+        visible={requestOtp.isLoading || requestRollNumberOTP.isLoading}
         textContent="Please wait..."
       />
       {/* login */}
@@ -232,7 +233,7 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
                     ) {
                       setInsufficientData(false);
 
-                      requestrollNumberOTP.mutate({
+                      requestRollNumberOTP.mutate({
                         class_id: selectedClass?.numeric_id,
                         section_id: selectedSection.numeric_id,
                         school_id: config.schoolId,
