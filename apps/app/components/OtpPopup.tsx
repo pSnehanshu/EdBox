@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import Colors from "../constants/Colors";
 import { Alert, Modal, StyleSheet, Pressable } from "react-native";
 import { trpc } from "../utils/trpc";
 import { useSetAuthToken } from "../utils/auth";

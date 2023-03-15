@@ -1,11 +1,11 @@
-import { useContext, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { StyleSheet, Pressable, Alert, Button } from "react-native";
 import type { ClassWithSections, Section } from "schooltalk-shared/types";
+import Spinner from "react-native-loading-spinner-overlay";
+import SelectDropdown from "react-native-select-dropdown";
 import { View, Text, TextInput } from "../../components/Themed";
 import { RootStackScreenProps } from "../../utils/types/common";
 import { trpc } from "../../utils/trpc";
-import Spinner from "react-native-loading-spinner-overlay";
-import SelectDropdown from "react-native-select-dropdown";
 import config from "../../config";
 import OtpPopup from "../../components/OtpPopup";
 import useColorScheme from "../../utils/useColorScheme";
@@ -107,16 +107,17 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
             onPress={() => setFormType("others")}
           >
             <Text
-              style={
+              style={[
                 formType === "others"
                   ? styles.active_button_text
                   : {
                       ...styles.default_button_text,
                       color: color === "dark" ? "black" : "white",
-                    }
-              }
+                    },
+                { marginBottom: 2 },
+              ]}
             >
-              Others
+              For parents, teachers, and staff
             </Text>
           </Pressable>
           <Pressable
@@ -134,16 +135,17 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
             onPress={() => setFormType("student")}
           >
             <Text
-              style={
+              style={[
                 formType === "student"
                   ? styles.active_button_text
                   : {
                       ...styles.default_button_text,
                       color: color === "dark" ? "black" : "white",
-                    }
-              }
+                    },
+                { marginVertical: 6 },
+              ]}
             >
-              Student
+              For Students
             </Text>
           </Pressable>
         </View>
@@ -246,7 +248,9 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
                 keyboardType="number-pad"
               />
               {insufficientData && (
-                <Text style={styles.text}> Please fill all the values</Text>
+                <Text style={[styles.text, { color: "red" }]}>
+                  Please fill all the values
+                </Text>
               )}
               <Pressable
                 style={styles.main_button}
@@ -270,6 +274,9 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
                 }}
               >
                 <Text style={styles.button_text}>Request OTP</Text>
+                <Text style={[styles.button_text, { fontSize: 12 }]}>
+                  OTP will be sent to your parents
+                </Text>
               </Pressable>
             </View>
           </View>
@@ -317,7 +324,6 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     borderWidth: 1,
-    height: 55,
     borderRadius: 24,
   },
   default_button: {
@@ -347,7 +353,7 @@ const styles = StyleSheet.create({
   default_button_text: {
     paddingTop: 6,
     textAlign: "center",
-    fontSize: 18,
+    fontSize: 16,
   },
   button_text: {
     color: "white",
@@ -355,11 +361,10 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 18,
   },
-
   active_button_text: {
     paddingTop: 6,
     textAlign: "center",
-    fontSize: 18,
+    fontSize: 16,
   },
   input: {
     width: "90%",
