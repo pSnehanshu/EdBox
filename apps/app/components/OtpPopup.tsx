@@ -1,18 +1,12 @@
 import React, { useState } from "react";
 import Colors from "../constants/Colors";
-import {
-  Alert,
-  Modal,
-  StyleSheet,
-  Text,
-  Pressable,
-  View,
-  TextInput,
-} from "react-native";
+import { Alert, Modal, StyleSheet, Pressable } from "react-native";
 import { trpc } from "../utils/trpc";
 import { useSetAuthToken } from "../utils/auth";
 import config from "../config";
 import Spinner from "react-native-loading-spinner-overlay";
+import { View, Text, TextInput } from "./Themed";
+import useColorScheme from "../utils/useColorScheme";
 
 interface props {
   visible: boolean;
@@ -40,6 +34,8 @@ export default function OtpPopup({
       setOtp(null);
     },
   });
+  const color = useColorScheme();
+  const blurBg = color === "dark" ? "rgba(0,0,0,.6)" : "rgba(255,255,255,.6)";
 
   return (
     <View style={styles.centeredView}>
@@ -50,7 +46,12 @@ export default function OtpPopup({
         visible={visible}
         onRequestClose={() => onClose?.()}
       >
-        <View style={styles.centeredView}>
+        <View
+          style={{
+            ...styles.centeredView,
+            backgroundColor: blurBg,
+          }}
+        >
           <View style={styles.modalView}>
             <Text style={styles.mainText}>Verification Code</Text>
             {description && <Text style={styles.subText}>{description}</Text>}
@@ -89,7 +90,6 @@ export default function OtpPopup({
 
 const styles = StyleSheet.create({
   centeredView: {
-    backgroundColor: "rgba(255, 255, 255, .7)",
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
@@ -97,7 +97,6 @@ const styles = StyleSheet.create({
   },
   modalView: {
     margin: 20,
-    backgroundColor: "white",
     borderRadius: 15,
     padding: 35,
     alignItems: "center",
@@ -111,10 +110,10 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   button: {
+    backgroundColor: "#4E48B2",
     borderRadius: 15,
     padding: 12,
     marginBottom: 12,
-    backgroundColor: Colors.semi_black,
     width: "90%",
   },
   textStyle: {

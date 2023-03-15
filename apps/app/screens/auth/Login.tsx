@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { StyleSheet, Pressable, Alert } from "react-native";
+import { useContext, useMemo, useState } from "react";
+import { StyleSheet, Pressable, Alert, Button } from "react-native";
 import type { ClassWithSections, Section } from "schooltalk-shared/types";
 import { View, Text, TextInput } from "../../components/Themed";
 import { RootStackScreenProps } from "../../utils/types/common";
@@ -8,6 +8,7 @@ import Spinner from "react-native-loading-spinner-overlay";
 import SelectDropdown from "react-native-select-dropdown";
 import config from "../../config";
 import OtpPopup from "../../components/OtpPopup";
+import useColorScheme from "../../utils/useColorScheme";
 
 export default function LoginScreen({}: RootStackScreenProps<"Login">) {
   // Form States
@@ -72,6 +73,7 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
     },
   });
 
+  const color = useColorScheme();
   return (
     <View
       style={{
@@ -84,12 +86,23 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
       />
       {/* login */}
       <View style={styles.container}>
-        <View style={styles.buttonContainer}>
+        <View
+          style={{
+            ...styles.buttonContainer,
+            backgroundColor: color === "dark" ? "white" : "black",
+          }}
+        >
           <Pressable
             style={
               formType === "others"
-                ? styles.active_button
-                : styles.default_button
+                ? {
+                    ...styles.active_button,
+                    backgroundColor: color === "dark" ? "black" : "white",
+                  }
+                : {
+                    ...styles.default_button,
+                    backgroundColor: color === "dark" ? "white" : "black",
+                  }
             }
             onPress={() => setFormType("others")}
           >
@@ -97,7 +110,10 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
               style={
                 formType === "others"
                   ? styles.active_button_text
-                  : styles.default_button_text
+                  : {
+                      ...styles.default_button_text,
+                      color: color === "dark" ? "black" : "white",
+                    }
               }
             >
               Others
@@ -106,8 +122,14 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
           <Pressable
             style={
               formType === "student"
-                ? styles.active_button
-                : styles.default_button
+                ? {
+                    ...styles.active_button,
+                    backgroundColor: color === "dark" ? "black" : "white",
+                  }
+                : {
+                    ...styles.default_button,
+                    backgroundColor: color === "dark" ? "white" : "black",
+                  }
             }
             onPress={() => setFormType("student")}
           >
@@ -115,7 +137,10 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
               style={
                 formType === "student"
                   ? styles.active_button_text
-                  : styles.default_button_text
+                  : {
+                      ...styles.default_button_text,
+                      color: color === "dark" ? "black" : "white",
+                    }
               }
             >
               Student
@@ -124,134 +149,134 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
         </View>
       </View>
 
-      {step === "requestOTP" ? (
-        formType === "others" ? (
-          <>
-            {/* others */}
-            <View>
-              <Text style={styles.text}>Phone number:</Text>
+      {formType === "others" ? (
+        <>
+          {/* others */}
+          <View style={{ height: "100%" }}>
+            <Text style={styles.text}>Phone number:</Text>
+            <TextInput
+              style={styles.input}
+              value={phone}
+              onChangeText={setPhone}
+              placeholder="Phone"
+              autoFocus
+              keyboardType="phone-pad"
+              autoComplete="tel"
+            />
+            <Pressable
+              style={styles.main_button}
+              onPress={() =>
+                requestOtp.mutate({
+                  phoneNumber: phone,
+                  schoolId: config.schoolId,
+                })
+              }
+            >
+              <Text style={styles.button_text}>Request OTP</Text>
+            </Pressable>
+          </View>
+        </>
+      ) : (
+        <>
+          {/* student */}
+          <View>
+            <View
+              style={{
+                flexDirection: "row",
+                marginLeft: 24,
+                marginRight: 24,
+              }}
+            >
+              <View style={{ width: "45%" }}>
+                <Text style={styles.text_class}>Class</Text>
+                <SelectDropdown
+                  data={allClassesNames}
+                  onSelect={(item, index) => {
+                    const Class = classesAndSectionsData?.data?.at(index);
+                    setSelectedClass(Class);
+                  }}
+                  defaultButtonText={"Select Class"}
+                  buttonTextAfterSelection={(selectedItem, index) => {
+                    return selectedItem;
+                  }}
+                  rowTextForSelection={(item, index) => {
+                    return item;
+                  }}
+                  buttonStyle={styles.dropdown1BtnStyle}
+                  buttonTextStyle={styles.dropdown1BtnTxtStyle}
+                  dropdownIconPosition={"right"}
+                  dropdownStyle={styles.dropdown1DropdownStyle}
+                  rowStyle={styles.dropdown1RowStyle}
+                  rowTextStyle={styles.dropdown1RowTxtStyle}
+                />
+              </View>
+              <View style={{ width: "45%", marginLeft: 10 }}>
+                <Text style={styles.text_class}>Section</Text>
+                <SelectDropdown
+                  data={allSections}
+                  disabled={allSections.length === 0}
+                  onSelect={(item, index) => {
+                    const section = selectedClass?.Sections.at(index);
+                    setSelectedSection(section);
+                  }}
+                  defaultButtonText={"Select Sections"}
+                  buttonTextAfterSelection={(selectedItem, index) => {
+                    return selectedItem;
+                  }}
+                  rowTextForSelection={(item, index) => {
+                    return item;
+                  }}
+                  buttonStyle={styles.dropdown1BtnStyle}
+                  buttonTextStyle={styles.dropdown1BtnTxtStyle}
+                  dropdownIconPosition={"right"}
+                  dropdownStyle={styles.dropdown1DropdownStyle}
+                  rowStyle={styles.dropdown1RowStyle}
+                  rowTextStyle={styles.dropdown1RowTxtStyle}
+                />
+              </View>
+            </View>
+            <View style={{}}>
+              <Text style={styles.text}>Roll number:</Text>
               <TextInput
                 style={styles.input}
-                value={phone}
-                onChangeText={setPhone}
-                placeholder="Phone"
+                value={rollnum?.toString()}
+                onChangeText={(r) => setRollNo(parseInt(r, 10))}
+                placeholder="Roll number"
                 autoFocus
-                keyboardType="phone-pad"
-                autoComplete="tel"
+                keyboardType="number-pad"
               />
+              {insufficientData && (
+                <Text style={styles.text}> Please fill all the values</Text>
+              )}
               <Pressable
                 style={styles.main_button}
-                onPress={() =>
-                  requestOtp.mutate({
-                    phoneNumber: phone,
-                    schoolId: config.schoolId,
-                  })
-                }
-              >
-                <Text style={styles.default_button_text}>Request OTP</Text>
-              </Pressable>
-            </View>
-          </>
-        ) : (
-          <>
-            {/* student */}
-            <View>
-              <View
-                style={{
-                  flexDirection: "row",
-                  marginLeft: 24,
-                  marginRight: 24,
+                onPress={() => {
+                  if (
+                    typeof rollnum === "number" &&
+                    selectedClass &&
+                    selectedSection
+                  ) {
+                    setInsufficientData(false);
+
+                    requestRollNumberOTP.mutate({
+                      class_id: selectedClass?.numeric_id,
+                      section_id: selectedSection.numeric_id,
+                      school_id: config.schoolId,
+                      rollnum,
+                    });
+                  } else {
+                    setInsufficientData(true);
+                  }
                 }}
               >
-                <View style={{ width: "45%" }}>
-                  <Text style={styles.text_class}>Class</Text>
-                  <SelectDropdown
-                    data={allClassesNames}
-                    onSelect={(item, index) => {
-                      const Class = classesAndSectionsData?.data?.at(index);
-                      setSelectedClass(Class);
-                    }}
-                    defaultButtonText={"Select Class"}
-                    buttonTextAfterSelection={(selectedItem, index) => {
-                      return selectedItem;
-                    }}
-                    rowTextForSelection={(item, index) => {
-                      return item;
-                    }}
-                    buttonStyle={styles.dropdown1BtnStyle}
-                    buttonTextStyle={styles.dropdown1BtnTxtStyle}
-                    dropdownIconPosition={"right"}
-                    dropdownStyle={styles.dropdown1DropdownStyle}
-                    rowStyle={styles.dropdown1RowStyle}
-                    rowTextStyle={styles.dropdown1RowTxtStyle}
-                  />
-                </View>
-                <View style={{ width: "45%", marginLeft: 10 }}>
-                  <Text style={styles.text_class}>Section</Text>
-                  <SelectDropdown
-                    data={allSections}
-                    disabled={allSections.length === 0}
-                    onSelect={(item, index) => {
-                      const section = selectedClass?.Sections.at(index);
-                      setSelectedSection(section);
-                    }}
-                    defaultButtonText={"Select Sections"}
-                    buttonTextAfterSelection={(selectedItem, index) => {
-                      return selectedItem;
-                    }}
-                    rowTextForSelection={(item, index) => {
-                      return item;
-                    }}
-                    buttonStyle={styles.dropdown1BtnStyle}
-                    buttonTextStyle={styles.dropdown1BtnTxtStyle}
-                    dropdownIconPosition={"right"}
-                    dropdownStyle={styles.dropdown1DropdownStyle}
-                    rowStyle={styles.dropdown1RowStyle}
-                    rowTextStyle={styles.dropdown1RowTxtStyle}
-                  />
-                </View>
-              </View>
-              <View style={{}}>
-                <Text style={styles.text}>Roll number:</Text>
-                <TextInput
-                  style={styles.input}
-                  value={rollnum?.toString()}
-                  onChangeText={(r) => setRollNo(parseInt(r, 10))}
-                  placeholder="Roll number"
-                  autoFocus
-                  keyboardType="number-pad"
-                />
-                {insufficientData && (
-                  <Text style={styles.text}> Please fill all the values</Text>
-                )}
-                <Pressable
-                  style={styles.main_button}
-                  onPress={() => {
-                    if (
-                      typeof rollnum === "number" &&
-                      selectedClass &&
-                      selectedSection
-                    ) {
-                      setInsufficientData(false);
-
-                      requestRollNumberOTP.mutate({
-                        class_id: selectedClass?.numeric_id,
-                        section_id: selectedSection.numeric_id,
-                        school_id: config.schoolId,
-                        rollnum,
-                      });
-                    } else {
-                      setInsufficientData(true);
-                    }
-                  }}
-                >
-                  <Text style={styles.default_button_text}>Request OTP</Text>
-                </Pressable>
-              </View>
+                <Text style={styles.button_text}>Request OTP</Text>
+              </Pressable>
             </View>
-          </>
-        )
-      ) : (
+          </View>
+        </>
+      )}
+
+      {step === "submitOTP" && (
         <OtpPopup
           visible={true}
           userId={userId}
@@ -273,7 +298,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   main_button: {
-    backgroundColor: "black",
+    backgroundColor: "#4E48B2",
     padding: 10,
     paddingBottom: 16,
     margin: 10,
@@ -293,7 +318,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     borderWidth: 1,
     height: 55,
-    backgroundColor: "black",
     borderRadius: 24,
   },
   default_button: {
@@ -311,25 +335,28 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
   text: {
-    color: "black",
     paddingTop: 6,
     paddingLeft: 24,
     fontSize: 18,
   },
   text_class: {
-    color: "black",
     paddingTop: 6,
     paddingBottom: 8,
     fontSize: 18,
   },
   default_button_text: {
+    paddingTop: 6,
+    textAlign: "center",
+    fontSize: 18,
+  },
+  button_text: {
     color: "white",
     paddingTop: 6,
     textAlign: "center",
     fontSize: 18,
   },
+
   active_button_text: {
-    color: "black",
     paddingTop: 6,
     textAlign: "center",
     fontSize: 18,
