@@ -351,6 +351,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   default_button_text: {
+    paddingLeft: 4,
+    paddingRight: 4,
     paddingTop: 6,
     textAlign: "center",
     fontSize: 16,
@@ -362,6 +364,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   active_button_text: {
+    paddingLeft: 4,
+    paddingRight: 4,
     paddingTop: 6,
     textAlign: "center",
     fontSize: 16,
@@ -385,7 +389,11 @@ const styles = StyleSheet.create({
     borderColor: "#444",
   },
   dropdown1BtnTxtStyle: { color: "#858585", textAlign: "left", fontSize: 14 },
-  dropdown1DropdownStyle: { backgroundColor: "#EFEFEF" },
+  dropdown1DropdownStyle: {
+    backgroundColor: "#EFEFEF",
+    marginTop: -30,
+    borderRadius: 15,
+  },
   dropdown1RowStyle: {
     backgroundColor: "white",
     borderBottomColor: "#C5C5C5",
