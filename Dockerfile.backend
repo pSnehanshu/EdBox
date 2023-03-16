@@ -53,4 +53,5 @@ EXPOSE 5080
 ENV NODE_ENV=production
 
 # Migrate and start
-CMD yarn prisma migrate deploy && yarn node apps/backend/server.js
+CMD yarn workspace schooltalk-backend run migrate \
+  && yarn node apps/backend/server.js
