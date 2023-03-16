@@ -9,6 +9,7 @@ import { trpc } from "../../utils/trpc";
 import config from "../../config";
 import OtpPopup from "../../components/OtpPopup";
 import useColorScheme from "../../utils/useColorScheme";
+import { FontAwesome } from "@expo/vector-icons";
 
 export default function LoginScreen({}: RootStackScreenProps<"Login">) {
   // Form States
@@ -207,6 +208,15 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
                   buttonStyle={styles.dropdown1BtnStyle}
                   buttonTextStyle={styles.dropdown1BtnTxtStyle}
                   dropdownIconPosition={"right"}
+                  renderDropdownIcon={(isOpened) => {
+                    return (
+                      <FontAwesome
+                        name={isOpened ? "chevron-up" : "chevron-down"}
+                        color={"#444"}
+                        size={18}
+                      />
+                    );
+                  }}
                   dropdownStyle={styles.dropdown1DropdownStyle}
                   rowStyle={styles.dropdown1RowStyle}
                   rowTextStyle={styles.dropdown1RowTxtStyle}
@@ -228,9 +238,18 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
                   rowTextForSelection={(item, index) => {
                     return item;
                   }}
+                  dropdownIconPosition={"right"}
+                  renderDropdownIcon={(isOpened) => {
+                    return (
+                      <FontAwesome
+                        name={isOpened ? "chevron-up" : "chevron-down"}
+                        color={"#444"}
+                        size={18}
+                      />
+                    );
+                  }}
                   buttonStyle={styles.dropdown1BtnStyle}
                   buttonTextStyle={styles.dropdown1BtnTxtStyle}
-                  dropdownIconPosition={"right"}
                   dropdownStyle={styles.dropdown1DropdownStyle}
                   rowStyle={styles.dropdown1RowStyle}
                   rowTextStyle={styles.dropdown1RowTxtStyle}
