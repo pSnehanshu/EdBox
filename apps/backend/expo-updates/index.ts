@@ -5,7 +5,7 @@ import crypto from "node:crypto";
 import mime from "mime";
 import UUIDbyString from "uuid-by-string";
 
-const S3_BUCKET_NAME = "schooltalk-expo-update-assets";
+const S3_BUCKET_NAME = "update-assets";
 const S3_REGION = "ap-south-1";
 const S3_BUCKET_URL = `https://${S3_BUCKET_NAME}.s3.${S3_REGION}.amazonaws.com`;
 
