@@ -18,4 +18,6 @@ export default {
     tabIconSelected: tintColorDark,
     placeholderColor: "#555",
   },
+  semi_black: "#242424",
+  semi_white: "#F1F1F1",
 };

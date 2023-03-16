@@ -49,6 +49,12 @@ export type ExamItem = ArrayElement<
   RouterOutput["school"]["exam"]["fetchExamsAndTestsForStudent"]
 >;
 
+export type ClassWithSections = ArrayElement<
+  RouterOutput["school"]["class"]["fetchClassesAndSections"]
+>;
+
+export type Section = ArrayElement<ClassWithSections["Sections"]>;
+
 export interface ServerToClientEvents {
   newMessage: (msg: Message) => void;
 }
