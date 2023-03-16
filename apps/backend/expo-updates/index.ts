@@ -5,13 +5,17 @@ import crypto from "node:crypto";
 import mime from "mime";
 import UUIDbyString from "uuid-by-string";
 
+const S3_BUCKET_NAME = "schooltalk-expo-update-assets";
+const S3_REGION = "ap-south-1";
+const S3_BUCKET_URL = `https://${S3_BUCKET_NAME}.s3.${S3_REGION}.amazonaws.com`;
+
 /** The S3 client */
 const s3 = new S3Client({
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY!,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
   },
-  region: "ap-south-1",
+  region: S3_REGION,
 });
 
 /** Express Router */
@@ -98,9 +102,7 @@ async function getAssetMetadata(
     key: assetHash.key,
     hash: assetHash.hash,
     fileExtension: `.${asset.ext}`,
-    url: `http://192.168.29.42:5080/updates/asset?key=${encodeURIComponent(
-      `https://schooltalk-expo-update-assets.s3.ap-south-1.amazonaws.com/${path}`,
-    )}`,
+    url: `${S3_BUCKET_URL}/${path}`,
   };
 }
 
@@ -113,7 +115,7 @@ async function getAssetFileHashAndKey(
 ): Promise<{ hash: string; key: string } | null> {
   const fileResponse = await s3.send(
     new GetObjectCommand({
-      Bucket: "schooltalk-expo-update-assets",
+      Bucket: S3_BUCKET_NAME,
       Key: s3key,
     }),
   );
@@ -150,7 +152,7 @@ app.get<string, {}, Manifest>("/manifest", async (req, res) => {
   const metadataFileResponse = await s3
     .send(
       new GetObjectCommand({
-        Bucket: "schooltalk-expo-update-assets",
+        Bucket: S3_BUCKET_NAME,
         Key: metadataFileKey,
       }),
     )
@@ -231,9 +233,7 @@ app.get<string, {}, Manifest>("/manifest", async (req, res) => {
     launchAsset: {
       contentType: "application/javascript",
       key: bundleHash.key,
-      url: `http://192.168.29.42:5080/updates/asset?key=${encodeURIComponent(
-        `https://schooltalk-expo-update-assets.s3.ap-south-1.amazonaws.com/updates/${headers["expo-runtime-version"]}/${platformMetadata.bundle}`,
-      )}`,
+      url: `${S3_BUCKET_URL}/updates/${headers["expo-runtime-version"]}/${platformMetadata.bundle}`,
       hash: bundleHash.hash,
     },
     extra: {},
@@ -249,35 +249,6 @@ app.get("/asset", async (req, res) => {
   }
 
   res.redirect(key);
-
-  // try {
-  //   const { key } = req.query;
-
-  //   if (typeof key !== "string") {
-  //     return res.sendStatus(400);
-  //   }
-
-  //   const response = await s3.send(
-  //     new GetObjectCommand({
-  //       Bucket: "schooltalk-expo-update-assets",
-  //       Key: key,
-  //     }),
-  //   );
-
-  //   if (!response?.Body) {
-  //     return res.sendStatus(404);
-  //   }
-
-  //   const stream = await response.Body.transformToWebStream();
-
-  //   // @ts-ignore
-  //   const midStream = Stream.Readable.fromWeb(stream);
-
-  //   midStream.pipe(res);
-  // } catch (error) {
-  //   console.error(error);
-  //   res.sendStatus(404);
-  // }
 });
 
 export default app;
