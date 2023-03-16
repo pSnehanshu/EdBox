@@ -328,16 +328,14 @@ const styles = StyleSheet.create({
     padding: 10,
     paddingBottom: 16,
     margin: 10,
-    marginRight: 20,
-    marginLeft: 20,
+    marginHorizontal: 20,
     borderWidth: 1,
     borderRadius: 15,
   },
   class_Section: {
     flexGrow: 1,
     flexDirection: "row",
-    paddingLeft: 20,
-    paddingRight: 20,
+    paddingHorizontal: 20,
   },
   buttonContainer: {
     flex: 1,
@@ -370,8 +368,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   default_button_text: {
-    paddingLeft: 4,
-    paddingRight: 4,
+    paddingHorizontal: 4,
     paddingTop: 6,
     textAlign: "center",
     fontSize: 16,
@@ -383,8 +380,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   active_button_text: {
-    paddingLeft: 4,
-    paddingRight: 4,
+    paddingHorizontal: 4,
     paddingTop: 6,
     textAlign: "center",
     fontSize: 16,
@@ -393,8 +389,7 @@ const styles = StyleSheet.create({
     width: "90%",
     padding: 10,
     paddingLeft: 16,
-    marginRight: 20,
-    marginLeft: 20,
+    marginHorizontal: 20,
     marginTop: 8,
     borderWidth: 1,
     borderRadius: 15,
@@ -407,7 +402,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#444",
   },
-  dropdown1BtnTxtStyle: { color: "#858585", textAlign: "left", fontSize: 14 },
+  dropdown1BtnTxtStyle: {
+    color: "#858585",
+    textAlign: "left",
+    fontSize: 14,
+  },
   dropdown1DropdownStyle: {
     backgroundColor: "#EFEFEF",
     marginTop: -30,
@@ -418,5 +417,8 @@ const styles = StyleSheet.create({
     borderBottomColor: "#C5C5C5",
     height: 40,
   },
-  dropdown1RowTxtStyle: { color: "#2A2A2A", textAlign: "center" },
+  dropdown1RowTxtStyle: {
+    color: "#2A2A2A",
+    textAlign: "center",
+  },
 });
