@@ -21,7 +21,7 @@ COPY apps/backend apps/backend
 COPY packages/shared packages/shared
 
 # Build prisma
-RUN yarn prisma:generate \
+RUN yarn prisma generate \
   # Build shared
   && yarn workspace schooltalk-shared run build \
   # Build backend
@@ -53,5 +53,4 @@ EXPOSE 5080
 ENV NODE_ENV=production
 
 # Migrate and start
-CMD yarn workspace schooltalk-backend run migrate \
-  && yarn node apps/backend/server.js
+CMD yarn prisma migrate deploy && yarn node apps/backend/server.js
