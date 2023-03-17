@@ -436,7 +436,7 @@ export default function AttendanceTakerScreen({
         studentsAttendance: finalAttendance,
       });
     }
-  }, [attendance]);
+  }, [attendance, totalRemaining]);
 
   const refetchData = useCallback(() => {
     studentsQuery.refetch();
