@@ -220,7 +220,7 @@ function BottomTabNavigator() {
         options={{
           title: "Home",
           headerTitle: school?.name ?? "Home",
-          headerShown: true,
+          headerShown: false,
           tabBarIcon: ({ focused, color }) => (
             <Ionicons
               name={focused ? "home-sharp" : "home-outline"}
@@ -229,25 +229,25 @@ function BottomTabNavigator() {
               color={color}
             />
           ),
-          headerRight: () => (
-            <View style={{ flexDirection: "row" }}>
-              {school?.website ? (
-                <Pressable
-                  onPress={() => WebBrowser.openBrowserAsync(school?.website!)}
-                  style={({ pressed }) => ({
-                    opacity: pressed ? 0.5 : 1,
-                  })}
-                >
-                  <MaterialCommunityIcons
-                    name="web"
-                    size={25}
-                    color={Colors[scheme].text}
-                    style={{ marginRight: 15 }}
-                  />
-                </Pressable>
-              ) : null}
-            </View>
-          ),
+          // headerRight: () => (
+          //   <View style={{ flexDirection: "row" }}>
+          //     {school?.website ? (
+          //       <Pressable
+          //         onPress={() => WebBrowser.openBrowserAsync(school?.website!)}
+          //         style={({ pressed }) => ({
+          //           opacity: pressed ? 0.5 : 1,
+          //         })}
+          //       >
+          //         <MaterialCommunityIcons
+          //           name="web"
+          //           size={25}
+          //           color={Colors[scheme].text}
+          //           style={{ marginRight: 15 }}
+          //         />
+          //       </Pressable>
+          //     ) : null}
+          //   </View>
+          // ),
         }}
       />
       <BottomTab.Screen
