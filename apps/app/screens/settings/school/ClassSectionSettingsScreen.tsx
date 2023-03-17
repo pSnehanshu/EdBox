@@ -10,6 +10,7 @@ import type { AppRouter } from "../../../../backend/trpc";
 import { List, Text, TextInput, View } from "../../../components/Themed";
 import { trpc } from "../../../utils/trpc";
 import useColorScheme from "../../../utils/useColorScheme";
+import { useSchool } from "../../../utils/useSchool";
 
 type ClassStd = ArrayElement<
   inferRouterOutputs<AppRouter>["school"]["class"]["fetchClassesAndSections"]
@@ -245,6 +246,7 @@ export default function ClassSectionSettingsScreen() {
   const utils = trpc.useContext();
   const [manageClass, setManageClass] = useState<ClassStd | null>(null);
   const [manageSections, setManageSections] = useState(false);
+  const school = useSchool();
 
   const setClasses = useCallback((newClasses: ClassStd[]) => {
     _setClasses((classes) => {
@@ -299,20 +301,24 @@ export default function ClassSectionSettingsScreen() {
     [],
   );
 
-  const fetchClasses = useCallback(async () => {
+  const fetchClasses = useCallback(async (schoolId: string) => {
     try {
       setIsFetching(true);
       const classes =
-        await utils.client.school.class.fetchClassesAndSections.query();
+        await utils.client.school.class.fetchClassesAndSections.query({
+          schoolId,
+        });
 
       setClasses(classes);
-    } catch (error) {}
+    } catch (error) {
+      console.error(error);
+    }
     setIsFetching(false);
   }, []);
 
   useEffect(() => {
-    fetchClasses();
-  }, []);
+    if (school) fetchClasses(school.id);
+  }, [school?.id]);
 
   const renderItem = useCallback<ListRenderItem<ClassStd>>(
     ({ item, index }) => {
@@ -390,7 +396,9 @@ export default function ClassSectionSettingsScreen() {
       </BottomSheet>
 
       <List
-        onRefresh={fetchClasses}
+        onRefresh={() => {
+          if (school) fetchClasses(school.id);
+        }}
         refreshing={isFetching}
         data={classes}
         keyExtractor={(item) => item.numeric_id.toString()}

@@ -9,9 +9,8 @@
     "dev": "nodemon server.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "typecheck": "tsc --noEmit",
-    "migrate:dev": "prisma migrate dev",
-    "migrate": "prisma migrate deploy",
-    "prisma:generate": "prisma generate"
+    "prisma": "prisma",
+    "migrate": "prisma migrate deploy"
   },
   "repository": {
     "type": "git",
