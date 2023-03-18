@@ -82,6 +82,7 @@ const styles = StyleSheet.create({
       width: 8,
     },
     borderRadius: 8,
+    minHeight: 80,
   },
   senderName: {
     fontSize: 12,

@@ -2,16 +2,15 @@
  * Learn more about Light and Dark modes:
  * https://docs.expo.io/guides/color-schemes/
  */
-
 import { ComponentPropsWithRef } from "react";
 import {
   Text as DefaultText,
   View as DefaultView,
   TextInput as DefaultTextInput,
-  FlatList as DefaultList,
 } from "react-native";
 import Colors from "../constants/Colors";
 import useColorScheme from "../utils/useColorScheme";
+import { FlashList } from "@shopify/flash-list";
 
 export function useThemeColor(
   props: { light?: string; dark?: string },
@@ -36,8 +35,8 @@ export type TextProps = ThemeProps & DefaultText["props"];
 export type ViewProps = ThemeProps & DefaultView["props"];
 export type TextInputProps = ThemeProps & DefaultTextInput["props"];
 export type ListProps<ItemT> = ThemeProps &
-  DefaultList<ItemT>["props"] & {
-    innerRef?: ComponentPropsWithRef<typeof DefaultList<ItemT>>["ref"];
+  Omit<FlashList<ItemT>["props"], "style"> & {
+    innerRef?: ComponentPropsWithRef<typeof FlashList<ItemT>>["ref"];
   };
 
 export function Text(props: TextProps) {
@@ -58,17 +57,20 @@ export function View(props: ViewProps) {
 }
 
 export function List<ItemT = any>(props: ListProps<ItemT>) {
-  const { style, lightColor, darkColor, ...otherProps } = props;
+  const { lightColor, darkColor, ...otherProps } = props;
   const backgroundColor = useThemeColor(
     { light: lightColor, dark: darkColor },
     "background",
   );
 
   return (
-    <DefaultList
-      style={[{ backgroundColor }, style]}
+    <FlashList
       {...otherProps}
       ref={props.innerRef}
+      contentContainerStyle={{
+        backgroundColor,
+        ...otherProps.contentContainerStyle,
+      }}
     />
   );
 }
