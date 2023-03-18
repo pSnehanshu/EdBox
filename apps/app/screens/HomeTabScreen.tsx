@@ -4,6 +4,13 @@ import { RootTabScreenProps } from "../utils/types/common";
 import { useCurrentUser } from "../utils/auth";
 import { useSchool } from "../utils/useSchool";
 
+import CarouselCardItem, {
+  SLIDER_WIDTH,
+  ITEM_WIDTH,
+} from "../components/CarouselCardItem";
+import { useRef } from "react";
+import { Carousel } from "react-native-snap-carousel";
+
 /**
  * Get a greeting by the time of day.
  * Copied from https://github.com/elijahmanor/greeting-time/blob/master/index.js
@@ -27,6 +34,25 @@ export default function HomeTabScreen({}: RootTabScreenProps<"HomeTab">) {
 
   if (!user) return null;
   const school = useSchool();
+  // test
+  const isCarousel = useRef(null);
+  const data = [
+    {
+      title: "BIO-01",
+      class_status: "",
+      time: "",
+    },
+    {
+      title: "MAT-06",
+      class_status: "",
+      time: "",
+    },
+    {
+      title: "CHY-07",
+      class_status: "",
+      time: "",
+    },
+  ];
 
   return (
     <SafeAreaView style={styles.container}>
@@ -40,6 +66,21 @@ export default function HomeTabScreen({}: RootTabScreenProps<"HomeTab">) {
         {/* <Text style={styles.title}>
         {greeting(new Date())}, {user.name}!
       </Text> */}
+        <View>
+          <Carousel
+            layout="default"
+            vertical={false}
+            layoutCardOffset={9}
+            firstItem={1}
+            ref={isCarousel}
+            data={data}
+            renderItem={CarouselCardItem}
+            sliderWidth={SLIDER_WIDTH}
+            itemWidth={ITEM_WIDTH}
+            inactiveSlideShift={0}
+            useScrollView={true}
+          />
+        </View>
       </View>
     </SafeAreaView>
   );
