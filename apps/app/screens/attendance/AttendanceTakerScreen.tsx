@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState, useRef } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -13,6 +13,7 @@ import type { AttendanceStatus } from "@prisma/client";
 import Toast from "react-native-toast-message";
 import { RouterInput, Student } from "schooltalk-shared/types";
 import _ from "lodash";
+import { FlashList } from "@shopify/flash-list";
 import { List, Text, TextInput, View } from "../../components/Themed";
 import { RootStackScreenProps } from "../../utils/types/common";
 import { trpc } from "../../utils/trpc";
@@ -214,6 +215,9 @@ export default function AttendanceTakerScreen({
 }: RootStackScreenProps<"AttendanceTaker">) {
   const utils = trpc.useContext();
 
+  /** A ref of the list to auto-scroll */
+  const studentsList = useRef<FlashList<StudentWithAttendance>>(null);
+
   // State to store attendance status and remarks
   const [attendance, setAttendance] = useState<Record<string, AttendanceInfo>>(
     {},
@@ -291,6 +295,11 @@ export default function AttendanceTakerScreen({
       });
       periodAttendanceQuery.refetch();
       utils.school.routine.fetchForTeacher.invalidate();
+
+      studentsList.current?.scrollToOffset?.({
+        offset: 0,
+        animated: true,
+      });
     },
     onError(error, variables, context) {
       console.error(error);
@@ -336,8 +345,6 @@ export default function AttendanceTakerScreen({
         return;
       }
 
-      console.log("Pressed!", status);
-
       setAttendance((a) => ({
         ...a,
         [studentId]: {
@@ -345,6 +352,15 @@ export default function AttendanceTakerScreen({
           remarks: a[studentId]?.remarks,
         },
       }));
+
+      // Scroll to next item
+      const nextItemIndex = students.findIndex((s) => s.id === studentId) + 1;
+      if (nextItemIndex < students.length)
+        studentsList.current?.scrollToIndex?.({
+          index: students.findIndex((s) => s.id === studentId) + 1,
+          viewPosition: 0.5,
+          animated: true,
+        });
     },
     [students, isAttendanceTaken],
   );
@@ -461,6 +477,7 @@ export default function AttendanceTakerScreen({
         }
         onEndReached={fetchNextPage}
         onEndReachedThreshold={0.5}
+        innerRef={studentsList}
       />
 
       <View style={styles.submitPanel}>
