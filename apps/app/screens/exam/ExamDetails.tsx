@@ -47,6 +47,7 @@ const ExamDetailsStudentScreen: React.FC<
     <List
       keyExtractor={(t) => t.id}
       data={exam.Tests}
+      estimatedItemSize={74}
       renderItem={({ item }) => <TestComp test={item} />}
       ListHeaderComponent={
         <Card>
