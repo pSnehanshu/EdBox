@@ -1,15 +1,18 @@
-import { SafeAreaView, StyleSheet } from "react-native";
+import { useRef } from "react";
+import { SafeAreaView, ScrollView, StyleSheet } from "react-native";
+import { getUserRoleHierarchical, StaticRole } from "schooltalk-shared/misc";
+import { Carousel } from "react-native-snap-carousel";
+import { format } from "date-fns";
+import type { DayOfWeek } from "@prisma/client";
 import { Text, View } from "../components/Themed";
 import { RootTabScreenProps } from "../utils/types/common";
 import { useCurrentUser } from "../utils/auth";
 import { useSchool } from "../utils/useSchool";
-
 import CarouselCardItem, {
   SLIDER_WIDTH,
   ITEM_WIDTH,
 } from "../components/CarouselCardItem";
-import { useRef } from "react";
-import { Carousel } from "react-native-snap-carousel";
+import { trpc } from "../utils/trpc";
 
 /**
  * Get a greeting by the time of day.
@@ -32,7 +35,18 @@ function greeting(date: Date): string {
 export default function HomeTabScreen({}: RootTabScreenProps<"HomeTab">) {
   const { user } = useCurrentUser();
 
-  if (!user) return null;
+  // TODO: Uncomment this
+  const dayOfWeek = "mon"; // format(new Date(), "iii").toLowerCase() as DayOfWeek;
+
+  const routineQuery =
+    getUserRoleHierarchical(user) === StaticRole.student
+      ? trpc.school.routine.fetchForStudent.useQuery({
+          daysOfWeek: [dayOfWeek],
+        })
+      : trpc.school.routine.fetchForTeacher.useQuery({
+          daysOfWeek: [dayOfWeek],
+        });
+
   const school = useSchool();
   // test
   const isCarousel = useRef(null);
@@ -54,18 +68,19 @@ export default function HomeTabScreen({}: RootTabScreenProps<"HomeTab">) {
     },
   ];
 
+  if (!user) return null;
+
   return (
     <SafeAreaView style={styles.container}>
-      <View>
+      <ScrollView>
         {/* header */}
         <View style={styles.header_container}>
-          <Text style={styles.text_head}>Hello, {user.name.split(" ")[0]}</Text>
-          <Text style={styles.text}>Wellcome to {school?.name ?? "Home"}</Text>
+          <Text style={styles.text_head}>
+            {greeting(new Date())}, {user.name.split(" ")[0]}
+          </Text>
+          <Text style={styles.text}>Welcome to {school?.name ?? "Home"}</Text>
         </View>
 
-        {/* <Text style={styles.title}>
-        {greeting(new Date())}, {user.name}!
-      </Text> */}
         <View>
           <Carousel
             layout="default"
@@ -81,7 +96,11 @@ export default function HomeTabScreen({}: RootTabScreenProps<"HomeTab">) {
             useScrollView={true}
           />
         </View>
-      </View>
+
+        <View>
+          <Text>{JSON.stringify(routineQuery.data, null, 2)}</Text>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

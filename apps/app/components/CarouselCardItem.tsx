@@ -9,6 +9,7 @@ interface props {
   index: any;
 }
 
+// TODO: Define it in HomeTabScreen.tsx since it is used only there
 const CarouselCardItem = ({ item, index }: props) => {
   return (
     <View style={styles.container} key={index}>
