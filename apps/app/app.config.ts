@@ -21,6 +21,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   assetBundlePatterns: ["**/*"],
   ios: {
     supportsTablet: true,
+    bundleIdentifier: "com.indorhino.software.schooltalk.sample",
   },
   android: {
     adaptiveIcon: {
