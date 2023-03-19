@@ -39,19 +39,47 @@ const attendanceRouter = t.router({
           is_active: true,
           section_id: true,
           class_id: true,
+          Class: {
+            select: {
+              Batch: true,
+              is_active: true,
+            },
+          },
         },
       });
 
-      if (!period || !period.is_active) {
+      if (
+        !period ||
+        !period.is_active ||
+        !period.Class.is_active ||
+        !period.Class.Batch?.is_active
+      ) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Period not found",
         });
       }
 
+      // Make sure full attendance is submitted
+      const studentsCount = await prisma.student.count({
+        where: {
+          school_id: ctx.user.school_id,
+          current_batch_num: period.Class.Batch.numeric_id,
+          section: period.section_id,
+          User: { is_active: true },
+        },
+      });
+      const submittedStudentIds = Object.keys(input.studentsAttendance);
+      if (submittedStudentIds.length < studentsCount) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Attendance for all students must be submitted",
+        });
+      }
+
       // Verify all students are part of this school, and part of the particular section
       const allStudentsOk = await everyLimit(
-        Object.keys(input.studentsAttendance),
+        submittedStudentIds,
         10,
         async (studentId) => {
           const student = await prisma.student.findUnique({

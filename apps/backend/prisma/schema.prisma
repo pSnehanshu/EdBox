@@ -46,6 +46,7 @@ model User {
   id                  String               @id @default(cuid()) @db.VarChar(32)
   name                String               @db.VarChar(50)
   phone               String?              @db.VarChar(15)
+  phone_isd_code      Int                  @default(91) @db.SmallInt()
   email               String?              @db.VarChar(256)
   password            String?              @db.VarChar(80)
   otp                 String?              @db.VarChar(10)
@@ -72,7 +73,7 @@ model User {
   DynamicRoles        RoleUserMapping[]
 
   @@unique([email, school_id])
-  @@unique([phone, school_id])
+  @@unique([phone_isd_code, phone, school_id])
 }
 
 enum Gender {

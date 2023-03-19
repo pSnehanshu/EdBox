@@ -1,15 +1,17 @@
 import type { inferRouterOutputs } from "@trpc/server";
 import _ from "lodash";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ListRenderItem, Pressable, StyleSheet } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Dialog, BottomSheet, ListItem } from "@rneui/themed";
 import Toast from "react-native-toast-message";
+import type { ListRenderItem } from "@shopify/flash-list";
 import type { ArrayElement } from "schooltalk-shared/types";
 import type { AppRouter } from "../../../../backend/trpc";
 import { List, Text, TextInput, View } from "../../../components/Themed";
 import { trpc } from "../../../utils/trpc";
 import useColorScheme from "../../../utils/useColorScheme";
+import config from "../../../config";
 
 type ClassStd = ArrayElement<
   inferRouterOutputs<AppRouter>["school"]["class"]["fetchClassesAndSections"]
@@ -106,7 +108,7 @@ function SectionsManager({
       onBackdropPress={onClose}
     >
       {classStd ? (
-        <>
+        <View style={styles.sectionWrapper}>
           <Dialog.Title
             titleStyle={{
               color: color === "dark" ? "white" : "black",
@@ -117,6 +119,7 @@ function SectionsManager({
           <List
             keyExtractor={(s) => s.numeric_id.toString()}
             data={givenSections}
+            estimatedItemSize={50}
             renderItem={({ item }) => {
               return (
                 <View style={styles.sectionContainer}>
@@ -233,7 +236,7 @@ function SectionsManager({
               onPress={onClose}
             />
           </Dialog.Actions>
-        </>
+        </View>
       ) : null}
     </Dialog>
   );
@@ -299,19 +302,23 @@ export default function ClassSectionSettingsScreen() {
     [],
   );
 
-  const fetchClasses = useCallback(async () => {
+  const fetchClasses = useCallback(async (schoolId: string) => {
     try {
       setIsFetching(true);
       const classes =
-        await utils.client.school.class.fetchClassesAndSections.query();
+        await utils.client.school.class.fetchClassesAndSections.query({
+          schoolId,
+        });
 
       setClasses(classes);
-    } catch (error) {}
+    } catch (error) {
+      console.error(error);
+    }
     setIsFetching(false);
   }, []);
 
   useEffect(() => {
-    fetchClasses();
+    fetchClasses(config.schoolId);
   }, []);
 
   const renderItem = useCallback<ListRenderItem<ClassStd>>(
@@ -380,7 +387,7 @@ export default function ClassSectionSettingsScreen() {
                   <ListItem.Title
                     style={{ color: item.color, opacity: pressed ? 0.5 : 1 }}
                   >
-                    {item.title}
+                    <Text>{item.title}</Text>
                   </ListItem.Title>
                 </ListItem.Content>
               </ListItem>
@@ -390,8 +397,9 @@ export default function ClassSectionSettingsScreen() {
       </BottomSheet>
 
       <List
-        onRefresh={fetchClasses}
+        onRefresh={() => fetchClasses(config.schoolId)}
         refreshing={isFetching}
+        estimatedItemSize={94}
         data={classes}
         keyExtractor={(item) => item.numeric_id.toString()}
         renderItem={renderItem}
@@ -401,7 +409,9 @@ export default function ClassSectionSettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {},
+  container: {
+    height: "100%",
+  },
   theClass: {
     justifyContent: "center",
     padding: 8,
@@ -422,6 +432,9 @@ const styles = StyleSheet.create({
     padding: 2,
   },
   classActionsMoveBtn: {},
+  sectionWrapper: {
+    minHeight: 400,
+  },
   sectionContainer: {
     flexDirection: "row",
   },

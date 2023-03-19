@@ -1,7 +1,8 @@
 import { ComponentProps, useCallback, useState } from "react";
-import { ListRenderItem, useWindowDimensions } from "react-native";
+import { StyleSheet, useWindowDimensions } from "react-native";
 import { TabBar, TabView } from "react-native-tab-view";
 import { StaticRole } from "schooltalk-shared/misc";
+import type { ListRenderItem } from "@shopify/flash-list";
 import { User } from "schooltalk-shared/types";
 import { List, Text, View } from "../../../components/Themed";
 import { trpc } from "../../../utils/trpc";
@@ -52,7 +53,7 @@ function PeopleList({ role }: PeopleListProps) {
 
   const renderItem = useCallback<ListRenderItem<User>>(({ item: user }) => {
     return (
-      <View>
+      <View style={styles.personContainer}>
         <Text>{user.name}</Text>
       </View>
     );
@@ -62,6 +63,7 @@ function PeopleList({ role }: PeopleListProps) {
     <List
       onRefresh={peopleQuery.refetch}
       refreshing={peopleQuery.isFetching}
+      estimatedItemSize={styles.personContainer.height}
       data={peopleQuery.data ?? []}
       renderItem={renderItem}
     />
@@ -105,3 +107,10 @@ export function PeopleSettingsScreen() {
     />
   );
 }
+
+const styles = StyleSheet.create({
+  personContainer: {
+    height: 50,
+    padding: 8,
+  },
+});

@@ -97,6 +97,7 @@ const ExamListScreen: React.FC = () => {
         onRefresh={() => query.refetch()}
         refreshing={query.isFetching}
         data={query.data}
+        estimatedItemSize={77}
         keyExtractor={({ item, type }) => `${type}-${item.id}`}
         ItemSeparatorComponent={Divider}
         renderItem={({ item }) =>
@@ -114,8 +115,9 @@ const ExamListScreen: React.FC = () => {
 export default ExamListScreen;
 
 const styles = StyleSheet.create({
-  container: {},
-
+  container: {
+    height: "100%",
+  },
   examHeading: {
     width: "90%",
   },
