@@ -1,11 +1,7 @@
 import { MaterialCommunityIcons, Entypo, Ionicons } from "@expo/vector-icons";
 import { useCallback, useMemo } from "react";
-import {
-  ListRenderItem,
-  Pressable,
-  SafeAreaView,
-  StyleSheet,
-} from "react-native";
+import { Pressable, SafeAreaView, StyleSheet } from "react-native";
+import type { ListRenderItem } from "@shopify/flash-list";
 import { List, Text, View } from "../../../components/Themed";
 import {
   RootStackScreenProps,
@@ -85,13 +81,20 @@ export default function SchoolSettingsScreen({
   }, []);
 
   return (
-    <SafeAreaView>
-      <List data={settingsOptions} renderItem={renderItem} />
+    <SafeAreaView style={styles.container}>
+      <List
+        data={settingsOptions}
+        estimatedItemSize={75}
+        renderItem={renderItem}
+      />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    height: "100%",
+  },
   item: {
     paddingVertical: 16,
     borderBottomColor: "gray",

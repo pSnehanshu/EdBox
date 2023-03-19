@@ -9,7 +9,6 @@ import {
   useState,
 } from "react";
 import { getAuthToken } from "./auth";
-import { useSchool } from "./useSchool";
 import { SocketClient } from "../utils/types/common";
 
 const SocketContext = createContext<SocketClient | undefined>(undefined);
@@ -18,16 +17,13 @@ interface SocketProviderProps {
   children: JSX.Element | JSX.Element[];
 }
 export function SocketProvider({ children }: SocketProviderProps) {
-  const school = useSchool();
   const socket = useRef<SocketClient>();
   const [, setSocketIsSet] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    if (!school) return;
-
     (async () => {
-      socket.current = io(`${config.backendHost}/${school.id}`, {
+      socket.current = io(`${config.backendHost}/${config.schoolId}`, {
         auth: {
           token: (await getAuthToken()) ?? undefined,
         },
@@ -43,13 +39,11 @@ export function SocketProvider({ children }: SocketProviderProps) {
       socket.current?.disconnect();
       socket.current?.removeAllListeners();
     };
-  }, [school?.id]);
+  }, []);
 
   return createElement(
     SocketContext.Provider,
-    {
-      value: socket.current,
-    },
+    { value: socket.current },
     children,
   );
 }

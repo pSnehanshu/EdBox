@@ -1,18 +1,8 @@
-import {
-  ComponentProps,
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { memo, useCallback, useEffect, useMemo, useState, useRef } from "react";
 import {
   ActivityIndicator,
   Alert,
-  FlatList,
   Keyboard,
-  ListRenderItem,
   Pressable,
   StyleSheet,
 } from "react-native";
@@ -23,6 +13,7 @@ import type { AttendanceStatus } from "@prisma/client";
 import Toast from "react-native-toast-message";
 import { RouterInput, Student } from "schooltalk-shared/types";
 import _ from "lodash";
+import { FlashList } from "@shopify/flash-list";
 import { List, Text, TextInput, View } from "../../components/Themed";
 import { RootStackScreenProps } from "../../utils/types/common";
 import { trpc } from "../../utils/trpc";
@@ -210,13 +201,12 @@ function RemarksEditor({
   );
 }
 
-const getItemLayout: NonNullable<
-  ComponentProps<typeof List<Student>>["getItemLayout"]
-> = (_student, index) => ({
-  length: STUDENT_ITEM_HEIGHT,
-  offset: STUDENT_ITEM_HEIGHT * index,
-  index,
-});
+interface AttendanceInfo {
+  status?: AttendanceStatus;
+  remarks?: string;
+}
+
+type StudentWithAttendance = Student & { attendance?: AttendanceInfo };
 
 export default function AttendanceTakerScreen({
   route: {
@@ -225,16 +215,13 @@ export default function AttendanceTakerScreen({
 }: RootStackScreenProps<"AttendanceTaker">) {
   const utils = trpc.useContext();
 
+  /** A ref of the list to auto-scroll */
+  const studentsList = useRef<FlashList<StudentWithAttendance>>(null);
+
   // State to store attendance status and remarks
-  const [attendance, setAttendance] = useState<
-    Record<
-      string,
-      {
-        status?: AttendanceStatus;
-        remarks?: string;
-      }
-    >
-  >({});
+  const [attendance, setAttendance] = useState<Record<string, AttendanceInfo>>(
+    {},
+  );
 
   // To check if attendance already taken
   const dateToday = useMemo<
@@ -309,9 +296,9 @@ export default function AttendanceTakerScreen({
       periodAttendanceQuery.refetch();
       utils.school.routine.fetchForTeacher.invalidate();
 
-      // Scroll to top
       studentsList.current?.scrollToOffset?.({
         offset: 0,
+        animated: true,
       });
     },
     onError(error, variables, context) {
@@ -325,16 +312,19 @@ export default function AttendanceTakerScreen({
     },
   });
 
-  const students = useMemo<Student[]>(() => {
-    const students: Student[] = [];
+  const students = useMemo<StudentWithAttendance[]>(() => {
+    const students: StudentWithAttendance[] = [];
     studentsQuery.data?.pages.forEach((page) =>
-      students.push(...page.students),
+      page.students.forEach((student) => {
+        students.push({
+          ...student,
+          attendance: attendance[student.id],
+        });
+      }),
     );
 
     return students;
-  }, [studentsQuery.fetchStatus]);
-
-  const studentsList = useRef<FlatList<Student>>();
+  }, [studentsQuery.fetchStatus, attendance]);
 
   const totalStudents = useMemo(
     () => _.last(studentsQuery.data?.pages)?.total ?? 0,
@@ -369,6 +359,7 @@ export default function AttendanceTakerScreen({
         studentsList.current?.scrollToIndex?.({
           index: students.findIndex((s) => s.id === studentId) + 1,
           viewPosition: 0.5,
+          animated: true,
         });
     },
     [students, isAttendanceTaken],
@@ -390,21 +381,6 @@ export default function AttendanceTakerScreen({
     [isAttendanceTaken],
   );
   const [studentForRemarks, setStudentForRemarks] = useState<Student>();
-
-  const renderItem = useCallback<ListRenderItem<Student>>(
-    ({ item: student }) => (
-      <StudentItem
-        student={student}
-        status={attendance[student.id]?.status}
-        remarks={attendance[student.id]?.remarks}
-        showRemarkActions={!isAttendanceTaken}
-        onStatusSelected={setAttendanceStatus}
-        onAddRemarksPress={setStudentForRemarks}
-        onRemarks={setAttendanceRemarks}
-      />
-    ),
-    [attendance],
-  );
 
   const submitAttendance = useCallback(() => {
     if (totalRemaining > 0) {
@@ -436,7 +412,7 @@ export default function AttendanceTakerScreen({
         studentsAttendance: finalAttendance,
       });
     }
-  }, [attendance]);
+  }, [attendance, totalRemaining]);
 
   const refetchData = useCallback(() => {
     studentsQuery.refetch();
@@ -465,9 +441,20 @@ export default function AttendanceTakerScreen({
       {/* The list of students */}
       <List
         data={students}
-        renderItem={renderItem}
+        renderItem={({ item: student }) => (
+          <StudentItem
+            student={student}
+            status={student.attendance?.status}
+            remarks={student.attendance?.remarks}
+            showRemarkActions={!isAttendanceTaken}
+            onStatusSelected={setAttendanceStatus}
+            onAddRemarksPress={setStudentForRemarks}
+            onRemarks={setAttendanceRemarks}
+          />
+        )}
         onRefresh={refetchData}
         refreshing={studentsQuery.isFetching}
+        estimatedItemSize={STUDENT_ITEM_HEIGHT}
         ListHeaderComponent={
           isAttendanceTaken ? (
             <Card containerStyle={styles.attendanceTakenAlertBox}>
@@ -490,8 +477,7 @@ export default function AttendanceTakerScreen({
         }
         onEndReached={fetchNextPage}
         onEndReachedThreshold={0.5}
-        getItemLayout={getItemLayout}
-        innerRef={studentsList as any}
+        innerRef={studentsList}
       />
 
       <View style={styles.submitPanel}>

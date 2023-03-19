@@ -1,11 +1,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Button,
-  ListRenderItem,
-  StyleSheet,
-} from "react-native";
+import { ActivityIndicator, Button, StyleSheet } from "react-native";
+import type { ListRenderItem } from "@shopify/flash-list";
 import { List, Text, TextInput, View } from "../../components/Themed";
 import { RootStackParamList } from "../../utils/types/common";
 import ChatMessage from "../../components/ChatMessage";
@@ -77,12 +73,11 @@ export default function ChatWindowScreen({
       this is because sometimes onEndReached is not triggered */}
       <List
         inverted
-        style={styles.messages}
         data={groupMessages.messages}
         renderItem={renderItem}
         onEndReached={groupMessages.fetchNextPage}
         onEndReachedThreshold={1}
-        initialNumToRender={10}
+        estimatedItemSize={80}
         ListFooterComponent={chatEndElement}
         ListHeaderComponent={<View style={styles.messagesHeadElement} />}
       />
@@ -114,9 +109,6 @@ export default function ChatWindowScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  messages: {
-    flexGrow: 1,
   },
   messagesHeadElement: {
     height: 16,

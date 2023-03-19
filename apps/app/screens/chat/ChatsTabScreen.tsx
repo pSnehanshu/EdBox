@@ -103,6 +103,7 @@ export default function ChatsListScreen() {
       <List
         data={sortedGroups}
         keyExtractor={(g) => g.identifier}
+        estimatedItemSize={styles.chatGroup.minHeight}
         renderItem={({ item: group }) => (
           <GroupItem
             group={group}
@@ -131,6 +132,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.5,
     flex: 1,
     flexDirection: "row",
+    minHeight: 80,
   },
   chatGroupIcon: {
     width: 48,
