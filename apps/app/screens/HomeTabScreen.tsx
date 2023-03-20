@@ -1,5 +1,5 @@
-import { useRef } from "react";
-import { SafeAreaView, ScrollView, StyleSheet } from "react-native";
+import { useRef, useMemo, useEffect } from "react";
+import { Dimensions, SafeAreaView, ScrollView, StyleSheet } from "react-native";
 import { getUserRoleHierarchical, StaticRole } from "schooltalk-shared/misc";
 import { Carousel } from "react-native-snap-carousel";
 import { format } from "date-fns";
@@ -8,10 +8,6 @@ import { Text, View } from "../components/Themed";
 import { RootTabScreenProps } from "../utils/types/common";
 import { useCurrentUser } from "../utils/auth";
 import { useSchool } from "../utils/useSchool";
-import CarouselCardItem, {
-  SLIDER_WIDTH,
-  ITEM_WIDTH,
-} from "../components/CarouselCardItem";
 import { trpc } from "../utils/trpc";
 
 /**
@@ -32,7 +28,22 @@ function greeting(date: Date): string {
   return "Hello";
 }
 
+interface props {
+  item: any;
+  index: any;
+}
+
+const CarouselCardItem = ({ item, index }: props) => {
+  return (
+    <View style={styles.container_carousel} key={index}>
+      <Text style={styles.header}>{item.Subject.name}</Text>
+    </View>
+  );
+};
+
 export default function HomeTabScreen({}: RootTabScreenProps<"HomeTab">) {
+  const SLIDER_WIDTH = Dimensions.get("window").width;
+  const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.8);
   const { user } = useCurrentUser();
 
   // TODO: Uncomment this
@@ -46,10 +57,29 @@ export default function HomeTabScreen({}: RootTabScreenProps<"HomeTab">) {
       : trpc.school.routine.fetchForTeacher.useQuery({
           daysOfWeek: [dayOfWeek],
         });
+  if (routineQuery) {
+  }
+  const allClasses = useMemo(
+    () => Object.values(routineQuery.data ?? {}).at(0),
+    [routineQuery],
+  );
+  console.log(allClasses);
+
+  const currentClass = useEffect(() => {
+    const output = allClasses?.reduce((prev, curr) =>
+      Math.abs(curr.end_hour * 60 + curr.end_min - 513) <
+      Math.abs(prev.end_hour * 60 + prev.end_min - 513)
+        ? curr
+        : prev,
+    );
+    console.log(output, "xx");
+  }, [routineQuery]);
+
+  console.log(currentClass);
 
   const school = useSchool();
-  // test
   const isCarousel = useRef(null);
+  // test data
   const data = [
     {
       title: "BIO-01",
@@ -81,14 +111,14 @@ export default function HomeTabScreen({}: RootTabScreenProps<"HomeTab">) {
           <Text style={styles.text}>Welcome to {school?.name ?? "Home"}</Text>
         </View>
 
-        <View>
+        <View style={styles.carousel}>
           <Carousel
             layout="default"
             vertical={false}
             layoutCardOffset={9}
             firstItem={1}
             ref={isCarousel}
-            data={data}
+            data={allClasses ?? []}
             renderItem={CarouselCardItem}
             sliderWidth={SLIDER_WIDTH}
             itemWidth={ITEM_WIDTH}
@@ -97,9 +127,9 @@ export default function HomeTabScreen({}: RootTabScreenProps<"HomeTab">) {
           />
         </View>
 
-        <View>
+        {/* <View>
           <Text>{JSON.stringify(routineQuery.data, null, 2)}</Text>
-        </View>
+        </View> */}
       </ScrollView>
     </SafeAreaView>
   );
@@ -107,16 +137,16 @@ export default function HomeTabScreen({}: RootTabScreenProps<"HomeTab">) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    // flex: 1,
     // alignItems: "center",
     // justifyContent: "center",
     backgroundColor: "#F1F1F1",
     marginTop: 0,
   },
   header_container: {
-    marginTop: 70,
-    marginBottom: 10,
-    backgroundColor: "white",
+    paddingTop: 70,
+    // marginBottom: 10,
+    // backgroundColor: "white",
     paddingLeft: 30,
   },
   title: {
@@ -128,4 +158,21 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   text: { fontSize: 18 },
+  carousel: {
+    paddingTop: 5,
+  },
+  container_carousel: {
+    // flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#4E48B2",
+    borderRadius: 8,
+    padding: 100,
+    margin: 10,
+  },
+  header: {
+    color: "#f4f4f4",
+    fontSize: 28,
+    fontWeight: "bold",
+  },
 });
