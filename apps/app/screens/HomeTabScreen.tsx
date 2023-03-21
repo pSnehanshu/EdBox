@@ -1,24 +1,10 @@
-import { useRef, useMemo, useEffect } from "react";
-import {
-  Dimensions,
-  Pressable,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-} from "react-native";
-import {
-  getUserRoleHierarchical,
-  StaticRole,
-  hasUserStaticRoles,
-} from "schooltalk-shared/misc";
-import { Carousel } from "react-native-snap-carousel";
-import { format } from "date-fns";
-import type { DayOfWeek } from "@prisma/client";
+import { SafeAreaView, ScrollView, StyleSheet } from "react-native";
+import { StaticRole, hasUserStaticRoles } from "schooltalk-shared/misc";
 import { Text, View } from "../components/Themed";
 import { RootTabScreenProps } from "../utils/types/common";
 import { useCurrentUser } from "../utils/auth";
 import { useSchool } from "../utils/useSchool";
-import { trpc } from "../utils/trpc";
+import { RoutineSlider } from "../components/RoutineSlider";
 
 /**
  * Get a greeting by the time of day.
@@ -38,57 +24,9 @@ function greeting(date: Date): string {
   return "Hello";
 }
 
-const SLIDER_WIDTH = Dimensions.get("window").width;
-const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.8);
-
-interface props {
-  item: any;
-  index: number;
-}
-
-const CarouselCardItem = ({ item, index }: props) => {
-  return (
-    <View style={styles.container_carousel} key={index}>
-      <Text style={styles.header}>{item.Subject.name}</Text>
-      <Pressable style={styles.button}>
-        <Text style={styles.button_text}>Take Attendance</Text>
-      </Pressable>
-    </View>
-  );
-};
-
 export default function HomeTabScreen({}: RootTabScreenProps<"HomeTab">) {
   const { user } = useCurrentUser();
-
-  // TODO: Uncomment this
-  const dayOfWeek = "mon"; // format(new Date(), "iii").toLowerCase() as DayOfWeek;
-
-  const routineQuery =
-    getUserRoleHierarchical(user) === StaticRole.student
-      ? trpc.school.routine.fetchForStudent.useQuery({
-          daysOfWeek: [dayOfWeek],
-        })
-      : trpc.school.routine.fetchForTeacher.useQuery({
-          daysOfWeek: [dayOfWeek],
-        });
-
-  const allClasses = useMemo(
-    () => routineQuery.data?.[dayOfWeek],
-    [routineQuery],
-  );
-
-  // const currentClass = useEffect(() => {
-  //   const output = allClasses?.reduce((prev, curr) =>
-  //     Math.abs(curr.end_hour * 60 + curr.end_min - 513) <
-  //     Math.abs(prev.end_hour * 60 + prev.end_min - 513)
-  //       ? curr
-  //       : prev,
-  //   );
-  //   console.log(output, "xx");
-  // }, [routineQuery]);
-
   const school = useSchool();
-  const isCarousel = useRef(null);
 
   if (!user) return null;
 
@@ -103,28 +41,12 @@ export default function HomeTabScreen({}: RootTabScreenProps<"HomeTab">) {
           <Text style={styles.text}>Welcome to {school?.name ?? "Home"}</Text>
         </View>
 
-        {(hasUserStaticRoles(user, [StaticRole.student], "all") ||
-          hasUserStaticRoles(user, [StaticRole.teacher], "all")) && (
-          <View style={styles.carousel}>
-            <Carousel
-              layout="default"
-              vertical={false}
-              layoutCardOffset={9}
-              firstItem={1}
-              ref={isCarousel}
-              data={allClasses ?? []}
-              renderItem={CarouselCardItem}
-              sliderWidth={SLIDER_WIDTH}
-              itemWidth={ITEM_WIDTH}
-              inactiveSlideShift={0}
-              useScrollView={true}
-            />
-          </View>
-        )}
-
-        {/* <View>
-          <Text>{JSON.stringify(routineQuery.data, null, 2)}</Text>
-        </View> */}
+        {/* Routine carousel */}
+        {hasUserStaticRoles(
+          user,
+          [StaticRole.student, StaticRole.teacher],
+          "some",
+        ) && <RoutineSlider style={styles.carousel} />}
       </ScrollView>
     </SafeAreaView>
   );
@@ -153,30 +75,5 @@ const styles = StyleSheet.create({
   text: { fontSize: 18 },
   carousel: {
     paddingTop: 5,
-  },
-  container_carousel: {
-    alignItems: "center",
-    backgroundColor: "#4E48B2",
-    borderRadius: 8,
-    padding: 40,
-    marginTop: 10,
-  },
-  header: {
-    color: "#f4f4f4",
-    fontSize: 36,
-    fontWeight: "bold",
-  },
-  button: {
-    marginTop: 15,
-    padding: 7,
-    width: "100%",
-    borderRadius: 20,
-    backgroundColor: "white",
-    shadowColor: "black",
-  },
-  button_text: {
-    fontSize: 18,
-    color: "black",
-    textAlign: "center",
   },
 });
