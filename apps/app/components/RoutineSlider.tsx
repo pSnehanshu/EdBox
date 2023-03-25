@@ -1,7 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import { format, isBefore, isWithinInterval } from "date-fns";
-import { constant } from "lodash";
-import { useMemo, useRef } from "react";
+import { useMemo } from "react";
 import {
   Dimensions,
   Pressable,
@@ -18,11 +17,7 @@ import {
 import type { DayOfWeek, TeacherRoutinePeriod } from "schooltalk-shared/types";
 import { useCurrentUser } from "../utils/auth";
 import { trpc } from "../utils/trpc";
-import {
-  GapPeriod,
-  RoutinePeriod,
-  TimelineData,
-} from "../utils/types/routine-types";
+import { GapPeriod, RoutinePeriod } from "../utils/types/routine-types";
 import { Text, View } from "./Themed";
 
 function getTimeFromHourMinute(hours: number, minutes: number) {
@@ -42,19 +37,17 @@ interface SingleRoutineCardProps {
 function SinglePeriodCard({ period }: SingleRoutineCardProps) {
   const navigation = useNavigation();
   const { user } = useCurrentUser();
-  const teacher = hasUserStaticRoles(user, [StaticRole.teacher], "some");
-  const time = new Date();
+  const isTeacher = hasUserStaticRoles(user, [StaticRole.teacher], "some");
   const start = getTimeFromHourMinute(period.start_hour, period.start_min);
-  const end = getTimeFromHourMinute(period.end_hour, period.end_hour);
 
   return (
     <View style={styles.container_carousel}>
       {/* location and time for teacher */}
-      {teacher && !period.is_gap && (
+      {isTeacher && !period.is_gap && (
         <View style={styles.time_loc}>
           <Text style={styles.time_dislay}>{format(start, "hh:mm aa")}</Text>
           <Text style={styles.time_dislay}>
-            {period.Class.name}-S {period.Section.name}
+            {period.Class.name} {period.Section.name}
           </Text>
         </View>
       )}
@@ -62,7 +55,7 @@ function SinglePeriodCard({ period }: SingleRoutineCardProps) {
         {!period.is_gap ? period?.Subject?.name : "Gap"}
       </Text>
 
-      {teacher && !period.is_gap && (
+      {isTeacher && !period.is_gap && (
         <Pressable
           style={styles.button}
           onPress={() =>
@@ -70,9 +63,9 @@ function SinglePeriodCard({ period }: SingleRoutineCardProps) {
           }
         >
           <Text style={styles.button_text}>
-            {!(period.AttendancesTaken.length > 0)
-              ? "Take Attendance"
-              : "View attendance"}
+            {period.AttendancesTaken.length > 0
+              ? "View attendance"
+              : "Take Attendance"}
           </Text>
         </Pressable>
       )}
@@ -84,8 +77,7 @@ interface RoutineSliderProps {
   style?: StyleProp<ViewStyle>;
 }
 export function RoutineSlider(props: RoutineSliderProps) {
-  // const dayOfWeek = format(new Date(), "iii").toLowerCase() as DayOfWeek;
-  const dayOfWeek = "tue";
+  const dayOfWeek = format(new Date(), "iii").toLowerCase() as DayOfWeek;
   const { user } = useCurrentUser();
 
   const SLIDER_WIDTH = Dimensions.get("window").width;
@@ -100,10 +92,10 @@ export function RoutineSlider(props: RoutineSliderProps) {
           daysOfWeek: [dayOfWeek],
         });
 
+  // FIXME: Move this Logic into a utility: DRY
   const { allPeriods, currentPeriodIndex } = useMemo(() => {
     const allPeriods = routineQuery.data?.[dayOfWeek] ?? [];
     type CustomPeriodType = (RoutinePeriod & { is_gap: false }) | GapPeriod;
-    type RoutineTimelineData = TimelineData<CustomPeriodType>;
 
     // Sort be time
     allPeriods.sort((p1, p2) => {
@@ -175,7 +167,6 @@ export function RoutineSlider(props: RoutineSliderProps) {
           : currentPeriodIndex,
     };
   }, [routineQuery.isFetching]);
-  console.log(allPeriods, currentPeriodIndex, "allperiods");
 
   if (routineQuery.isLoading) return <></>;
 
