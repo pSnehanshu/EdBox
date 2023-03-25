@@ -1,4 +1,4 @@
-import { isBefore, isWithinInterval } from "date-fns";
+import { format, isBefore, isWithinInterval } from "date-fns";
 import { useMemo } from "react";
 import type {
   TeacherRoutinePeriod,
@@ -7,7 +7,9 @@ import type {
 import type { GapPeriod } from "./types/routine-types";
 
 type Period = TeacherRoutinePeriod | StudentRoutinePeriod;
-type PeriodWithGapType = (Period & { is_gap: false }) | GapPeriod;
+export type PeriodWithGap =
+  | (Period & { is_gap: false; time: string })
+  | GapPeriod;
 
 /**
  * Returns date object representing today with given hour and minute
@@ -43,13 +45,20 @@ export function useRoutineWithGaps(periods: Period[]) {
       return 0;
     });
 
-    const periodsWithGaps: PeriodWithGapType[] = [];
+    const periodsWithGaps: PeriodWithGap[] = [];
     allPeriods.forEach((p, i) => {
+      // Calculate formatted time
+      const time = format(
+        getTimeFromHourMinute(p.start_hour, p.start_min),
+        "hh:mm aaa",
+      );
+
       // Can't be gap at the beginning
       if (i === 0) {
         periodsWithGaps.push({
           ...p,
           is_gap: false,
+          time,
         });
       } else {
         const previous = allPeriods[i - 1];
@@ -68,6 +77,7 @@ export function useRoutineWithGaps(periods: Period[]) {
             start_min: previous.end_min,
             end_hour: p.start_hour,
             end_min: p.start_min,
+            time,
           };
 
           periodsWithGaps.push(gap);
@@ -77,6 +87,7 @@ export function useRoutineWithGaps(periods: Period[]) {
         periodsWithGaps.push({
           ...p,
           is_gap: false,
+          time,
         });
       }
     });

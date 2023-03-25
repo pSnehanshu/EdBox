@@ -13,39 +13,27 @@ import {
   hasUserStaticRoles,
   StaticRole,
 } from "schooltalk-shared/misc";
-import type { DayOfWeek, TeacherRoutinePeriod } from "schooltalk-shared/types";
+import type { DayOfWeek } from "schooltalk-shared/types";
 import { useCurrentUser } from "../utils/auth";
-import { useRoutineWithGaps } from "../utils/routine-utils";
+import { PeriodWithGap, useRoutineWithGaps } from "../utils/routine-utils";
 import { trpc } from "../utils/trpc";
-import { GapPeriod } from "../utils/types/routine-types";
 import { Text, View } from "./Themed";
 
-function getTimeFromHourMinute(hours: number, minutes: number) {
-  const startTime = new Date();
-  startTime.setHours(hours);
-  startTime.setMinutes(minutes);
-  startTime.setSeconds(0);
-  startTime.setMilliseconds(0);
-
-  return startTime;
-}
-
 interface SingleRoutineCardProps {
-  period: (TeacherRoutinePeriod & { is_gap: false }) | GapPeriod;
+  period: PeriodWithGap;
   index: number;
 }
 function SinglePeriodCard({ period }: SingleRoutineCardProps) {
   const navigation = useNavigation();
   const { user } = useCurrentUser();
-  const isTeacher = hasUserStaticRoles(user, [StaticRole.teacher], "some");
-  const start = getTimeFromHourMinute(period.start_hour, period.start_min);
+  const isTeacher = hasUserStaticRoles(user, [StaticRole.teacher], "all");
 
   return (
     <View style={styles.container_carousel}>
       {/* Class and time  */}
       {!period.is_gap && (
         <View style={styles.time_loc}>
-          <Text style={styles.time_dislay}>{format(start, "hh:mm aa")}</Text>
+          <Text style={styles.time_dislay}>{period.time}</Text>
           <Text style={styles.time_dislay}>
             {period.Class.name} ({period.Section.name})
           </Text>
