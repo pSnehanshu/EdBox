@@ -42,28 +42,40 @@ interface SingleRoutineCardProps {
 function SinglePeriodCard({ period }: SingleRoutineCardProps) {
   const navigation = useNavigation();
   const { user } = useCurrentUser();
+  const teacher = hasUserStaticRoles(user, [StaticRole.teacher], "some");
+  const time = new Date();
+  const start = getTimeFromHourMinute(period.start_hour, period.start_min);
+  const end = getTimeFromHourMinute(period.end_hour, period.end_hour);
 
   return (
     <View style={styles.container_carousel}>
+      {/* location and time for teacher */}
+      {teacher && !period.is_gap && (
+        <View style={styles.time_loc}>
+          <Text style={styles.time_dislay}>{format(start, "hh:mm aa")}</Text>
+          <Text style={styles.time_dislay}>
+            {period.Class.name}-S {period.Section.name}
+          </Text>
+        </View>
+      )}
       <Text style={styles.header}>
         {!period.is_gap ? period?.Subject?.name : "Gap"}
       </Text>
 
-      {hasUserStaticRoles(user, [StaticRole.teacher], "some") &&
-        !period.is_gap && (
-          <Pressable
-            style={styles.button}
-            onPress={() =>
-              navigation.navigate("AttendanceTaker", { periodId: period.id })
-            }
-          >
-            <Text style={styles.button_text}>
-              {!(period.AttendancesTaken.length > 0)
-                ? "Take Attendance"
-                : "View attendance"}
-            </Text>
-          </Pressable>
-        )}
+      {teacher && !period.is_gap && (
+        <Pressable
+          style={styles.button}
+          onPress={() =>
+            navigation.navigate("AttendanceTaker", { periodId: period.id })
+          }
+        >
+          <Text style={styles.button_text}>
+            {!(period.AttendancesTaken.length > 0)
+              ? "Take Attendance"
+              : "View attendance"}
+          </Text>
+        </Pressable>
+      )}
     </View>
   );
 }
@@ -73,7 +85,7 @@ interface RoutineSliderProps {
 }
 export function RoutineSlider(props: RoutineSliderProps) {
   // const dayOfWeek = format(new Date(), "iii").toLowerCase() as DayOfWeek;
-  const dayOfWeek = "mon";
+  const dayOfWeek = "tue";
   const { user } = useCurrentUser();
 
   const SLIDER_WIDTH = Dimensions.get("window").width;
@@ -106,10 +118,8 @@ export function RoutineSlider(props: RoutineSliderProps) {
       return 0;
     });
 
-    // TODO: Insert Gaps, refer to RoutineScreen.tsx
     const withGaps: CustomPeriodType[] = [];
     allPeriods.forEach((p, i) => {
-      // First insert the gap, then insert the period
       if (i === 0) {
         withGaps.push({
           ...p,
@@ -142,7 +152,7 @@ export function RoutineSlider(props: RoutineSliderProps) {
 
     // Determine the current period
     const time = new Date();
-    const currentPeriodIndex = allPeriods.findIndex((period) => {
+    const currentPeriodIndex = withGaps.findIndex((period) => {
       const start = getTimeFromHourMinute(period.start_hour, period.start_min);
       const end = getTimeFromHourMinute(period.end_hour, period.end_min);
 
@@ -150,8 +160,8 @@ export function RoutineSlider(props: RoutineSliderProps) {
     });
 
     const firstPeriod = getTimeFromHourMinute(
-      allPeriods[0]?.start_hour,
-      allPeriods[0]?.start_min,
+      withGaps[0]?.start_hour,
+      withGaps[0]?.start_min,
     );
 
     return {
@@ -161,7 +171,7 @@ export function RoutineSlider(props: RoutineSliderProps) {
         currentPeriodIndex < 0
           ? isBefore(time, firstPeriod)
             ? 0
-            : allPeriods?.length - 1
+            : withGaps?.length - 1
           : currentPeriodIndex,
     };
   }, [routineQuery.isFetching]);
@@ -196,7 +206,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 40,
     marginTop: 10,
-    height: 160,
+    height: 190,
   },
   header: {
     color: "#f4f4f4",
@@ -215,5 +225,17 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "black",
     textAlign: "center",
+  },
+  time_loc: {
+    // flex: 1,
+    backgroundColor: "#4E48B2",
+    marginTop: -3,
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  time_dislay: {
+    fontSize: 12,
+    color: "white",
   },
 });
