@@ -4,6 +4,7 @@
  */
 
 import { z } from "zod";
+import Constants from "expo-constants";
 
 const ConfigSchema = z.object({
   backendHost: z.string().url(),
@@ -11,8 +12,8 @@ const ConfigSchema = z.object({
 });
 
 const config = ConfigSchema.parse({
-  backendHost: process.env.HOSTNAME,
-  schoolId: process.env.SCHOOLID,
+  backendHost: Constants.expoConfig?.extra?.backendHost,
+  schoolId: Constants.expoConfig?.extra?.schoolId,
 });
 
 console.log("Final config:", config);

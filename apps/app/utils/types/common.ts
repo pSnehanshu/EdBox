@@ -31,6 +31,7 @@ export type RootStackParamList = {
   PeopleSettings: undefined;
   TestDetails: { testId: string };
   ExamDetails: { examId: string };
+  AboutApp: undefined;
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> =
