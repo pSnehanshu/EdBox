@@ -54,9 +54,6 @@ export default function HomeTabScreen({}: RootTabScreenProps<"HomeTab">) {
 
 const styles = StyleSheet.create({
   container: {
-    // flex: 1,
-    // alignItems: "center",
-    // justifyContent: "center",
     backgroundColor: "#F1F1F1",
     marginTop: 0,
   },

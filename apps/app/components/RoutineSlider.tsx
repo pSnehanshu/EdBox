@@ -1,5 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import { format, isBefore, isWithinInterval } from "date-fns";
+import { constant } from "lodash";
 import { useMemo, useRef } from "react";
 import {
   Dimensions,
@@ -9,10 +10,19 @@ import {
   ViewStyle,
 } from "react-native";
 import { Carousel } from "react-native-snap-carousel";
-import { getUserRoleHierarchical, StaticRole } from "schooltalk-shared/misc";
+import {
+  getUserRoleHierarchical,
+  hasUserStaticRoles,
+  StaticRole,
+} from "schooltalk-shared/misc";
 import type { DayOfWeek, TeacherRoutinePeriod } from "schooltalk-shared/types";
 import { useCurrentUser } from "../utils/auth";
 import { trpc } from "../utils/trpc";
+import {
+  GapPeriod,
+  RoutinePeriod,
+  TimelineData,
+} from "../utils/types/routine-types";
 import { Text, View } from "./Themed";
 
 function getTimeFromHourMinute(hours: number, minutes: number) {
@@ -26,26 +36,34 @@ function getTimeFromHourMinute(hours: number, minutes: number) {
 }
 
 interface SingleRoutineCardProps {
-  period: TeacherRoutinePeriod;
+  period: (TeacherRoutinePeriod & { is_gap: false }) | GapPeriod;
   index: number;
 }
 function SinglePeriodCard({ period }: SingleRoutineCardProps) {
   const navigation = useNavigation();
+  const { user } = useCurrentUser();
 
   return (
     <View style={styles.container_carousel}>
-      <Text style={styles.header}>{period.Subject.name}</Text>
+      <Text style={styles.header}>
+        {!period.is_gap ? period?.Subject?.name : "Gap"}
+      </Text>
 
-      {/* TODO: This action is valid for teachers only */}
-      <Pressable
-        style={styles.button}
-        onPress={() =>
-          navigation.navigate("AttendanceTaker", { periodId: period.id })
-        }
-      >
-        {/* TODO: Show "View attendance" when attendance is already taken */}
-        <Text style={styles.button_text}>Take Attendance</Text>
-      </Pressable>
+      {hasUserStaticRoles(user, [StaticRole.teacher], "some") &&
+        !period.is_gap && (
+          <Pressable
+            style={styles.button}
+            onPress={() =>
+              navigation.navigate("AttendanceTaker", { periodId: period.id })
+            }
+          >
+            <Text style={styles.button_text}>
+              {!(period.AttendancesTaken.length > 0)
+                ? "Take Attendance"
+                : "View attendance"}
+            </Text>
+          </Pressable>
+        )}
     </View>
   );
 }
@@ -54,7 +72,8 @@ interface RoutineSliderProps {
   style?: StyleProp<ViewStyle>;
 }
 export function RoutineSlider(props: RoutineSliderProps) {
-  const dayOfWeek = format(new Date(), "iii").toLowerCase() as DayOfWeek;
+  // const dayOfWeek = format(new Date(), "iii").toLowerCase() as DayOfWeek;
+  const dayOfWeek = "mon";
   const { user } = useCurrentUser();
 
   const SLIDER_WIDTH = Dimensions.get("window").width;
@@ -71,6 +90,8 @@ export function RoutineSlider(props: RoutineSliderProps) {
 
   const { allPeriods, currentPeriodIndex } = useMemo(() => {
     const allPeriods = routineQuery.data?.[dayOfWeek] ?? [];
+    type CustomPeriodType = (RoutinePeriod & { is_gap: false }) | GapPeriod;
+    type RoutineTimelineData = TimelineData<CustomPeriodType>;
 
     // Sort be time
     allPeriods.sort((p1, p2) => {
@@ -86,6 +107,38 @@ export function RoutineSlider(props: RoutineSliderProps) {
     });
 
     // TODO: Insert Gaps, refer to RoutineScreen.tsx
+    const withGaps: CustomPeriodType[] = [];
+    allPeriods.forEach((p, i) => {
+      // First insert the gap, then insert the period
+      if (i === 0) {
+        withGaps.push({
+          ...p,
+          is_gap: false,
+        });
+      } else {
+        const previous = allPeriods[i - 1];
+        const hasGap =
+          previous.end_hour !== p.start_hour
+            ? true
+            : previous.end_min !== p.start_min;
+        if (hasGap) {
+          const gap: GapPeriod = {
+            is_gap: true,
+            start_hour: previous.end_hour,
+            start_min: previous.end_min,
+            end_hour: p.start_hour,
+            end_min: p.start_min,
+          };
+
+          withGaps.push(gap);
+        }
+
+        withGaps.push({
+          ...p,
+          is_gap: false,
+        });
+      }
+    });
 
     // Determine the current period
     const time = new Date();
@@ -96,14 +149,24 @@ export function RoutineSlider(props: RoutineSliderProps) {
       return isWithinInterval(time, { start, end });
     });
 
+    const firstPeriod = getTimeFromHourMinute(
+      allPeriods[0]?.start_hour,
+      allPeriods[0]?.start_min,
+    );
+
     return {
-      allPeriods,
-      // TODO: Show first period if no periods have begun, show last period if all periods are over
-      currentPeriodIndex: currentPeriodIndex < 0 ? 0 : currentPeriodIndex,
+      allPeriods: withGaps,
+
+      currentPeriodIndex:
+        currentPeriodIndex < 0
+          ? isBefore(time, firstPeriod)
+            ? 0
+            : allPeriods?.length - 1
+          : currentPeriodIndex,
     };
   }, [routineQuery.isFetching]);
+  console.log(allPeriods, currentPeriodIndex, "allperiods");
 
-  // Don't show anything unless  loaded
   if (routineQuery.isLoading) return <></>;
 
   return (
@@ -133,6 +196,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 40,
     marginTop: 10,
+    height: 160,
   },
   header: {
     color: "#f4f4f4",
