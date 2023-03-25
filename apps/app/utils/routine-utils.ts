@@ -1,5 +1,6 @@
 import { format, isBefore, isWithinInterval } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
+import _ from "lodash";
 import type {
   TeacherRoutinePeriod,
   StudentRoutinePeriod,
@@ -17,8 +18,7 @@ export type PeriodWithGap =
  * @param minutes
  * @returns
  */
-// TODO: memoize this function
-function getTimeFromHourMinute(hours: number, minutes: number) {
+function _getTimeFromHourMinute(hours: number, minutes: number) {
   const startTime = new Date();
   startTime.setHours(hours);
   startTime.setMinutes(minutes);
@@ -27,6 +27,10 @@ function getTimeFromHourMinute(hours: number, minutes: number) {
 
   return startTime;
 }
+const getTimeFromHourMinute = _.memoize(
+  _getTimeFromHourMinute,
+  (h, m) => `${h}:${m}`,
+);
 
 export function useRoutineWithGaps(periods: Period[]) {
   const [recalculateState, setRecalculateState] = useState(0);
