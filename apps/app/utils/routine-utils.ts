@@ -1,5 +1,5 @@
 import { format, isBefore, isWithinInterval } from "date-fns";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type {
   TeacherRoutinePeriod,
   StudentRoutinePeriod,
@@ -17,7 +17,7 @@ export type PeriodWithGap =
  * @param minutes
  * @returns
  */
-// TODO: memoize the above function
+// TODO: memoize this function
 function getTimeFromHourMinute(hours: number, minutes: number) {
   const startTime = new Date();
   startTime.setHours(hours);
@@ -29,6 +29,9 @@ function getTimeFromHourMinute(hours: number, minutes: number) {
 }
 
 export function useRoutineWithGaps(periods: Period[]) {
+  const [recalculateState, setRecalculateState] = useState(0);
+
+  // Calculate everyting inside `useMemo`
   const { allPeriods, currentPeriodIndex } = useMemo(() => {
     const allPeriods = periods.slice();
 
@@ -115,7 +118,16 @@ export function useRoutineWithGaps(periods: Period[]) {
             : periodsWithGaps?.length - 1
           : currentPeriodIndex,
     };
-  }, [periods]);
+  }, [periods, recalculateState]);
+
+  // Write an effect to re-calculate in interval
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRecalculateState(Math.random());
+    }, 5 * 60 * 1000 /* 5 min */);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return {
     allPeriods,
