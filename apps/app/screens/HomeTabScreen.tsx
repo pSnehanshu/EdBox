@@ -29,7 +29,7 @@ export default function HomeTabScreen({}: RootTabScreenProps<"HomeTab">) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>
-        {greeting(new Date())}, {user.name}!!!
+        {greeting(new Date())}, {user.name}!
       </Text>
     </View>
   );

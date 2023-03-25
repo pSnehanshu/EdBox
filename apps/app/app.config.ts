@@ -37,6 +37,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     eas: {
       projectId: "967f9a25-6a24-476d-8d3c-1dc7db20ec80",
     },
+    backendHost: process.env.HOSTNAME,
+    schoolId: process.env.SCHOOLID,
   },
   runtimeVersion: {
     policy: "nativeVersion",
