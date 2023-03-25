@@ -12,7 +12,12 @@ import { useDB } from "./db";
  * Get the current token
  */
 export async function getAuthToken() {
-  const expiry = await SecureStore.getItemAsync(AUTH_TOKEN_EXPIRY);
+  const expiry = await SecureStore.getItemAsync(AUTH_TOKEN_EXPIRY).catch(
+    (err) => {
+      console.error(err);
+      return null;
+    },
+  );
   if (!expiry) return null;
 
   const expiryDate = parseISO(expiry);
@@ -21,7 +26,10 @@ export async function getAuthToken() {
   // Expired tokens are invalid
   if (isPast(expiryDate)) return null;
 
-  return SecureStore.getItemAsync(AUTH_TOKEN);
+  return SecureStore.getItemAsync(AUTH_TOKEN).catch((err) => {
+    console.error(err);
+    return null;
+  });
 }
 
 export async function setAuthToken(token: string, expiry: Date): Promise<void> {
