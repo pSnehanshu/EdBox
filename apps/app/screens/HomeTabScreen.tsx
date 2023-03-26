@@ -5,6 +5,7 @@ import { RootTabScreenProps } from "../utils/types/common";
 import { useCurrentUser } from "../utils/auth";
 import { useSchool } from "../utils/useSchool";
 import { RoutineSlider } from "../components/RoutineSlider";
+import Announcements from "../components/Announcements";
 
 /**
  * Get a greeting by the time of day.
@@ -32,7 +33,7 @@ export default function HomeTabScreen({}: RootTabScreenProps<"HomeTab">) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
+      <View>
         {/* header */}
         <View style={styles.header_container}>
           <Text style={styles.text_head}>
@@ -47,7 +48,10 @@ export default function HomeTabScreen({}: RootTabScreenProps<"HomeTab">) {
           [StaticRole.student, StaticRole.teacher],
           "some",
         ) && <RoutineSlider style={styles.carousel} />}
-      </ScrollView>
+
+        {/*  */}
+        <Announcements />
+      </View>
     </SafeAreaView>
   );
 }
