@@ -1,6 +1,6 @@
-import { SafeAreaView, ScrollView, StyleSheet } from "react-native";
+import { SafeAreaView, StyleSheet } from "react-native";
 import { StaticRole, hasUserStaticRoles } from "schooltalk-shared/misc";
-import { Text, View } from "../components/Themed";
+import { Text, View, ScrollView } from "../components/Themed";
 import { RootTabScreenProps } from "../utils/types/common";
 import { useCurrentUser } from "../utils/auth";
 import { useSchool } from "../utils/useSchool";
@@ -33,7 +33,7 @@ export default function HomeTabScreen({}: RootTabScreenProps<"HomeTab">) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View>
+      <ScrollView>
         {/* header */}
         <View style={styles.header_container}>
           <Text style={styles.text_head}>
@@ -50,7 +50,7 @@ export default function HomeTabScreen({}: RootTabScreenProps<"HomeTab">) {
         ) && <RoutineSlider style={styles.carousel} />}
 
         <Announcements />
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

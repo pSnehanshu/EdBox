@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { ListRenderItem } from "@shopify/flash-list";
-import { List, Text, View } from "./Themed";
+import { Text, View } from "./Themed";
 import { Pressable, StyleSheet } from "react-native";
 import { Group, Message } from "schooltalk-shared/types";
 import { useMessages } from "../utils/messages-repository";
@@ -63,24 +63,19 @@ export default function Announcements() {
   const groupMessages = messages.useFetchGroupMessages(group.identifier, 7);
   const navigation = useNavigation();
   return (
-    <View style={{ height: "55%" }}>
-      {/* how to mannage the height */}
+    <View>
       <Text style={styles.header_text}>Announcements</Text>
-      <List
-        data={groupMessages.messages}
-        renderItem={renderItem}
-        onEndReachedThreshold={1}
-        estimatedItemSize={80}
-        ListHeaderComponent={<View style={{ height: 15 }} />}
-        ListFooterComponent={() => (
-          <Pressable
-            style={styles.header_text}
-            onPress={() => navigation.navigate("ChatWindow", group)}
-          >
-            <Text>load more</Text>
-          </Pressable>
-        )}
-      />
+
+      {groupMessages.messages.map((message) => (
+        <SingleAnnouncement message={message} key={message.id} />
+      ))}
+
+      <Pressable
+        style={styles.header_text}
+        onPress={() => navigation.navigate("ChatWindow", group)}
+      >
+        <Text>View more</Text>
+      </Pressable>
     </View>
   );
 }
@@ -100,7 +95,7 @@ const styles = StyleSheet.create({
     minHeight: 80,
     justifyContent: "flex-start",
     backgroundColor: "#4E58B2",
-    marginBottom: 3,
+    marginBottom: 8,
     marginLeft: "5%",
     width: "90%",
   },
@@ -108,7 +103,8 @@ const styles = StyleSheet.create({
     fontSize: 25,
     fontWeight: "500",
     marginLeft: 20,
-    marginTop: 15,
+    marginTop: 16,
+    marginBottom: 16,
   },
   time: {
     fontSize: 10,
