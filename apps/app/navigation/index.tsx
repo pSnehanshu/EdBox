@@ -40,6 +40,7 @@ import ExamList from "../screens/exam/ExamList";
 import TestDetailsScreen from "../screens/exam/TestDetails";
 import ExamDetailsScreen from "../screens/exam/ExamDetails";
 import RoutineScreen from "../screens/routine/RoutineScreen";
+import AboutAppScreen from "../screens/settings/AboutAppScreen";
 
 export default function Navigation({
   colorScheme,
@@ -172,6 +173,15 @@ function RootNavigator() {
               />
             </>
           ) : null}
+
+          <Stack.Screen
+            name="AboutApp"
+            component={AboutAppScreen}
+            options={{
+              headerShown: true,
+              title: "About this app",
+            }}
+          />
         </Stack.Navigator>
       </MessagesProvider>
     </SocketProvider>
