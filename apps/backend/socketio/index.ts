@@ -5,7 +5,7 @@ import { isPast } from "date-fns";
 import {
   convertObjectToOrderedQueryString,
   parseGroupIdentifierString,
-} from "../utils/group-identifier";
+} from "schooltalk-shared/group-identifier";
 import {
   ClientToServerEvents,
   InterServerEvents,
