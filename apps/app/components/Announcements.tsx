@@ -1,20 +1,20 @@
 import React, { useMemo } from "react";
-import { autoScroll, ListRenderItem } from "@shopify/flash-list";
+import { ListRenderItem } from "@shopify/flash-list";
 import { List, Text, View } from "./Themed";
-import { Dimensions, Pressable, ScrollView, StyleSheet } from "react-native";
-import { Message } from "schooltalk-shared/types";
+import { Pressable, StyleSheet } from "react-native";
+import { Group, Message } from "schooltalk-shared/types";
 import { useMessages } from "../utils/messages-repository";
 import { useCurrentUser } from "../utils/auth";
 import { format, isThisYear, isToday, isYesterday } from "date-fns";
-
 import { getDisplayName } from "schooltalk-shared/misc";
-import navigation from "../navigation";
 import { useNavigation } from "@react-navigation/native";
+import { getSchoolGroupIdentifier } from "schooltalk-shared/group-identifier";
+import config from "../config";
 
 interface AnnouncementProps {
   message: Message;
 }
-function Announcement({ message }: AnnouncementProps) {
+function SingleAnnouncement({ message }: AnnouncementProps) {
   const { user } = useCurrentUser();
   const time = useMemo(() => {
     const date = new Date(message.created_at);
@@ -50,14 +50,15 @@ function Announcement({ message }: AnnouncementProps) {
 }
 
 const renderItem: ListRenderItem<Message> = ({ item }) => (
-  <Announcement message={item} />
+  <SingleAnnouncement message={item} />
 );
 
-function Announcements() {
-  const group = {
-    name: "Don Bosco Guwahati",
-    identifier: "gd=a&sc=clcpuzcxf00001yvt5ppcenso&ty=sc",
-  };
+const group: Group = {
+  name: "School Group",
+  identifier: getSchoolGroupIdentifier(config.schoolId),
+};
+
+export default function Announcements() {
   const messages = useMessages();
   const groupMessages = messages.useFetchGroupMessages(group.identifier, 7);
   const navigation = useNavigation();
@@ -126,5 +127,3 @@ const styles = StyleSheet.create({
     color: "white",
   },
 });
-
-export default Announcements;
