@@ -49,7 +49,6 @@ export default function HomeTabScreen({}: RootTabScreenProps<"HomeTab">) {
           "some",
         ) && <RoutineSlider style={styles.carousel} />}
 
-        {/*  */}
         <Announcements />
       </View>
     </SafeAreaView>
