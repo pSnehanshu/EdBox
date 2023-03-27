@@ -71,13 +71,15 @@ function Announcements() {
         onEndReachedThreshold={1}
         estimatedItemSize={80}
         ListHeaderComponent={<View style={{ height: 15 }} />}
+        ListFooterComponent={() => (
+          <Pressable
+            style={styles.header_text}
+            onPress={() => navigation.navigate("ChatWindow", group)}
+          >
+            <Text>load more</Text>
+          </Pressable>
+        )}
       />
-      <Pressable
-        style={styles.header_text}
-        onPress={() => navigation.navigate("ChatWindow", group)}
-      >
-        <Text>load more</Text>
-      </Pressable>
     </View>
   );
 }
