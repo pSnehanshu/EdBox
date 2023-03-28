@@ -10,6 +10,7 @@ import { getDisplayName } from "schooltalk-shared/misc";
 import { useNavigation } from "@react-navigation/native";
 import { getSchoolGroupIdentifier } from "schooltalk-shared/group-identifier";
 import config from "../config";
+import useColorScheme from "../utils/useColorScheme";
 
 interface AnnouncementProps {
   message: Message;
@@ -62,6 +63,8 @@ export default function Announcements() {
   const messages = useMessages();
   const groupMessages = messages.useFetchGroupMessages(group.identifier, 7);
   const navigation = useNavigation();
+  const scheme = useColorScheme();
+
   return (
     <View>
       <Text style={styles.header_text}>Announcements</Text>
@@ -71,19 +74,13 @@ export default function Announcements() {
 
       {groupMessages.messages.length > 0 && (
         <Pressable
-          style={{
-            flex: 1,
-            padding: 7,
-            borderRadius: 5,
-            borderWidth: 2,
-            justifyContent: "flex-start",
-            marginBottom: 8,
-            marginLeft: "5%",
-            width: "90%",
-          }}
+          style={[
+            styles.view_more_btn_wrapper,
+            { borderColor: scheme === "dark" ? "white" : "black" },
+          ]}
           onPress={() => navigation.navigate("ChatWindow", group)}
         >
-          <Text style={{ textAlign: "center" }}>View more</Text>
+          <Text style={styles.view_more_btn}>View more</Text>
         </Pressable>
       )}
     </View>
@@ -129,7 +126,18 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   message_text: {
-    fontSize: 20,
     color: "white",
+  },
+  view_more_btn: {
+    textAlign: "center",
+  },
+  view_more_btn_wrapper: {
+    flex: 1,
+    padding: 7,
+    borderRadius: 5,
+    borderWidth: 2,
+    marginVertical: 16,
+    marginHorizontal: 24,
+    justifyContent: "flex-start",
   },
 });
