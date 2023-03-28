@@ -65,17 +65,27 @@ export default function Announcements() {
   return (
     <View>
       <Text style={styles.header_text}>Announcements</Text>
-
       {groupMessages.messages.map((message) => (
         <SingleAnnouncement message={message} key={message.id} />
       ))}
 
-      <Pressable
-        style={styles.header_text}
-        onPress={() => navigation.navigate("ChatWindow", group)}
-      >
-        <Text>View more</Text>
-      </Pressable>
+      {groupMessages.messages.length > 0 && (
+        <Pressable
+          style={{
+            flex: 1,
+            padding: 7,
+            borderRadius: 5,
+            borderWidth: 2,
+            justifyContent: "flex-start",
+            marginBottom: 8,
+            marginLeft: "5%",
+            width: "90%",
+          }}
+          onPress={() => navigation.navigate("ChatWindow", group)}
+        >
+          <Text style={{ textAlign: "center" }}>View more</Text>
+        </Pressable>
+      )}
     </View>
   );
 }
