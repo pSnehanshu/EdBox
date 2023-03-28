@@ -1,7 +1,6 @@
-import React, { useMemo } from "react";
-import { ListRenderItem } from "@shopify/flash-list";
+import React, { useCallback, useMemo } from "react";
 import { Text, View } from "./Themed";
-import { Pressable, StyleSheet } from "react-native";
+import { Alert, Pressable, StyleSheet } from "react-native";
 import { Group, Message } from "schooltalk-shared/types";
 import { useMessages } from "../utils/messages-repository";
 import { useCurrentUser } from "../utils/auth";
@@ -33,26 +32,58 @@ function SingleAnnouncement({ message }: AnnouncementProps) {
     return `${format(date, "dd/MM/yy")} ${time}`;
   }, [message.created_at]);
 
+  const sender = message.Sender;
+  const shouldCollapse = message.text.length > config.previewMessageLength;
+  const trimmedMessage = useMemo(
+    () =>
+      shouldCollapse
+        ? message.text.slice(0, config.previewMessageLength).trimEnd()
+        : message.text,
+    [message.text],
+  );
+  const senderDisplayName = useMemo(() => getDisplayName(sender), [sender]);
+  const viewFullMessage = useCallback(() => {
+    if (shouldCollapse) {
+      Alert.alert(senderDisplayName, message.text);
+    }
+  }, [senderDisplayName, message.text, shouldCollapse]);
+
   if (!user) return null;
 
-  const sender = message.Sender;
   const isSentByMe = user.id === sender.id;
 
   return (
     <View style={styles.container}>
-      {isSentByMe ? (
-        <Text style={styles.name_text}>You</Text>
-      ) : (
-        <Text style={styles.name_text}>{getDisplayName(sender)}</Text>
+      <View style={styles.announcement_header}>
+        {isSentByMe ? (
+          <Text style={styles.name_text}>You</Text>
+        ) : (
+          <Text style={styles.name_text}>{senderDisplayName}</Text>
+        )}
+
+        <Text style={styles.time}>{time}</Text>
+      </View>
+
+      <Pressable
+        style={({ pressed }) => ({
+          opacity: pressed ? 0.4 : 1,
+        })}
+        onPress={viewFullMessage}
+      >
+        <Text style={styles.message_text}>
+          {trimmedMessage}
+          {shouldCollapse ? "..." : ""}
+        </Text>
+      </Pressable>
+
+      {shouldCollapse && (
+        <Pressable onPress={viewFullMessage}>
+          <Text style={styles.read_more_btn}>Read more</Text>
+        </Pressable>
       )}
-      <Text style={styles.message_text}>{message.text}</Text>
     </View>
   );
 }
-
-const renderItem: ListRenderItem<Message> = ({ item }) => (
-  <SingleAnnouncement message={item} />
-);
 
 const group: Group = {
   name: "School Group",
@@ -90,7 +121,7 @@ export default function Announcements() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 4,
+    paddingVertical: 8,
     paddingLeft: 16,
     shadowColor: "gray",
     shadowRadius: 8,
@@ -99,12 +130,10 @@ const styles = StyleSheet.create({
       width: 8,
     },
     borderRadius: 8,
-    minHeight: 80,
     justifyContent: "flex-start",
     backgroundColor: "#4E58B2",
     marginBottom: 8,
-    marginLeft: "5%",
-    width: "90%",
+    marginHorizontal: 24,
   },
   header_text: {
     fontSize: 25,
@@ -113,17 +142,22 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 16,
   },
+  announcement_header: {
+    backgroundColor: "transparent",
+    paddingVertical: 4,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
   time: {
-    fontSize: 10,
+    fontSize: 12,
     textAlign: "right",
     paddingRight: 6,
-    paddingBottom: 4,
     opacity: 0.6,
   },
   name_text: {
-    fontSize: 18,
-    color: "gray",
-    marginTop: 8,
+    fontSize: 12,
+    opacity: 0.6,
+    textDecorationLine: "underline",
   },
   message_text: {
     color: "white",
@@ -139,5 +173,10 @@ const styles = StyleSheet.create({
     marginVertical: 16,
     marginHorizontal: 24,
     justifyContent: "flex-start",
+  },
+  read_more_btn: {
+    textDecorationLine: "underline",
+    color: "#50b4c1",
+    fontSize: 10,
   },
 });
