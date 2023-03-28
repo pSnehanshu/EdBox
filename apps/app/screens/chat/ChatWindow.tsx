@@ -1,6 +1,11 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Button, StyleSheet } from "react-native";
+import {
+  ActivityIndicator,
+  Button,
+  StyleSheet,
+  ImageBackground,
+} from "react-native";
 import type { ListRenderItem } from "@shopify/flash-list";
 import { List, Text, TextInput, View } from "../../components/Themed";
 import { RootStackParamList } from "../../utils/types/common";
@@ -69,49 +74,59 @@ export default function ChatWindowScreen({
 
   return (
     <View style={styles.container}>
-      {/* TODO: Add a manual load more button to the top of the chat list.
-      this is because sometimes onEndReached is not triggered */}
-      <List
-        inverted
-        data={groupMessages.messages}
-        renderItem={renderItem}
-        onEndReached={groupMessages.fetchNextPage}
-        onEndReachedThreshold={1}
-        estimatedItemSize={80}
-        ListFooterComponent={chatEndElement}
-        ListHeaderComponent={<View style={styles.messagesHeadElement} />}
-      />
-
-      <View style={styles.composer}>
-        <TextInput
-          value={messageText}
-          placeholder="Message"
-          onChangeText={setMessageText}
-          style={styles.composerText}
+      <ImageBackground
+        source={require("../../assets/images/chat-bg.jpg")}
+        style={styles.image}
+      >
+        {/* TODO: Add a manual load more button to the top of the chat list. this is because sometimes onEndReached is not triggered */}
+        <List
+          inverted
+          data={groupMessages.messages}
+          renderItem={renderItem}
+          onEndReached={groupMessages.fetchNextPage}
+          onEndReachedThreshold={1}
+          estimatedItemSize={170}
+          ListFooterComponent={chatEndElement}
+          ListHeaderComponent={<View style={styles.messagesHeadElement} />}
+          contentContainerStyle={{ backgroundColor: "transparent" }}
         />
 
-        <Ionicons.Button
-          name="send"
-          style={styles.composerSendBtn}
-          onPress={() => {
-            if (!messageText.trim()) return;
-            messages.sendMessage(groupInfo.identifier, messageText.trim());
-            setMessageText("");
-          }}
-        >
-          Send
-        </Ionicons.Button>
-      </View>
+        <View style={styles.composer}>
+          <TextInput
+            value={messageText}
+            placeholder="Message"
+            onChangeText={setMessageText}
+            style={styles.composerText}
+          />
+
+          <Ionicons.Button
+            name="send"
+            style={styles.composerSendBtn}
+            onPress={() => {
+              if (!messageText.trim()) return;
+              messages.sendMessage(groupInfo.identifier, messageText.trim());
+              setMessageText("");
+            }}
+          >
+            Send
+          </Ionicons.Button>
+        </View>
+      </ImageBackground>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  image: {
+    flex: 1,
+    justifyContent: "center",
+  },
   container: {
     flex: 1,
   },
   messagesHeadElement: {
-    height: 16,
+    height: 24,
+    backgroundColor: "transparent",
   },
   composer: {
     flex: 0,
@@ -136,7 +151,13 @@ const styles = StyleSheet.create({
   },
   endOfChat: {
     textAlign: "center",
-    padding: 16,
-    opacity: 0.7,
+    padding: 8,
+    marginBottom: 32,
+    marginHorizontal: 48,
+    marginTop: 8,
+    borderRadius: 8,
+    fontSize: 16,
+    color: "white",
+    backgroundColor: "#1f2c34aa",
   },
 });
