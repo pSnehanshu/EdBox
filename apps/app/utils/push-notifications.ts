@@ -11,7 +11,7 @@ Notifications.setNotificationHandler({
 });
 
 export async function getPushToken() {
-  if (Device.isDevice) {
+  if (!Device.isDevice) {
     throw new Error("Must use physical device for Push Notifications");
   }
 
