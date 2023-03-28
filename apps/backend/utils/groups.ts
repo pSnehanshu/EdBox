@@ -8,7 +8,7 @@ import {
   getSectionGroupIdentifier,
   getSubjectGroupIdentifier,
   GroupIdentifier,
-} from "./group-identifier";
+} from "schooltalk-shared/group-identifier";
 import _ from "lodash";
 import { Group } from "schooltalk-shared/types";
 

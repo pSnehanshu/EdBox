@@ -256,19 +256,14 @@ export function getColorBrightness(hexColor: string) {
 }
 
 /**
- * Get negative color of a color
+ * Get negative color of a color (See: https://stackoverflow.com/a/54569758/9990365)
  * @param hexColor
  */
 export function getNegativeColor(hexColor: string) {
-  function padZero(str: number, len = 2) {
-    const zeros = new Array(len).join("0");
-    return (zeros + str.toString()).slice(-len);
-  }
-
-  const rgb = hexToRgb(hexColor);
-  if (!rgb) return hexColor;
-
-  return "#" + padZero(rgb.r) + padZero(rgb.g) + padZero(rgb.b);
+  return (
+    "#" +
+    (Number(`0x1${hexColor.slice(1)}`) ^ 0xffffff).toString(16).substring(1)
+  );
 }
 
 /**

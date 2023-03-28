@@ -7,7 +7,7 @@ import { getUserGroups } from "../../../utils/groups";
 import {
   convertObjectToOrderedQueryString,
   groupIdentifierSchema,
-} from "../../../utils/group-identifier";
+} from "schooltalk-shared/group-identifier";
 import { t, authMiddleware } from "../../trpc";
 
 const messagingRouter = t.router({

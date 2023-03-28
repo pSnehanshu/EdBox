@@ -1,4 +1,8 @@
-import { MaterialCommunityIcons, FontAwesome } from "@expo/vector-icons";
+import {
+  MaterialCommunityIcons,
+  FontAwesome,
+  Ionicons,
+} from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
   NavigationContainer,
@@ -226,34 +230,34 @@ function BottomTabNavigator() {
         options={{
           title: "Home",
           headerTitle: school?.name ?? "Home",
-          headerShown: true,
-          tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons
-              name="home"
+          headerShown: false,
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons
+              name={focused ? "home-sharp" : "home-outline"}
               size={30}
               style={{ marginBottom: -3 }}
               color={color}
             />
           ),
-          headerRight: () => (
-            <View style={{ flexDirection: "row" }}>
-              {school?.website ? (
-                <Pressable
-                  onPress={() => WebBrowser.openBrowserAsync(school?.website!)}
-                  style={({ pressed }) => ({
-                    opacity: pressed ? 0.5 : 1,
-                  })}
-                >
-                  <MaterialCommunityIcons
-                    name="web"
-                    size={25}
-                    color={Colors[scheme].text}
-                    style={{ marginRight: 15 }}
-                  />
-                </Pressable>
-              ) : null}
-            </View>
-          ),
+          // headerRight: () => (
+          //   <View style={{ flexDirection: "row" }}>
+          //     {school?.website ? (
+          //       <Pressable
+          //         onPress={() => WebBrowser.openBrowserAsync(school?.website!)}
+          //         style={({ pressed }) => ({
+          //           opacity: pressed ? 0.5 : 1,
+          //         })}
+          //       >
+          //         <MaterialCommunityIcons
+          //           name="web"
+          //           size={25}
+          //           color={Colors[scheme].text}
+          //           style={{ marginRight: 15 }}
+          //         />
+          //       </Pressable>
+          //     ) : null}
+          //   </View>
+          // ),
         }}
       />
       <BottomTab.Screen
@@ -262,9 +266,9 @@ function BottomTabNavigator() {
         options={{
           title: "Chats",
           headerShown: true,
-          tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons
-              name="chat"
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons
+              name={focused ? "ios-chatbox" : "chatbox-outline"}
               size={30}
               style={{ marginBottom: -3 }}
               color={color}
@@ -280,9 +284,9 @@ function BottomTabNavigator() {
             options={{
               title: "Routine",
               headerShown: true,
-              tabBarIcon: ({ color }) => (
-                <MaterialCommunityIcons
-                  name="timetable"
+              tabBarIcon: ({ focused, color }) => (
+                <Ionicons
+                  name={focused ? "md-timer-sharp" : "md-timer-outline"}
                   size={30}
                   style={{ marginBottom: -3 }}
                   color={color}
@@ -297,9 +301,9 @@ function BottomTabNavigator() {
             options={{
               title: "Exams",
               headerShown: true,
-              tabBarIcon: ({ color }) => (
-                <FontAwesome
-                  name="pencil-square-o"
+              tabBarIcon: ({ focused, color }) => (
+                <Ionicons
+                  name={focused ? "newspaper" : "newspaper-outline"}
                   size={30}
                   style={{ marginBottom: -3 }}
                   color={color}
@@ -316,9 +320,9 @@ function BottomTabNavigator() {
         options={{
           title: "Settings",
           headerShown: true,
-          tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons
-              name="cog"
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons
+              name={focused ? "settings-sharp" : "settings-outline"}
               size={30}
               style={{ marginBottom: -3 }}
               color={color}

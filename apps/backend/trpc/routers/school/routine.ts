@@ -44,7 +44,12 @@ const routineRouter = t.router({
     }),
   fetchForTeacher: t.procedure
     .use(teacherMiddleware)
-    .input(z.object({ dateOfAttendance }))
+    .input(
+      z.object({
+        dateOfAttendance,
+        daysOfWeek: z.nativeEnum(DayOfWeek).array().default([]),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       const periods = await prisma.routinePeriod.findMany({
         where: {
@@ -57,6 +62,8 @@ const routineRouter = t.router({
           Subject: {
             is_active: true,
           },
+          day_of_week:
+            input.daysOfWeek.length > 0 ? { in: input.daysOfWeek } : undefined,
         },
         include: {
           Class: {
@@ -97,7 +104,12 @@ const routineRouter = t.router({
     }),
   fetchForStudent: t.procedure
     .use(studentMiddleware)
-    .input(z.object({ dateOfAttendance }))
+    .input(
+      z.object({
+        dateOfAttendance,
+        daysOfWeek: z.nativeEnum(DayOfWeek).array().default([]),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       if (typeof ctx.student.section !== "number") {
         throw new TRPCError({
@@ -133,6 +145,10 @@ const routineRouter = t.router({
                       Subject: {
                         is_active: true,
                       },
+                      day_of_week:
+                        input.daysOfWeek.length > 0
+                          ? { in: input.daysOfWeek }
+                          : undefined,
                     },
                     include: {
                       Subject: {

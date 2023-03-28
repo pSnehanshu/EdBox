@@ -1,7 +1,12 @@
-import { StyleSheet } from "react-native";
-import { Text, View } from "../components/Themed";
+import { SafeAreaView, StyleSheet } from "react-native";
+import { StaticRole, hasUserStaticRoles } from "schooltalk-shared/misc";
+import { Text, View, ScrollView } from "../components/Themed";
 import { RootTabScreenProps } from "../utils/types/common";
 import { useCurrentUser } from "../utils/auth";
+import { useSchool } from "../utils/useSchool";
+import { RoutineSlider } from "../components/RoutineSlider";
+import Announcements from "../components/Announcements";
+import useColorScheme from "../utils/useColorScheme";
 
 /**
  * Get a greeting by the time of day.
@@ -23,26 +28,59 @@ function greeting(date: Date): string {
 
 export default function HomeTabScreen({}: RootTabScreenProps<"HomeTab">) {
   const { user } = useCurrentUser();
+  const school = useSchool();
+  const scheme = useColorScheme();
 
   if (!user) return null;
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>
-        {greeting(new Date())}, {user.name}!
-      </Text>
+      <ScrollView stickyHeaderIndices={[0]}>
+        {/* header */}
+        <View
+          style={[
+            styles.header_container,
+            { backgroundColor: scheme === "dark" ? "black" : "white" },
+          ]}
+        >
+          <Text style={styles.text_head}>
+            {greeting(new Date())}, {user.name.split(" ")[0]}
+          </Text>
+          <Text style={styles.text}>Welcome to {school?.name ?? "Home"}</Text>
+        </View>
+
+        {/* Routine carousel */}
+        {hasUserStaticRoles(
+          user,
+          [StaticRole.student, StaticRole.teacher],
+          "some",
+        ) && <RoutineSlider style={styles.carousel} />}
+
+        <Announcements />
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    marginTop: 0,
+  },
+  header_container: {
+    paddingTop: 55,
+    paddingLeft: 30,
+    paddingBottom: 10,
   },
   title: {
     fontSize: 20,
     fontWeight: "bold",
+  },
+  text_head: {
+    fontSize: 30,
+    fontWeight: "500",
+  },
+  text: { fontSize: 18 },
+  carousel: {
+    paddingTop: 5,
   },
 });
