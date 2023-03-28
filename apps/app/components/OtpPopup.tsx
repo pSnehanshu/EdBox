@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useCallback, useState } from "react";
 import { Alert, Modal, StyleSheet, Pressable } from "react-native";
 import { trpc } from "../utils/trpc";
 import { useSetAuthToken } from "../utils/auth";
@@ -6,6 +6,7 @@ import config from "../config";
 import Spinner from "react-native-loading-spinner-overlay";
 import { View, Text, TextInput } from "./Themed";
 import useColorScheme from "../utils/useColorScheme";
+import { getPushToken } from "../utils/push-notifications";
 
 interface props {
   visible: boolean;
@@ -23,8 +24,8 @@ export default function OtpPopup({
   const setAuthToken = useSetAuthToken();
   const [otp, setOtp] = useState<string | null>(null);
 
-  const submitOTP = trpc.auth.submitLoginOTP.useMutation({
-    onSuccess(data) {
+  const submitOTPMutation = trpc.auth.submitLoginOTP.useMutation({
+    async onSuccess(data) {
       setAuthToken(data.token, new Date(data.expiry_date));
     },
     onError(error, variables, context) {
@@ -33,24 +34,43 @@ export default function OtpPopup({
       setOtp(null);
     },
   });
+
+  const onSubmit = useCallback(async () => {
+    if (userId && otp) {
+      submitOTPMutation.mutate({
+        userId,
+        otp,
+        schoolId: config.schoolId,
+        // Also pass device push token if possible
+        pushToken: await getPushToken()
+          .then((token) => ({
+            token,
+            type: "expo" as const,
+          }))
+          .catch((err) => {
+            alert((err as any)?.message);
+            return undefined;
+          }),
+      });
+    }
+  }, [userId, otp]);
+
   const color = useColorScheme();
   const blurBg = color === "dark" ? "rgba(0,0,0,.6)" : "rgba(255,255,255,.6)";
 
   return (
     <View style={styles.centeredView}>
-      <Spinner visible={submitOTP.isLoading} textContent="Please wait..." />
+      <Spinner
+        visible={submitOTPMutation.isLoading}
+        textContent="Please wait..."
+      />
       <Modal
         animationType="slide"
         transparent={true}
         visible={visible}
-        onRequestClose={() => onClose?.()}
+        onRequestClose={onClose}
       >
-        <View
-          style={{
-            ...styles.centeredView,
-            backgroundColor: blurBg,
-          }}
-        >
+        <View style={[styles.centeredView, { backgroundColor: blurBg }]}>
           <View style={styles.modalView}>
             <Text style={styles.mainText}>Verification Code</Text>
             {description && <Text style={styles.subText}>{description}</Text>}
@@ -63,23 +83,14 @@ export default function OtpPopup({
               keyboardType="number-pad"
               maxLength={6}
             />
-            <Pressable
-              style={styles.button}
-              onPress={() => {
-                if (userId && otp) {
-                  submitOTP.mutate({
-                    userId,
-                    otp,
-                    schoolId: config.schoolId,
-                  });
-                }
-              }}
-            >
+            <Pressable style={styles.button} onPress={onSubmit}>
               <Text style={styles.textStyle}>Submit</Text>
             </Pressable>
-            <Pressable onPress={() => onClose?.()}>
-              <Text>Cancel</Text>
-            </Pressable>
+            {onClose && (
+              <Pressable onPress={onClose}>
+                <Text>Cancel</Text>
+              </Pressable>
+            )}
           </View>
         </View>
       </Modal>

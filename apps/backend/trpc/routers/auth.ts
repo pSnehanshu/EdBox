@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { PushTokenType, User } from "@prisma/client";
 import { t, authMiddleware } from "../trpc";
 import { z } from "zod";
 import prisma from "../../prisma";
@@ -132,6 +132,12 @@ const authRouter = t.router({
         otp: z.string().regex(/^\d+$/).length(CONFIG.otpLength),
         userId: z.string().cuid(),
         schoolId: z.string().cuid(),
+        pushToken: z
+          .object({
+            token: z.string(),
+            type: z.nativeEnum(PushTokenType),
+          })
+          .optional(),
       }),
     )
     .mutation(async ({ input }) => {
@@ -162,21 +168,44 @@ const authRouter = t.router({
       }
 
       // OTP correct, create session and remove otp
-      const [session] = await prisma.$transaction([
-        prisma.loginSession.create({
+      const session = await prisma.$transaction(async (tx) => {
+        // Create the session
+        const s = await tx.loginSession.create({
           data: {
             expiry_date: addMonths(new Date(), 2),
             user_id: user.id,
           },
-        }),
-        prisma.user.update({
+        });
+
+        // Remove OTP
+        await tx.user.update({
           where: { id: user.id },
           data: {
             otp: null,
             otp_expiry: null,
           },
-        }),
-      ]);
+        });
+
+        if (input.pushToken) {
+          // Delete existing records of the same token
+          await tx.pushToken.deleteMany({
+            where: {
+              token: input.pushToken.token,
+            },
+          });
+
+          // Create new record
+          await tx.pushToken.create({
+            data: {
+              token: input.pushToken.token,
+              type: input.pushToken.type,
+              user_id: user.id,
+            },
+          });
+        }
+
+        return s;
+      });
 
       return {
         token: session.id,
@@ -188,23 +217,49 @@ const authRouter = t.router({
     .query(({ ctx }) =>
       _.omit(ctx.user, ["password", "otp", "otp_expiry", "School"]),
     ),
-  logout: t.procedure.use(authMiddleware).mutation(async ({ ctx }) => {
-    try {
-      await prisma.loginSession.delete({
-        where: {
-          id: ctx.session.id,
-        },
-      });
+  logout: t.procedure
+    .use(authMiddleware)
+    .input(
+      z.object({
+        pushToken: z
+          .object({
+            token: z.string(),
+            type: z.nativeEnum(PushTokenType),
+          })
+          .optional(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      try {
+        await prisma.$transaction(async (tx) => {
+          // Remove the session
+          await tx.loginSession.delete({
+            where: {
+              id: ctx.session.id,
+            },
+          });
 
-      return null;
-    } catch (error) {
-      console.error("Logout failed", error);
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: (error as any)?.message ?? "Something went wrong",
-      });
-    }
-  }),
+          // Remove push token
+          if (input.pushToken) {
+            await tx.pushToken.deleteMany({
+              where: {
+                token: input.pushToken.token,
+                user_id: ctx.user.id,
+                type: input.pushToken.type,
+              },
+            });
+          }
+        });
+
+        return null;
+      } catch (error) {
+        console.error("Logout failed", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: (error as any)?.message ?? "Something went wrong",
+        });
+      }
+    }),
   rollNumberLoginRequestOTP: t.procedure
     .input(
       z.object({

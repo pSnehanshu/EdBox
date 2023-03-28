@@ -71,6 +71,7 @@ model User {
   Messages            Message[]
   TestsCreated        ExamTest[]
   DynamicRoles        RoleUserMapping[]
+  PushTokens          PushToken[]
 
   @@unique([email, school_id])
   @@unique([phone_isd_code, phone, school_id])
@@ -431,4 +432,20 @@ model RoleUserMapping {
   Role    DynamicRole @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@id([user_id, role_id])
+}
+
+model PushToken {
+  token      String
+  user_id    String        @db.VarChar(32)
+  User       User          @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  type       PushTokenType
+  created_at DateTime      @default(now())
+
+  @@id([token, user_id])
+}
+
+enum PushTokenType {
+  expo
+  fcm
+  apn
 }

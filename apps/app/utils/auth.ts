@@ -7,6 +7,7 @@ import type { User } from "schooltalk-shared/types";
 import { trpc } from "./trpc";
 import { AUTH_TOKEN, AUTH_TOKEN_EXPIRY, USER } from "./async-storage-keys";
 import { useDB } from "./db";
+import { getPushToken } from "./push-notifications";
 
 /**
  * Get the current token
@@ -49,13 +50,10 @@ export async function setAuthToken(token: string, expiry: Date): Promise<void> {
 export function useSetAuthToken() {
   const utils = trpc.useContext();
 
-  return useCallback<typeof setAuthToken>(
-    async (token: string, expiry: Date) => {
-      await setAuthToken(token, expiry);
-      utils.auth.whoami.invalidate();
-    },
-    [],
-  );
+  return useCallback(async (token: string, expiry: Date) => {
+    await setAuthToken(token, expiry);
+    utils.auth.whoami.invalidate();
+  }, []);
 }
 
 export function useLogout() {
@@ -99,7 +97,22 @@ export function useLogout() {
     },
   });
 
-  return useCallback(() => logoutMutation.mutate(), []);
+  return useCallback(
+    async () =>
+      logoutMutation.mutate({
+        // Submit token to get it removed if possible
+        pushToken: await getPushToken()
+          .then((token) => ({
+            token,
+            type: "expo" as const,
+          }))
+          .catch((err) => {
+            console.error(err);
+            return undefined;
+          }),
+      }),
+    [],
+  );
 }
 
 /**
