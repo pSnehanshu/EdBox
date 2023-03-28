@@ -1,14 +1,15 @@
-import { memo, useMemo } from "react";
+import { memo, useCallback, useMemo } from "react";
 import { format, isThisYear, isToday, isYesterday } from "date-fns";
 import { useCurrentUser } from "../utils/auth";
 import { Text, View } from "./Themed";
-import { Pressable, StyleSheet } from "react-native";
+import { Alert, Pressable, StyleSheet } from "react-native";
 import type { Message } from "schooltalk-shared/types";
 import {
   getDisplayName,
   getTextColorForGivenBG,
   getUserColor,
 } from "schooltalk-shared/misc";
+import config from "../config";
 
 interface ChatMessageProps {
   message: Message;
@@ -36,20 +37,41 @@ function ChatMessage({ message }: ChatMessageProps) {
   const sender = message.Sender;
   const isSentByMe = user.id === sender.id;
 
-  const userColor = useMemo(
-    () => getUserColor(message.Sender.id),
-    [message.Sender.id],
+  const bgColor = useMemo(
+    () => (isSentByMe ? "#005d4b" : "#1f2c34"),
+    [isSentByMe],
   );
-  const color = useMemo(() => getTextColorForGivenBG(userColor), [userColor]);
+  const color = useMemo(() => getTextColorForGivenBG(bgColor), [bgColor]);
+  const senderDisplayName = useMemo(() => getDisplayName(sender), [sender]);
+  const senderColor = useMemo(
+    () => getUserColor(message.sender_id),
+    [message.sender_id],
+  );
+
+  const shouldCollapse = message.text.length > config.previewMessageLength;
+  const trimmedMessage = useMemo(
+    () =>
+      shouldCollapse
+        ? message.text.slice(0, config.previewMessageLength).trimEnd()
+        : message.text,
+    [message.text],
+  );
+
+  const viewFullMessage = useCallback(() => {
+    if (shouldCollapse) {
+      Alert.alert(senderDisplayName, message.text);
+    }
+  }, [senderDisplayName, message.text, shouldCollapse]);
 
   return (
     <View
-      style={{
-        ...styles.container,
-        backgroundColor: userColor,
-        width: "75%",
-        alignSelf: isSentByMe ? "flex-end" : "flex-start",
-      }}
+      style={[
+        styles.container,
+        {
+          backgroundColor: bgColor,
+          alignSelf: isSentByMe ? "flex-end" : "flex-start",
+        },
+      ]}
     >
       {isSentByMe ? null : (
         <Pressable
@@ -58,13 +80,31 @@ function ChatMessage({ message }: ChatMessageProps) {
             alert(`User: ${sender.name}\nID: ${sender.id}`);
           }}
         >
-          <Text style={{ ...styles.senderName, color }}>
-            {getDisplayName(sender)}
+          <Text style={[styles.senderName, { color: senderColor }]}>
+            {senderDisplayName}
           </Text>
         </Pressable>
       )}
-      <Text style={{ ...styles.body, color }}>{message.text}</Text>
-      <Text style={{ ...styles.time, color }}>{time}</Text>
+
+      <Pressable
+        onPress={viewFullMessage}
+        style={({ pressed }) => ({
+          opacity: pressed ? 0.4 : 1,
+        })}
+      >
+        <Text style={[styles.body, { color }]}>
+          {trimmedMessage}
+          {shouldCollapse ? "..." : ""}
+        </Text>
+      </Pressable>
+
+      {shouldCollapse && (
+        <Pressable onPress={viewFullMessage}>
+          <Text style={styles.viewMoreBtn}>Read more</Text>
+        </Pressable>
+      )}
+
+      <Text style={[styles.time, { color }]}>{time}</Text>
     </View>
   );
 }
@@ -74,6 +114,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 4,
     paddingLeft: 16,
+    paddingRight: 8,
     margin: 4,
     shadowColor: "gray",
     shadowRadius: 8,
@@ -82,7 +123,8 @@ const styles = StyleSheet.create({
       width: 8,
     },
     borderRadius: 8,
-    minHeight: 80,
+    width: "75%",
+    marginHorizontal: 16,
   },
   senderName: {
     fontSize: 12,
@@ -98,6 +140,11 @@ const styles = StyleSheet.create({
     paddingRight: 6,
     paddingBottom: 4,
     opacity: 0.6,
+  },
+  viewMoreBtn: {
+    textDecorationLine: "underline",
+    color: "#50b4c1",
+    fontSize: 10,
   },
 });
 
