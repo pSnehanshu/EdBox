@@ -6,6 +6,7 @@ import { useCurrentUser } from "../utils/auth";
 import { useSchool } from "../utils/useSchool";
 import { RoutineSlider } from "../components/RoutineSlider";
 import Announcements from "../components/Announcements";
+import useColorScheme from "../utils/useColorScheme";
 
 /**
  * Get a greeting by the time of day.
@@ -28,6 +29,7 @@ function greeting(date: Date): string {
 export default function HomeTabScreen({}: RootTabScreenProps<"HomeTab">) {
   const { user } = useCurrentUser();
   const school = useSchool();
+  const scheme = useColorScheme();
 
   if (!user) return null;
 
@@ -35,7 +37,12 @@ export default function HomeTabScreen({}: RootTabScreenProps<"HomeTab">) {
     <View style={styles.container}>
       <ScrollView stickyHeaderIndices={[0]}>
         {/* header */}
-        <View style={styles.header_container}>
+        <View
+          style={[
+            styles.header_container,
+            { backgroundColor: scheme === "dark" ? "black" : "white" },
+          ]}
+        >
           <Text style={styles.text_head}>
             {greeting(new Date())}, {user.name.split(" ")[0]}
           </Text>
@@ -57,11 +64,9 @@ export default function HomeTabScreen({}: RootTabScreenProps<"HomeTab">) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#F1F1F1",
     marginTop: 0,
   },
   header_container: {
-    backgroundColor: "white",
     paddingTop: 55,
     paddingLeft: 30,
     paddingBottom: 10,
