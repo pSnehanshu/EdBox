@@ -32,8 +32,8 @@ export default function HomeTabScreen({}: RootTabScreenProps<"HomeTab">) {
   if (!user) return null;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView>
+    <View style={styles.container}>
+      <ScrollView stickyHeaderIndices={[0]}>
         {/* header */}
         <View style={styles.header_container}>
           <Text style={styles.text_head}>
@@ -51,7 +51,7 @@ export default function HomeTabScreen({}: RootTabScreenProps<"HomeTab">) {
 
         <Announcements />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -61,8 +61,10 @@ const styles = StyleSheet.create({
     marginTop: 0,
   },
   header_container: {
-    paddingTop: 70,
+    backgroundColor: "white",
+    paddingTop: 55,
     paddingLeft: 30,
+    paddingBottom: 10,
   },
   title: {
     fontSize: 20,
