@@ -9,7 +9,7 @@ import { useCurrentUser, useLogout } from "../../utils/auth";
 import { hasUserStaticRoles, StaticRole } from "schooltalk-shared/misc";
 import { SettingsOption } from "../../utils/types/common";
 
-export function SettingsScreen() {
+export default function SettingsScreen() {
   const { scheme: colorScheme, change } = useContext(ColorSchemeContext);
   const iconColor = colorScheme === "dark" ? "white" : "black";
   const navigation = useNavigation();
