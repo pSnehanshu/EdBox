@@ -32,6 +32,7 @@ export type RootStackParamList = {
   TestDetails: { testId: string };
   ExamDetails: { examId: string };
   AboutApp: undefined;
+  ExamsScreen: undefined;
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> =
@@ -43,6 +44,7 @@ export type RootTabParamList = {
   Routine: undefined;
   Settings: undefined;
   ExamsTab: undefined;
+  Menu: undefined;
 };
 
 export type RootTabScreenProps<Screen extends keyof RootTabParamList> =

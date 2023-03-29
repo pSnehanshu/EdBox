@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useContext } from "react";
 import { hasUserStaticRoles, StaticRole } from "schooltalk-shared/misc";
@@ -8,10 +8,10 @@ import { ColorSchemeContext } from "../utils/useColorScheme";
 import { useSchool } from "../utils/useSchool";
 import Colors from "../constants/Colors";
 import ChatsListScreen from "../screens/chat/ChatsTabScreen";
-import ExamListScreen from "../screens/exam/ExamList";
 import HomeTabScreen from "../screens/HomeTabScreen";
 import RoutineScreen from "../screens/routine/RoutineScreen";
 import SettingsScreen from "../screens/settings/SettingsScreen";
+import MenuScreen from "../screens/MenuScreen";
 
 /**
  * A bottom tab navigator displays tab buttons on the bottom of the display to switch screens.
@@ -69,6 +69,24 @@ export function BottomTabNavigator() {
           ),
         }}
       />
+
+      <BottomTab.Screen
+        name="Menu"
+        component={MenuScreen}
+        options={{
+          title: "Menu",
+          headerShown: true,
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons
+              name="dots-grid"
+              size={30}
+              style={{ marginBottom: -3 }}
+              color={color}
+            />
+          ),
+        }}
+      />
+
       {isStudentOrTeacher ? (
         <>
           <BottomTab.Screen
@@ -80,23 +98,6 @@ export function BottomTabNavigator() {
               tabBarIcon: ({ focused, color }) => (
                 <Ionicons
                   name={focused ? "md-timer-sharp" : "md-timer-outline"}
-                  size={30}
-                  style={{ marginBottom: -3 }}
-                  color={color}
-                />
-              ),
-            }}
-          />
-
-          <BottomTab.Screen
-            name="ExamsTab"
-            component={ExamListScreen}
-            options={{
-              title: "Exams",
-              headerShown: true,
-              tabBarIcon: ({ focused, color }) => (
-                <Ionicons
-                  name={focused ? "newspaper" : "newspaper-outline"}
                   size={30}
                   style={{ marginBottom: -3 }}
                   color={color}
