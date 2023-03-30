@@ -40,6 +40,7 @@ model School {
   Exams              Exam[]
   Tests              ExamTest[]
   DynamicRoles       DynamicRole[]
+  Homeworks          Homework[]
 }
 
 model User {
@@ -92,6 +93,7 @@ model Subject {
   updated_at DateTime             @updatedAt
   Periods    RoutinePeriod[]
   Tests      TestSubjectMapping[]
+  Homeworks  Homework[]
 }
 
 model ClassStd {
@@ -107,6 +109,7 @@ model ClassStd {
   Batch      StudentsBatch?
   Periods    RoutinePeriod[]
   Tests      ExamTest[]
+  Homeworks  Homework[]
 
   @@id([numeric_id, school_id])
 }
@@ -120,6 +123,7 @@ model ClassSection {
   name       String?         @db.VarChar(10)
   Periods    RoutinePeriod[]
   Tests      ExamTest[]
+  Homeworks  Homework[]
 
   @@id([numeric_id, class_id, school_id])
 }
@@ -230,34 +234,37 @@ model StudentsBatch {
 }
 
 model Student {
-  id                String                  @id @default(cuid()) @db.VarChar(32)
-  school_id         String                  @db.VarChar(32)
-  School            School                  @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  roll_num          Int                     @db.SmallInt
-  joining_batch_num Int                     @db.SmallInt
-  JoiningBatch      StudentsBatch           @relation("JoiningBatch", fields: [joining_batch_num, school_id], references: [numeric_id, school_id], onDelete: Restrict)
-  current_batch_num Int?                    @db.SmallInt
-  CurrentBatch      StudentsBatch?          @relation("CurrentBatch", fields: [current_batch_num, school_id], references: [numeric_id, school_id], onDelete: Restrict)
-  section           Int?                    @db.SmallInt
-  created_at        DateTime                @default(now())
-  updated_at        DateTime                @updatedAt
-  Parents           ParentStudent_mapping[]
-  User              User?
-  Attendances       StudentAttendance[]
-  TestResults       ExamTestResult[]
+  id                  String                  @id @default(cuid()) @db.VarChar(32)
+  school_id           String                  @db.VarChar(32)
+  School              School                  @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  roll_num            Int                     @db.SmallInt
+  joining_batch_num   Int                     @db.SmallInt
+  JoiningBatch        StudentsBatch           @relation("JoiningBatch", fields: [joining_batch_num, school_id], references: [numeric_id, school_id], onDelete: Restrict)
+  current_batch_num   Int?                    @db.SmallInt
+  CurrentBatch        StudentsBatch?          @relation("CurrentBatch", fields: [current_batch_num, school_id], references: [numeric_id, school_id], onDelete: Restrict)
+  section             Int?                    @db.SmallInt
+  created_at          DateTime                @default(now())
+  updated_at          DateTime                @updatedAt
+  Parents             ParentStudent_mapping[]
+  User                User?
+  Attendances         StudentAttendance[]
+  TestResults         ExamTestResult[]
+  HomeworkSubmissions HomeworkSubmission[]
 
   @@unique([roll_num, section, current_batch_num])
 }
 
 model Teacher {
-  id               String             @id @default(cuid()) @db.VarChar(32)
-  school_id        String             @db.VarChar(32)
-  School           School             @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  created_at       DateTime           @default(now())
-  updated_at       DateTime           @updatedAt
-  Periods          RoutinePeriod[]
-  User             User?
-  AttendancesTaken PeriodAttendance[]
+  id                        String                     @id @default(cuid()) @db.VarChar(32)
+  school_id                 String                     @db.VarChar(32)
+  School                    School                     @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  created_at                DateTime                   @default(now())
+  updated_at                DateTime                   @updatedAt
+  Periods                   RoutinePeriod[]
+  User                      User?
+  AttendancesTaken          PeriodAttendance[]
+  Homeworks                 Homework[]
+  HomeworkSubmissionRemarks HomeworkSubmissionRemark[]
 }
 
 model Parent {
@@ -431,4 +438,44 @@ model RoleUserMapping {
   Role    DynamicRole @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@id([user_id, role_id])
+}
+
+model Homework {
+  id          String               @id @default(cuid()) @db.VarChar(32)
+  text        String?              @db.Text
+  due_date    DateTime?
+  teacher_id  String?              @db.VarChar(32)
+  Teacher     Teacher?             @relation(fields: [teacher_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  subject_id  String               @db.VarChar(32)
+  Subject     Subject              @relation(fields: [subject_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  section_id  Int                  @db.SmallInt
+  Section     ClassSection         @relation(fields: [section_id, class_id, school_id], references: [numeric_id, class_id, school_id], onDelete: Cascade, onUpdate: Cascade)
+  class_id    Int                  @db.SmallInt
+  Class       ClassStd             @relation(fields: [class_id, school_id], references: [numeric_id, school_id], onDelete: Cascade, onUpdate: Cascade)
+  school_id   String               @db.VarChar(32)
+  School      School               @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  created_at  DateTime             @default(now())
+  updated_at  DateTime             @updatedAt
+  Submissions HomeworkSubmission[]
+}
+
+model HomeworkSubmission {
+  id          String                     @id @default(cuid()) @db.VarChar(32)
+  text        String?                    @db.Text
+  homework_id String                     @db.VarChar(32)
+  Homework    Homework                   @relation(fields: [homework_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  student_id  String                     @db.VarChar(32)
+  Student     Student                    @relation(fields: [student_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  created_at  DateTime                   @default(now())
+  updated_at  DateTime                   @updatedAt
+  Remarks     HomeworkSubmissionRemark[]
+}
+
+model HomeworkSubmissionRemark {
+  id            String             @id @default(cuid()) @db.VarChar(32)
+  text          String?            @db.Text
+  submission_id String             @db.VarChar(32)
+  Submission    HomeworkSubmission @relation(fields: [submission_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  teacher_id    String?            @db.VarChar(32)
+  Teacher       Teacher?           @relation(fields: [teacher_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
 }
