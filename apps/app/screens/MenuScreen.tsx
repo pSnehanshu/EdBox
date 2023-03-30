@@ -54,6 +54,29 @@ export default function MenuScreen() {
       },
     ];
   }, [iconColor]);
+
+  const MoreMenu = () => {
+    return (
+      <View style={styles.container}>
+        {MenuItems.map((item, i) => (
+          <Pressable
+            key={i}
+            onPress={item.onPress}
+            style={({ pressed }) => [
+              styles.item,
+              { opacity: pressed ? 0.5 : 1 },
+            ]}
+          >
+            <View style={styles.icon}>{item.icon}</View>
+            <View style={styles.titleArea}>
+              <Text style={styles.itemTitle}>{item.name}</Text>
+            </View>
+          </Pressable>
+        ))}
+      </View>
+    );
+  };
+
   const refRBSheet = useRef<RBSheet>(null);
 
   return (
@@ -85,24 +108,7 @@ export default function MenuScreen() {
             },
           }}
         >
-          {/* <MenuList /> */}
-          <ScrollView style={styles.container}>
-            {MenuItems.map((item, i) => (
-              <Pressable
-                key={i}
-                onPress={item.onPress}
-                style={({ pressed }) => [
-                  styles.item,
-                  { opacity: pressed ? 0.5 : 1 },
-                ]}
-              >
-                <View style={styles.icon}>{item.icon}</View>
-                <View style={styles.titleArea}>
-                  <Text style={styles.itemTitle}>{item.name}</Text>
-                </View>
-              </Pressable>
-            ))}
-          </ScrollView>
+          <MoreMenu />
         </RBSheet>
       </View>
     </>
@@ -112,6 +118,7 @@ export default function MenuScreen() {
 const styles = StyleSheet.create({
   container: {
     height: "100%",
+    // backgroundColor: "red",
   },
   item: {
     paddingVertical: 16,
