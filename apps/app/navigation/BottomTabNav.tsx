@@ -76,14 +76,7 @@ export function BottomTabNavigator() {
         options={{
           title: "Menu",
           headerShown: true,
-          tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons
-              name="dots-grid"
-              size={30}
-              style={{ marginBottom: -3 }}
-              color={color}
-            />
-          ),
+          tabBarButton: () => <MenuScreen />,
         }}
       />
 

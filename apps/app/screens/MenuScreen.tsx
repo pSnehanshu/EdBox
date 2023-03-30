@@ -1,7 +1,18 @@
-import { Foundation, Ionicons } from "@expo/vector-icons";
+import {
+  Foundation,
+  Ionicons,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { ReactNode, useMemo } from "react";
-import { Pressable, StyleProp, StyleSheet } from "react-native";
+import { ReactNode, useCallback, useMemo, useRef } from "react";
+import {
+  Button,
+  Pressable,
+  StyleProp,
+  StyleSheet,
+  TouchableWithoutFeedback,
+} from "react-native";
+import RBSheet from "react-native-raw-bottom-sheet";
 import { ScrollView, Text, View } from "../components/Themed";
 import useColorScheme from "../utils/useColorScheme";
 
@@ -43,22 +54,58 @@ export default function MenuScreen() {
       },
     ];
   }, [iconColor]);
+  const refRBSheet = useRef<RBSheet>(null);
 
   return (
-    <ScrollView style={styles.container}>
-      {MenuItems.map((item, i) => (
-        <Pressable
-          key={i}
-          onPress={item.onPress}
-          style={({ pressed }) => [styles.item, { opacity: pressed ? 0.5 : 1 }]}
+    <>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          marginTop: 1,
+        }}
+      >
+        <MaterialCommunityIcons
+          name="dots-grid"
+          size={34}
+          onPress={() => refRBSheet?.current?.open()}
+        />
+        <Text style={{ fontSize: 10, marginTop: 0 }}>Menu</Text>
+        <RBSheet
+          ref={refRBSheet}
+          closeOnDragDown={true}
+          closeOnPressMask={false}
+          customStyles={{
+            wrapper: {
+              backgroundColor: "transparent",
+            },
+            draggableIcon: {
+              backgroundColor: "#000",
+            },
+          }}
         >
-          <View style={styles.icon}>{item.icon}</View>
-          <View style={styles.titleArea}>
-            <Text style={styles.itemTitle}>{item.name}</Text>
-          </View>
-        </Pressable>
-      ))}
-    </ScrollView>
+          {/* <MenuList /> */}
+          <ScrollView style={styles.container}>
+            {MenuItems.map((item, i) => (
+              <Pressable
+                key={i}
+                onPress={item.onPress}
+                style={({ pressed }) => [
+                  styles.item,
+                  { opacity: pressed ? 0.5 : 1 },
+                ]}
+              >
+                <View style={styles.icon}>{item.icon}</View>
+                <View style={styles.titleArea}>
+                  <Text style={styles.itemTitle}>{item.name}</Text>
+                </View>
+              </Pressable>
+            ))}
+          </ScrollView>
+        </RBSheet>
+      </View>
+    </>
   );
 }
 
