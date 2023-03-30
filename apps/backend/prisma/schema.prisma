@@ -43,6 +43,7 @@ model School {
   Homeworks             Homework[]
   FileUploadPermissions FileUploadPermission[]
   UploadedFiles         UploadedFile[]
+  MessageAttachments    MessageAttachment[]
 }
 
 model User {
@@ -332,26 +333,39 @@ model CustomGroupMembers {
 }
 
 model Message {
-  id                String     @default(cuid()) @db.VarChar(32)
-  parent_message_id String?    @db.VarChar(32)
-  ParentMessage     Message?   @relation("Replies", fields: [parent_message_id, school_id], references: [id, school_id], onDelete: Cascade, onUpdate: Cascade)
-  school_id         String     @db.VarChar(32)
-  School            School     @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  text              String     @db.Text
-  sender_id         String     @db.VarChar(32)
-  Sender            User       @relation(fields: [sender_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id                String              @default(cuid()) @db.VarChar(32)
+  parent_message_id String?             @db.VarChar(32)
+  ParentMessage     Message?            @relation("Replies", fields: [parent_message_id, school_id], references: [id, school_id], onDelete: Cascade, onUpdate: Cascade)
+  school_id         String              @db.VarChar(32)
+  School            School              @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  text              String              @db.Text
+  sender_id         String              @db.VarChar(32)
+  Sender            User                @relation(fields: [sender_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   sender_role       SenderRole
   group_identifier  String
   attachments       Json?
   edit_history      Json?
-  is_active         Boolean    @default(true)
-  created_at        DateTime   @default(now())
-  updated_at        DateTime   @updatedAt
-  sort_key          BigInt     @unique @default(autoincrement()) @db.BigInt
-  Replies           Message[]  @relation("Replies")
+  is_active         Boolean             @default(true)
+  created_at        DateTime            @default(now())
+  updated_at        DateTime            @updatedAt
+  sort_key          BigInt              @unique @default(autoincrement()) @db.BigInt
+  Replies           Message[]           @relation("Replies")
+  Attachments       MessageAttachment[]
 
   @@id([id, school_id])
   @@index([group_identifier, school_id])
+}
+
+model MessageAttachment {
+  message_id String       @db.VarChar(32)
+  Message    Message      @relation(fields: [message_id, school_id], references: [id, school_id], onDelete: Cascade, onUpdate: Cascade)
+  school_id  String       @db.VarChar(32)
+  School     School       @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  file_id    String       @db.VarChar(32)
+  File       UploadedFile @relation(fields: [file_id], references: [id])
+  created_at DateTime     @default(now())
+
+  @@id([message_id, file_id])
 }
 
 enum SenderRole {
@@ -456,18 +470,22 @@ model FileUploadPermission {
 }
 
 model UploadedFile {
-  id               String       @id @default(cuid()) @db.VarChar(32)
-  file_name        String
-  s3key            String
-  size_bytes       Int?
-  file_type        String?      @db.VarChar(30)
-  school_id        String       @db.VarChar(32)
-  School           School       @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  uploader_user_id String?      @db.VarChar(32)
-  UploaderUser     User?        @relation(fields: [uploader_user_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  preview_type     PreviewType?
-  preview_value    String       @db.Text
-  created_at       DateTime     @default(now())
+  id                        String                               @id @default(cuid()) @db.VarChar(32)
+  file_name                 String
+  s3key                     String
+  size_bytes                Int?
+  file_type                 String?                              @db.VarChar(30)
+  school_id                 String                               @db.VarChar(32)
+  School                    School                               @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  uploader_user_id          String?                              @db.VarChar(32)
+  UploaderUser              User?                                @relation(fields: [uploader_user_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  preview_type              PreviewType?
+  preview_value             String                               @db.Text
+  created_at                DateTime                             @default(now())
+  Homeworks                 HomeworkAttachment[]
+  HomeworkSubmissions       HomeworkSubmissionAttachment[]
+  HomeworkSubmissionRemarks HomeworkSubmissionRemarkAttachment[]
+  MessageAttachment         MessageAttachment[]
 }
 
 enum PreviewType {
@@ -492,25 +510,58 @@ model Homework {
   created_at  DateTime             @default(now())
   updated_at  DateTime             @updatedAt
   Submissions HomeworkSubmission[]
+  Attachments HomeworkAttachment[]
+}
+
+model HomeworkAttachment {
+  homework_id String       @db.VarChar(32)
+  Homework    Homework     @relation(fields: [homework_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  file_id     String       @db.VarChar(32)
+  File        UploadedFile @relation(fields: [file_id], references: [id])
+  created_at  DateTime     @default(now())
+
+  @@id([homework_id, file_id])
 }
 
 model HomeworkSubmission {
-  id          String                     @id @default(cuid()) @db.VarChar(32)
-  text        String?                    @db.Text
-  homework_id String                     @db.VarChar(32)
-  Homework    Homework                   @relation(fields: [homework_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  student_id  String                     @db.VarChar(32)
-  Student     Student                    @relation(fields: [student_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  created_at  DateTime                   @default(now())
-  updated_at  DateTime                   @updatedAt
+  id          String                         @id @default(cuid()) @db.VarChar(32)
+  text        String?                        @db.Text
+  homework_id String                         @db.VarChar(32)
+  Homework    Homework                       @relation(fields: [homework_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  student_id  String                         @db.VarChar(32)
+  Student     Student                        @relation(fields: [student_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  created_at  DateTime                       @default(now())
+  updated_at  DateTime                       @updatedAt
   Remarks     HomeworkSubmissionRemark[]
+  Attachments HomeworkSubmissionAttachment[]
+}
+
+model HomeworkSubmissionAttachment {
+  submission_id String             @db.VarChar(32)
+  Submission    HomeworkSubmission @relation(fields: [submission_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  file_id       String             @db.VarChar(32)
+  File          UploadedFile       @relation(fields: [file_id], references: [id])
+  created_at    DateTime           @default(now())
+
+  @@id([submission_id, file_id])
 }
 
 model HomeworkSubmissionRemark {
-  id            String             @id @default(cuid()) @db.VarChar(32)
-  text          String?            @db.Text
-  submission_id String             @db.VarChar(32)
-  Submission    HomeworkSubmission @relation(fields: [submission_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  teacher_id    String?            @db.VarChar(32)
-  Teacher       Teacher?           @relation(fields: [teacher_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  id            String                               @id @default(cuid()) @db.VarChar(32)
+  text          String?                              @db.Text
+  submission_id String                               @db.VarChar(32)
+  Submission    HomeworkSubmission                   @relation(fields: [submission_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  teacher_id    String?                              @db.VarChar(32)
+  Teacher       Teacher?                             @relation(fields: [teacher_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  Attachments   HomeworkSubmissionRemarkAttachment[]
+}
+
+model HomeworkSubmissionRemarkAttachment {
+  remark_id  String                   @db.VarChar(32)
+  Submission HomeworkSubmissionRemark @relation(fields: [remark_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  file_id    String                   @db.VarChar(32)
+  File       UploadedFile             @relation(fields: [file_id], references: [id])
+  created_at DateTime                 @default(now())
+
+  @@id([remark_id, file_id])
 }
