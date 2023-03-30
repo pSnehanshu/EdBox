@@ -9,7 +9,7 @@ import { useCurrentUser, useLogout } from "../../utils/auth";
 import { hasUserStaticRoles, StaticRole } from "schooltalk-shared/misc";
 import { SettingsOption } from "../../utils/types/common";
 
-export function SettingsScreen() {
+export default function SettingsScreen() {
   const { scheme: colorScheme, change } = useContext(ColorSchemeContext);
   const iconColor = colorScheme === "dark" ? "white" : "black";
   const navigation = useNavigation();
@@ -97,11 +97,8 @@ export function SettingsScreen() {
   const renderItem = useCallback<ListRenderItem<SettingsOption>>(({ item }) => {
     return (
       <Pressable
-        onPress={() => item.onPress?.()}
-        style={({ pressed }) => ({
-          ...styles.item,
-          opacity: pressed ? 0.5 : 1,
-        })}
+        onPress={item.onPress}
+        style={({ pressed }) => [styles.item, { opacity: pressed ? 0.5 : 1 }]}
       >
         <View style={styles.icon}>{item.icon}</View>
         <View style={styles.titleArea}>

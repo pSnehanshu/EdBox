@@ -48,12 +48,10 @@ function GroupItem(props: GroupItemProps) {
 
   return (
     <Pressable
-      style={({ pressed }) => {
-        return {
-          ...styles.chatGroup,
-          opacity: pressed ? 0.5 : 1,
-        };
-      }}
+      style={({ pressed }) => [
+        styles.chatGroup,
+        { opacity: pressed ? 0.5 : 1 },
+      ]}
       onPress={props.onClick}
     >
       <Image
