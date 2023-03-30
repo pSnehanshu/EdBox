@@ -1,0 +1,16 @@
+{
+  "AWSEBDockerrunVersion": "1",
+  "Authentication": {
+    "bucket": "elasticbeanstalk-ap-south-1-580128686445",
+    "key": "edbox/dockercfg.json"
+  },
+  "Image": {
+    "Name": "ghcr.io/psnehanshu/schooltalk_backend:main"
+  },
+  "Ports": [
+    {
+      "ContainerPort": 5080,
+      "HostPort": 80
+    }
+  ]
+}
