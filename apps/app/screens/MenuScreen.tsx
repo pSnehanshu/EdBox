@@ -55,28 +55,6 @@ export default function MenuScreen() {
     ];
   }, [iconColor]);
 
-  const MoreMenu = () => {
-    return (
-      <View style={styles.container}>
-        {MenuItems.map((item, i) => (
-          <Pressable
-            key={i}
-            onPress={item.onPress}
-            style={({ pressed }) => [
-              styles.item,
-              { opacity: pressed ? 0.5 : 1 },
-            ]}
-          >
-            <View style={styles.icon}>{item.icon}</View>
-            <View style={styles.titleArea}>
-              <Text style={styles.itemTitle}>{item.name}</Text>
-            </View>
-          </Pressable>
-        ))}
-      </View>
-    );
-  };
-
   const refRBSheet = useRef<RBSheet>(null);
 
   return (
@@ -99,7 +77,20 @@ export default function MenuScreen() {
           ref={refRBSheet}
           closeOnDragDown={true}
           closeOnPressMask={false}
+          height={150}
           customStyles={{
+            container: {
+              borderTopRightRadius: 15,
+              borderTopLeftRadius: 15,
+              shadowColor: "#000",
+              shadowOffset: {
+                width: 0,
+                height: 5,
+              },
+              shadowOpacity: 0.34,
+              shadowRadius: 6.27,
+              elevation: 10,
+            },
             wrapper: {
               backgroundColor: "transparent",
             },
@@ -108,7 +99,23 @@ export default function MenuScreen() {
             },
           }}
         >
-          <MoreMenu />
+          <View style={styles.container}>
+            {MenuItems.map((item, i) => (
+              <Pressable
+                key={i}
+                onPress={item.onPress}
+                style={({ pressed }) => [
+                  styles.item,
+                  { opacity: pressed ? 0.5 : 1 },
+                ]}
+              >
+                <View style={styles.icon}>{item.icon}</View>
+                <View style={styles.titleArea}>
+                  <Text style={styles.itemTitle}>{item.name}</Text>
+                </View>
+              </Pressable>
+            ))}
+          </View>
         </RBSheet>
       </View>
     </>
@@ -124,7 +131,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderBottomColor: "gray",
     borderBottomWidth: 0.5,
-    flex: 1,
+    // flex: 1,
     flexDirection: "row",
     paddingLeft: 8,
   },

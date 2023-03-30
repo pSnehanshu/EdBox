@@ -10362,10 +10362,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-raw-bottom-sheet@npm:^2.2.0":
+"react-native-raw-bottom-sheet@npm:2.2.0":
   version: 2.2.0
   resolution: "react-native-raw-bottom-sheet@npm:2.2.0"
   checksum: a42b2edcf6ee0e4d3fe1b06e81b7db424d3ba7f57658a4f280815db9c5cb9690802061ed6802d2e0d3064d6c34773233e66c3dccc1bd929c2aad27bbf30f4dac
+  languageName: node
+  linkType: hard
+
+"react-native-raw-bottom-sheet@patch:react-native-raw-bottom-sheet@npm%3A2.2.0#./.yarn/patches/react-native-raw-bottom-sheet-npm-2.2.0-e9dc8fb4b8.patch::locator=schooltalk%40workspace%3A.":
+  version: 2.2.0
+  resolution: "react-native-raw-bottom-sheet@patch:react-native-raw-bottom-sheet@npm%3A2.2.0#./.yarn/patches/react-native-raw-bottom-sheet-npm-2.2.0-e9dc8fb4b8.patch::version=2.2.0&hash=a3cfdf&locator=schooltalk%40workspace%3A."
+  checksum: 8d776e7fe88af93fc6ccae38f250b4cacbc139345cee31dd2c0e3be0e6a2263118e04278deca3ae055fc24285bcd82d90256bbf135712a9d51906cca9e827125
   languageName: node
   linkType: hard
 
