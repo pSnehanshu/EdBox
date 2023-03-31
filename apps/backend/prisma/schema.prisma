@@ -480,12 +480,12 @@ model UploadedFile {
   uploader_user_id          String?                              @db.VarChar(32)
   UploaderUser              User?                                @relation(fields: [uploader_user_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
   preview_type              PreviewType?
-  preview_value             String                               @db.Text
+  preview_value             String?                              @db.Text
   created_at                DateTime                             @default(now())
   Homeworks                 HomeworkAttachment[]
   HomeworkSubmissions       HomeworkSubmissionAttachment[]
   HomeworkSubmissionRemarks HomeworkSubmissionRemarkAttachment[]
-  MessageAttachment         MessageAttachment[]
+  Messages                  MessageAttachment[]
 }
 
 enum PreviewType {
