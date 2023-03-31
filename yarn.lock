@@ -2984,6 +2984,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/async@npm:^3.2.18":
+  version: 3.2.18
+  resolution: "@types/async@npm:3.2.18"
+  checksum: fe860993cc3fc087a00c4a55ca256bfb7aebfc56f1b1f05857b124a7328ff95177da48f441b1efc0bbb6e663a49e91a807c0adabb9950abc8b817b6bcffcfee0
+  languageName: node
+  linkType: hard
+
 "@types/babel__core@npm:^7.0.0, @types/babel__core@npm:^7.1.7":
   version: 7.1.20
   resolution: "@types/babel__core@npm:7.1.20"
@@ -5819,6 +5826,17 @@ __metadata:
   peerDependencies:
     expo: "*"
   checksum: 47d72b0bdd9e900e4b2a4d348e79ec6fd0a1c7d1ae7933f7bb237341cea4dbe461a5ebd92f3682859769318b96c3244d776d4324af35e49d6f7d8f430e20d40c
+  languageName: node
+  linkType: hard
+
+"expo-server-sdk@npm:^3.7.0":
+  version: 3.7.0
+  resolution: "expo-server-sdk@npm:3.7.0"
+  dependencies:
+    node-fetch: ^2.6.0
+    promise-limit: ^2.7.0
+    promise-retry: ^2.0.1
+  checksum: 6350edca193b7c64169594a99710deefced854d560d3e810bac3633e443c3e0e923b35842c5445af3d61dc6cd707b3dc8ecbe0fa984cb40a0d4c15c7f36767a4
   languageName: node
   linkType: hard
 
@@ -10276,6 +10294,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"promise-limit@npm:^2.7.0":
+  version: 2.7.0
+  resolution: "promise-limit@npm:2.7.0"
+  checksum: 3e20a46d752ab41c921feceb668b3a6d000438573e71342d42bf63373fdbafbf4b6a3f88ef5ff902a2a37be28152dc74e618e863134fd4c08c196448f4a6d28f
+  languageName: node
+  linkType: hard
+
 "promise-retry@npm:^2.0.1":
   version: 2.0.1
   resolution: "promise-retry@npm:2.0.1"
@@ -11371,13 +11396,16 @@ __metadata:
   dependencies:
     "@prisma/client": ^4.11.0
     "@trpc/server": ^10.10.0
+    "@types/async": ^3.2.18
     "@types/express": ^4.17.15
     "@types/lodash": ^4.14.191
     "@types/node": ^18.11.18
+    async: ^3.2.4
     axios: ^1.3.4
     body-parser: ^1.20.1
     date-fns: ^2.29.3
     dotenv: ^16.0.3
+    expo-server-sdk: ^3.7.0
     express: ^4.18.2
     lodash: ^4.17.21
     nodemon: ^2.0.20
