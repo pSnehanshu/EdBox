@@ -75,7 +75,6 @@ const peopleRouter = t.router({
         where: {
           ...where,
           school_id: ctx.user.school_id,
-          is_active: true,
         },
         include: {
           Teacher: true,
@@ -92,12 +91,6 @@ const peopleRouter = t.router({
       where: {
         id: ctx.user.student_id!,
         school_id: ctx.user.school_id,
-        CurrentBatch: {
-          is_active: true,
-          Class: {
-            is_active: true,
-          },
-        },
       },
       select: {
         section: true,

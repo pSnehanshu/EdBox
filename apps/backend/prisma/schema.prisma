@@ -66,7 +66,6 @@ model User {
   Parent                Parent?                @relation(fields: [parent_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
   staff_id              String?                @unique @db.VarChar(32)
   Staff                 SchoolStaff?           @relation(fields: [staff_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  is_active             Boolean                @default(true)
   created_at            DateTime               @default(now())
   updated_at            DateTime               @updatedAt
   Sessions              LoginSession[]
@@ -94,7 +93,6 @@ model Subject {
   name       String               @db.VarChar(50)
   school_id  String               @db.VarChar(32)
   School     School               @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  is_active  Boolean              @default(true)
   created_at DateTime             @default(now())
   updated_at DateTime             @updatedAt
   Periods    RoutinePeriod[]
@@ -108,7 +106,6 @@ model ClassStd {
   name       String?         @db.VarChar(50)
   school_id  String          @db.VarChar(32)
   School     School          @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  is_active  Boolean         @default(true)
   created_at DateTime        @default(now())
   updated_at DateTime        @updatedAt
   Sections   ClassSection[]
@@ -151,7 +148,6 @@ model RoutinePeriod {
   end_min          Int                @db.SmallInt
   teacher_id       String?            @db.VarChar(32)
   Teacher          Teacher?           @relation(fields: [teacher_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  is_active        Boolean            @default(true)
   created_at       DateTime           @default(now())
   updated_at       DateTime           @updatedAt
   AttendancesTaken PeriodAttendance[]
@@ -231,7 +227,6 @@ model StudentsBatch {
   Class           ClassStd? @relation(fields: [class_id, school_id], references: [numeric_id, school_id], onDelete: Restrict)
   JoiningStudents Student[] @relation("JoiningBatch")
   CurrentStudents Student[] @relation("CurrentBatch")
-  is_active       Boolean   @default(true)
   created_at      DateTime  @default(now())
   updated_at      DateTime  @updatedAt
 
@@ -316,7 +311,6 @@ model CustomGroup {
   School        School               @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   created_by_id String?              @db.VarChar(32)
   CreatedBy     User?                @relation(fields: [created_by_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  is_active     Boolean              @default(true)
   created_at    DateTime             @default(now())
   updated_at    DateTime             @updatedAt
   Members       CustomGroupMembers[]
@@ -346,7 +340,6 @@ model Message {
   group_identifier  String
   attachments       Json?
   edit_history      Json?
-  is_active         Boolean             @default(true)
   created_at        DateTime            @default(now())
   updated_at        DateTime            @updatedAt
   sort_key          BigInt              @unique @default(autoincrement()) @db.BigInt
@@ -389,7 +382,6 @@ model Exam {
   name       String     @db.VarChar(100)
   school_id  String     @db.VarChar(32)
   School     School     @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  is_active  Boolean    @default(true)
   created_at DateTime   @default(now())
   updated_at DateTime   @updatedAt
   Tests      ExamTest[]
@@ -408,7 +400,6 @@ model ExamTest {
   Section          ClassSection?        @relation(fields: [section_id, class_id, school_id], references: [numeric_id, class_id, school_id], onDelete: Cascade, onUpdate: Cascade)
   date_of_exam     DateTime
   duration_minutes Int                  @default(0) @db.SmallInt
-  is_active        Boolean              @default(true)
   creator_user_id  String?              @db.VarChar(32)
   CreatorUser      User?                @relation(fields: [creator_user_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
   created_at       DateTime             @default(now())
@@ -444,7 +435,6 @@ model DynamicRole {
   school_id   String            @db.VarChar(32)
   School      School            @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   permissions Int[]             @db.SmallInt
-  is_active   Boolean           @default(true)
   created_at  DateTime          @default(now())
   updated_at  DateTime          @updatedAt
   Users       RoleUserMapping[]

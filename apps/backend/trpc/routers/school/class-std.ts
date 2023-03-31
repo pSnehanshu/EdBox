@@ -28,10 +28,8 @@ const classStdRouter = t.router({
         select: {
           Class: {
             select: {
-              is_active: true,
               Batch: {
                 select: {
-                  is_active: true,
                   numeric_id: true,
                 },
               },
@@ -40,8 +38,7 @@ const classStdRouter = t.router({
         },
       });
 
-      const isValid =
-        section && section.Class.is_active && section.Class.Batch?.is_active;
+      const isValid = section && section.Class.Batch;
 
       if (!isValid) {
         return { students: [], cursor: undefined, total: 0 };
@@ -54,7 +51,6 @@ const classStdRouter = t.router({
         school_id: ctx.user.school_id,
         current_batch_num: batchId,
         section: input.sectionId,
-        User: { is_active: true },
       };
 
       const [students, total] = await Promise.all([
@@ -102,7 +98,6 @@ const classStdRouter = t.router({
       const classes = await prisma.classStd.findMany({
         where: {
           school_id: input.schoolId,
-          is_active: true,
         },
         include: {
           Sections: {

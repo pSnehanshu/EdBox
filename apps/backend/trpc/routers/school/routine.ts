@@ -55,13 +55,6 @@ const routineRouter = t.router({
         where: {
           teacher_id: ctx.teacher.id,
           school_id: ctx.user.school_id,
-          is_active: true,
-          Class: {
-            is_active: true,
-          },
-          Subject: {
-            is_active: true,
-          },
           day_of_week:
             input.daysOfWeek.length > 0 ? { in: input.daysOfWeek } : undefined,
         },
@@ -122,15 +115,6 @@ const routineRouter = t.router({
       const student = await prisma.student.findFirst({
         where: {
           id: ctx.student.id,
-          CurrentBatch: {
-            is_active: true,
-            Class: {
-              is_active: true,
-            },
-          },
-          User: {
-            is_active: true,
-          },
         },
         select: {
           CurrentBatch: {
@@ -141,10 +125,6 @@ const routineRouter = t.router({
                     where: {
                       section_id: ctx.student.section,
                       school_id: ctx.user.school_id,
-                      is_active: true,
-                      Subject: {
-                        is_active: true,
-                      },
                       day_of_week:
                         input.daysOfWeek.length > 0
                           ? { in: input.daysOfWeek }
@@ -227,13 +207,12 @@ const routineRouter = t.router({
           },
         },
         select: {
-          is_active: true,
           class_id: true,
           section_id: true,
         },
       });
 
-      if (!period || !period.is_active) {
+      if (!period) {
         throw new TRPCError({
           code: "NOT_FOUND",
         });

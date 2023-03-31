@@ -20,11 +20,6 @@ export async function userHasPermissions(
     },
     select: {
       DynamicRoles: {
-        where: {
-          Role: {
-            is_active: true,
-          },
-        },
         include: {
           Role: true,
         },

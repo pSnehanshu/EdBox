@@ -34,7 +34,7 @@ const authRouter = t.router({
       }),
     )
     .mutation(async ({ input }) => {
-      const user = await prisma.user.findUnique({
+      const user = await prisma.user.findUniqueOrThrow({
         where: {
           email_school_id: {
             email: input.email,
@@ -43,17 +43,10 @@ const authRouter = t.router({
         },
         select: {
           id: true,
-          is_active: true,
           otp: true,
           otp_expiry: true,
         },
       });
-
-      if (!user || !user.is_active) {
-        return;
-      }
-
-      // User exists, and is active
 
       // Generate OTP
       const { otp, expiry } = generateUserOTP(user);
@@ -79,7 +72,7 @@ const authRouter = t.router({
       }),
     )
     .mutation(async ({ input }) => {
-      const user = await prisma.user.findUnique({
+      const user = await prisma.user.findUniqueOrThrow({
         where: {
           phone_isd_code_phone_school_id: {
             phone: input.phoneNumber,
@@ -89,7 +82,6 @@ const authRouter = t.router({
         },
         select: {
           id: true,
-          is_active: true,
           otp: true,
           otp_expiry: true,
           School: {
@@ -99,12 +91,6 @@ const authRouter = t.router({
           },
         },
       });
-
-      if (!user || !user.is_active) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-        });
-      }
 
       // User exists, and is active
 
@@ -148,14 +134,13 @@ const authRouter = t.router({
         },
         select: {
           id: true,
-          is_active: true,
           otp: true,
           otp_expiry: true,
           school_id: true,
         },
       });
 
-      if (!user || !user.is_active || user.school_id !== input.schoolId) {
+      if (!user || user.school_id !== input.schoolId) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
@@ -277,10 +262,8 @@ const authRouter = t.router({
           roll_num: input.rollnum,
           section: input.section_id,
           CurrentBatch: {
-            is_active: true,
             class_id: input.class_id,
             Class: {
-              is_active: true,
               Sections: {
                 some: {
                   numeric_id: input.section_id,
@@ -288,19 +271,10 @@ const authRouter = t.router({
               },
             },
           },
-          User: {
-            is_active: true,
-          },
+          User: {},
         },
         include: {
           Parents: {
-            where: {
-              Parent: {
-                User: {
-                  is_active: true,
-                },
-              },
-            },
             include: {
               Parent: {
                 include: {

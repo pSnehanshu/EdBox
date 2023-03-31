@@ -36,24 +36,17 @@ const attendanceRouter = t.router({
           },
         },
         select: {
-          is_active: true,
           section_id: true,
           class_id: true,
           Class: {
             select: {
               Batch: true,
-              is_active: true,
             },
           },
         },
       });
 
-      if (
-        !period ||
-        !period.is_active ||
-        !period.Class.is_active ||
-        !period.Class.Batch?.is_active
-      ) {
+      if (!period || !period.Class || !period.Class.Batch) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Period not found",
@@ -66,7 +59,6 @@ const attendanceRouter = t.router({
           school_id: ctx.user.school_id,
           current_batch_num: period.Class.Batch.numeric_id,
           section: period.section_id,
-          User: { is_active: true },
         },
       });
       const submittedStudentIds = Object.keys(input.studentsAttendance);
@@ -88,15 +80,9 @@ const attendanceRouter = t.router({
             },
             select: {
               school_id: true,
-              User: {
-                select: {
-                  is_active: true,
-                },
-              },
               section: true,
               CurrentBatch: {
                 select: {
-                  is_active: true,
                   class_id: true,
                 },
               },
@@ -107,12 +93,8 @@ const attendanceRouter = t.router({
             student && // Student exists
             // Student is part of this school
             student.school_id === ctx.user.school_id &&
-            // The student's user is active
-            student.User?.is_active &&
-            // Student is part of a batch and it is currently active
-            student.CurrentBatch?.is_active &&
             // Student is part of the period's class
-            student.CurrentBatch.class_id === period.class_id &&
+            student.CurrentBatch?.class_id === period.class_id &&
             // Student is part of the period's section
             student.section === period.section_id
           );
@@ -182,7 +164,6 @@ const attendanceRouter = t.router({
           },
         },
         select: {
-          is_active: true,
           section_id: true,
           class_id: true,
           AttendancesTaken: {
@@ -204,7 +185,6 @@ const attendanceRouter = t.router({
                         select: {
                           id: true,
                           name: true,
-                          is_active: true,
                         },
                       },
                     },
@@ -218,7 +198,6 @@ const attendanceRouter = t.router({
                     select: {
                       id: true,
                       name: true,
-                      is_active: true,
                     },
                   },
                 },
@@ -228,7 +207,7 @@ const attendanceRouter = t.router({
         },
       });
 
-      if (!period || !period.is_active) {
+      if (!period) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Period not found",

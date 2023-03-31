@@ -15,7 +15,6 @@ export async function generatePermission(userId: string) {
   const { school_id } = await prisma.user.findFirstOrThrow({
     where: {
       id: userId,
-      is_active: true,
       School: {
         is_active: true,
       },
@@ -90,7 +89,6 @@ export async function consumePermission(
   const { school_id } = await prisma.user.findFirstOrThrow({
     where: {
       id: userId,
-      is_active: true,
       School: {
         is_active: true,
       },

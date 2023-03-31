@@ -46,15 +46,6 @@ async function getAutoGroups(
       where: { id: user.teacher_id },
       include: {
         Periods: {
-          where: {
-            is_active: true,
-            Class: {
-              is_active: true,
-            },
-            Subject: {
-              is_active: true,
-            },
-          },
           include: {
             Class: true,
             Subject: true,
@@ -134,12 +125,6 @@ async function getAutoGroups(
           },
           include: {
             Periods: {
-              where: {
-                is_active: true,
-                Subject: {
-                  is_active: true,
-                },
-              },
               include: {
                 Subject: true,
               },
@@ -203,9 +188,6 @@ export async function getUserGroups(
   const customGroupMembers = await prisma.customGroupMembers.findMany({
     where: {
       user_id: user.id,
-      Group: {
-        is_active: true,
-      },
     },
     include: {
       Group: true,
@@ -262,12 +244,6 @@ export async function getGroupMembers(
     const customGroupMembers = await prisma.customGroupMembers.findMany({
       where: {
         group_id: groupIdentifier.id,
-        Group: {
-          is_active: true,
-        },
-        User: {
-          is_active: true,
-        },
       },
       include: {
         User: {
@@ -294,7 +270,6 @@ export async function getGroupMembers(
     const users = await prisma.user.findMany({
       where: {
         school_id: groupIdentifier.sc,
-        is_active: true,
       },
       orderBy: {
         name: "asc",
