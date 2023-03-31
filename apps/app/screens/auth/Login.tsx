@@ -75,6 +75,7 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
   });
 
   const color = useColorScheme();
+
   return (
     <View
       style={{

@@ -29,6 +29,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: "#ffffff",
     },
     package: "com.indorhino.software.schooltalk.sample",
+    googleServicesFile: "./google-services.json",
   },
   web: {
     favicon: "./assets/images/favicon.png",
