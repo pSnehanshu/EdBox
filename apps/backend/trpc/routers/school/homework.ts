@@ -5,11 +5,17 @@ import { mapLimit } from "async";
 import prisma from "../../../prisma";
 import { t, authMiddleware, teacherMiddleware } from "../../trpc";
 import { consumePermission } from "../../../utils/file.service";
+import { TRPCError } from "@trpc/server";
 
 const FilePermissionsSchema = z.object({
   permission_id: z.string().cuid(),
   file_name: z.string().optional(),
 });
+
+const DateSchema = z
+  .string()
+  .datetime()
+  .transform((d) => parseISO(d));
 
 const homeworkRouter = t.router({
   fetchForSection: t.procedure
@@ -20,11 +26,7 @@ const homeworkRouter = t.router({
         class_id: z.number().int(),
         limit: z.number().int().min(1).max(20).default(10),
         page: z.number().int().min(1).default(1),
-        after_due_date: z
-          .string()
-          .datetime()
-          .transform((d) => parseISO(d))
-          .optional(),
+        after_due_date: DateSchema.optional(),
       }),
     )
     .query(async ({ input, ctx }) => {
@@ -75,12 +77,8 @@ const homeworkRouter = t.router({
         section_id: z.number().int(),
         class_id: z.number().int(),
         subject_id: z.string().cuid(),
-        due_date: z
-          .string()
-          .datetime()
-          .transform((d) => parseISO(d))
-          .optional(),
-        filePermissions: FilePermissionsSchema.array().default([]),
+        due_date: DateSchema.optional(),
+        file_permissions: FilePermissionsSchema.array().default([]),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -88,7 +86,7 @@ const homeworkRouter = t.router({
         z.infer<typeof FilePermissionsSchema>,
         UploadedFile
       >(
-        input.filePermissions,
+        input.file_permissions,
         2,
         function ({ permission_id, file_name }, callback) {
           consumePermission(permission_id, ctx.user.id, file_name)
@@ -124,9 +122,66 @@ const homeworkRouter = t.router({
     }),
   update: t.procedure
     .use(teacherMiddleware)
-    .input(z.object({}))
+    .input(
+      z.object({
+        homework_id: z.string().cuid(),
+        text: z.string().optional(),
+        due_date: DateSchema.optional(),
+        remove_attachments: z.string().cuid().array().optional(),
+        new_file_permissions: FilePermissionsSchema.array().default([]),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
-      //
+      const files = await mapLimit<
+        z.infer<typeof FilePermissionsSchema>,
+        UploadedFile
+      >(
+        input.new_file_permissions,
+        2,
+        function ({ permission_id, file_name }, callback) {
+          consumePermission(permission_id, ctx.user.id, file_name)
+            .then((file) => callback(null, file))
+            .catch((err) => callback(err));
+        },
+      );
+
+      const { count } = await prisma.homework.updateMany({
+        where: {
+          id: input.homework_id,
+          teacher_id: ctx.user.teacher_id,
+          school_id: ctx.user.school_id,
+        },
+        data: {
+          text: input.text,
+          due_date: input.due_date,
+        },
+      });
+
+      if (count < 1) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+        });
+      }
+
+      // New attachements
+      await prisma.homeworkAttachment.createMany({
+        data: files.map((file) => ({
+          file_id: file.id,
+          homework_id: input.homework_id,
+        })),
+        skipDuplicates: true,
+      });
+
+      // Remove attachements
+      if (input.remove_attachments)
+        await prisma.homeworkAttachment.deleteMany({
+          where: {
+            OR: input.remove_attachments.map((fileId) => ({
+              file_id: fileId,
+            })),
+            homework_id: input.homework_id,
+          },
+        });
     }),
   delete: t.procedure
     .use(teacherMiddleware)
