@@ -11,8 +11,8 @@ import { sendSMS } from "../../utils/sms.service";
 function generateUserOTP(user: Pick<User, "otp" | "otp_expiry">) {
   // Generate OTP
   let otp = (
-    Math.floor(Math.random() * 9 * 10 ** (CONFIG.otpLength - 1)) +
-    10 ** (CONFIG.otpLength - 1)
+    Math.floor(Math.random() * 9 * 10 ** (CONFIG.OTP_LENGTH - 1)) +
+    10 ** (CONFIG.OTP_LENGTH - 1)
   ).toString();
 
   if (user.otp && user.otp_expiry && isFuture(user.otp_expiry)) {
@@ -129,7 +129,7 @@ const authRouter = t.router({
   submitLoginOTP: t.procedure
     .input(
       z.object({
-        otp: z.string().regex(/^\d+$/).length(CONFIG.otpLength),
+        otp: z.string().regex(/^\d+$/).length(CONFIG.OTP_LENGTH),
         userId: z.string().cuid(),
         schoolId: z.string().cuid(),
         pushToken: z
