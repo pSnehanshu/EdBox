@@ -10,6 +10,7 @@ import subjectRouter from "./subject";
 import peopleRouter from "./people";
 import examRouter from "./exam";
 import attachmentsRouter from "./attachments";
+import homeworkRouter from "./homework";
 
 const schoolRouter = t.router({
   schoolBasicInfo: t.procedure
@@ -47,6 +48,7 @@ const schoolRouter = t.router({
   people: peopleRouter,
   exam: examRouter,
   attachment: attachmentsRouter,
+  homework: homeworkRouter,
 });
 
 export default schoolRouter;
