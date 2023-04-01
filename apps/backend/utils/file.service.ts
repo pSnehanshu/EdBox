@@ -37,17 +37,26 @@ export async function generateSignedS3URL(userId: string) {
   // Generate permission
   const permission = await generatePermission(userId);
 
-  const command = new PutObjectCommand({
-    Bucket: CONFIG.S3_USERCONTENT_BUCKET,
-    Key: permission.s3key,
-  });
+  try {
+    const command = new PutObjectCommand({
+      Bucket: CONFIG.S3_USERCONTENT_BUCKET,
+      Key: permission.s3key,
+    });
 
-  // Generate URL
-  const signedURL = await getSignedUrl(s3client, command, {
-    expiresIn: CONFIG.S3_UPLOAD_URL_EXPIRY_SECONDS,
-  });
+    // Generate URL
+    const signedURL = await getSignedUrl(s3client, command, {
+      expiresIn: CONFIG.S3_UPLOAD_URL_EXPIRY_SECONDS,
+    });
 
-  return { permission, signedURL };
+    return { permission, signedURL };
+  } catch (error) {
+    // Delete the permission
+    await prisma.fileUploadPermission.delete({
+      where: { id: permission.id },
+    });
+
+    throw error;
+  }
 }
 
 export async function consumePermission(
