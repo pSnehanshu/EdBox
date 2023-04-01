@@ -211,23 +211,29 @@ const homeworkRouter = t.router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const { count } = await prisma.homework.updateMany({
+      const homework = await prisma.homework.findUnique({
         where: {
           id: input.homework_id,
-          teacher_id: ctx.teacher.id,
-          school_id: ctx.user.school_id,
         },
+      });
+
+      if (
+        !homework ||
+        homework.teacher_id !== ctx.teacher.id ||
+        homework.school_id !== ctx.user.school_id
+      ) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+        });
+      }
+
+      await prisma.homework.update({
+        where: { id: input.homework_id },
         data: {
           text: input.text,
           due_date: input.due_date,
         },
       });
-
-      if (count < 1) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-        });
-      }
 
       const files = await mapLimit<
         z.infer<typeof FilePermissionsSchema>,
