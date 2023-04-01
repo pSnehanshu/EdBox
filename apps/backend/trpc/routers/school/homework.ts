@@ -3,7 +3,12 @@ import { z } from "zod";
 import { Prisma, UploadedFile } from "@prisma/client";
 import { mapLimit } from "async";
 import prisma from "../../../prisma";
-import { t, authMiddleware, teacherMiddleware } from "../../trpc";
+import {
+  t,
+  authMiddleware,
+  teacherMiddleware,
+  studentMiddleware,
+} from "../../trpc";
 import { consumePermission } from "../../../utils/file.service";
 import { TRPCError } from "@trpc/server";
 
@@ -82,7 +87,7 @@ const homeworkRouter = t.router({
     )
     .query(async ({ input, ctx }) => {
       const where: Prisma.HomeworkWhereInput = {
-        teacher_id: ctx.user.teacher_id,
+        teacher_id: ctx.teacher.id,
         school_id: ctx.user.school_id,
       };
 
@@ -104,15 +109,6 @@ const homeworkRouter = t.router({
         },
         include: {
           Subject: true,
-          Teacher: {
-            include: {
-              User: {
-                select: {
-                  name: true,
-                },
-              },
-            },
-          },
           Attachments: true,
         },
         take: input.limit,
@@ -154,7 +150,7 @@ const homeworkRouter = t.router({
           school_id: ctx.user.school_id,
           subject_id: input.subject_id,
           due_date: input.due_date,
-          teacher_id: ctx.user.teacher_id,
+          teacher_id: ctx.teacher.id,
           text: input.text,
           Attachments: {
             createMany: {
@@ -200,7 +196,7 @@ const homeworkRouter = t.router({
       const { count } = await prisma.homework.updateMany({
         where: {
           id: input.homework_id,
-          teacher_id: ctx.user.teacher_id,
+          teacher_id: ctx.teacher.id,
           school_id: ctx.user.school_id,
         },
         data: {
@@ -246,10 +242,104 @@ const homeworkRouter = t.router({
       await prisma.homework.deleteMany({
         where: {
           id: input.homework_id,
-          teacher_id: ctx.user.teacher_id,
+          teacher_id: ctx.teacher.id,
           school_id: ctx.user.school_id,
         },
       });
+    }),
+  submitAnswer: t.procedure
+    .use(studentMiddleware)
+    .input(
+      z.object({
+        homework_id: z.string().cuid(),
+        text: z.string().optional(),
+        file_permissions: FilePermissionsSchema.array().default([]),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const student = await prisma.student.findUniqueOrThrow({
+        where: {
+          id: ctx.student.id,
+        },
+        select: {
+          section: true,
+          CurrentBatch: {
+            select: {
+              class_id: true,
+            },
+          },
+        },
+      });
+
+      if (
+        typeof student.CurrentBatch?.class_id !== "number" ||
+        typeof student.section !== "number"
+      )
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Student is not part of any class or section",
+        });
+
+      const homework = await prisma.homework.findFirstOrThrow({
+        where: {
+          id: input.homework_id,
+          school_id: ctx.user.school_id,
+          class_id: student.CurrentBatch.class_id,
+          section_id: student.section,
+        },
+        include: {
+          Submissions: {
+            where: {
+              student_id: ctx.student.id,
+            },
+          },
+        },
+      });
+
+      // Check if student has already submitted
+      if (homework.Submissions.length > 0)
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Student has already submitted to this homework",
+        });
+
+      // All ok!
+
+      // Consume the files
+      const files = await mapLimit<
+        z.infer<typeof FilePermissionsSchema>,
+        UploadedFile
+      >(
+        input.file_permissions,
+        2,
+        function ({ permission_id, file_name }, callback) {
+          consumePermission(permission_id, ctx.user.id, file_name)
+            .then((file) => callback(null, file))
+            .catch((err) => callback(err));
+        },
+      );
+
+      // Create the submission
+      const { id } = await prisma.homeworkSubmission.create({
+        data: {
+          homework_id: input.homework_id,
+          student_id: ctx.student.id,
+          text: input.text,
+          Attachments: {
+            createMany: {
+              data: files.map((file) => ({
+                file_id: file.id,
+              })),
+              skipDuplicates: true,
+            },
+          },
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      return id;
     }),
 });
 
