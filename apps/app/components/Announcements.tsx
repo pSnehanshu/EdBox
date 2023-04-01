@@ -55,11 +55,9 @@ function SingleAnnouncement({ message }: AnnouncementProps) {
   return (
     <View style={styles.container}>
       <View style={styles.announcement_header}>
-        {isSentByMe ? (
-          <Text style={styles.name_text}>You</Text>
-        ) : (
-          <Text style={styles.name_text}>{senderDisplayName}</Text>
-        )}
+        <Text style={styles.name_text}>
+          {isSentByMe ? "You" : senderDisplayName}
+        </Text>
 
         <Text style={styles.time}>{time}</Text>
       </View>
@@ -153,11 +151,13 @@ const styles = StyleSheet.create({
     textAlign: "right",
     paddingRight: 6,
     opacity: 0.6,
+    color: "white",
   },
   name_text: {
     fontSize: 12,
     opacity: 0.6,
     textDecorationLine: "underline",
+    color: "white",
   },
   message_text: {
     color: "white",
