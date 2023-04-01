@@ -12,9 +12,44 @@ import type { UploadedFile } from "schooltalk-shared/types";
 import MIMEType from "whatwg-mimetype";
 import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
+import * as WebBrowser from "expo-web-browser";
 import { trpc } from "../../utils/trpc";
 import { Text, View } from "../Themed";
 import useColorScheme from "../../utils/useColorScheme";
+
+/**
+ * Format bytes as human-readable text. Taken from https://stackoverflow.com/a/14919494/9990365
+ *
+ * @param bytes Number of bytes.
+ * @param si True to use metric (SI) units, aka powers of 1000. False to use
+ *           binary (IEC), aka powers of 1024.
+ * @param dp Number of decimal places to display.
+ *
+ * @return Formatted string.
+ */
+function humanFileSize(bytes: number, si = false, dp = 1) {
+  const thresh = si ? 1000 : 1024;
+
+  if (Math.abs(bytes) < thresh) {
+    return bytes + " B";
+  }
+
+  const units = si
+    ? ["kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
+    : ["KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"];
+  let u = -1;
+  const r = 10 ** dp;
+
+  do {
+    bytes /= thresh;
+    ++u;
+  } while (
+    Math.round(Math.abs(bytes) * r) / r >= thresh &&
+    u < units.length - 1
+  );
+
+  return bytes.toFixed(dp) + " " + units[u];
+}
 
 interface FilePreviewObjectProps {
   file: UploadedFile;
@@ -27,11 +62,31 @@ function FilePreviewObject({ file, style }: FilePreviewObjectProps) {
   );
   const scheme = useColorScheme();
   const iconColor = scheme === "dark" ? "white" : "black";
-  const download = useCallback(() => {
-    Toast.show({
-      type: "error",
-      text1: "Download not implemented yet :(",
-    });
+  const humanFriendlySize = useMemo(
+    () =>
+      typeof file.size_bytes === "number"
+        ? humanFileSize(file.size_bytes, true)
+        : "N/A",
+    [file.size_bytes],
+  );
+
+  const utils = trpc.useContext();
+
+  const download = useCallback(async () => {
+    try {
+      const { url } = await utils.school.attachment.getFileURL.fetch({
+        file_id: file.id,
+      });
+
+      // Pass the URL to browser to download it
+      await WebBrowser.openBrowserAsync(url);
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Download failed",
+        text2: (error as any)?.message,
+      });
+    }
   }, [file.id]);
 
   return (
@@ -58,9 +113,7 @@ function FilePreviewObject({ file, style }: FilePreviewObjectProps) {
       <View style={styles.control_bar}>
         <View style={styles.control_bar_left}>
           <Text style={styles.file_name}>{file.file_name ?? file.id}</Text>
-          {typeof file.size_bytes === "number" && (
-            <Text style={styles.file_size}>{file.size_bytes}B</Text>
-          )}
+          <Text style={styles.file_size}>{humanFriendlySize}</Text>
         </View>
         <View style={styles.control_bar_right}>
           <Pressable
