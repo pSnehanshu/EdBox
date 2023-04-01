@@ -356,7 +356,7 @@ model MessageAttachment {
   school_id  String       @db.VarChar(32)
   School     School       @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   file_id    String       @db.VarChar(32)
-  File       UploadedFile @relation(fields: [file_id], references: [id])
+  File       UploadedFile @relation(fields: [file_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   created_at DateTime     @default(now())
 
   @@id([message_id, file_id])
@@ -508,7 +508,7 @@ model HomeworkAttachment {
   homework_id String       @db.VarChar(32)
   Homework    Homework     @relation(fields: [homework_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   file_id     String       @db.VarChar(32)
-  File        UploadedFile @relation(fields: [file_id], references: [id])
+  File        UploadedFile @relation(fields: [file_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   created_at  DateTime     @default(now())
 
   @@id([homework_id, file_id])
@@ -531,7 +531,7 @@ model HomeworkSubmissionAttachment {
   submission_id String             @db.VarChar(32)
   Submission    HomeworkSubmission @relation(fields: [submission_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   file_id       String             @db.VarChar(32)
-  File          UploadedFile       @relation(fields: [file_id], references: [id])
+  File          UploadedFile       @relation(fields: [file_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   created_at    DateTime           @default(now())
 
   @@id([submission_id, file_id])
@@ -551,7 +551,7 @@ model HomeworkSubmissionRemarkAttachment {
   remark_id  String                   @db.VarChar(32)
   Submission HomeworkSubmissionRemark @relation(fields: [remark_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   file_id    String                   @db.VarChar(32)
-  File       UploadedFile             @relation(fields: [file_id], references: [id])
+  File       UploadedFile             @relation(fields: [file_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   created_at DateTime                 @default(now())
 
   @@id([remark_id, file_id])
