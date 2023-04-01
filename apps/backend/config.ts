@@ -6,6 +6,10 @@ const ConfigSchema = z.object({
     .number()
     .int()
     .default(30 * 60),
+  S3_DOWNLOAD_URL_EXPIRY_SECONDS: z
+    .number()
+    .int()
+    .default(5 * 60),
   S3_USERCONTENT_BUCKET: z.string(),
   NODE_ENV: z
     .enum(["production", "development", "staging"])

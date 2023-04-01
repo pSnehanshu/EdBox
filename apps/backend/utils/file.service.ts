@@ -1,11 +1,19 @@
 import { TRPCError } from "@trpc/server";
 import { addSeconds, isPast } from "date-fns";
 import crypto from "node:crypto";
-import { PutObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
+import {
+  PutObjectCommand,
+  HeadObjectCommand,
+  GetObjectCommand,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import prisma from "../prisma";
 import CONFIG from "../config";
 import { s3client } from "./aws-clients";
+
+export function getFileS3Key(schoolId: string, fileName: string) {
+  return `user-uploads/school-${schoolId}/file-${fileName}`;
+}
 
 export async function generatePermission(userId: string) {
   // Generate random file name
@@ -28,12 +36,12 @@ export async function generatePermission(userId: string) {
       school_id,
       user_id: userId,
       expiry: addSeconds(new Date(), CONFIG.S3_UPLOAD_URL_EXPIRY_SECONDS),
-      s3key: `user-uploads/${school_id}/${fileName}`,
+      s3key: getFileS3Key(school_id, fileName),
     },
   });
 }
 
-export async function generateSignedS3URL(userId: string) {
+export async function generateSignedUploadS3URL(userId: string) {
   // Generate permission
   const permission = await generatePermission(userId);
 
@@ -57,6 +65,23 @@ export async function generateSignedS3URL(userId: string) {
 
     throw error;
   }
+}
+
+export async function generateSignedDownloadS3URL(s3key: string) {
+  const command = new GetObjectCommand({
+    Bucket: CONFIG.S3_USERCONTENT_BUCKET,
+    Key: s3key,
+  });
+
+  // Generate URL
+  const signedURL = await getSignedUrl(s3client, command, {
+    expiresIn: CONFIG.S3_DOWNLOAD_URL_EXPIRY_SECONDS,
+  });
+
+  return {
+    url: signedURL,
+    expiry: addSeconds(new Date(), CONFIG.S3_DOWNLOAD_URL_EXPIRY_SECONDS),
+  };
 }
 
 export async function consumePermission(
