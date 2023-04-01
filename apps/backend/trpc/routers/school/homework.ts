@@ -1,4 +1,4 @@
-import { parseISO } from "date-fns";
+import { isPast, parseISO } from "date-fns";
 import { z } from "zod";
 import { Prisma, UploadedFile } from "@prisma/client";
 import { mapLimit } from "async";
@@ -180,19 +180,6 @@ const homeworkRouter = t.router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const files = await mapLimit<
-        z.infer<typeof FilePermissionsSchema>,
-        UploadedFile
-      >(
-        input.new_file_permissions,
-        2,
-        function ({ permission_id, file_name }, callback) {
-          consumePermission(permission_id, ctx.user.id, file_name)
-            .then((file) => callback(null, file))
-            .catch((err) => callback(err));
-        },
-      );
-
       const { count } = await prisma.homework.updateMany({
         where: {
           id: input.homework_id,
@@ -211,6 +198,19 @@ const homeworkRouter = t.router({
         });
       }
 
+      const files = await mapLimit<
+        z.infer<typeof FilePermissionsSchema>,
+        UploadedFile
+      >(
+        input.new_file_permissions,
+        2,
+        function ({ permission_id, file_name }, callback) {
+          consumePermission(permission_id, ctx.user.id, file_name)
+            .then((file) => callback(null, file))
+            .catch((err) => callback(err));
+        },
+      );
+
       // New attachements
       await prisma.homeworkAttachment.createMany({
         data: files.map((file) => ({
@@ -224,9 +224,9 @@ const homeworkRouter = t.router({
       if (input.remove_attachments)
         await prisma.homeworkAttachment.deleteMany({
           where: {
-            OR: input.remove_attachments.map((fileId) => ({
-              file_id: fileId,
-            })),
+            file_id: {
+              in: input.remove_attachments,
+            },
             homework_id: input.homework_id,
           },
         });
@@ -340,6 +340,78 @@ const homeworkRouter = t.router({
       });
 
       return id;
+    }),
+  updateAnswer: t.procedure
+    .use(studentMiddleware)
+    .input(
+      z.object({
+        submission_id: z.string().cuid(),
+        text: z.string().optional(),
+        remove_attachments: z.string().cuid().array().optional(),
+        new_file_permissions: FilePermissionsSchema.array().default([]),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const submission = await prisma.homeworkSubmission.findFirstOrThrow({
+        where: {
+          id: input.submission_id,
+          student_id: ctx.student.id,
+        },
+        include: {
+          Homework: true,
+        },
+      });
+
+      // Don't allow update if due date has passed
+      if (submission.Homework.due_date && isPast(submission.Homework.due_date))
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Can't update after due date has passed",
+        });
+
+      // Update
+      await prisma.homeworkSubmission.update({
+        where: {
+          id: input.submission_id,
+        },
+        data: {
+          text: input.text,
+        },
+      });
+
+      // Handle attachments
+      const files = await mapLimit<
+        z.infer<typeof FilePermissionsSchema>,
+        UploadedFile
+      >(
+        input.new_file_permissions,
+        2,
+        function ({ permission_id, file_name }, callback) {
+          consumePermission(permission_id, ctx.user.id, file_name)
+            .then((file) => callback(null, file))
+            .catch((err) => callback(err));
+        },
+      );
+
+      // New attachements
+      await prisma.homeworkSubmissionAttachment.createMany({
+        data: files.map((file) => ({
+          file_id: file.id,
+          submission_id: input.submission_id,
+        })),
+        skipDuplicates: true,
+      });
+
+      // Remove attachements
+      if (input.remove_attachments)
+        await prisma.homeworkSubmissionAttachment.deleteMany({
+          where: {
+            file_id: {
+              in: input.remove_attachments,
+            },
+            submission_id: input.submission_id,
+          },
+        });
     }),
 });
 
