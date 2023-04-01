@@ -117,6 +117,31 @@ const homeworkRouter = t.router({
 
       return homeworks;
     }),
+  fetchHomework: t.procedure
+    .use(authMiddleware)
+    .input(
+      z.object({
+        homework_id: z.string().cuid(),
+      }),
+    )
+    .query(({ input, ctx }) => {
+      return prisma.homework.findFirstOrThrow({
+        where: {
+          id: input.homework_id,
+          school_id: ctx.user.school_id,
+        },
+        include: {
+          Section: true,
+          Class: true,
+          Subject: true,
+          Attachments: {
+            include: {
+              File: true,
+            },
+          },
+        },
+      });
+    }),
   create: t.procedure
     .use(teacherMiddleware)
     .input(
@@ -247,7 +272,58 @@ const homeworkRouter = t.router({
         },
       });
     }),
-  submitAnswer: t.procedure
+  fetchSubmissions: t.procedure
+    .use(teacherMiddleware)
+    .input(
+      z.object({
+        homework_id: z.string().cuid(),
+        limit: z.number().int().min(1).max(20).default(10),
+        page: z.number().int().min(1).default(1),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const homework = await prisma.homework.findFirstOrThrow({
+        where: {
+          id: input.homework_id,
+          school_id: ctx.user.school_id,
+          teacher_id: ctx.teacher.id,
+        },
+        select: { id: true },
+      });
+
+      const where: Prisma.HomeworkSubmissionWhereInput = {
+        homework_id: homework.id,
+      };
+
+      const [submissions, total] = await Promise.all([
+        prisma.homeworkSubmission.findMany({
+          where,
+          orderBy: {
+            created_at: "desc",
+          },
+          include: {
+            Student: {
+              include: {
+                User: true,
+              },
+            },
+            Attachments: {
+              include: {
+                File: true,
+              },
+            },
+          },
+          take: input.limit,
+          skip: (input.page - 1) * input.limit,
+        }),
+        prisma.homeworkSubmission.count({
+          where,
+        }),
+      ]);
+
+      return { data: submissions, total };
+    }),
+  createSubmission: t.procedure
     .use(studentMiddleware)
     .input(
       z.object({
@@ -341,7 +417,7 @@ const homeworkRouter = t.router({
 
       return id;
     }),
-  updateAnswer: t.procedure
+  updateSubmission: t.procedure
     .use(studentMiddleware)
     .input(
       z.object({
