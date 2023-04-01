@@ -10,6 +10,9 @@ const ConfigSchema = z.object({
   NODE_ENV: z
     .enum(["production", "development", "staging"])
     .default("development"),
+  AWS_ACCESS_KEY: z.string(),
+  AWS_SECRET_ACCESS_KEY: z.string(),
+  AWS_REGION: z.string().default("ap-south-1"),
 });
 
 export default ConfigSchema.parse(process.env);
