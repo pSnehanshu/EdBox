@@ -65,6 +65,58 @@ const homeworkRouter = t.router({
           },
           Attachments: true,
         },
+        take: input.limit,
+        skip: (input.page - 1) * input.limit,
+      });
+
+      return homeworks;
+    }),
+  fetchForTeacher: t.procedure
+    .use(teacherMiddleware)
+    .input(
+      z.object({
+        limit: z.number().int().min(1).max(20).default(10),
+        page: z.number().int().min(1).default(1),
+        after_due_date: DateSchema.optional(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const where: Prisma.HomeworkWhereInput = {
+        teacher_id: ctx.user.teacher_id,
+        school_id: ctx.user.school_id,
+      };
+
+      if (input.after_due_date) {
+        where.OR = [
+          { due_date: null },
+          {
+            due_date: {
+              gte: input.after_due_date,
+            },
+          },
+        ];
+      }
+
+      const homeworks = await prisma.homework.findMany({
+        where,
+        orderBy: {
+          due_date: "asc",
+        },
+        include: {
+          Subject: true,
+          Teacher: {
+            include: {
+              User: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          },
+          Attachments: true,
+        },
+        take: input.limit,
+        skip: (input.page - 1) * input.limit,
       });
 
       return homeworks;
