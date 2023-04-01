@@ -4403,6 +4403,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/whatwg-mimetype@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "@types/whatwg-mimetype@npm:3.0.0"
+  checksum: 98254edcddb5b9580aa41c19e6c96d2bfb178285d5c2560e3a1f321f14da70192adc82950baecd2cad5876098b0677fbe813db1edf9ab9ba0a9996f0bf2bb703
+  languageName: node
+  linkType: hard
+
 "@types/yargs-parser@npm:*":
   version: 21.0.0
   resolution: "@types/yargs-parser@npm:21.0.0"
@@ -12526,6 +12533,7 @@ __metadata:
     "@types/lodash": ^4.14.191
     "@types/react": ~18.0.24
     "@types/react-native": ~0.70.6
+    "@types/whatwg-mimetype": ^3.0.0
     babel-plugin-transform-inline-environment-variables: ^0.4.4
     big-integer: ^1.6.51
     date-fns: ^2.29.3
@@ -12570,6 +12578,7 @@ __metadata:
     socket.io-client: ^4.5.4
     ts-node: ^10.9.1
     typescript: ^4.9.4
+    whatwg-mimetype: ^3.0.0
     zod: ^3.20.2
   languageName: unknown
   linkType: soft
@@ -14283,6 +14292,13 @@ __metadata:
   version: 2.3.0
   resolution: "whatwg-mimetype@npm:2.3.0"
   checksum: 23eb885940bcbcca4ff841c40a78e9cbb893ec42743993a42bf7aed16085b048b44b06f3402018931687153550f9a32d259dfa524e4f03577ab898b6965e5383
+  languageName: node
+  linkType: hard
+
+"whatwg-mimetype@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "whatwg-mimetype@npm:3.0.0"
+  checksum: ce08bbb36b6aaf64f3a84da89707e3e6a31e5ab1c1a2379fd68df79ba712a4ab090904f0b50e6693b0dafc8e6343a6157e40bf18fdffd26e513cf95ee2a59824
   languageName: node
   linkType: hard
 

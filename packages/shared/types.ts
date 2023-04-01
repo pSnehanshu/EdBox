@@ -55,6 +55,12 @@ export type ClassWithSections = ArrayElement<
 
 export type Section = ArrayElement<ClassWithSections["Sections"]>;
 
+export type Homework = RouterOutput["school"]["homework"]["fetchHomework"];
+
+export type Attachment = ArrayElement<Homework["Attachments"]>;
+
+export type UploadedFile = RouterOutput["school"]["attachment"]["fetchFile"];
+
 export interface ServerToClientEvents {
   newMessage: (msg: Message) => void;
 }

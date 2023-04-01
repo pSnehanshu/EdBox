@@ -66,6 +66,7 @@
     "rxjs": "^7.8.0",
     "schooltalk-shared": "*",
     "socket.io-client": "^4.5.4",
+    "whatwg-mimetype": "^3.0.0",
     "zod": "^3.20.2"
   },
   "devDependencies": {
@@ -73,6 +74,7 @@
     "@types/lodash": "^4.14.191",
     "@types/react": "~18.0.24",
     "@types/react-native": "~0.70.6",
+    "@types/whatwg-mimetype": "^3.0.0",
     "babel-plugin-transform-inline-environment-variables": "^0.4.4",
     "dotenv": "^16.0.3",
     "jest": "^26.6.3",
