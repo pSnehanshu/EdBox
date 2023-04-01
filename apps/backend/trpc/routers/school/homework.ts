@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { isPast, parseISO } from "date-fns";
 import { z } from "zod";
 import { Prisma, UploadedFile } from "@prisma/client";
@@ -10,7 +11,6 @@ import {
   studentMiddleware,
 } from "../../trpc";
 import { consumePermission } from "../../../utils/file.service";
-import { TRPCError } from "@trpc/server";
 
 const FilePermissionsSchema = z.object({
   permission_id: z.string().cuid(),
@@ -52,29 +52,32 @@ const homeworkRouter = t.router({
         ];
       }
 
-      const homeworks = await prisma.homework.findMany({
-        where,
-        orderBy: {
-          due_date: "asc",
-        },
-        include: {
-          Subject: true,
-          Teacher: {
-            include: {
-              User: {
-                select: {
-                  name: true,
+      const [homeworks, total] = await Promise.all([
+        prisma.homework.findMany({
+          where,
+          orderBy: {
+            due_date: "asc",
+          },
+          include: {
+            Subject: true,
+            Teacher: {
+              include: {
+                User: {
+                  select: {
+                    name: true,
+                  },
                 },
               },
             },
+            Attachments: true,
           },
-          Attachments: true,
-        },
-        take: input.limit,
-        skip: (input.page - 1) * input.limit,
-      });
+          take: input.limit,
+          skip: (input.page - 1) * input.limit,
+        }),
+        prisma.homework.count({ where }),
+      ]);
 
-      return homeworks;
+      return { data: homeworks, total };
     }),
   fetchForTeacher: t.procedure
     .use(teacherMiddleware)
@@ -102,20 +105,23 @@ const homeworkRouter = t.router({
         ];
       }
 
-      const homeworks = await prisma.homework.findMany({
-        where,
-        orderBy: {
-          due_date: "asc",
-        },
-        include: {
-          Subject: true,
-          Attachments: true,
-        },
-        take: input.limit,
-        skip: (input.page - 1) * input.limit,
-      });
+      const [homeworks, total] = await Promise.all([
+        prisma.homework.findMany({
+          where,
+          orderBy: {
+            due_date: "asc",
+          },
+          include: {
+            Subject: true,
+            Attachments: true,
+          },
+          take: input.limit,
+          skip: (input.page - 1) * input.limit,
+        }),
+        prisma.homework.count({ where }),
+      ]);
 
-      return homeworks;
+      return { data: homeworks, total };
     }),
   fetchHomework: t.procedure
     .use(authMiddleware)
@@ -316,9 +322,7 @@ const homeworkRouter = t.router({
           take: input.limit,
           skip: (input.page - 1) * input.limit,
         }),
-        prisma.homeworkSubmission.count({
-          where,
-        }),
+        prisma.homeworkSubmission.count({ where }),
       ]);
 
       return { data: submissions, total };
