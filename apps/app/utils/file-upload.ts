@@ -94,6 +94,8 @@ export type FileUploadTask = _FileUploadTask & {
 export function useFileUpload() {
   const uploadPermissionMutation =
     trpc.school.attachment.requestPermission.useMutation();
+  const cancelPermission =
+    trpc.school.attachment.cancelPermission.useMutation();
 
   /** Keeps track of ongoing uploads */
   const [uploadTasksMap, setUploadTasksMap] = useState<
@@ -115,21 +117,10 @@ export function useFileUpload() {
     const task = await _PickAndUploadFileWithoutTRPC(uploadPermissionMutation);
 
     // User cancelled, return
-    if (!task) return null;
+    if (!task) return;
 
     // Each task will have its own permission, hence the permission id is effectively the task id
     const taskId = task.permission.id;
-
-    // Record this task
-    setUploadTasksMap((t) => ({
-      ...t,
-      [taskId]: {
-        ...task,
-        // Because we know the task haven't started yet
-        uploadResult: undefined,
-        started: false,
-      },
-    }));
 
     // Overwrite the `start` method of a task to perform additional tasks
     const start = async () => {
@@ -159,6 +150,14 @@ export function useFileUpload() {
       // Cancel it
       await task.cancel();
 
+      // Cancel the permission
+      await cancelPermission
+        .mutateAsync({ permission_id: task.permission.id })
+        .catch((err) => {
+          // We will ignore this error
+          console.warn(err);
+        });
+
       // Remove it from record
       setUploadTasksMap((tasks) => ({
         ...tasks,
@@ -166,13 +165,23 @@ export function useFileUpload() {
       }));
     };
 
+    // Record this task
+    setUploadTasksMap((t) => ({
+      ...t,
+      [taskId]: {
+        ...task,
+        start,
+        cancel,
+        // Because we know the task haven't started yet
+        uploadResult: undefined,
+        started: false,
+      },
+    }));
+
     // Check if upload should start automatically
     if (autoStart) {
       start();
     }
-
-    // Return the task with overwritten methods
-    return { ...task, start, cancel };
   }, []);
 
   return { pickAndUploadFile, uploadTasks };

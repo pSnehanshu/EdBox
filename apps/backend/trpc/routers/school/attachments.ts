@@ -6,6 +6,9 @@ import {
 import { z } from "zod";
 import prisma from "../../../prisma";
 import { TRPCError } from "@trpc/server";
+import { DeleteObjectCommand } from "@aws-sdk/client-s3";
+import config from "../../../config";
+import { s3client } from "../../../utils/aws-clients";
 
 const attachmentsRouter = t.router({
   requestPermission: t.procedure
@@ -31,6 +34,42 @@ const attachmentsRouter = t.router({
       });
 
       return permission;
+    }),
+  cancelPermission: t.procedure
+    .use(authMiddleware)
+    .input(
+      z.object({
+        permission_id: z.string().cuid(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      // Check the permission
+      const permission = await prisma.fileUploadPermission.findUnique({
+        where: { id: input.permission_id },
+      });
+
+      if (
+        !permission ||
+        permission.user_id !== ctx.user.id ||
+        permission.school_id !== ctx.user.school_id
+      )
+        throw new TRPCError({
+          code: "NOT_FOUND",
+        });
+
+      // Delete the permission
+      await prisma.fileUploadPermission.delete({
+        where: { id: input.permission_id },
+      });
+
+      // Attempt to delete from S3
+      const deleteCommand = new DeleteObjectCommand({
+        Bucket: config.S3_USERCONTENT_BUCKET,
+        Key: permission.s3key,
+      });
+
+      // Attempt delete, but ignore when it fails
+      await s3client.send(deleteCommand).catch((err) => {});
     }),
   fetchFile: t.procedure
     .use(authMiddleware)
