@@ -13,9 +13,9 @@ import MIMEType from "whatwg-mimetype";
 import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
 import * as WebBrowser from "expo-web-browser";
-import { trpc } from "../../utils/trpc";
-import { Text, View } from "../Themed";
-import useColorScheme from "../../utils/useColorScheme";
+import { trpc } from "../utils/trpc";
+import { Text, View } from "./Themed";
+import useColorScheme from "../utils/useColorScheme";
 
 /**
  * Format bytes as human-readable text. Taken from https://stackoverflow.com/a/14919494/9990365
