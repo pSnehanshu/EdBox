@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useMessages } from "../../utils/messages-repository";
 import { Message } from "schooltalk-shared/types";
 import { useGroupInfo } from "../../utils/groups";
+import { useFileUpload } from "../../utils/file-upload";
 
 const renderItem: ListRenderItem<Message> = ({ item }) => (
   <ChatMessage message={item} />
@@ -72,6 +73,8 @@ export default function ChatWindowScreen({
     }
   }, [groupInfoQuery.data?.name, groupInfo.identifier]);
 
+  const fileUpload = useFileUpload();
+
   return (
     <View style={styles.container}>
       <ImageBackground
@@ -97,6 +100,15 @@ export default function ChatWindowScreen({
             placeholder="Message"
             onChangeText={setMessageText}
             style={styles.composerText}
+          />
+
+          <Ionicons.Button
+            name="attach"
+            style={styles.composerSendBtn}
+            onPress={async () => {
+              const res = await fileUpload.pickFile();
+              console.log(res);
+            }}
           />
 
           <Ionicons.Button

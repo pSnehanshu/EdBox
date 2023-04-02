@@ -6865,6 +6865,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-document-picker@npm:~11.0.1":
+  version: 11.0.1
+  resolution: "expo-document-picker@npm:11.0.1"
+  dependencies:
+    uuid: ^3.3.2
+  peerDependencies:
+    expo: "*"
+  checksum: 54fe8ca7917fcccd06cc62423b8f11ac02237b9ff6f02a07998f93a74abee4136750671a8afba33ff3b8e356c70fa089d80e1225e87a02bdae1f6c87fbdfc611
+  languageName: node
+  linkType: hard
+
 "expo-eas-client@npm:~0.4.0":
   version: 0.4.1
   resolution: "expo-eas-client@npm:0.4.1"
@@ -12543,6 +12554,8 @@ __metadata:
     expo-constants: ~14.0.2
     expo-dev-client: ~2.0.1
     expo-device: ~5.0.0
+    expo-document-picker: ~11.0.1
+    expo-file-system: ~15.1.1
     expo-font: ~11.0.1
     expo-linking: ~3.3.1
     expo-notifications: ~0.17.0
