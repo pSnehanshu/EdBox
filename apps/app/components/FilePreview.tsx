@@ -57,8 +57,8 @@ interface FilePreviewObjectProps {
 }
 function FilePreviewObject({ file, style }: FilePreviewObjectProps) {
   const mime = useMemo(
-    () => (file.file_type ? MIMEType.parse(file.file_type) : null),
-    [file.file_type],
+    () => (file.mime ? MIMEType.parse(file.mime) : null),
+    [file.mime],
   );
   const scheme = useColorScheme();
   const iconColor = scheme === "dark" ? "white" : "black";

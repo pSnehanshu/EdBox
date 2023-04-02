@@ -142,11 +142,11 @@ export async function consumePermission(
   // Fetch file metadata and populate
   const file = await prisma.uploadedFile.create({
     data: {
-      file_name: fileName ?? permission.s3key,
+      file_name: fileName ?? permission.file_name ?? permission.id,
       s3key: permission.s3key,
       school_id,
-      file_type: headResponse?.ContentType ?? null,
-      size_bytes: headResponse?.ContentLength ?? null,
+      mime: headResponse?.ContentType ?? permission.mime ?? null,
+      size_bytes: headResponse?.ContentLength ?? permission.size_bytes ?? null,
       uploader_user_id: userId,
       // TODO: Generate Preview
     },

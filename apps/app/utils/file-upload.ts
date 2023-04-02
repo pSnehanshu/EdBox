@@ -67,7 +67,10 @@ async function _PickAndUploadFileWithoutTRPC(
   if (fileInfo.type === "cancel") return null;
 
   // Get permission from backend
-  const { signedURL, permission } = await requestPermission.mutateAsync();
+  const { signedURL, permission } = await requestPermission.mutateAsync({
+    file_name: fileInfo.name,
+    size_in_bytes: fileInfo.size,
+  });
 
   // Upload it!
   const res = uploadFileToS3(fileInfo, signedURL);

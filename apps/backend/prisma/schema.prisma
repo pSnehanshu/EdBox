@@ -451,6 +451,9 @@ model RoleUserMapping {
 
 model FileUploadPermission {
   id         String   @id @default(cuid()) @db.VarChar(32)
+  file_name  String?
+  size_bytes Int?
+  mime       String?  @db.VarChar(30)
   s3key      String
   user_id    String   @db.VarChar(32)
   User       User     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
@@ -465,7 +468,7 @@ model UploadedFile {
   file_name                 String
   s3key                     String
   size_bytes                Int?
-  file_type                 String?                              @db.VarChar(30)
+  mime                      String?                              @db.VarChar(30)
   school_id                 String                               @db.VarChar(32)
   School                    School                               @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   uploader_user_id          String?                              @db.VarChar(32)

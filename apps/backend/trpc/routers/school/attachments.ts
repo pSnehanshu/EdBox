@@ -10,7 +10,28 @@ import { TRPCError } from "@trpc/server";
 const attachmentsRouter = t.router({
   requestPermission: t.procedure
     .use(authMiddleware)
-    .mutation(({ ctx }) => generateSignedUploadS3URL(ctx.user.id)),
+    .input(
+      z.object({
+        file_name: z.string().optional(),
+        size_in_bytes: z.number().optional(),
+        mime: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const permission = await generateSignedUploadS3URL(ctx.user.id);
+
+      // Update the given file name and size
+      await prisma.fileUploadPermission.update({
+        where: { id: permission.permission.id },
+        data: {
+          file_name: input.file_name,
+          size_bytes: input.size_in_bytes,
+          mime: input.mime,
+        },
+      });
+
+      return permission;
+    }),
   fetchFile: t.procedure
     .use(authMiddleware)
     .input(
