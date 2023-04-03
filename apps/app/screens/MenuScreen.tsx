@@ -25,6 +25,7 @@ interface MenuItem {
 export default function MenuScreen() {
   const scheme = useColorScheme();
   const iconColor = scheme === "dark" ? "white" : "black";
+  const menuColor = scheme === "dark" ? "#555" : "#999";
   const navigation = useNavigation();
 
   const MenuItems = useMemo<MenuItem[]>(() => {
@@ -63,8 +64,16 @@ export default function MenuScreen() {
         name="dots-grid"
         size={34}
         onPress={() => refRBSheet?.current?.open()}
+        color={menuColor}
       />
-      <Text style={styles.tab_icon_text}>Menu</Text>
+      <Text
+        style={{
+          ...styles.tab_icon_text,
+          color: menuColor,
+        }}
+      >
+        Menu
+      </Text>
 
       <RBSheet
         ref={refRBSheet}
@@ -104,6 +113,7 @@ export default function MenuScreen() {
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: "transparent",
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
