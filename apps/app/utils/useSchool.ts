@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import type { School } from "schooltalk-shared/types";
 import { trpc } from "../utils/trpc";
 import { SCHOOL } from "./async-storage-keys";
-import config from "../config";
+import { useConfig } from "../config";
 
 /**
  * Cache school object to avoid fetching from AsyncStorage over and over
@@ -14,6 +14,7 @@ let globalSchool: School | undefined = undefined;
  * Fetch the current school object.
  */
 export function useSchool(): School | undefined {
+  const [config] = useConfig();
   const schoolQuery = trpc.school.schoolBasicInfo.useQuery({
     schoolId: config.schoolId,
   });

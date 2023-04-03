@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { Alert, Modal, StyleSheet, Pressable } from "react-native";
 import { trpc } from "../utils/trpc";
 import { useSetAuthToken } from "../utils/auth";
-import config from "../config";
+import { useConfig } from "../config";
 import Spinner from "react-native-loading-spinner-overlay";
 import { View, Text, TextInput } from "./Themed";
 import useColorScheme from "../utils/useColorScheme";
@@ -23,6 +23,7 @@ export default function OtpPopup({
 }: props) {
   const setAuthToken = useSetAuthToken();
   const [otp, setOtp] = useState<string | null>(null);
+  const [config] = useConfig();
 
   const submitOTPMutation = trpc.auth.submitLoginOTP.useMutation({
     async onSuccess(data) {
@@ -53,7 +54,7 @@ export default function OtpPopup({
           }),
       });
     }
-  }, [userId, otp]);
+  }, [userId, otp, config.schoolId]);
 
   const color = useColorScheme();
   const blurBg = color === "dark" ? "rgba(0,0,0,.6)" : "rgba(255,255,255,.6)";

@@ -9,12 +9,13 @@ import {
   getTextColorForGivenBG,
   getUserColor,
 } from "schooltalk-shared/misc";
-import config from "../config";
+import { useConfig } from "../config";
 
 interface ChatMessageProps {
   message: Message;
 }
 function ChatMessage({ message }: ChatMessageProps) {
+  const [config] = useConfig();
   const { user } = useCurrentUser();
   const time = useMemo(() => {
     const date = new Date(message.created_at);
@@ -54,7 +55,7 @@ function ChatMessage({ message }: ChatMessageProps) {
       shouldCollapse
         ? message.text.slice(0, config.previewMessageLength).trimEnd()
         : message.text,
-    [message.text],
+    [message.text, config.previewMessageLength],
   );
 
   const viewFullMessage = useCallback(() => {

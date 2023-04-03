@@ -1,5 +1,5 @@
 import { io } from "socket.io-client";
-import config from "../config";
+import { useConfig } from "../config";
 import {
   useRef,
   createContext,
@@ -20,6 +20,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
   const socket = useRef<SocketClient>();
   const [, setSocketIsSet] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
+  const [config] = useConfig();
 
   useEffect(() => {
     (async () => {
@@ -39,7 +40,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
       socket.current?.disconnect();
       socket.current?.removeAllListeners();
     };
-  }, []);
+  }, [config.backendHost, config.schoolId]);
 
   return createElement(
     SocketContext.Provider,

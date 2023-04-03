@@ -6,12 +6,14 @@ import SelectDropdown from "react-native-select-dropdown";
 import { View, Text, TextInput } from "../../components/Themed";
 import { RootStackScreenProps } from "../../utils/types/common";
 import { trpc } from "../../utils/trpc";
-import config from "../../config";
+import { useConfig } from "../../config";
 import OtpPopup from "../../components/OtpPopup";
 import useColorScheme from "../../utils/useColorScheme";
 import { FontAwesome } from "@expo/vector-icons";
 
 export default function LoginScreen({}: RootStackScreenProps<"Login">) {
+  const [config] = useConfig();
+
   // Form States
   const [phone, setPhone] = useState("");
   const [rollnum, setRollNo] = useState<number>();

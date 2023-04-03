@@ -2,10 +2,11 @@ import { StyleSheet } from "react-native";
 import { Text, View } from "../components/Themed";
 import { trpc } from "../utils/trpc";
 import { Ionicons } from "@expo/vector-icons";
-import config from "../config";
+import { useConfig } from "../config";
 
 export default function SchoolNotFound() {
   const utils = trpc.useContext();
+  const [config] = useConfig();
 
   return (
     <View style={styles.container}>

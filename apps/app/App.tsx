@@ -13,7 +13,7 @@ import useColorScheme, {
 import Navigation from "./navigation";
 import { useSchool } from "./utils/useSchool";
 import { getAuthToken } from "./utils/auth";
-import config from "./config";
+import { useConfig } from "./config";
 import { DBProvider } from "./utils/db";
 import Toast from "react-native-toast-message";
 import SchoolNotFound from "./screens/SchoolNotFound";
@@ -35,6 +35,7 @@ function AppWithSchool() {
 export default function App() {
   const isLoadingComplete = useCachedResources();
   const [colorScheme, setColorScheme] = useState<"light" | "dark">("light");
+  const [config] = useConfig();
 
   useEffect(() => {
     AsyncStorage.getItem(COLOR_SCHEME).then((scheme) => {

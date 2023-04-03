@@ -11,7 +11,7 @@ import type { AppRouter } from "../../../../backend/trpc";
 import { List, Text, TextInput, View } from "../../../components/Themed";
 import { trpc } from "../../../utils/trpc";
 import useColorScheme from "../../../utils/useColorScheme";
-import config from "../../../config";
+import { useConfig } from "../../../config";
 
 type ClassStd = ArrayElement<
   inferRouterOutputs<AppRouter>["school"]["class"]["fetchClassesAndSections"]
@@ -243,6 +243,7 @@ function SectionsManager({
 }
 
 export default function ClassSectionSettingsScreen() {
+  const [config] = useConfig();
   const [isFetching, setIsFetching] = useState(false);
   const [classes, _setClasses] = useState<ClassStd[]>([]);
   const utils = trpc.useContext();
@@ -319,7 +320,7 @@ export default function ClassSectionSettingsScreen() {
 
   useEffect(() => {
     fetchClasses(config.schoolId);
-  }, []);
+  }, [config.schoolId]);
 
   const renderItem = useCallback<ListRenderItem<ClassStd>>(
     ({ item, index }) => {
