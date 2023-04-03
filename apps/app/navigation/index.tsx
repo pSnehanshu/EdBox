@@ -27,6 +27,7 @@ import ExamDetailsScreen from "../screens/exam/ExamDetails";
 import AboutAppScreen from "../screens/settings/AboutAppScreen";
 import { BottomTabNavigator } from "./BottomTabNav";
 import ExamListScreen from "../screens/exam/ExamList";
+import HomeWorkScreen from "../screens/HomeWorkScreen";
 
 export default function Navigation({
   colorScheme,
@@ -163,6 +164,14 @@ function RootNavigator() {
                 options={{
                   headerShown: true,
                   title: "Class tests and Exams",
+                }}
+              />
+              <Stack.Screen
+                name="HomeWorkScreen"
+                component={HomeWorkScreen}
+                options={{
+                  headerShown: true,
+                  title: "Home Work",
                 }}
               />
             </>

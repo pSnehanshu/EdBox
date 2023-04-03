@@ -33,6 +33,7 @@ export type RootStackParamList = {
   ExamDetails: { examId: string };
   AboutApp: undefined;
   ExamsScreen: undefined;
+  HomeWorkScreen: undefined;
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> =

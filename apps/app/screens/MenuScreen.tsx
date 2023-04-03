@@ -35,7 +35,7 @@ export default function MenuScreen() {
           <Foundation name="clipboard-pencil" size={30} color={iconColor} />
         ),
         onPress() {
-          alert("Homework!");
+          navigation.navigate("HomeWorkScreen");
         },
       },
       {
