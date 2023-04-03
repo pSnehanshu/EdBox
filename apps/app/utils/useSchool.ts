@@ -23,21 +23,29 @@ export function useSchool(): School | undefined {
   // Fetch locally
   useEffect(() => {
     (async () => {
-      if (globalSchool) {
+      if (globalSchool && globalSchool?.id === config.schoolId) {
         // The object is cached, so no need to refetch it
         return;
       }
+      globalSchool = undefined;
 
       const _school = await AsyncStorage.getItem(SCHOOL);
       if (!_school) return;
 
       const school = JSON.parse(_school);
+
+      // The school obj stored is of a different school, remove it instead
+      if (school?.id !== config.schoolId) {
+        await AsyncStorage.removeItem(SCHOOL);
+        return;
+      }
+
       setSchool(school);
 
       // Cache the value
       globalSchool = school;
     })();
-  }, []);
+  }, [config.schoolId]);
 
   useEffect(() => {
     (async () => {
