@@ -17,10 +17,17 @@ const ConfigSchema = z.object({
 
 type Config = z.infer<typeof ConfigSchema>;
 
+const preloadedSchoolId = Constants.expoConfig?.extra?.schoolId as
+  | string
+  | undefined;
+
+/** Was the app pre-configured for a school using environment variables? */
+export const hasPreloadedSchool = !!preloadedSchoolId;
+
 /** The preloaded values */
 const preloadedConfig = ConfigSchema.parse({
   backendHost: Constants.expoConfig?.extra?.backendHost,
-  schoolId: Constants.expoConfig?.extra?.schoolId ?? "",
+  schoolId: preloadedSchoolId ?? "",
 });
 
 console.log("Pre-loaded config", preloadedConfig);

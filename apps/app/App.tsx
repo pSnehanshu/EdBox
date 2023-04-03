@@ -19,7 +19,7 @@ import Toast from "react-native-toast-message";
 import SchoolNotFound from "./screens/SchoolNotFound";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { COLOR_SCHEME } from "./utils/async-storage-keys";
-import SchoolSelectorScreen from "./screens/SchoolSelector";
+import SchoolSelector from "./components/SchoolSelector";
 
 function AppWithSchool() {
   const colorScheme = useColorScheme();
@@ -77,7 +77,7 @@ function AppWithConfig() {
             <ColorSchemeContext.Provider
               value={{ scheme: colorScheme, change: setAndSaveColorScheme }}
             >
-              {isSchoolSelected ? <AppWithSchool /> : <SchoolSelectorScreen />}
+              {isSchoolSelected ? <AppWithSchool /> : <SchoolSelector />}
             </ColorSchemeContext.Provider>
           </ThemeProvider>
         </QueryClientProvider>
