@@ -1,16 +1,15 @@
 import { useMemo, useState } from "react";
-import { StyleSheet, Pressable, Alert, Button, Modal } from "react-native";
+import { StyleSheet, Pressable, Alert } from "react-native";
 import type { ClassWithSections, Section } from "schooltalk-shared/types";
 import Spinner from "react-native-loading-spinner-overlay";
 import SelectDropdown from "react-native-select-dropdown";
 import { View, Text, TextInput } from "../../components/Themed";
 import { RootStackScreenProps } from "../../utils/types/common";
 import { trpc } from "../../utils/trpc";
-import { hasPreloadedSchool, useConfig } from "../../config";
+import { useConfig } from "../../config";
 import OtpPopup from "../../components/OtpPopup";
 import useColorScheme from "../../utils/useColorScheme";
 import { FontAwesome } from "@expo/vector-icons";
-import SchoolSelector from "../../components/SchoolSelector";
 
 export default function LoginScreen({}: RootStackScreenProps<"Login">) {
   const [config] = useConfig();
@@ -32,7 +31,6 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
   const [step, setStep] = useState<"requestOTP" | "submitOTP">("requestOTP");
   const [selectedClass, setSelectedClass] = useState<ClassWithSections>();
   const [selectedSection, setSelectedSection] = useState<Section>();
-  const [isSchoolSelectorOpen, setIsSchoolSelectorOpen] = useState(false);
 
   // Derived data
   const allClassesNames = useMemo(
@@ -86,13 +84,6 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
         height: "100%",
       }}
     >
-      {!hasPreloadedSchool && (
-        <Button
-          title="Change school"
-          onPress={() => setIsSchoolSelectorOpen(true)}
-        />
-      )}
-
       <Spinner
         visible={requestOtp.isLoading || requestRollNumberOTP.isLoading}
         textContent="Please wait..."
@@ -326,15 +317,6 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
           }
         />
       )}
-
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isSchoolSelectorOpen}
-        onRequestClose={() => setIsSchoolSelectorOpen(false)}
-      >
-        <SchoolSelector onSelect={() => setIsSchoolSelectorOpen(false)} />
-      </Modal>
     </View>
   );
 }
