@@ -3,7 +3,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
 import { useCallback, useEffect, useState, Suspense } from "react";
-import { Button, ThemeProvider } from "@rneui/themed";
+import { ThemeProvider } from "@rneui/themed";
 import { trpc } from "./utils/trpc";
 import useCachedResources from "./utils/useCachedResources";
 import useColorScheme, {
@@ -19,26 +19,7 @@ import Toast from "react-native-toast-message";
 import SchoolNotFound from "./screens/SchoolNotFound";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { COLOR_SCHEME } from "./utils/async-storage-keys";
-import { Text, View } from "./components/Themed";
-
-function SchoolSelector() {
-  const [, setConfig] = useConfig();
-
-  return (
-    <View>
-      <Text>School selector</Text>
-      <Button
-        onPress={() =>
-          setConfig({
-            schoolId: "clcpuzcxf00001yvt5ppcenso",
-          })
-        }
-      >
-        Set school
-      </Button>
-    </View>
-  );
-}
+import SchoolSelectorScreen from "./screens/SchoolSelector";
 
 function AppWithSchool() {
   const colorScheme = useColorScheme();
@@ -96,7 +77,7 @@ function AppWithConfig() {
             <ColorSchemeContext.Provider
               value={{ scheme: colorScheme, change: setAndSaveColorScheme }}
             >
-              {isSchoolSelected ? <AppWithSchool /> : <SchoolSelector />}
+              {isSchoolSelected ? <AppWithSchool /> : <SchoolSelectorScreen />}
             </ColorSchemeContext.Provider>
           </ThemeProvider>
         </QueryClientProvider>
