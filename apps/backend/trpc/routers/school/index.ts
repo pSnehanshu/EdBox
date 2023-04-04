@@ -29,6 +29,13 @@ const schoolRouter = t.router({
           name: true,
           is_active: true,
           website: true,
+          app_android_adaptive_bgcolor: true,
+          app_android_adaptive_icon: true,
+          app_android_package_name: true,
+          app_google_services_json: true,
+          app_ios_bundle_identifier: true,
+          app_scheme: true,
+          app_splash: true,
         },
       });
 

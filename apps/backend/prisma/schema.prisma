@@ -15,31 +15,38 @@ datasource db {
 }
 
 model School {
-  id                 String              @id @default(cuid()) @db.VarChar(32)
-  name               String              @db.VarChar(50)
-  logo               String?             @db.VarChar(256)
-  icon               String?             @db.VarChar(256)
-  website            String?             @db.VarChar(256)
-  is_active          Boolean             @default(true)
-  created_at         DateTime            @default(now())
-  updated_at         DateTime            @updatedAt
-  Users              User[]
-  Students           Student[]
-  Batches            StudentsBatch[]
-  Classes            ClassStd[]
-  Sections           ClassSection[]
-  Teachers           Teacher[]
-  Parents            Parent[]
-  Staff              SchoolStaff[]
-  CustomGroups       CustomGroup[]
-  Messages           Message[]
-  Subjects           Subject[]
-  Periods            RoutinePeriod[]
-  AttendancesTaken   PeriodAttendance[]
-  StudentAttendances StudentAttendance[]
-  Exams              Exam[]
-  Tests              ExamTest[]
-  DynamicRoles       DynamicRole[]
+  id                           String              @id @default(cuid()) @db.VarChar(32)
+  name                         String              @db.VarChar(50)
+  logo                         String?             @db.VarChar(256)
+  icon                         String?             @db.VarChar(256)
+  website                      String?             @db.VarChar(256)
+  is_active                    Boolean             @default(true)
+  created_at                   DateTime            @default(now())
+  updated_at                   DateTime            @updatedAt
+  Users                        User[]
+  Students                     Student[]
+  Batches                      StudentsBatch[]
+  Classes                      ClassStd[]
+  Sections                     ClassSection[]
+  Teachers                     Teacher[]
+  Parents                      Parent[]
+  Staff                        SchoolStaff[]
+  CustomGroups                 CustomGroup[]
+  Messages                     Message[]
+  Subjects                     Subject[]
+  Periods                      RoutinePeriod[]
+  AttendancesTaken             PeriodAttendance[]
+  StudentAttendances           StudentAttendance[]
+  Exams                        Exam[]
+  Tests                        ExamTest[]
+  DynamicRoles                 DynamicRole[]
+  app_scheme                   String              @default("edbox")
+  app_splash                   String?
+  app_ios_bundle_identifier    String              @default("com.indorhino.edbox.common")
+  app_android_package_name     String              @default("com.indorhino.edbox.common")
+  app_android_adaptive_icon    String?
+  app_android_adaptive_bgcolor String              @default("#ffffff")
+  app_google_services_json     String?             @db.Text
 }
 
 model User {
