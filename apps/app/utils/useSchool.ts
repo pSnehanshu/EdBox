@@ -66,7 +66,7 @@ export function useSchool(): School | undefined {
         }
       }
     })();
-  }, [schoolQuery.isLoading]);
+  }, [schoolQuery.isFetching]);
 
   return school;
 }

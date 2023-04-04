@@ -22,9 +22,10 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
 
   // Query
   const classesAndSectionsData =
-    trpc.school.class.fetchClassesAndSections.useQuery({
-      schoolId: config.schoolId,
-    });
+    trpc.school.class.fetchClassesAndSections.useQuery(
+      { schoolId: config.schoolId },
+      { cacheTime: 0 },
+    );
 
   // Selection state
   const [formType, setFormType] = useState<"others" | "student">("others");

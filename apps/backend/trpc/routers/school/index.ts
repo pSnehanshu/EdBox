@@ -1,5 +1,5 @@
-import { t } from "../../trpc";
 import { z } from "zod";
+import { t } from "../../trpc";
 import prisma from "../../../prisma";
 import { TRPCError } from "@trpc/server";
 import messagingRouter from "./messaging";
@@ -37,6 +37,46 @@ const schoolRouter = t.router({
       }
 
       return school;
+    }),
+  schoolList: t.procedure
+    .input(
+      z.object({
+        search: z.string().trim().optional(),
+        limit: z.number().int().min(1).max(30).default(10),
+        page: z.number().int().min(1).default(1),
+      }),
+    )
+    .query(async ({ input }) => {
+      const schools = await prisma.school.findMany({
+        where: {
+          name: input.search
+            ? {
+                contains: input.search,
+                mode: "insensitive",
+              }
+            : undefined,
+          is_active: true,
+        },
+        select: {
+          id: true,
+          name: true,
+          logo: true,
+          website: true,
+        },
+        take: input.limit + 1,
+        skip: (input.page - 1) * input.limit,
+        orderBy: {
+          name: "asc",
+        },
+      });
+
+      let hasMore = false;
+      if (schools.length > input.limit) {
+        hasMore = true;
+        schools.pop();
+      }
+
+      return { schools, hasMore };
     }),
   messaging: messagingRouter,
   routine: routineRouter,
