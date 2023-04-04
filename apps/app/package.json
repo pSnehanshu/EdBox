@@ -11,7 +11,8 @@
     "test": "jest --watchAll",
     "typecheck": "tsc --noEmit",
     "expo": "NODE_OPTIONS='-r dotenv/config' expo",
-    "eas": "NODE_OPTIONS='-r dotenv/config' eas"
+    "eas": "NODE_OPTIONS='-r dotenv/config' eas",
+    "eas-build-post-install": "ts-node ./scripts/prepare-build.ts"
   },
   "jest": {
     "preset": "jest-expo"
