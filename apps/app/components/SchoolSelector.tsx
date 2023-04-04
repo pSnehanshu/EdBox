@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "@rneui/themed";
 import { List, Text, View, TextInput } from "./Themed";
 import { useConfig } from "../config";
 import { trpc } from "../utils/trpc";
-import { Image } from "@rneui/themed";
 
 function useDebounce(value: string, delay: number) {
   // State and setters for debounced value
@@ -29,8 +29,14 @@ function useDebounce(value: string, delay: number) {
 
 interface SchoolSelectorProps {
   onSelect?: (schoolId: string) => void;
+  onClose?: () => void;
+  showCancelButton?: boolean;
 }
-export default function SchoolSelector({ onSelect }: SchoolSelectorProps) {
+export default function SchoolSelector({
+  onSelect,
+  onClose,
+  showCancelButton,
+}: SchoolSelectorProps) {
   const [, setConfig] = useConfig();
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
@@ -57,9 +63,24 @@ export default function SchoolSelector({ onSelect }: SchoolSelectorProps) {
         <TextInput
           value={search}
           onChangeText={setSearch}
-          placeholder="Search for your school"
+          placeholder="Search for your school 🔍"
+          style={styles.search_text}
         />
+
         {isFetching && <ActivityIndicator size="small" />}
+
+        {showCancelButton && (
+          <Pressable
+            onPress={onClose}
+            style={({ pressed }) => ({
+              opacity: pressed ? 0.5 : 1,
+              marginLeft: 4,
+              marginRight: 16,
+            })}
+          >
+            <Ionicons name="md-close" size={24} />
+          </Pressable>
+        )}
       </View>
 
       <List
@@ -101,6 +122,7 @@ export default function SchoolSelector({ onSelect }: SchoolSelectorProps) {
           </View>
         }
         ItemSeparatorComponent={Separator}
+        keyboardShouldPersistTaps="always"
       />
     </View>
   );
@@ -138,14 +160,21 @@ function SchoolItem({ school, onSelect }: SchoolItemInterface) {
 const styles = StyleSheet.create({
   container: {
     height: "100%",
+    paddingTop: 16,
   },
   search: {
     flexDirection: "row",
     height: 50,
     justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 8,
     borderBottomColor: "gray",
-    borderBottomWidth: 1,
+    borderBottomWidth: 0.5,
+    marginBottom: 8,
+  },
+  search_text: {
+    flexGrow: 1,
+    marginLeft: 16,
   },
   school: {
     paddingVertical: 16,

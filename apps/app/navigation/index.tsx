@@ -61,13 +61,12 @@ interface SchoolSelectorModalProps {
 function SchoolSelectorModal({ isOpen, onClose }: SchoolSelectorModalProps) {
   return (
     <Modal
-      animationType="fade"
+      animationType="slide"
       transparent={false}
       visible={isOpen}
       onRequestClose={onClose}
     >
-      {onClose && <Button title="Cancel" onPress={onClose} />}
-      <SchoolSelector onSelect={onClose} />
+      <SchoolSelector onSelect={onClose} showCancelButton onClose={onClose} />
     </Modal>
   );
 }
