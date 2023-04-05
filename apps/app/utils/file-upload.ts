@@ -1,6 +1,7 @@
 import * as FileSystem from "expo-file-system";
 import * as DocumentPicker from "expo-document-picker";
 import { useCallback, useMemo, useState } from "react";
+import Toast from "react-native-toast-message";
 import { Subject } from "rxjs";
 import { trpc } from "./trpc";
 
@@ -64,19 +65,28 @@ async function _PickAndUploadFileWithoutTRPC(
   const fileInfo = await DocumentPicker.getDocumentAsync();
 
   // Make sure user picked a file
-  if (fileInfo.type === "cancel") return null;
+  if (fileInfo.type === "cancel") return;
 
-  // Get permission from backend
-  const { signedURL, permission } = await requestPermission.mutateAsync({
-    file_name: fileInfo.name,
-    size_in_bytes: fileInfo.size,
-  });
+  try {
+    // Get permission from backend
+    const { signedURL, permission } = await requestPermission.mutateAsync({
+      file_name: fileInfo.name,
+      size_in_bytes: fileInfo.size,
+    });
 
-  // Upload it!
-  const res = uploadFileToS3(fileInfo, signedURL);
+    // Upload it!
+    const res = uploadFileToS3(fileInfo, signedURL);
 
-  // Return the data
-  return { ...res, permission, file: fileInfo };
+    // Return the data
+    return { ...res, permission, file: fileInfo };
+  } catch (error) {
+    console.error(error);
+    Toast.show({
+      type: "error",
+      text1: "Failed to upload file!",
+      text2: (error as any)?.message,
+    });
+  }
 }
 
 type _FileUploadTask = NonNullable<

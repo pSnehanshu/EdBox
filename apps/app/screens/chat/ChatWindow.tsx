@@ -106,7 +106,7 @@ export default function ChatWindowScreen({
             name="attach"
             style={styles.composerSendBtn}
             onPress={async () => {
-              const res = await fileUpload.pickFile();
+              const res = await fileUpload.pickAndUploadFile();
               console.log(res);
             }}
           />
