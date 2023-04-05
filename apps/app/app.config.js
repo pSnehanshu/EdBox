@@ -1,6 +1,8 @@
+// @ts-check
+
 /**
  * @param {import('expo/config').ConfigContext} ctx
- * @returns {import('expo/config').ExpoConfig}
+ * @returns {Partial<import('expo/config').ExpoConfig>}
  */
 module.exports = ({ config }) => ({
   ...config,
