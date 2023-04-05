@@ -7,6 +7,8 @@ import { FAB } from "@rneui/themed";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { Modal } from "react-native";
 import SelectDropdown from "react-native-select-dropdown";
+import { trpc } from "../utils/trpc";
+import useColorScheme from "../utils/useColorScheme";
 
 type Props = {};
 
@@ -15,11 +17,23 @@ export default function HomeWorkScreen({}: NativeStackScreenProps<
   "HomeWorkScreen"
 >) {
   const [createHomeWorkModal, setCreateHomeWorkModal] = useState(false);
+
+  const homeworkQuery = trpc.school.homework.fetchForTeacher.useQuery({
+    limit: 10,
+  });
+  const color = useColorScheme();
   return (
-    <View style={{ flex: 1 }}>
-      <Text>test</Text>
+    <View style={{ flex: 1, marginTop: 0 }}>
+      {/* list */}
+      <Text>{JSON.stringify(homeworkQuery.data, null, 2)}</Text>
       <FAB
-        icon={<Ionicons name="add" size={24} color="white" />}
+        icon={
+          <Ionicons
+            name="add"
+            size={24}
+            color={color === "dark" ? "black" : "white"}
+          />
+        }
         style={{
           position: "absolute",
           bottom: 10,
@@ -28,12 +42,14 @@ export default function HomeWorkScreen({}: NativeStackScreenProps<
           elevation: 1,
           flex: 1,
         }}
-        color="black"
+        color={color === "dark" ? "white" : "black"}
         onPress={() => setCreateHomeWorkModal(true)}
+        // title={""}
       />
       <EditHomeWorkModal
         createHomeWorkModal={createHomeWorkModal}
-        setCreateHomeWorkModal={setCreateHomeWorkModal}
+        onClose={() => setCreateHomeWorkModal((prev) => !prev)}
+        color={color}
       />
     </View>
   );
@@ -41,18 +57,27 @@ export default function HomeWorkScreen({}: NativeStackScreenProps<
 
 interface props {
   createHomeWorkModal: boolean;
-  setCreateHomeWorkModal: any;
+  onClose: () => void;
+  color: string;
 }
 
-function EditHomeWorkModal({
-  createHomeWorkModal,
-  setCreateHomeWorkModal,
-}: props) {
+function EditHomeWorkModal({ createHomeWorkModal, onClose, color }: props) {
+  const blurBg = color === "dark" ? "rgba(0,0,0,.6)" : "rgba(255,255,255,.6)";
   return (
     <View style={styles.centeredView}>
-      <Modal transparent={true} visible={createHomeWorkModal}>
+      <Modal
+        transparent={true}
+        visible={createHomeWorkModal}
+        onRequestClose={onClose}
+      >
         <FAB
-          icon={<Ionicons name="add" size={24} color="white" />}
+          icon={
+            <Ionicons
+              name="add"
+              size={24}
+              color={color === "dark" ? "black" : "white"}
+            />
+          }
           style={{
             position: "absolute",
             bottom: 10,
@@ -61,11 +86,19 @@ function EditHomeWorkModal({
             elevation: 1,
             flex: 1,
           }}
-          color="black"
-          onPress={() => setCreateHomeWorkModal(false)}
+          color={color === "dark" ? "white" : "black"}
+          onPress={onClose}
         />
-        <View style={[styles.centeredView]}>
-          <View style={styles.modalView}>
+        <View style={[styles.centeredView, { backgroundColor: blurBg }]}>
+          <View
+            style={[
+              styles.modalView,
+              {
+                borderColor: "white",
+                borderWidth: 2,
+              },
+            ]}
+          >
             <Text style={styles.mainText}>Create new Home Work</Text>
             <View
               style={{
