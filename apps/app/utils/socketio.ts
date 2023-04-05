@@ -20,7 +20,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
   const socket = useRef<SocketClient>();
   const [, setSocketIsSet] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
-  const [config] = useConfig();
+  const config = useConfig();
 
   useEffect(() => {
     (async () => {

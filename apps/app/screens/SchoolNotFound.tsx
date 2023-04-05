@@ -6,7 +6,7 @@ import { useConfig } from "../utils/config";
 
 export default function SchoolNotFound() {
   const utils = trpc.useContext();
-  const [config] = useConfig();
+  const config = useConfig();
 
   return (
     <View style={styles.container}>

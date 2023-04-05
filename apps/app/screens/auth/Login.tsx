@@ -12,7 +12,7 @@ import useColorScheme from "../../utils/useColorScheme";
 import { FontAwesome } from "@expo/vector-icons";
 
 export default function LoginScreen({}: RootStackScreenProps<"Login">) {
-  const [config] = useConfig();
+  const config = useConfig();
 
   // Form States
   const [phone, setPhone] = useState("");

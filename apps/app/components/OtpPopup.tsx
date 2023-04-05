@@ -23,7 +23,7 @@ export default function OtpPopup({
 }: props) {
   const setAuthToken = useSetAuthToken();
   const [otp, setOtp] = useState<string | null>(null);
-  const [config] = useConfig();
+  const config = useConfig();
 
   const submitOTPMutation = trpc.auth.submitLoginOTP.useMutation({
     async onSuccess(data) {

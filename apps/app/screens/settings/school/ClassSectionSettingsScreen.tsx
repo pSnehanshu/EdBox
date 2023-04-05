@@ -243,7 +243,7 @@ function SectionsManager({
 }
 
 export default function ClassSectionSettingsScreen() {
-  const [config] = useConfig();
+  const config = useConfig();
   const [isFetching, setIsFetching] = useState(false);
   const [classes, _setClasses] = useState<ClassStd[]>([]);
   const utils = trpc.useContext();

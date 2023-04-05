@@ -2,7 +2,7 @@
  * This file is the global config file. Import this to access the values.
  * This will throw error if it is unable to gather all the required configs.
  */
-import { atom, useAtom } from "jotai";
+import { atom, useAtom, useAtomValue } from "jotai";
 import { z } from "zod";
 import Constants from "expo-constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -79,7 +79,14 @@ const ConfigAtom = atom(
   },
 );
 
-/** This hook wraps the ConfigAtom */
+/** Get the current config */
 export function useConfig() {
-  return useAtom(ConfigAtom);
+  return useAtomValue(ConfigAtom);
+}
+
+/** Returns a setter for config */
+export function useConfigUpdate() {
+  const [, setConfig] = useAtom(ConfigAtom);
+
+  return setConfig;
 }

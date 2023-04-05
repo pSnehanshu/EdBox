@@ -36,7 +36,7 @@ function AppWithSchool() {
 function AppWithConfig() {
   const isLoadingComplete = useCachedResources();
   const [colorScheme, setColorScheme] = useState<"light" | "dark">("light");
-  const [config] = useConfig();
+  const config = useConfig();
   const isSchoolSelected = !!config.schoolId;
 
   useEffect(() => {

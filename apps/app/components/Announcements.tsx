@@ -15,7 +15,7 @@ interface AnnouncementProps {
   message: Message;
 }
 function SingleAnnouncement({ message }: AnnouncementProps) {
-  const [config] = useConfig();
+  const config = useConfig();
   const { user } = useCurrentUser();
   const time = useMemo(() => {
     const date = new Date(message.created_at);
@@ -89,7 +89,7 @@ function SingleAnnouncement({ message }: AnnouncementProps) {
 export default function Announcements() {
   const messages = useMessages();
 
-  const [config] = useConfig();
+  const config = useConfig();
   const group: Group = useMemo(
     () => ({
       name: "School Group",

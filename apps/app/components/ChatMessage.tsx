@@ -15,7 +15,7 @@ interface ChatMessageProps {
   message: Message;
 }
 function ChatMessage({ message }: ChatMessageProps) {
-  const [config] = useConfig();
+  const config = useConfig();
   const { user } = useCurrentUser();
   const time = useMemo(() => {
     const date = new Date(message.created_at);

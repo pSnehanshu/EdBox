@@ -14,7 +14,7 @@ let globalSchool: School | undefined = undefined;
  * Fetch the current school object.
  */
 export function useSchool(): School | undefined {
-  const [config] = useConfig();
+  const config = useConfig();
   const schoolQuery = trpc.school.schoolBasicInfo.useQuery({
     schoolId: config.schoolId,
   });

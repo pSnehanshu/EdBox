@@ -3,7 +3,7 @@ import { ActivityIndicator, Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "@rneui/themed";
 import { List, Text, View, TextInput } from "./Themed";
-import { useConfig } from "../utils/config";
+import { useConfigUpdate } from "../utils/config";
 import { trpc } from "../utils/trpc";
 
 function useDebounce(value: string, delay: number) {
@@ -37,7 +37,7 @@ export default function SchoolSelector({
   onClose,
   showCancelButton,
 }: SchoolSelectorProps) {
-  const [, setConfig] = useConfig();
+  const updateConfig = useConfigUpdate();
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
   const [page, setPage] = useState(1);
@@ -50,7 +50,7 @@ export default function SchoolSelector({
   const hasMore = !!data?.hasMore;
 
   const handleSchoolSelect = useCallback(async (schoolId: string) => {
-    await setConfig({ schoolId });
+    await updateConfig({ schoolId });
     onSelect?.(schoolId);
   }, []);
 
