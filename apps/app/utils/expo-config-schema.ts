@@ -420,3 +420,7 @@ export const expoConfigSchema = z.object({
     )
     .optional(),
 });
+
+export const expoJsonSchema = z.object({
+  expo: expoConfigSchema,
+});
