@@ -36,7 +36,7 @@ import ExamDetailsScreen from "../screens/exam/ExamDetails";
 import RoutineScreen from "../screens/routine/RoutineScreen";
 import AboutAppScreen from "../screens/settings/AboutAppScreen";
 import SchoolSelector from "../components/SchoolSelector";
-import { hasPreloadedSchool } from "../config";
+import { hasPreloadedSchool } from "../utils/config";
 
 export default function Navigation({
   colorScheme,

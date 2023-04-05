@@ -6,7 +6,7 @@ import { atom, useAtom } from "jotai";
 import { z } from "zod";
 import Constants from "expo-constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { SELECTED_SCHOOL_ID } from "./utils/async-storage-keys";
+import { SELECTED_SCHOOL_ID } from "./async-storage-keys";
 
 /** The schema */
 const ConfigSchema = z.object({

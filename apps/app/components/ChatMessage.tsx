@@ -9,7 +9,7 @@ import {
   getTextColorForGivenBG,
   getUserColor,
 } from "schooltalk-shared/misc";
-import { useConfig } from "../config";
+import { useConfig } from "../utils/config";
 
 interface ChatMessageProps {
   message: Message;

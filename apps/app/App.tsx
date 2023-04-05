@@ -13,7 +13,7 @@ import useColorScheme, {
 import Navigation from "./navigation";
 import { useSchool } from "./utils/useSchool";
 import { getAuthToken } from "./utils/auth";
-import { useConfig } from "./config";
+import { useConfig } from "./utils/config";
 import { DBProvider } from "./utils/db";
 import Toast from "react-native-toast-message";
 import SchoolNotFound from "./screens/SchoolNotFound";

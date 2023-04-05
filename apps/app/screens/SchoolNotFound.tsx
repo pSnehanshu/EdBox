@@ -2,7 +2,7 @@ import { StyleSheet } from "react-native";
 import { Text, View } from "../components/Themed";
 import { trpc } from "../utils/trpc";
 import { Ionicons } from "@expo/vector-icons";
-import { useConfig } from "../config";
+import { useConfig } from "../utils/config";
 
 export default function SchoolNotFound() {
   const utils = trpc.useContext();

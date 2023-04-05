@@ -11,7 +11,7 @@ import type { AppRouter } from "../../../../backend/trpc";
 import { List, Text, TextInput, View } from "../../../components/Themed";
 import { trpc } from "../../../utils/trpc";
 import useColorScheme from "../../../utils/useColorScheme";
-import { useConfig } from "../../../config";
+import { useConfig } from "../../../utils/config";
 
 type ClassStd = ArrayElement<
   inferRouterOutputs<AppRouter>["school"]["class"]["fetchClassesAndSections"]

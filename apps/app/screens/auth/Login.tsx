@@ -6,7 +6,7 @@ import SelectDropdown from "react-native-select-dropdown";
 import { View, Text, TextInput } from "../../components/Themed";
 import { RootStackScreenProps } from "../../utils/types/common";
 import { trpc } from "../../utils/trpc";
-import { useConfig } from "../../config";
+import { useConfig } from "../../utils/config";
 import OtpPopup from "../../components/OtpPopup";
 import useColorScheme from "../../utils/useColorScheme";
 import { FontAwesome } from "@expo/vector-icons";

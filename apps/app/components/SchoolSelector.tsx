@@ -3,7 +3,7 @@ import { ActivityIndicator, Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "@rneui/themed";
 import { List, Text, View, TextInput } from "./Themed";
-import { useConfig } from "../config";
+import { useConfig } from "../utils/config";
 import { trpc } from "../utils/trpc";
 
 function useDebounce(value: string, delay: number) {

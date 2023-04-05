@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import type { School } from "schooltalk-shared/types";
 import { trpc } from "../utils/trpc";
 import { SCHOOL } from "./async-storage-keys";
-import { useConfig } from "../config";
+import { useConfig } from "./config";
 
 /**
  * Cache school object to avoid fetching from AsyncStorage over and over

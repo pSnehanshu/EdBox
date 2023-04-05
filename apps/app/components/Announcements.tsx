@@ -8,7 +8,7 @@ import { format, isThisYear, isToday, isYesterday } from "date-fns";
 import { getDisplayName } from "schooltalk-shared/misc";
 import { useNavigation } from "@react-navigation/native";
 import { getSchoolGroupIdentifier } from "schooltalk-shared/group-identifier";
-import { useConfig } from "../config";
+import { useConfig } from "../utils/config";
 import useColorScheme from "../utils/useColorScheme";
 
 interface AnnouncementProps {

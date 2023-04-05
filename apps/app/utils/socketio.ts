@@ -1,5 +1,5 @@
 import { io } from "socket.io-client";
-import { useConfig } from "../config";
+import { useConfig } from "./config";
 import {
   useRef,
   createContext,

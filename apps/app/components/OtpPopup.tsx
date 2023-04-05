@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { Alert, Modal, StyleSheet, Pressable } from "react-native";
 import { trpc } from "../utils/trpc";
 import { useSetAuthToken } from "../utils/auth";
-import { useConfig } from "../config";
+import { useConfig } from "../utils/config";
 import Spinner from "react-native-loading-spinner-overlay";
 import { View, Text, TextInput } from "./Themed";
 import useColorScheme from "../utils/useColorScheme";
