@@ -172,12 +172,13 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
             />
             <Pressable
               style={styles.main_button}
-              onPress={() =>
-                requestOtp.mutate({
-                  phoneNumber: phone,
-                  schoolId: config.schoolId,
-                })
-              }
+              onPress={() => {
+                if (phone)
+                  requestOtp.mutate({
+                    phoneNumber: phone,
+                    schoolId: config.schoolId,
+                  });
+              }}
             >
               <Text style={styles.button_text}>Request OTP</Text>
             </Pressable>

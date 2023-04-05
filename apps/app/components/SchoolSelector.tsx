@@ -6,6 +6,7 @@ import { List, Text, View, TextInput } from "./Themed";
 import { useConfigUpdate } from "../utils/config";
 import { trpc } from "../utils/trpc";
 import { Banner } from "./Banner";
+import useColorScheme from "../utils/useColorScheme";
 
 function useDebounce(value: string, delay: number) {
   // State and setters for debounced value
@@ -55,6 +56,8 @@ export default function SchoolSelector({
     onSelect?.(schoolId);
   }, []);
 
+  const scheme = useColorScheme();
+
   const hasPrevPage = page > 1;
   const hasNextPage = hasMore;
 
@@ -79,7 +82,11 @@ export default function SchoolSelector({
               marginRight: 16,
             })}
           >
-            <Ionicons name="md-close" size={24} />
+            <Ionicons
+              name="md-close"
+              size={24}
+              color={scheme === "dark" ? "white" : "black"}
+            />
           </Pressable>
         )}
       </View>
