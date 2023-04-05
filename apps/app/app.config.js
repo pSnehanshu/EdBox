@@ -1,3 +1,7 @@
+/**
+ * @param {import('expo/config').ConfigContext} ctx
+ * @returns {import('expo/config').ExpoConfig}
+ */
 module.exports = ({ config }) => ({
   ...config,
   extra: {
