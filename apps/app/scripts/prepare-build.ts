@@ -17,6 +17,11 @@ type OUTPUT = {
 };
 
 const CONFIG_FILE_PATH = path.join(__dirname, "..", "app.json");
+const GOOGLE_SERVICES_JSON_PATH = path.join(
+  __dirname,
+  "..",
+  "google-services.json",
+);
 
 if (!process.env.HOSTNAME) {
   throw new Error("HOSTNAME is not defined");
@@ -89,12 +94,19 @@ async function setupPreconfiguredApp(
     },
   };
 
-  // TODO: Write google-services.json
-  // school.app_google_services_json
+  // Write google-services.json
+  if (school.app_google_services_json) {
+    await writeGoogleServicesJsonFile(school.app_google_services_json);
+  }
 
   return config;
 }
 
 async function setupCommonApp(config: ExpoConfig): Promise<ExpoConfig> {
   return config;
+}
+
+async function writeGoogleServicesJsonFile(google_services_json: string) {
+  await fs.writeFile(GOOGLE_SERVICES_JSON_PATH, google_services_json);
+  console.log(`google-services.json updated!`, google_services_json);
 }
