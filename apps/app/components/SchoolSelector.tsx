@@ -5,6 +5,7 @@ import { Image } from "@rneui/themed";
 import { List, Text, View, TextInput } from "./Themed";
 import { useConfigUpdate } from "../utils/config";
 import { trpc } from "../utils/trpc";
+import { Banner } from "./Banner";
 
 function useDebounce(value: string, delay: number) {
   // State and setters for debounced value
@@ -92,9 +93,10 @@ export default function SchoolSelector({
         ListHeaderComponent={
           <View>
             {isError && (
-              <View>
-                <Text>Error!</Text>
-              </View>
+              <Banner
+                text="An error occured while fetching schools, please try again."
+                type="error"
+              />
             )}
           </View>
         }
