@@ -27,4 +27,5 @@ ENV PROFILE=$profile
 WORKDIR /home/ubuntu/schooltalk/apps/app
 
 CMD export $(grep -v '^#' .env | xargs) && \
+    npx ts-node ./scripts/prepare-build.ts && \
     eas build --platform android --profile $PROFILE --local
