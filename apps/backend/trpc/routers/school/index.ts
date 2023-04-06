@@ -24,8 +24,6 @@ const schoolRouter = t.router({
         },
         select: {
           id: true,
-          logo: true,
-          icon: true,
           name: true,
           is_active: true,
           website: true,
@@ -65,8 +63,6 @@ const schoolRouter = t.router({
         select: {
           id: true,
           name: true,
-          logo: true,
-          icon: true,
           website: true,
         },
         take: input.limit + 1,

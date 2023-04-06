@@ -71,7 +71,7 @@ async function setupPreconfiguredApp(
 
   config.name = school.name;
   config.scheme = school.app_scheme ?? config.scheme;
-  config.icon = school.icon ?? config.icon;
+  config.icon = `${process.env.HOSTNAME}/school-info/${school.id}/icon`;
   config.splash = {
     ...config.splash,
     image: school.app_splash ?? config.splash?.image,

@@ -3,7 +3,7 @@ import { ActivityIndicator, Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "@rneui/themed";
 import { List, Text, View, TextInput } from "./Themed";
-import { useConfigUpdate } from "../utils/config";
+import { useConfig, useConfigUpdate } from "../utils/config";
 import { trpc } from "../utils/trpc";
 import { Banner } from "./Banner";
 import useColorScheme from "../utils/useColorScheme";
@@ -145,25 +145,22 @@ interface SchoolItemInterface {
   school: {
     id: string;
     name: string;
-    logo: string | null;
-    icon: string | null;
     website: string | null;
   };
   onSelect: (schoolId: string) => void;
 }
 function SchoolItem({ school, onSelect }: SchoolItemInterface) {
-  const icon = school.icon ?? school.logo;
+  const config = useConfig();
 
   return (
     <Pressable
       onPress={() => onSelect(school.id)}
       style={({ pressed }) => [styles.school, { opacity: pressed ? 0.5 : 1 }]}
     >
-      {icon ? (
-        <Image source={{ uri: icon }} style={styles.school_logo} />
-      ) : (
-        <Ionicons name="ios-school-outline" size={50} color="gray" />
-      )}
+      <Image
+        source={{ uri: `${config.backendHost}/school-info/${school.id}/icon` }}
+        style={styles.school_logo}
+      />
       <Text style={styles.school_name}>{school.name}</Text>
     </Pressable>
   );
