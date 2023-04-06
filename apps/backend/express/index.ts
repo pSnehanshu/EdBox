@@ -1,10 +1,12 @@
-import express from "express";
+import express, { Response } from "express";
 import bodyParser from "body-parser";
 import * as trpcExpress from "@trpc/server/adapters/express";
 import parseDataUrl from "parse-data-url";
+import fs from "fs";
 import { appRouter as trpcRouter } from "../trpc";
 import { createContext } from "../trpc/context";
 import prisma from "../prisma";
+import path from "path";
 
 const app = express();
 app.use(bodyParser.json());
@@ -20,6 +22,15 @@ app.use(
   }),
 );
 
+const defaultSchoolIcon = fs.readFileSync(
+  path.join(__dirname, "..", "assets", "school-default-icon.png"),
+);
+
+function sendDefaultIcon(res: Response) {
+  res.setHeader("Content-Type", "image/png");
+  res.send(defaultSchoolIcon);
+}
+
 // Other routes
 app.get("/school-info/:schoolId/:type", async (req, res) => {
   try {
@@ -31,7 +42,7 @@ app.get("/school-info/:schoolId/:type", async (req, res) => {
     }
 
     if (!schoolId) {
-      return res.sendStatus(404);
+      return sendDefaultIcon(res);
     }
 
     // Fetch school
@@ -42,21 +53,21 @@ app.get("/school-info/:schoolId/:type", async (req, res) => {
 
     // Make sure school exists and is active
     if (!school || !school.is_active) {
-      return res.sendStatus(404);
+      return sendDefaultIcon(res);
     }
 
     // Extract the img
     const img = school[type] ?? school[type === "icon" ? "logo" : "icon"];
 
     if (!img) {
-      return res.sendStatus(404);
+      return sendDefaultIcon(res);
     }
 
     // If base64 image
     if (img.startsWith("data:image/")) {
       const parsedIcon = parseDataUrl(img);
       if (!parsedIcon) {
-        return res.sendStatus(500);
+        return sendDefaultIcon(res);
       }
       const buffer = parsedIcon.toBuffer();
       res.setHeader("Content-Type", parsedIcon.contentType);
@@ -66,10 +77,10 @@ app.get("/school-info/:schoolId/:type", async (req, res) => {
       res.redirect(img);
     } else {
       // Bad!
-      res.sendStatus(500);
+      sendDefaultIcon(res);
     }
   } catch (error) {
-    res.sendStatus(500);
+    sendDefaultIcon(res);
     console.error(error);
   }
 });
