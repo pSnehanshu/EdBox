@@ -73,7 +73,7 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose, color }: props) {
         <FAB
           icon={
             <Ionicons
-              name="add"
+              name="close"
               size={24}
               color={color === "dark" ? "black" : "white"}
             />
