@@ -17,8 +17,8 @@ datasource db {
 model School {
   id                        String              @id @default(cuid()) @db.VarChar(32)
   name                      String              @db.VarChar(50)
-  logo                      String?             @db.VarChar(256)
-  icon                      String?             @db.VarChar(256)
+  logo                      String?             @db.Text
+  icon                      String?             @db.Text
   website                   String?             @db.VarChar(256)
   is_active                 Boolean             @default(true)
   created_at                DateTime            @default(now())
