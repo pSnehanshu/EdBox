@@ -213,7 +213,7 @@ export function useFileUpload() {
         start();
       }
     },
-    [uploadTasks.length],
+    [],
   );
 
   return {
