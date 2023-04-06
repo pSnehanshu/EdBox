@@ -5,16 +5,18 @@ import {
   Button,
   StyleSheet,
   ImageBackground,
+  Pressable,
 } from "react-native";
 import type { ListRenderItem } from "@shopify/flash-list";
+import { Ionicons } from "@expo/vector-icons";
 import { List, Text, TextInput, View } from "../../components/Themed";
 import { RootStackParamList } from "../../utils/types/common";
 import ChatMessage from "../../components/ChatMessage";
-import { Ionicons } from "@expo/vector-icons";
 import { useMessages } from "../../utils/messages-repository";
 import { Message } from "schooltalk-shared/types";
 import { useGroupInfo } from "../../utils/groups";
 import { useFileUpload } from "../../utils/file-upload";
+import useColorScheme from "../../utils/useColorScheme";
 
 const renderItem: ListRenderItem<Message> = ({ item }) => (
   <ChatMessage message={item} />
@@ -31,6 +33,9 @@ export default function ChatWindowScreen({
     30,
   );
   const groupInfoQuery = useGroupInfo(groupInfo.identifier);
+
+  const scheme = useColorScheme();
+  const iconColor = scheme === "dark" ? "white" : "black";
 
   /** The Element that should appear at the end of the chat */
   const chatEndElement = useMemo(() => {
@@ -98,30 +103,36 @@ export default function ChatWindowScreen({
           <TextInput
             value={messageText}
             placeholder="Message"
+            multiline
             onChangeText={setMessageText}
             style={styles.composerText}
           />
 
-          <Ionicons.Button
-            name="attach"
-            style={styles.composerSendBtn}
-            onPress={async () => {
-              const res = await fileUpload.pickAndUploadFile();
-              console.log(res);
-            }}
-          />
+          <View style={styles.composer_actions}>
+            <Pressable
+              onPress={() => fileUpload.pickAndUploadFile()}
+              style={({ pressed }) => [
+                styles.attach_btn,
+                { opacity: pressed ? 0.5 : 1 },
+              ]}
+            >
+              <Ionicons name="attach" color={iconColor} size={32} />
+            </Pressable>
 
-          <Ionicons.Button
-            name="send"
-            style={styles.composerSendBtn}
-            onPress={() => {
-              if (!messageText.trim()) return;
-              messages.sendMessage(groupInfo.identifier, messageText.trim());
-              setMessageText("");
-            }}
-          >
-            Send
-          </Ionicons.Button>
+            <Pressable
+              style={({ pressed }) => [
+                styles.composerSendBtn,
+                { opacity: pressed ? 0.5 : 1 },
+              ]}
+              onPress={() => {
+                if (!messageText.trim()) return;
+                messages.sendMessage(groupInfo.identifier, messageText.trim());
+                setMessageText("");
+              }}
+            >
+              <Ionicons name="send" color={iconColor} size={32} />
+            </Pressable>
+          </View>
         </View>
       </ImageBackground>
     </View>
@@ -143,17 +154,31 @@ const styles = StyleSheet.create({
   composer: {
     flex: 0,
     flexDirection: "row",
-    width: "100%",
-    padding: 8,
     borderTopColor: "gray",
     borderTopWidth: 0.5,
+    alignItems: "center",
+    justifyContent: "space-between",
+    maxHeight: 100,
+    margin: 4,
+    borderRadius: 16,
+    overflow: "hidden",
+    opacity: 0.9,
   },
   composerText: {
-    width: "80%",
+    flexGrow: 1,
     padding: 2,
+    paddingLeft: 16,
+    backgroundColor: "transparent",
+    maxWidth: "70%",
+  },
+  composer_actions: {
+    flexDirection: "row",
+    padding: 8,
+    maxHeight: 50,
+    backgroundColor: "transparent",
   },
   composerSendBtn: {
-    padding: 8,
+    marginLeft: 8,
   },
   chatLoading: {
     padding: 16,
@@ -172,4 +197,5 @@ const styles = StyleSheet.create({
     color: "white",
     backgroundColor: "#1f2c34aa",
   },
+  attach_btn: {},
 });
