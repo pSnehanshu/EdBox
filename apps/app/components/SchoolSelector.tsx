@@ -146,18 +146,21 @@ interface SchoolItemInterface {
     id: string;
     name: string;
     logo: string | null;
+    icon: string | null;
     website: string | null;
   };
   onSelect: (schoolId: string) => void;
 }
 function SchoolItem({ school, onSelect }: SchoolItemInterface) {
+  const icon = school.icon ?? school.logo;
+
   return (
     <Pressable
       onPress={() => onSelect(school.id)}
       style={({ pressed }) => [styles.school, { opacity: pressed ? 0.5 : 1 }]}
     >
-      {school.logo ? (
-        <Image source={{ uri: school.logo }} style={styles.school_logo} />
+      {icon ? (
+        <Image source={{ uri: icon }} style={styles.school_logo} />
       ) : (
         <Ionicons name="ios-school-outline" size={50} color="gray" />
       )}

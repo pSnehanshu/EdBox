@@ -66,6 +66,7 @@ const schoolRouter = t.router({
           id: true,
           name: true,
           logo: true,
+          icon: true,
           website: true,
         },
         take: input.limit + 1,
