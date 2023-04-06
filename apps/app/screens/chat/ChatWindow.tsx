@@ -146,6 +146,9 @@ export default function ChatWindowScreen({
                 if (!messageText.trim()) return;
                 messages.sendMessage(groupInfo.identifier, messageText.trim());
                 setMessageText("");
+
+                // Vibrate!
+                Haptics.impactAsync();
               }}
             >
               <Ionicons name="send" color={iconColor} size={32} />
