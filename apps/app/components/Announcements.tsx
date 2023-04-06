@@ -8,13 +8,14 @@ import { format, isThisYear, isToday, isYesterday } from "date-fns";
 import { getDisplayName } from "schooltalk-shared/misc";
 import { useNavigation } from "@react-navigation/native";
 import { getSchoolGroupIdentifier } from "schooltalk-shared/group-identifier";
-import config from "../config";
+import { useConfig } from "../utils/config";
 import useColorScheme from "../utils/useColorScheme";
 
 interface AnnouncementProps {
   message: Message;
 }
 function SingleAnnouncement({ message }: AnnouncementProps) {
+  const config = useConfig();
   const { user } = useCurrentUser();
   const time = useMemo(() => {
     const date = new Date(message.created_at);
@@ -85,13 +86,18 @@ function SingleAnnouncement({ message }: AnnouncementProps) {
   );
 }
 
-const group: Group = {
-  name: "School Group",
-  identifier: getSchoolGroupIdentifier(config.schoolId),
-};
-
 export default function Announcements() {
   const messages = useMessages();
+
+  const config = useConfig();
+  const group: Group = useMemo(
+    () => ({
+      name: "School Group",
+      identifier: getSchoolGroupIdentifier(config.schoolId),
+    }),
+    [config.schoolId],
+  );
+
   const groupMessages = messages.useFetchGroupMessages(group.identifier, 7);
   const navigation = useNavigation();
   const scheme = useColorScheme();

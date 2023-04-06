@@ -1,17 +1,19 @@
 import { useMemo, useState } from "react";
-import { StyleSheet, Pressable, Alert, Button } from "react-native";
+import { StyleSheet, Pressable, Alert } from "react-native";
 import type { ClassWithSections, Section } from "schooltalk-shared/types";
 import Spinner from "react-native-loading-spinner-overlay";
 import SelectDropdown from "react-native-select-dropdown";
 import { View, Text, TextInput } from "../../components/Themed";
 import { RootStackScreenProps } from "../../utils/types/common";
 import { trpc } from "../../utils/trpc";
-import config from "../../config";
+import { useConfig } from "../../utils/config";
 import OtpPopup from "../../components/OtpPopup";
 import useColorScheme from "../../utils/useColorScheme";
 import { FontAwesome } from "@expo/vector-icons";
 
 export default function LoginScreen({}: RootStackScreenProps<"Login">) {
+  const config = useConfig();
+
   // Form States
   const [phone, setPhone] = useState("");
   const [rollnum, setRollNo] = useState<number>();
@@ -20,9 +22,10 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
 
   // Query
   const classesAndSectionsData =
-    trpc.school.class.fetchClassesAndSections.useQuery({
-      schoolId: config.schoolId,
-    });
+    trpc.school.class.fetchClassesAndSections.useQuery(
+      { schoolId: config.schoolId },
+      { cacheTime: 0 },
+    );
 
   // Selection state
   const [formType, setFormType] = useState<"others" | "student">("others");
@@ -169,12 +172,13 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
             />
             <Pressable
               style={styles.main_button}
-              onPress={() =>
-                requestOtp.mutate({
-                  phoneNumber: phone,
-                  schoolId: config.schoolId,
-                })
-              }
+              onPress={() => {
+                if (phone)
+                  requestOtp.mutate({
+                    phoneNumber: phone,
+                    schoolId: config.schoolId,
+                  });
+              }}
             >
               <Text style={styles.button_text}>Request OTP</Text>
             </Pressable>
