@@ -146,6 +146,10 @@ export default function ChatWindowScreen({
                 { opacity: pressed ? 0.5 : 1 },
               ]}
               onPress={() => {
+                if (!fileUpload.allDone) {
+                  return alert("Please wait for all uploads to complete");
+                }
+
                 if (!messageText.trim()) return;
                 messages.sendMessage(groupInfo.identifier, messageText.trim());
                 setMessageText("");

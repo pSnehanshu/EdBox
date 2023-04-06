@@ -112,6 +112,9 @@ export function useFileUpload() {
     Record<string, FileUploadTask | undefined>
   >({});
 
+  /** Tracks count of uploads complete */
+  const [totalDone, setTotalDone] = useState(0);
+
   /** The tasks in array form */
   const uploadTasks = useMemo(
     // Remove the empty tasks, they have been removed
@@ -122,77 +125,100 @@ export function useFileUpload() {
   /**
    * Pick and upload the file
    */
-  const pickAndUploadFile = useCallback(async (autoStart = true) => {
-    // Create a task
-    const task = await _PickAndUploadFileWithoutTRPC(uploadPermissionMutation);
+  const pickAndUploadFile = useCallback(
+    async (autoStart = true) => {
+      // Create a task
+      const task = await _PickAndUploadFileWithoutTRPC(
+        uploadPermissionMutation,
+      );
 
-    // User cancelled, return
-    if (!task) return;
+      // User cancelled, return
+      if (!task) return;
 
-    // Each task will have its own permission, hence the permission id is effectively the task id
-    const taskId = task.permission.id;
+      task.progress.subscribe({
+        complete() {
+          setTotalDone((v) => v + 1);
+        },
+        error(err) {
+          console.error(err);
 
-    // Overwrite the `start` method of a task to perform additional tasks
-    const start = async () => {
-      // Start it
-      const res = await task.start();
-
-      // Mark this task as started
-      setUploadTasksMap((tasks) => {
-        const thisTask = tasks[taskId];
-        if (!thisTask) return tasks;
-
-        return {
-          ...tasks,
-          [taskId]: {
-            ...thisTask,
-            uploadResult: res,
-            started: true,
-          },
-        };
+          // Remove after a while
+          setTimeout(() => {
+            cancel();
+          }, 2000);
+        },
       });
 
-      return res;
-    };
+      // Each task will have its own permission, hence the permission id is effectively the task id
+      const taskId = task.permission.id;
 
-    // Overwrite the `cancel` method of a task to perform additional tasks
-    const cancel = async () => {
-      // Cancel it
-      await task.cancel();
+      // Overwrite the `start` method of a task to perform additional tasks
+      const start = async () => {
+        // Start it
+        const res = await task.start();
 
-      // Cancel the permission
-      await cancelPermission
-        .mutateAsync({ permission_id: task.permission.id })
-        .catch((err) => {
-          // We will ignore this error
-          console.warn(err);
+        // Mark this task as started
+        setUploadTasksMap((tasks) => {
+          const thisTask = tasks[taskId];
+          if (!thisTask) return tasks;
+
+          return {
+            ...tasks,
+            [taskId]: {
+              ...thisTask,
+              uploadResult: res,
+              started: true,
+            },
+          };
         });
 
-      // Remove it from record
-      setUploadTasksMap((tasks) => ({
-        ...tasks,
-        [taskId]: undefined,
+        return res;
+      };
+
+      // Overwrite the `cancel` method of a task to perform additional tasks
+      const cancel = async () => {
+        // Cancel it
+        await task.cancel();
+
+        // Cancel the permission
+        await cancelPermission
+          .mutateAsync({ permission_id: task.permission.id })
+          .catch((err) => {
+            // We will ignore this error
+            console.warn(err);
+          });
+
+        // Remove it from record
+        setUploadTasksMap((tasks) => ({
+          ...tasks,
+          [taskId]: undefined,
+        }));
+      };
+
+      // Record this task
+      setUploadTasksMap((t) => ({
+        ...t,
+        [taskId]: {
+          ...task,
+          start,
+          cancel,
+          // Because we know the task haven't started yet
+          uploadResult: undefined,
+          started: false,
+        },
       }));
-    };
 
-    // Record this task
-    setUploadTasksMap((t) => ({
-      ...t,
-      [taskId]: {
-        ...task,
-        start,
-        cancel,
-        // Because we know the task haven't started yet
-        uploadResult: undefined,
-        started: false,
-      },
-    }));
+      // Check if upload should start automatically
+      if (autoStart) {
+        start();
+      }
+    },
+    [uploadTasks.length],
+  );
 
-    // Check if upload should start automatically
-    if (autoStart) {
-      start();
-    }
-  }, []);
-
-  return { pickAndUploadFile, uploadTasks };
+  return {
+    pickAndUploadFile,
+    uploadTasks,
+    allDone: totalDone >= uploadTasks.length,
+  };
 }
