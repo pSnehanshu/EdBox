@@ -1,6 +1,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import {
+  Alert,
   ActivityIndicator,
   Button,
   StyleSheet,
@@ -9,13 +10,20 @@ import {
 } from "react-native";
 import type { ListRenderItem } from "@shopify/flash-list";
 import { Ionicons } from "@expo/vector-icons";
-import { List, Text, TextInput, View } from "../../components/Themed";
+import * as Haptics from "expo-haptics";
+import {
+  List,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "../../components/Themed";
 import { RootStackParamList } from "../../utils/types/common";
 import ChatMessage from "../../components/ChatMessage";
 import { useMessages } from "../../utils/messages-repository";
 import { Message } from "schooltalk-shared/types";
 import { useGroupInfo } from "../../utils/groups";
-import { useFileUpload } from "../../utils/file-upload";
+import { FileUploadTask, useFileUpload } from "../../utils/file-upload";
 import useColorScheme from "../../utils/useColorScheme";
 
 const renderItem: ListRenderItem<Message> = ({ item }) => (
@@ -99,6 +107,16 @@ export default function ChatWindowScreen({
           contentContainerStyle={{ backgroundColor: "transparent" }}
         />
 
+        {fileUpload.uploadTasks.length > 0 && (
+          <View style={styles.pending_attachments_container}>
+            <ScrollView horizontal>
+              {fileUpload.uploadTasks.map((task) => (
+                <PendingAttachment uploadTask={task} key={task.permission.id} />
+              ))}
+            </ScrollView>
+          </View>
+        )}
+
         <View style={styles.composer}>
           <TextInput
             value={messageText}
@@ -136,6 +154,50 @@ export default function ChatWindowScreen({
         </View>
       </ImageBackground>
     </View>
+  );
+}
+
+interface PendingAttachmentProps {
+  uploadTask: FileUploadTask;
+}
+function PendingAttachment({ uploadTask: task }: PendingAttachmentProps) {
+  const taskId = task.permission.id;
+  const [progressPercent, setProgressPercent] = useState(0);
+  const [isError, setIsError] = useState(false);
+  const [isComplete, setIsComplete] = useState(false);
+
+  useEffect(() => {
+    const subscription = task.progress.subscribe({
+      next(value) {
+        setProgressPercent(value);
+      },
+      error(err) {
+        console.error(err);
+        setIsError(true);
+      },
+      complete() {
+        setIsComplete(true);
+      },
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [taskId]);
+
+  const cancelFile = useCallback(async () => {
+    await Haptics.selectionAsync();
+    await task.cancel();
+  }, [taskId]);
+
+  return (
+    <Pressable onLongPress={cancelFile}>
+      <View key={task.permission.id} style={styles.pending_attachment_item}>
+        <Text>
+          {task.file.name} {progressPercent}% {isComplete ? "Done" : ""}
+        </Text>
+      </View>
+    </Pressable>
   );
 }
 
@@ -198,4 +260,19 @@ const styles = StyleSheet.create({
     backgroundColor: "#1f2c34aa",
   },
   attach_btn: {},
+  pending_attachments_container: {
+    height: 100,
+    flexDirection: "row",
+    marginHorizontal: 4,
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  pending_attachment_item: {
+    width: 100,
+    height: 100,
+    padding: 4,
+    marginRight: 4,
+    borderColor: "gray",
+    borderWidth: 0.5,
+  },
 });
