@@ -22,15 +22,8 @@
       "bundleIdentifier": "com.indorhino.edbox.common"
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
       "package": "com.indorhino.edbox.common",
       "googleServicesFile": "./google-services.json"
-    },
-    "web": {
-      "favicon": "./assets/images/favicon.png"
     },
     "extra": {
       "eas": {

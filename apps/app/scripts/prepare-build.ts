@@ -83,15 +83,6 @@ async function setupPreconfiguredApp(
   config.android = {
     ...config.android,
     package: school.app_android_package_name ?? config.android?.package,
-    adaptiveIcon: {
-      ...config.android?.adaptiveIcon,
-      foregroundImage:
-        school.app_android_adaptive_icon ??
-        config.android?.adaptiveIcon?.foregroundImage,
-      backgroundColor:
-        school.app_android_adaptive_bgcolor ??
-        config.android?.adaptiveIcon?.backgroundColor,
-    },
   };
 
   // Write google-services.json
