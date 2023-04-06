@@ -1,13 +1,16 @@
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   NavigationContainer,
   DefaultTheme,
   DarkTheme,
 } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { ColorSchemeName } from "react-native";
+import { ColorSchemeName, Modal, Pressable } from "react-native";
+import { useContext, useState } from "react";
+import Colors from "../constants/Colors";
+import { ColorSchemeContext } from "../utils/useColorScheme";
 import { useSchool } from "../utils/useSchool";
 import LoginScreen from "../screens/auth/Login";
-import PreLoginScreen from "../screens/auth/PreLogin";
 import { RootStackParamList } from "../utils/types/common";
 import { useCurrentUser } from "../utils/auth";
 import LinkingConfiguration from "./LinkingConfiguration";
@@ -28,6 +31,9 @@ import AboutAppScreen from "../screens/settings/AboutAppScreen";
 import { BottomTabNavigator } from "./BottomTabNav";
 import ExamListScreen from "../screens/exam/ExamList";
 import HomeWorkScreen from "../screens/HomeWorkScreen";
+import SchoolSelector from "../components/SchoolSelector";
+import { hasPreloadedSchool } from "../utils/config";
+import { View } from "../components/Themed";
 
 export default function Navigation({
   colorScheme,
@@ -45,6 +51,23 @@ export default function Navigation({
   );
 }
 
+interface SchoolSelectorModalProps {
+  isOpen: boolean;
+  onClose?: () => void;
+}
+function SchoolSelectorModal({ isOpen, onClose }: SchoolSelectorModalProps) {
+  return (
+    <Modal
+      animationType="slide"
+      transparent={false}
+      visible={isOpen}
+      onRequestClose={onClose}
+    >
+      <SchoolSelector onSelect={onClose} showCancelButton onClose={onClose} />
+    </Modal>
+  );
+}
+
 /**
  * A root stack navigator is often used for displaying modals on top of all other content.
  * https://reactnavigation.org/docs/modal
@@ -54,6 +77,8 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 function RootNavigator() {
   const school = useSchool();
   const { isLoggedIn, user } = useCurrentUser();
+  const { scheme } = useContext(ColorSchemeContext);
+  const [isSchoolSelectorOpen, setIsSchoolSelectorOpen] = useState(false);
 
   if (!school) return null;
 
@@ -189,17 +214,43 @@ function RootNavigator() {
       </MessagesProvider>
     </SocketProvider>
   ) : (
-    <Stack.Navigator>
-      <Stack.Screen
-        name="PreLogin"
-        component={PreLoginScreen}
-        options={{ headerShown: false }}
+    <>
+      <Stack.Navigator>
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{
+            title: `Login to ${school.name}`,
+            headerShown: true,
+            headerRight: () => {
+              return (
+                <View style={{ flexDirection: "row" }}>
+                  {hasPreloadedSchool ? null : (
+                    <Pressable
+                      onPress={() => setIsSchoolSelectorOpen(true)}
+                      style={({ pressed }) => ({
+                        opacity: pressed ? 0.5 : 1,
+                      })}
+                    >
+                      <MaterialCommunityIcons
+                        name="arrow-down-drop-circle-outline"
+                        size={25}
+                        color={Colors[scheme].text}
+                        style={{ marginRight: 15 }}
+                      />
+                    </Pressable>
+                  )}
+                </View>
+              );
+            },
+          }}
+        />
+      </Stack.Navigator>
+
+      <SchoolSelectorModal
+        isOpen={isSchoolSelectorOpen}
+        onClose={() => setIsSchoolSelectorOpen(false)}
       />
-      <Stack.Screen
-        name="Login"
-        component={LoginScreen}
-        options={{ title: `Login to ${school.name}` }}
-      />
-    </Stack.Navigator>
+    </>
   );
 }

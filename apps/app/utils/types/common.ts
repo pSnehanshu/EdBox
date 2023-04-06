@@ -18,7 +18,6 @@ declare global {
 }
 
 export type RootStackParamList = {
-  PreLogin: undefined;
   Login: undefined;
   Root: NavigatorScreenParams<RootTabParamList> | undefined;
   ChatWindow: Group;
