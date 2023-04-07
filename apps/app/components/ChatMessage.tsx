@@ -14,7 +14,7 @@ import { useConfig } from "../utils/config";
 interface ChatMessageProps {
   message: Message;
 }
-function ChatMessage({ message }: ChatMessageProps) {
+function _ChatMessage({ message }: ChatMessageProps) {
   const config = useConfig();
   const { user } = useCurrentUser();
   const time = useMemo(() => {
@@ -149,4 +149,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default memo(ChatMessage);
+export const ChatMessage = memo(_ChatMessage);
