@@ -12,6 +12,7 @@ import {
 import type { ListRenderItem } from "@shopify/flash-list";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import * as ImagePicker from "expo-image-picker";
 import MIMEType from "whatwg-mimetype";
 import { LinearProgress } from "@rneui/themed";
 import {
