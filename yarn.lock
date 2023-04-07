@@ -3753,6 +3753,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-community/datetimepicker@npm:6.5.2":
+  version: 6.5.2
+  resolution: "@react-native-community/datetimepicker@npm:6.5.2"
+  dependencies:
+    invariant: ^2.2.4
+  checksum: ff17fd22750ec825366c980c7505b94a16690ffe529e62cded2d8f1af3f1eaba8fe17ddb67cc5f98fa242b4b939b899c013271b49d44438540e5c7d1a96fee39
+  languageName: node
+  linkType: hard
+
 "@react-native/assets@npm:1.0.0":
   version: 1.0.0
   resolution: "@react-native/assets@npm:1.0.0"
@@ -12514,6 +12523,7 @@ __metadata:
     "@babel/core": ^7.12.9
     "@expo/vector-icons": ^13.0.0
     "@react-native-async-storage/async-storage": ~1.17.3
+    "@react-native-community/datetimepicker": 6.5.2
     "@react-navigation/bottom-tabs": ^6.0.5
     "@react-navigation/native": ^6.0.2
     "@react-navigation/native-stack": ^6.1.0
@@ -12552,6 +12562,7 @@ __metadata:
     expo-system-ui: ~2.0.1
     expo-updates: ~0.15.6
     expo-web-browser: ~12.0.0
+    invariant: ^2.2.4
     jest: ^26.6.3
     jest-expo: ~47.0.1
     jotai: ^2.0.3
