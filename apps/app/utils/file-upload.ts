@@ -236,9 +236,9 @@ export function useFileUpload() {
             ...res,
             permission,
             file: {
-              name: asset.fileName ?? undefined,
+              name: asset.fileName ?? `media-${Date.now()}.jpg`,
               size: asset.fileSize,
-              // mimeType: asset.type,
+              mimeType: `${asset.type}/*`,
               uri: asset.uri,
             },
             started: false,
