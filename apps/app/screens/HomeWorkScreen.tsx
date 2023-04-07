@@ -11,6 +11,7 @@ import { trpc } from "../utils/trpc";
 import useColorScheme from "../utils/useColorScheme";
 import { useConfig } from "../utils/config";
 import { ClassWithSections, Section, Subject } from "schooltalk-shared/types";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 type Props = {};
 
@@ -68,6 +69,8 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
   const [selectedSection, setSelectedSection] = useState<Section>();
   const [selectedSubject, setselectedSubject] = useState<Subject>();
 
+  const [datePickerVisible, setDatePickerVisible] = useState(false);
+  const [date, setDate] = useState(new Date());
   const blurBg = color === "dark" ? "rgba(0,0,0,.6)" : "rgba(255,255,255,.6)";
 
   // mutation
@@ -114,7 +117,7 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
 
   return (
     <View style={styles.centeredView}>
-      <Text>{JSON.stringify(classesAndSectionsData, null, 2)}</Text>
+      <Text>{JSON.stringify(allClassesNames, null, 2)}</Text>
       <Text>{JSON.stringify(allSubjectsName, null, 2)}</Text>
       <Modal
         transparent={true}
@@ -264,6 +267,18 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
               //   value={""}
               //   autoFocus
             />
+            {/* datepicker */}
+            {/* <View style={{}}>
+              <DateTimePicker
+                testID="dateTimePicker"
+                timeZoneOffsetInMinutes={0}
+                value={date}
+                mode="date"
+                is24Hour={true}
+                display="default"
+                onChange={() => {}}
+              />
+            </View> */}
 
             <Pressable
               style={styles.button}
