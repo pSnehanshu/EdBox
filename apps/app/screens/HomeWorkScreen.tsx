@@ -9,7 +9,8 @@ import { Modal } from "react-native";
 import SelectDropdown from "react-native-select-dropdown";
 import { trpc } from "../utils/trpc";
 import useColorScheme from "../utils/useColorScheme";
-import config from "../config";
+import { useConfig } from "../utils/config";
+import { ClassWithSections, Section, Subject } from "schooltalk-shared/types";
 
 type Props = {};
 
@@ -50,7 +51,6 @@ export default function HomeWorkScreen({}: NativeStackScreenProps<
       <EditHomeWorkModal
         createHomeWorkModal={createHomeWorkModal}
         onClose={() => setCreateHomeWorkModal((prev) => !prev)}
-        color={color}
       />
     </View>
   );
@@ -59,10 +59,15 @@ export default function HomeWorkScreen({}: NativeStackScreenProps<
 interface props {
   createHomeWorkModal: boolean;
   onClose: () => void;
-  color: string;
 }
 
-function EditHomeWorkModal({ createHomeWorkModal, onClose, color }: props) {
+function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
+  const color = useColorScheme();
+  const config = useConfig();
+  const [selectedClass, setSelectedClass] = useState<ClassWithSections>();
+  const [selectedSection, setSelectedSection] = useState<Section>();
+  const [selectedSubject, setselectedSubject] = useState<Subject>();
+
   const blurBg = color === "dark" ? "rgba(0,0,0,.6)" : "rgba(255,255,255,.6)";
 
   // mutation
@@ -78,9 +83,13 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose, color }: props) {
   // class Section and subject data
 
   const classesAndSectionsData =
-    trpc.school.class.fetchClassesAndSections.useQuery({
-      schoolId: config.schoolId,
-    });
+    trpc.school.class.fetchClassesAndSections.useQuery(
+      { schoolId: config.schoolId },
+      { cacheTime: 0 },
+    );
+
+  // subjects
+  const allSubject = trpc.school.subject.fetchSubjects.useQuery({});
 
   const allClassesNames = useMemo(
     () =>
@@ -98,9 +107,15 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose, color }: props) {
   //   return [];
   // }, [selectedClass?.numeric_id]);
 
+  const allSubjectsName = useMemo(
+    () => allSubject.data?.map((a) => ` ${a.name ?? a.name}`) ?? [],
+    [allSubject.isFetching],
+  );
+
   return (
     <View style={styles.centeredView}>
-      <Text>{JSON.stringify(allClassesNames, null, 2)}</Text>
+      <Text>{JSON.stringify(classesAndSectionsData, null, 2)}</Text>
+      <Text>{JSON.stringify(allSubjectsName, null, 2)}</Text>
       <Modal
         transparent={true}
         visible={createHomeWorkModal}
