@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet } from "react-native";
 import { RootStackParamList } from "../utils/types/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -9,6 +9,7 @@ import { Modal } from "react-native";
 import SelectDropdown from "react-native-select-dropdown";
 import { trpc } from "../utils/trpc";
 import useColorScheme from "../utils/useColorScheme";
+import config from "../config";
 
 type Props = {};
 
@@ -63,8 +64,43 @@ interface props {
 
 function EditHomeWorkModal({ createHomeWorkModal, onClose, color }: props) {
   const blurBg = color === "dark" ? "rgba(0,0,0,.6)" : "rgba(255,255,255,.6)";
+
+  // mutation
+  const createHomework = trpc.school.homework.create.useMutation({
+    onSuccess(data) {
+      alert(JSON.stringify(data, null, 2));
+    },
+    onError(error, variables, context) {
+      alert(error);
+    },
+  });
+
+  // class Section and subject data
+
+  const classesAndSectionsData =
+    trpc.school.class.fetchClassesAndSections.useQuery({
+      schoolId: config.schoolId,
+    });
+
+  const allClassesNames = useMemo(
+    () =>
+      classesAndSectionsData.data?.map(
+        (a) => `Class ${a.name ?? a.numeric_id}`,
+      ) ?? [],
+    [classesAndSectionsData.isFetching],
+  );
+  // const allSections = useMemo(() => {
+  //   if (selectedClass) {
+  //     return selectedClass.Sections.map(
+  //       (section) => `Section ${section.name ?? section.numeric_id}`,
+  //     );
+  //   }
+  //   return [];
+  // }, [selectedClass?.numeric_id]);
+
   return (
     <View style={styles.centeredView}>
+      <Text>{JSON.stringify(allClassesNames, null, 2)}</Text>
       <Modal
         transparent={true}
         visible={createHomeWorkModal}
@@ -214,7 +250,19 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose, color }: props) {
               //   autoFocus
             />
 
-            <Pressable style={styles.button}>
+            <Pressable
+              style={styles.button}
+              onPress={() => {
+                createHomework.mutate({
+                  // test
+                  text: "new home work",
+                  section_id: 1,
+                  class_id: 1,
+                  subject_id: "a",
+                  // file_permissions: FilePermissionsSchema.array().default([]),
+                });
+              }}
+            >
               <Text style={styles.textStyle}>Create</Text>
             </Pressable>
           </View>
