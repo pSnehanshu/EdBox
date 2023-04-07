@@ -4,12 +4,13 @@ import { Alert, Image, Pressable, StyleSheet } from "react-native";
 import * as Haptics from "expo-haptics";
 import MIMEType from "whatwg-mimetype";
 import { LinearProgress } from "@rneui/themed";
+import type { FilePermissionsInput } from "schooltalk-shared/misc";
 import { FileUploadTask, useFileUpload } from "../utils/file-upload";
 import useColorScheme from "../utils/useColorScheme";
 import { List, Text, TextInput, View } from "./Themed";
 
 interface MsgComposerProps {
-  onSend: (msg: string) => void;
+  onSend: (msg: string, files?: FilePermissionsInput[]) => void;
 }
 const _MsgComposer = ({ onSend }: MsgComposerProps) => {
   const [messageText, setMessageText] = useState("");
@@ -99,7 +100,13 @@ const _MsgComposer = ({ onSend }: MsgComposerProps) => {
 
               if (!messageText.trim()) return;
 
-              onSend(messageText.trim());
+              onSend(
+                messageText.trim(),
+                fileUpload.uploadTasks.map((t) => ({
+                  permission_id: t.permission.id,
+                  file_name: t.file.name,
+                })),
+              );
               setMessageText("");
 
               // Vibrate!

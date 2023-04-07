@@ -1,21 +1,16 @@
 import { TRPCError } from "@trpc/server";
 import { isPast, parseISO } from "date-fns";
 import { z } from "zod";
-import { Prisma, UploadedFile } from "@prisma/client";
-import { mapLimit } from "async";
+import type { Prisma } from "@prisma/client";
+import { FilePermissionsInputSchema } from "schooltalk-shared/misc";
 import prisma from "../../../prisma";
+import { consumeMultiplePermissions } from "../../../utils/file.service";
 import {
   t,
   authMiddleware,
   teacherMiddleware,
   studentMiddleware,
 } from "../../trpc";
-import { consumePermission } from "../../../utils/file.service";
-
-const FilePermissionsSchema = z.object({
-  permission_id: z.string().cuid(),
-  file_name: z.string().optional(),
-});
 
 const DateSchema = z
   .string()
@@ -157,21 +152,13 @@ const homeworkRouter = t.router({
         class_id: z.number().int(),
         subject_id: z.string().cuid(),
         due_date: DateSchema.optional(),
-        file_permissions: FilePermissionsSchema.array().default([]),
+        file_permissions: FilePermissionsInputSchema.array().default([]),
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const files = await mapLimit<
-        z.infer<typeof FilePermissionsSchema>,
-        UploadedFile
-      >(
+      const files = await consumeMultiplePermissions(
         input.file_permissions,
-        2,
-        function ({ permission_id, file_name }, callback) {
-          consumePermission(permission_id, ctx.user.id, file_name)
-            .then((file) => callback(null, file))
-            .catch((err) => callback(err));
-        },
+        ctx.user.id,
       );
 
       const { id } = await prisma.homework.create({
@@ -207,7 +194,7 @@ const homeworkRouter = t.router({
         text: z.string().optional(),
         due_date: DateSchema.optional(),
         remove_attachments: z.string().cuid().array().optional(),
-        new_file_permissions: FilePermissionsSchema.array().default([]),
+        new_file_permissions: FilePermissionsInputSchema.array().default([]),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -235,17 +222,9 @@ const homeworkRouter = t.router({
         },
       });
 
-      const files = await mapLimit<
-        z.infer<typeof FilePermissionsSchema>,
-        UploadedFile
-      >(
+      const files = await consumeMultiplePermissions(
         input.new_file_permissions,
-        2,
-        function ({ permission_id, file_name }, callback) {
-          consumePermission(permission_id, ctx.user.id, file_name)
-            .then((file) => callback(null, file))
-            .catch((err) => callback(err));
-        },
+        ctx.user.id,
       );
 
       // New attachements
@@ -339,7 +318,7 @@ const homeworkRouter = t.router({
       z.object({
         homework_id: z.string().cuid(),
         text: z.string().optional(),
-        file_permissions: FilePermissionsSchema.array().default([]),
+        file_permissions: FilePermissionsInputSchema.array().default([]),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -392,17 +371,9 @@ const homeworkRouter = t.router({
       // All ok!
 
       // Consume the files
-      const files = await mapLimit<
-        z.infer<typeof FilePermissionsSchema>,
-        UploadedFile
-      >(
+      const files = await consumeMultiplePermissions(
         input.file_permissions,
-        2,
-        function ({ permission_id, file_name }, callback) {
-          consumePermission(permission_id, ctx.user.id, file_name)
-            .then((file) => callback(null, file))
-            .catch((err) => callback(err));
-        },
+        ctx.user.id,
       );
 
       // Create the submission
@@ -434,7 +405,7 @@ const homeworkRouter = t.router({
         submission_id: z.string().cuid(),
         text: z.string().optional(),
         remove_attachments: z.string().cuid().array().optional(),
-        new_file_permissions: FilePermissionsSchema.array().default([]),
+        new_file_permissions: FilePermissionsInputSchema.array().default([]),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -466,17 +437,9 @@ const homeworkRouter = t.router({
       });
 
       // Handle attachments
-      const files = await mapLimit<
-        z.infer<typeof FilePermissionsSchema>,
-        UploadedFile
-      >(
+      const files = await consumeMultiplePermissions(
         input.new_file_permissions,
-        2,
-        function ({ permission_id, file_name }, callback) {
-          consumePermission(permission_id, ctx.user.id, file_name)
-            .then((file) => callback(null, file))
-            .catch((err) => callback(err));
-        },
+        ctx.user.id,
       );
 
       // New attachements

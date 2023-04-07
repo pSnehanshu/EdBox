@@ -2,6 +2,7 @@ import type { School as DBSchool, User as DBUser } from "@prisma/client";
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "../../apps/backend/trpc";
 import type { Context } from "../../apps/backend/trpc/context";
+import type { FilePermissionsInput } from "./misc";
 
 export type ArrayElement<ArrayType extends readonly unknown[]> =
   ArrayType extends readonly (infer ElementType)[] ? ElementType : never;
@@ -72,6 +73,7 @@ export interface ClientToServerEvents {
   messageCreate: (
     groupIdentifier: string,
     text: string,
+    files: FilePermissionsInput[],
     callback: (message: Message) => void,
   ) => void;
 }

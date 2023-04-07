@@ -7,6 +7,9 @@ import {
   GetObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { mapLimit } from "async";
+import type { FilePermissionsInput } from "schooltalk-shared/misc";
+import type { UploadedFile } from "@prisma/client";
 import prisma from "../prisma";
 import CONFIG from "../config";
 import { s3client } from "./aws-clients";
@@ -154,4 +157,23 @@ export async function consumePermission(
 
   // Return the file object
   return file;
+}
+
+// Handle attachments
+export async function consumeMultiplePermissions(
+  filePermissions: FilePermissionsInput[],
+  userId: string,
+) {
+  const files = await mapLimit<FilePermissionsInput, UploadedFile>(
+    filePermissions,
+    2,
+    function ({ permission_id, file_name }, callback) {
+      consumePermission(permission_id, userId, file_name)
+        .then((file) => callback(null, file))
+        .catch((err) => callback(err));
+    },
+  );
+
+  //
+  return files;
 }

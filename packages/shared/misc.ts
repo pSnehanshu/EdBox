@@ -281,3 +281,10 @@ export function getTextColorForGivenBG(
   }
   return "white";
 }
+
+export const FilePermissionsInputSchema = z.object({
+  permission_id: z.string().cuid(),
+  file_name: z.string().optional(),
+});
+
+export type FilePermissionsInput = z.infer<typeof FilePermissionsInputSchema>;

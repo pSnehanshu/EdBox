@@ -7,6 +7,7 @@ import {
   ImageBackground,
 } from "react-native";
 import type { ListRenderItem } from "@shopify/flash-list";
+import type { FilePermissionsInput } from "schooltalk-shared/misc";
 import { List, Text, View } from "../../components/Themed";
 import { RootStackParamList } from "../../utils/types/common";
 import { ChatMessage } from "../../components/ChatMessage";
@@ -72,7 +73,9 @@ export default function ChatWindowScreen({
   }, [groupInfoQuery.data?.name, groupInfo.identifier]);
 
   const handleMsgSend = useCallback(
-    (msg: string) => messages.sendMessage(groupInfo.identifier, msg),
+    (msg: string, files?: FilePermissionsInput[]) => {
+      messages.sendMessage(groupInfo.identifier, msg, files);
+    },
     [groupInfo.identifier, messages.sendMessage],
   );
 
