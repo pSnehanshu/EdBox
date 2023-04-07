@@ -2,6 +2,7 @@ import type { School as DBSchool, User as DBUser } from "@prisma/client";
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "../../apps/backend/trpc";
 import type { Context } from "../../apps/backend/trpc/context";
+import type { FilePermissionsInput } from "./misc";
 
 export type ArrayElement<ArrayType extends readonly unknown[]> =
   ArrayType extends readonly (infer ElementType)[] ? ElementType : never;
@@ -63,6 +64,9 @@ export type Attachment = ArrayElement<Homework["Attachments"]>;
 
 export type UploadedFile = RouterOutput["school"]["attachment"]["fetchFile"];
 
+export type UploadPermission =
+  RouterOutput["school"]["attachment"]["requestPermission"]["permission"];
+
 export interface ServerToClientEvents {
   newMessage: (msg: Message) => void;
 }
@@ -71,6 +75,7 @@ export interface ClientToServerEvents {
   messageCreate: (
     groupIdentifier: string,
     text: string,
+    files: FilePermissionsInput[],
     callback: (message: Message) => void,
   ) => void;
 }

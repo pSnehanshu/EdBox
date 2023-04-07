@@ -4,61 +4,21 @@ import { Alert, Image, Pressable, StyleSheet } from "react-native";
 import * as Haptics from "expo-haptics";
 import MIMEType from "whatwg-mimetype";
 import { LinearProgress } from "@rneui/themed";
-import Toast from "react-native-toast-message";
-import * as ImagePicker from "expo-image-picker";
+import type { FilePermissionsInput } from "schooltalk-shared/misc";
 import { FileUploadTask, useFileUpload } from "../utils/file-upload";
 import useColorScheme from "../utils/useColorScheme";
 import { List, Text, TextInput, View } from "./Themed";
 
 interface MsgComposerProps {
-  onSend: (msg: string) => void;
+  onSend: (msg: string, files?: FilePermissionsInput[]) => void;
 }
 const _MsgComposer = ({ onSend }: MsgComposerProps) => {
   const [messageText, setMessageText] = useState("");
-  const fileUpload = useFileUpload();
   const scheme = useColorScheme();
   const iconColor = scheme === "dark" ? "white" : "black";
 
-  // Permission
-  const [cameraPermissionStatus, requestCameraPermission] =
-    ImagePicker.useCameraPermissions({ get: true, request: false });
-  const [mediaPermissionStatus, requestMediaPermission] =
-    ImagePicker.useMediaLibraryPermissions({ get: true, request: false });
-
-  const handleMediaLibPick = async () => {
-    const { granted } = await requestMediaPermission();
-    if (granted) {
-      // Do stuff
-      const { canceled, assets } = await ImagePicker.launchImageLibraryAsync();
-      if (canceled) return;
-
-      console.log(assets);
-    } else {
-      Toast.show({
-        type: "error",
-        text1: "Media library permission denied!",
-      });
-    }
-  };
-
-  const handleCameraPick = async () => {
-    const { granted } = await requestCameraPermission();
-    if (granted) {
-      // Do stuff
-      const { canceled, assets } = await ImagePicker.launchCameraAsync({
-        allowsEditing: true,
-        exif: false,
-      });
-      if (canceled) return;
-
-      console.log(assets);
-    } else {
-      Toast.show({
-        type: "error",
-        text1: "Camera permission denied!",
-      });
-    }
-  };
+  // Attachments
+  const fileUpload = useFileUpload();
 
   return (
     <View style={styles.container}>
@@ -93,7 +53,7 @@ const _MsgComposer = ({ onSend }: MsgComposerProps) => {
           </Pressable>
 
           <Pressable
-            onPress={handleMediaLibPick}
+            onPress={() => fileUpload.pickAndUploadMediaLib()}
             style={({ pressed }) => [
               styles.attach_btn,
               { opacity: pressed ? 0.5 : 1 },
@@ -101,7 +61,7 @@ const _MsgComposer = ({ onSend }: MsgComposerProps) => {
           >
             <MaterialIcons
               name={
-                mediaPermissionStatus?.status === "denied"
+                fileUpload.mediaPermissionStatus?.status === "denied"
                   ? "image-not-supported"
                   : "image"
               }
@@ -111,7 +71,7 @@ const _MsgComposer = ({ onSend }: MsgComposerProps) => {
           </Pressable>
 
           <Pressable
-            onPress={handleCameraPick}
+            onPress={() => fileUpload.pickAndUploadCamera()}
             style={({ pressed }) => [
               styles.attach_btn,
               { opacity: pressed ? 0.5 : 1 },
@@ -119,7 +79,7 @@ const _MsgComposer = ({ onSend }: MsgComposerProps) => {
           >
             <MaterialCommunityIcons
               name={
-                cameraPermissionStatus?.status === "denied"
+                fileUpload.cameraPermissionStatus?.status === "denied"
                   ? "camera-off-outline"
                   : "camera-outline"
               }
@@ -140,7 +100,13 @@ const _MsgComposer = ({ onSend }: MsgComposerProps) => {
 
               if (!messageText.trim()) return;
 
-              onSend(messageText.trim());
+              onSend(
+                messageText.trim(),
+                fileUpload.uploadTasks.map((t) => ({
+                  permission_id: t.permission.id,
+                  file_name: t.file.name,
+                })),
+              );
               setMessageText("");
 
               // Vibrate!

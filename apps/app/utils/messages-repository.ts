@@ -17,6 +17,7 @@ import { trpc } from "./trpc";
 import _ from "lodash";
 import BigInt from "big-integer";
 import Toast from "react-native-toast-message";
+import type { FilePermissionsInput } from "schooltalk-shared/misc";
 import { navigationRef } from "../navigation/navRef";
 import { fetchUnseenGroupsInfo, insertGroups } from "./groups";
 
@@ -30,6 +31,7 @@ export class MessagesRepository {
   readonly composerObservable = new Subject<{
     groupIdentifier: string;
     text: string;
+    files?: FilePermissionsInput[];
   }>();
 
   constructor(private db: WebSQLDatabase, private socket: SocketClient) {
@@ -52,6 +54,7 @@ export class MessagesRepository {
         "messageCreate",
         message.groupIdentifier,
         message.text,
+        message.files ?? [],
         (createdMessage) => {
           this.getGroupMessageObservable(message.groupIdentifier).next(
             createdMessage,
@@ -343,10 +346,15 @@ export class MessagesRepository {
    * @param groupIdentifier
    * @param text
    */
-  sendMessage(groupIdentifier: string, text: string) {
+  sendMessage(
+    groupIdentifier: string,
+    text: string,
+    files?: FilePermissionsInput[],
+  ) {
     this.composerObservable.next({
       groupIdentifier,
       text,
+      files,
     });
   }
 }

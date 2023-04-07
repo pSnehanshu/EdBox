@@ -1,30 +1,23 @@
 import * as FileSystem from "expo-file-system";
 import * as DocumentPicker from "expo-document-picker";
 import { useCallback, useMemo, useState } from "react";
-import Toast from "react-native-toast-message";
 import { Subject } from "rxjs";
+import * as ImagePicker from "expo-image-picker";
+import type { UploadPermission } from "schooltalk-shared/types";
+import Toast from "react-native-toast-message";
 import { trpc } from "./trpc";
-
-type DocumentResultSuccess = Extract<
-  DocumentPicker.DocumentResult,
-  { type: "success" }
->;
-
-type RequestPermissionMutation = ReturnType<
-  typeof trpc.school.attachment.requestPermission.useMutation
->;
 
 /**
  * Upload a given file to S3
- * @param fileInfo File result given by Document-Picker
+ * @param fileURI File path
  * @param s3url The s3 URL
  */
-function uploadFileToS3(fileInfo: DocumentResultSuccess, s3url: string) {
+function uploadFileToS3(fileURI: string, s3url: string) {
   const uploadProgressSubject = new Subject<number>();
 
   const task = FileSystem.createUploadTask(
     s3url,
-    fileInfo.uri,
+    fileURI,
     {
       httpMethod: "PUT",
       uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
@@ -48,55 +41,30 @@ function uploadFileToS3(fileInfo: DocumentResultSuccess, s3url: string) {
   return {
     progress: uploadProgressSubject,
     start: () =>
-      task.uploadAsync().catch((error) => uploadProgressSubject.error(error)),
+      task.uploadAsync().catch((error) => {
+        uploadProgressSubject.error(error);
+        return undefined;
+      }),
     cancel: () => task.cancelAsync(),
   };
 }
 
-/**
- * Picks a file, fetches permission, and uploads to S3.
- * You must pass in the "Request permission" mutation for it to work.
- * @param requestPermission The Request permission mutation
- */
-async function _PickAndUploadFileWithoutTRPC(
-  requestPermission: RequestPermissionMutation,
-) {
-  // Pick the file
-  const fileInfo = await DocumentPicker.getDocumentAsync();
-
-  // Make sure user picked a file
-  if (fileInfo.type === "cancel") return;
-
-  try {
-    // Get permission from backend
-    const { signedURL, permission } = await requestPermission.mutateAsync({
-      file_name: fileInfo.name,
-      size_in_bytes: fileInfo.size,
-    });
-
-    // Upload it!
-    const res = uploadFileToS3(fileInfo, signedURL);
-
-    // Return the data
-    return { ...res, permission, file: fileInfo };
-  } catch (error) {
-    console.error(error);
-    Toast.show({
-      type: "error",
-      text1: "Failed to upload file!",
-      text2: (error as any)?.message,
-    });
-  }
+interface File {
+  name?: string;
+  size?: number;
+  mimeType?: string;
+  uri: string;
 }
 
-type _FileUploadTask = NonNullable<
-  Awaited<ReturnType<typeof _PickAndUploadFileWithoutTRPC>>
->;
-
-export type FileUploadTask = _FileUploadTask & {
-  uploadResult: Awaited<ReturnType<_FileUploadTask["start"]>>;
+export interface FileUploadTask {
+  progress: Subject<number>;
+  start: () => Promise<FileSystem.FileSystemUploadResult | undefined>;
+  cancel: () => Promise<void>;
+  permission: UploadPermission;
+  file: File;
+  uploadResult?: FileSystem.FileSystemUploadResult;
   started: boolean;
-};
+}
 
 /**
  * This hook provides a useful interface for uploading files
@@ -106,6 +74,16 @@ export function useFileUpload() {
     trpc.school.attachment.requestPermission.useMutation();
   const cancelPermission =
     trpc.school.attachment.cancelPermission.useMutation();
+
+  // Permissions
+  const [cameraPermissionStatus] = ImagePicker.useCameraPermissions({
+    get: true,
+    request: false,
+  });
+  const [mediaPermissionStatus] = ImagePicker.useMediaLibraryPermissions({
+    get: true,
+    request: false,
+  });
 
   /** Keeps track of ongoing uploads */
   const [uploadTasksMap, setUploadTasksMap] = useState<
@@ -122,19 +100,8 @@ export function useFileUpload() {
     [uploadTasksMap],
   );
 
-  /**
-   * Pick and upload the file
-   */
-  const pickAndUploadFile = useCallback(
-    async (autoStart = true) => {
-      // Create a task
-      const task = await _PickAndUploadFileWithoutTRPC(
-        uploadPermissionMutation,
-      );
-
-      // User cancelled, return
-      if (!task) return;
-
+  const consumeTask = useCallback(
+    (task: FileUploadTask, autoStart: boolean) => {
       task.progress.subscribe({
         complete() {
           setTotalDone((v) => v + 1);
@@ -216,9 +183,116 @@ export function useFileUpload() {
     [],
   );
 
+  /**
+   * Pick and upload the file
+   */
+  const pickAndUploadFile = useCallback(async (autoStart = true) => {
+    // Pick the file
+    const fileInfo = await DocumentPicker.getDocumentAsync();
+
+    // Make sure user picked a file
+    if (fileInfo.type === "cancel") return;
+
+    // Get permission from backend
+    const { signedURL, permission } =
+      await uploadPermissionMutation.mutateAsync({
+        file_name: fileInfo.name,
+        size_in_bytes: fileInfo.size,
+      });
+
+    // Upload it!
+    const res = uploadFileToS3(fileInfo.uri, signedURL);
+
+    const task: FileUploadTask = {
+      ...res,
+      permission,
+      file: {
+        name: fileInfo.name,
+        size: fileInfo.size,
+        mimeType: fileInfo.mimeType,
+        uri: fileInfo.uri,
+      },
+      started: false,
+    };
+
+    consumeTask(task, autoStart);
+  }, []);
+
+  const uploadMediaAssets = useCallback(
+    async (assets: ImagePicker.ImagePickerAsset[], autoStart: boolean) => {
+      await Promise.allSettled(
+        assets.map(async (asset) => {
+          // Get permission from backend
+          const { signedURL, permission } =
+            await uploadPermissionMutation.mutateAsync({
+              file_name: asset.fileName ?? undefined,
+              size_in_bytes: asset.fileSize,
+            });
+
+          // Upload it!
+          const res = uploadFileToS3(asset.uri, signedURL);
+
+          const task: FileUploadTask = {
+            ...res,
+            permission,
+            file: {
+              name: asset.fileName ?? `media-${Date.now()}.jpg`,
+              size: asset.fileSize,
+              mimeType: `${asset.type}/*`,
+              uri: asset.uri,
+            },
+            started: false,
+          };
+
+          consumeTask(task, autoStart);
+        }),
+      );
+    },
+    [],
+  );
+
+  const pickAndUploadMediaLib = useCallback(async (autoStart = true) => {
+    const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (granted) {
+      // Do stuff
+      const { canceled, assets } = await ImagePicker.launchImageLibraryAsync();
+      if (canceled) return;
+
+      await uploadMediaAssets(assets, autoStart);
+    } else {
+      Toast.show({
+        type: "error",
+        text1: "Media library permission denied!",
+      });
+    }
+  }, []);
+
+  const pickAndUploadCamera = useCallback(async (autoStart = true) => {
+    const { granted } = await ImagePicker.requestCameraPermissionsAsync();
+    if (granted) {
+      // Do stuff
+      const { canceled, assets } = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        exif: false,
+      });
+      if (canceled) return;
+
+      await uploadMediaAssets(assets, autoStart);
+    } else {
+      Toast.show({
+        type: "error",
+        text1: "Camera permission denied!",
+      });
+    }
+  }, []);
+
   return {
     pickAndUploadFile,
+    pickAndUploadMediaLib,
+    pickAndUploadCamera,
     uploadTasks,
     allDone: totalDone >= uploadTasks.length,
+    cameraPermissionStatus,
+    mediaPermissionStatus,
   };
 }
