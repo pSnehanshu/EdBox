@@ -1,12 +1,14 @@
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, Image, Pressable, StyleSheet } from "react-native";
 import * as Haptics from "expo-haptics";
 import MIMEType from "whatwg-mimetype";
+import { LinearProgress } from "@rneui/themed";
+import Toast from "react-native-toast-message";
+import * as ImagePicker from "expo-image-picker";
 import { FileUploadTask, useFileUpload } from "../utils/file-upload";
 import useColorScheme from "../utils/useColorScheme";
 import { List, Text, TextInput, View } from "./Themed";
-import { LinearProgress } from "@rneui/themed";
 
 interface MsgComposerProps {
   onSend: (msg: string) => void;
@@ -16,6 +18,47 @@ const _MsgComposer = ({ onSend }: MsgComposerProps) => {
   const fileUpload = useFileUpload();
   const scheme = useColorScheme();
   const iconColor = scheme === "dark" ? "white" : "black";
+
+  // Permission
+  const [cameraPermissionStatus, requestCameraPermission] =
+    ImagePicker.useCameraPermissions({ get: true, request: false });
+  const [mediaPermissionStatus, requestMediaPermission] =
+    ImagePicker.useMediaLibraryPermissions({ get: true, request: false });
+
+  const handleMediaLibPick = async () => {
+    const { granted } = await requestMediaPermission();
+    if (granted) {
+      // Do stuff
+      const { canceled, assets } = await ImagePicker.launchImageLibraryAsync();
+      if (canceled) return;
+
+      console.log(assets);
+    } else {
+      Toast.show({
+        type: "error",
+        text1: "Media library permission denied!",
+      });
+    }
+  };
+
+  const handleCameraPick = async () => {
+    const { granted } = await requestCameraPermission();
+    if (granted) {
+      // Do stuff
+      const { canceled, assets } = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        exif: false,
+      });
+      if (canceled) return;
+
+      console.log(assets);
+    } else {
+      Toast.show({
+        type: "error",
+        text1: "Camera permission denied!",
+      });
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -46,7 +89,43 @@ const _MsgComposer = ({ onSend }: MsgComposerProps) => {
               { opacity: pressed ? 0.5 : 1 },
             ]}
           >
-            <Ionicons name="attach" color={iconColor} size={32} />
+            <MaterialIcons name="attach-file" color={iconColor} size={24} />
+          </Pressable>
+
+          <Pressable
+            onPress={handleMediaLibPick}
+            style={({ pressed }) => [
+              styles.attach_btn,
+              { opacity: pressed ? 0.5 : 1 },
+            ]}
+          >
+            <MaterialIcons
+              name={
+                mediaPermissionStatus?.status === "denied"
+                  ? "image-not-supported"
+                  : "image"
+              }
+              color={iconColor}
+              size={24}
+            />
+          </Pressable>
+
+          <Pressable
+            onPress={handleCameraPick}
+            style={({ pressed }) => [
+              styles.attach_btn,
+              { opacity: pressed ? 0.5 : 1 },
+            ]}
+          >
+            <MaterialCommunityIcons
+              name={
+                cameraPermissionStatus?.status === "denied"
+                  ? "camera-off-outline"
+                  : "camera-outline"
+              }
+              color={iconColor}
+              size={24}
+            />
           </Pressable>
 
           <Pressable
@@ -68,7 +147,7 @@ const _MsgComposer = ({ onSend }: MsgComposerProps) => {
               Haptics.impactAsync();
             }}
           >
-            <Ionicons name="send" color={iconColor} size={32} />
+            <MaterialIcons name="send" color={iconColor} size={32} />
           </Pressable>
         </View>
       </View>
@@ -184,18 +263,21 @@ const styles = StyleSheet.create({
     padding: 2,
     paddingLeft: 16,
     backgroundColor: "transparent",
-    maxWidth: "70%",
+    maxWidth: "60%",
   },
   composer_actions: {
     flexDirection: "row",
     padding: 8,
     maxHeight: 50,
     backgroundColor: "transparent",
+    alignItems: "center",
   },
   composerSendBtn: {
     marginLeft: 8,
   },
-  attach_btn: {},
+  attach_btn: {
+    marginRight: 4,
+  },
   pending_attachments_list: {
     backgroundColor: "transparent",
   },
