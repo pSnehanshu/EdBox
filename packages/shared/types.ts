@@ -61,6 +61,9 @@ export type Attachment = ArrayElement<Homework["Attachments"]>;
 
 export type UploadedFile = RouterOutput["school"]["attachment"]["fetchFile"];
 
+export type UploadPermission =
+  RouterOutput["school"]["attachment"]["requestPermission"]["permission"];
+
 export interface ServerToClientEvents {
   newMessage: (msg: Message) => void;
 }

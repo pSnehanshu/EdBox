@@ -15,11 +15,13 @@ interface MsgComposerProps {
 }
 const _MsgComposer = ({ onSend }: MsgComposerProps) => {
   const [messageText, setMessageText] = useState("");
-  const fileUpload = useFileUpload();
   const scheme = useColorScheme();
   const iconColor = scheme === "dark" ? "white" : "black";
 
-  // Permission
+  // Attachments
+  const fileUpload = useFileUpload();
+
+  // Permissions
   const [cameraPermissionStatus, requestCameraPermission] =
     ImagePicker.useCameraPermissions({ get: true, request: false });
   const [mediaPermissionStatus, requestMediaPermission] =
