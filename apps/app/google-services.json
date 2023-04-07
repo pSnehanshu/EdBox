@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:250191953685:android:ae405fd861f1e2291ab31c",
+        "mobilesdk_app_id": "1:250191953685:android:fd364e85e1f049661ab31c",
         "android_client_info": {
-          "package_name": "com.indorhino.software.schooltalk.sample"
+          "package_name": "com.indorhino.edbox.common"
         }
       },
       "oauth_client": [

@@ -1,13 +1,7 @@
 // This screen shows a time line with the exams and class tests
 
 import React, { useMemo, useState } from "react";
-import {
-  Pressable,
-  SafeAreaView,
-  StyleProp,
-  StyleSheet,
-  ViewStyle,
-} from "react-native";
+import { SafeAreaView, StyleSheet } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
 import type { ExamItem } from "schooltalk-shared/types";
 import _ from "lodash";
@@ -20,6 +14,7 @@ import useColorScheme from "../../utils/useColorScheme";
 import { TestComp } from "../../components/TestComp";
 import { useCurrentUser } from "../../utils/auth";
 import { getUserRoleHierarchical, StaticRole } from "schooltalk-shared/misc";
+import { Banner } from "../../components/Banner";
 
 const ExamComp: React.FC<{
   exam: Extract<ExamItem, { type: "exam" }>["item"];
@@ -90,6 +85,8 @@ const ExamListScreen: React.FC = () => {
       : trpc.school.exam.fetchExamsAndTestsForTeacher.useQuery({});
 
   if (query.isLoading) return <Spinner visible />;
+  if (query.isError)
+    return <Banner text="Failed to fetch exams!" type="error" />;
 
   return (
     <SafeAreaView style={styles.container}>

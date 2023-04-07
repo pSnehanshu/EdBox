@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import type { School } from "schooltalk-shared/types";
 import { trpc } from "../utils/trpc";
 import { SCHOOL } from "./async-storage-keys";
-import config from "../config";
+import { useConfig } from "./config";
 
 /**
  * Cache school object to avoid fetching from AsyncStorage over and over
@@ -14,6 +14,7 @@ let globalSchool: School | undefined = undefined;
  * Fetch the current school object.
  */
 export function useSchool(): School | undefined {
+  const config = useConfig();
   const schoolQuery = trpc.school.schoolBasicInfo.useQuery({
     schoolId: config.schoolId,
   });
@@ -22,21 +23,29 @@ export function useSchool(): School | undefined {
   // Fetch locally
   useEffect(() => {
     (async () => {
-      if (globalSchool) {
+      if (globalSchool && globalSchool?.id === config.schoolId) {
         // The object is cached, so no need to refetch it
         return;
       }
+      globalSchool = undefined;
 
       const _school = await AsyncStorage.getItem(SCHOOL);
       if (!_school) return;
 
       const school = JSON.parse(_school);
+
+      // The school obj stored is of a different school, remove it instead
+      if (school?.id !== config.schoolId) {
+        await AsyncStorage.removeItem(SCHOOL);
+        return;
+      }
+
       setSchool(school);
 
       // Cache the value
       globalSchool = school;
     })();
-  }, []);
+  }, [config.schoolId]);
 
   useEffect(() => {
     (async () => {
@@ -57,7 +66,7 @@ export function useSchool(): School | undefined {
         }
       }
     })();
-  }, [schoolQuery.isLoading]);
+  }, [schoolQuery.isFetching]);
 
   return school;
 }

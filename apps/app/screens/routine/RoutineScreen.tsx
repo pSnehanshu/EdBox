@@ -23,6 +23,7 @@ import { NoClassesToday } from "../../components/RoutineNoClasses";
 import { getUserRoleHierarchical, StaticRole } from "schooltalk-shared/misc";
 import { useCurrentUser } from "../../utils/auth";
 import { useRoutineWithGaps } from "../../utils/routine-utils";
+import { Banner } from "../../components/Banner";
 
 const DayRoutine = memo(
   ({ periods, isFetching, onRefresh }: DayRoutineProps<RoutinePeriod>) => {
@@ -148,7 +149,10 @@ export default function RoutineScreen() {
   );
 
   if (routineQuery.isLoading) return <Spinner visible />;
-  if (routineQuery.isError) return <Text>Error occured!</Text>;
+  if (routineQuery.isError)
+    return (
+      <Banner text="Failed to fetch routine, please try again" type="error" />
+    );
 
   return (
     <TabView
