@@ -5,7 +5,7 @@ import * as Haptics from "expo-haptics";
 import MIMEType from "whatwg-mimetype";
 import { FileUploadTask, useFileUpload } from "../utils/file-upload";
 import useColorScheme from "../utils/useColorScheme";
-import { ScrollView, Text, TextInput, View } from "./Themed";
+import { List, Text, TextInput, View } from "./Themed";
 import { LinearProgress } from "@rneui/themed";
 
 interface MsgComposerProps {
@@ -18,15 +18,15 @@ const _MsgComposer = ({ onSend }: MsgComposerProps) => {
   const iconColor = scheme === "dark" ? "white" : "black";
 
   return (
-    <>
+    <View style={styles.container}>
       {fileUpload.uploadTasks.length > 0 && (
-        <View style={styles.pending_attachments_container}>
-          <ScrollView horizontal style={{ backgroundColor: "transparent" }}>
-            {fileUpload.uploadTasks.map((task) => (
-              <PendingAttachment uploadTask={task} key={task.permission.id} />
-            ))}
-          </ScrollView>
-        </View>
+        <List
+          horizontal
+          estimatedItemSize={200}
+          data={fileUpload.uploadTasks}
+          contentContainerStyle={styles.pending_attachments_list}
+          renderItem={({ item }) => <PendingAttachment uploadTask={item} />}
+        />
       )}
 
       <View style={styles.composer}>
@@ -72,7 +72,7 @@ const _MsgComposer = ({ onSend }: MsgComposerProps) => {
           </Pressable>
         </View>
       </View>
-    </>
+    </View>
   );
 };
 
@@ -163,6 +163,9 @@ function PendingAttachment({ uploadTask: task }: PendingAttachmentProps) {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    backgroundColor: "transparent",
+  },
   composer: {
     flex: 0,
     flexDirection: "row",
@@ -193,6 +196,9 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   attach_btn: {},
+  pending_attachments_list: {
+    backgroundColor: "transparent",
+  },
   pending_attachments_container: {
     height: 120,
     flexDirection: "row",
@@ -207,7 +213,6 @@ const styles = StyleSheet.create({
     borderColor: "gray",
     borderWidth: 0.5,
     borderRadius: 16,
-    opacity: 0.8,
     overflow: "hidden",
   },
   pending_attachments_file: {
