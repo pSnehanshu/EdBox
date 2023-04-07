@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, memo } from "react";
 import {
   Alert,
   ActivityIndicator,
@@ -38,16 +38,12 @@ export default function ChatWindowScreen({
   route: { params: groupInfo },
   navigation,
 }: NativeStackScreenProps<RootStackParamList, "ChatWindow">) {
-  const [messageText, setMessageText] = useState("");
   const messages = useMessages();
   const groupMessages = messages.useFetchGroupMessages(
     groupInfo.identifier,
     30,
   );
   const groupInfoQuery = useGroupInfo(groupInfo.identifier);
-
-  const scheme = useColorScheme();
-  const iconColor = scheme === "dark" ? "white" : "black";
 
   /** The Element that should appear at the end of the chat */
   const chatEndElement = useMemo(() => {
@@ -90,7 +86,10 @@ export default function ChatWindowScreen({
     }
   }, [groupInfoQuery.data?.name, groupInfo.identifier]);
 
-  const fileUpload = useFileUpload();
+  const handleMsgSend = useCallback(
+    (msg: string) => messages.sendMessage(groupInfo.identifier, msg),
+    [groupInfo.identifier, messages.sendMessage],
+  );
 
   return (
     <View style={styles.container}>
@@ -111,62 +110,80 @@ export default function ChatWindowScreen({
           contentContainerStyle={{ backgroundColor: "transparent" }}
         />
 
-        {fileUpload.uploadTasks.length > 0 && (
-          <View style={styles.pending_attachments_container}>
-            <ScrollView horizontal style={{ backgroundColor: "transparent" }}>
-              {fileUpload.uploadTasks.map((task) => (
-                <PendingAttachment uploadTask={task} key={task.permission.id} />
-              ))}
-            </ScrollView>
-          </View>
-        )}
-
-        <View style={styles.composer}>
-          <TextInput
-            value={messageText}
-            placeholder="Message"
-            multiline
-            onChangeText={setMessageText}
-            style={styles.composerText}
-          />
-
-          <View style={styles.composer_actions}>
-            <Pressable
-              onPress={() => fileUpload.pickAndUploadFile()}
-              style={({ pressed }) => [
-                styles.attach_btn,
-                { opacity: pressed ? 0.5 : 1 },
-              ]}
-            >
-              <Ionicons name="attach" color={iconColor} size={32} />
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [
-                styles.composerSendBtn,
-                { opacity: pressed ? 0.5 : 1 },
-              ]}
-              onPress={() => {
-                if (!fileUpload.allDone) {
-                  return alert("Please wait for all uploads to complete");
-                }
-
-                if (!messageText.trim()) return;
-                messages.sendMessage(groupInfo.identifier, messageText.trim());
-                setMessageText("");
-
-                // Vibrate!
-                Haptics.impactAsync();
-              }}
-            >
-              <Ionicons name="send" color={iconColor} size={32} />
-            </Pressable>
-          </View>
-        </View>
+        <MsgComposer onSend={handleMsgSend} />
       </ImageBackground>
     </View>
   );
 }
+
+interface MsgComposerProps {
+  onSend: (msg: string) => void;
+}
+const _MsgComposer = ({ onSend }: MsgComposerProps) => {
+  const [messageText, setMessageText] = useState("");
+  const fileUpload = useFileUpload();
+  const scheme = useColorScheme();
+  const iconColor = scheme === "dark" ? "white" : "black";
+
+  return (
+    <>
+      {fileUpload.uploadTasks.length > 0 && (
+        <View style={styles.pending_attachments_container}>
+          <ScrollView horizontal style={{ backgroundColor: "transparent" }}>
+            {fileUpload.uploadTasks.map((task) => (
+              <PendingAttachment uploadTask={task} key={task.permission.id} />
+            ))}
+          </ScrollView>
+        </View>
+      )}
+
+      <View style={styles.composer}>
+        <TextInput
+          value={messageText}
+          placeholder="Message"
+          multiline
+          onChangeText={setMessageText}
+          style={styles.composerText}
+        />
+
+        <View style={styles.composer_actions}>
+          <Pressable
+            onPress={() => fileUpload.pickAndUploadFile()}
+            style={({ pressed }) => [
+              styles.attach_btn,
+              { opacity: pressed ? 0.5 : 1 },
+            ]}
+          >
+            <Ionicons name="attach" color={iconColor} size={32} />
+          </Pressable>
+
+          <Pressable
+            style={({ pressed }) => [
+              styles.composerSendBtn,
+              { opacity: pressed ? 0.5 : 1 },
+            ]}
+            onPress={() => {
+              if (!fileUpload.allDone) {
+                return alert("Please wait for all uploads to complete");
+              }
+
+              if (!messageText.trim()) return;
+
+              onSend(messageText.trim());
+              setMessageText("");
+
+              // Vibrate!
+              Haptics.impactAsync();
+            }}
+          >
+            <Ionicons name="send" color={iconColor} size={32} />
+          </Pressable>
+        </View>
+      </View>
+    </>
+  );
+};
+const MsgComposer = memo(_MsgComposer);
 
 interface PendingAttachmentProps {
   uploadTask: FileUploadTask;
