@@ -99,7 +99,8 @@ const _MsgComposer = ({ onSend }: MsgComposerProps) => {
                 return alert("Please wait for all uploads to complete");
               }
 
-              if (!messageText.trim()) return;
+              if (!messageText.trim() && fileUpload.uploadTasks.length < 1)
+                return;
 
               onSend(
                 messageText.trim(),
