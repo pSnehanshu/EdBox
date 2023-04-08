@@ -136,9 +136,23 @@ interface ImagePreviewProps {
   style?: StyleProp<ImageStyle>;
 }
 function ImagePreview({ file, style }: ImagePreviewProps) {
-  const urlQuery = trpc.school.attachment.getFileURL.useQuery({
-    file_id: file.id,
-  });
+  const urlQuery = trpc.school.attachment.getFileURL.useQuery(
+    {
+      file_id: file.id,
+      via_imagekit: true,
+      imagekit_transformations: [
+        {
+          format: "jpg",
+          quality: "20",
+          height: "400",
+          width: "500",
+          focus: "auto",
+          progressive: "true",
+        },
+      ],
+    },
+    { staleTime: 5 * 60 * 1000 },
+  );
 
   if (urlQuery.isLoading) return <></>;
 

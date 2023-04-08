@@ -1,3 +1,5 @@
+import { TRPCError } from "@trpc/server";
+import { addSeconds } from "date-fns";
 import { t, authMiddleware } from "../../trpc";
 import {
   generateSignedDownloadS3URL,
@@ -5,10 +7,9 @@ import {
 } from "../../../utils/file.service";
 import { z } from "zod";
 import prisma from "../../../prisma";
-import { TRPCError } from "@trpc/server";
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import config from "../../../config";
-import { s3client } from "../../../utils/aws-clients";
+import { imagekit, s3client } from "../../../utils/aws-clients";
 
 const attachmentsRouter = t.router({
   requestPermission: t.procedure
@@ -98,6 +99,8 @@ const attachmentsRouter = t.router({
     .input(
       z.object({
         file_id: z.string().cuid(),
+        via_imagekit: z.boolean().default(false),
+        imagekit_transformations: z.record(z.string()).array().default([]),
       }),
     )
     .query(async ({ input, ctx }) => {
@@ -113,8 +116,20 @@ const attachmentsRouter = t.router({
           code: "NOT_FOUND",
         });
 
-      // Generate signed s3 URL
-      return generateSignedDownloadS3URL(file.s3key);
+      if (input.via_imagekit) {
+        return {
+          url: imagekit.url({
+            path: file.s3key,
+            signed: true,
+            expireSeconds: config.S3_DOWNLOAD_URL_EXPIRY_SECONDS,
+            transformation: input.imagekit_transformations,
+          }),
+          expiry: addSeconds(new Date(), config.S3_DOWNLOAD_URL_EXPIRY_SECONDS),
+        };
+      } else {
+        // Generate signed s3 URL
+        return generateSignedDownloadS3URL(file.s3key);
+      }
     }),
 });
 

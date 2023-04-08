@@ -4836,6 +4836,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"axios@npm:^0.27.2":
+  version: 0.27.2
+  resolution: "axios@npm:0.27.2"
+  dependencies:
+    follow-redirects: ^1.14.9
+    form-data: ^4.0.0
+  checksum: 38cb7540465fe8c4102850c4368053c21683af85c5fdf0ea619f9628abbcb59415d1e22ebc8a6390d2bbc9b58a9806c874f139767389c862ec9b772235f06854
+  languageName: node
+  linkType: hard
+
 "axios@npm:^1.3.4":
   version: 1.3.4
   resolution: "axios@npm:1.3.4"
@@ -7444,7 +7454,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.15.0":
+"follow-redirects@npm:^1.14.9, follow-redirects@npm:^1.15.0":
   version: 1.15.2
   resolution: "follow-redirects@npm:1.15.2"
   peerDependenciesMeta:
@@ -7840,6 +7850,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"hamming-distance@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "hamming-distance@npm:1.0.0"
+  checksum: 2cba2ec883d9ec9cd5877ff308af3ea2c87a9e131b81e0e00bf9b8525c1db46ad0be9a2c405223b417f6867ea8f8966cf687c8f07d1d7b496c6aeeb38f72e8ee
+  languageName: node
+  linkType: hard
+
 "has-flag@npm:^3.0.0":
   version: 3.0.0
   resolution: "has-flag@npm:3.0.0"
@@ -8120,6 +8137,20 @@ __metadata:
   bin:
     image-size: bin/image-size.js
   checksum: cfd01d7672d584a4dd09d29bcf593c4bec3c9bb63769a51f735bd10673a7ddce7445da79771ea70b582a114b35bb4c148366b027ee9d1071c1a051aead54c788
+  languageName: node
+  linkType: hard
+
+"imagekit@npm:^4.1.3":
+  version: 4.1.3
+  resolution: "imagekit@npm:4.1.3"
+  dependencies:
+    axios: ^0.27.2
+    form-data: ^4.0.0
+    hamming-distance: ^1.0.0
+    lodash: ^4.17.15
+    tslib: ^2.4.0
+    uuid: ^8.3.2
+  checksum: abc065f1a3c1fb561dd1e32b3b1b25e875dc992460ca1aff7173831fd4c6a40ed7b5b35e4b4405f4c33fa1c3ab4e882c7022073abd4c8aea8fb41b0daf07caaf
   languageName: node
   linkType: hard
 
@@ -12614,6 +12645,7 @@ __metadata:
     dotenv: ^16.0.3
     expo-server-sdk: ^3.7.0
     express: ^4.18.2
+    imagekit: ^4.1.3
     lodash: ^4.17.21
     nodemon: ^2.0.20
     parse-data-url: ^5.0.0

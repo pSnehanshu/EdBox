@@ -17,6 +17,8 @@ const ConfigSchema = z.object({
   AWS_ACCESS_KEY: z.string(),
   AWS_SECRET_ACCESS_KEY: z.string(),
   AWS_REGION: z.string().default("ap-south-1"),
+  IK_PUBLIC_KEY: z.string(),
+  IK_PRIVATE_KEY: z.string(),
 });
 
 export default ConfigSchema.parse(process.env);
