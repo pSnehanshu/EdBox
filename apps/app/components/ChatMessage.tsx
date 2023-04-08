@@ -112,13 +112,17 @@ function _ChatMessage({ message }: ChatMessageProps) {
         </Pressable>
       )}
 
-      {message.Attachments?.map((attachment) => (
-        <FilePreview
-          fileIdOrObject={attachment.File}
-          key={attachment.file_id}
-          style={{ borderWidth: 0 }}
-        />
-      ))}
+      {message.Attachments?.length ? (
+        <View style={styles.attachments_container}>
+          {message.Attachments?.map((attachment) => (
+            <FilePreview
+              fileIdOrObject={attachment.File}
+              key={attachment.file_id}
+              style={styles.attachment}
+            />
+          ))}
+        </View>
+      ) : null}
 
       <Text style={[styles.time, { color }]}>{time}</Text>
     </View>
@@ -161,6 +165,14 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
     color: "#50b4c1",
     fontSize: 10,
+  },
+  attachments_container: {
+    backgroundColor: "transparent",
+    marginTop: 24,
+  },
+  attachment: {
+    borderWidth: 0,
+    marginBottom: 4,
   },
 });
 
