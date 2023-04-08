@@ -156,6 +156,11 @@ export default function initSocketIo(server: HTTPServer) {
               include: {
                 ParentMessage: true,
                 Sender: true,
+                Attachments: {
+                  include: {
+                    File: true,
+                  },
+                },
               },
             });
 

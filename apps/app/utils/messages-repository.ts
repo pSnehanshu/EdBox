@@ -234,7 +234,7 @@ export class MessagesRepository {
     }, [groupIdentifier]);
 
     this.useGroupMessageReceived(groupIdentifier, (newMessage) => {
-      setFinalMessages((m) => [newMessage, ...m]);
+      setFinalMessages((m) => [newMessage].concat(m));
     });
 
     return {
