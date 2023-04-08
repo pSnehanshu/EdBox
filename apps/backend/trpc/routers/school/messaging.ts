@@ -603,6 +603,11 @@ const messagingRouter = t.router({
                 Staff: true,
               },
             },
+            Attachments: {
+              include: {
+                File: true,
+              },
+            },
           },
           orderBy: {
             sort_key: "desc",

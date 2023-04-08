@@ -21,11 +21,11 @@ const attachmentsRouter = t.router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const permission = await generateSignedUploadS3URL(ctx.user.id);
+      const data = await generateSignedUploadS3URL(ctx.user.id);
 
       // Update the given file name and size
-      await prisma.fileUploadPermission.update({
-        where: { id: permission.permission.id },
+      const permission = await prisma.fileUploadPermission.update({
+        where: { id: data.permission.id },
         data: {
           file_name: input.file_name,
           size_bytes: input.size_in_bytes,
@@ -33,7 +33,7 @@ const attachmentsRouter = t.router({
         },
       });
 
-      return permission;
+      return { ...data, permission };
     }),
   cancelPermission: t.procedure
     .use(authMiddleware)

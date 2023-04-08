@@ -5,9 +5,10 @@ import * as Haptics from "expo-haptics";
 import MIMEType from "whatwg-mimetype";
 import { LinearProgress } from "@rneui/themed";
 import type { FilePermissionsInput } from "schooltalk-shared/misc";
-import { FileUploadTask, useFileUpload } from "../utils/file-upload";
+import { useFileUpload } from "../utils/file-upload";
 import useColorScheme from "../utils/useColorScheme";
 import { List, Text, TextInput, View } from "./Themed";
+import { FileUploadTask } from "../utils/types/common";
 
 interface MsgComposerProps {
   onSend: (msg: string, files?: FilePermissionsInput[]) => void;
@@ -107,6 +108,8 @@ const _MsgComposer = ({ onSend }: MsgComposerProps) => {
                   file_name: t.file.name,
                 })),
               );
+              fileUpload.removeAll();
+
               setMessageText("");
 
               // Vibrate!

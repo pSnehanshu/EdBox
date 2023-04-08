@@ -6,21 +6,25 @@ import * as ImagePicker from "expo-image-picker";
 import type { UploadPermission } from "schooltalk-shared/types";
 import Toast from "react-native-toast-message";
 import { trpc } from "./trpc";
+import type { FileUploadTask } from "./types/common";
 
 /**
  * Upload a given file to S3
  * @param fileURI File path
  * @param s3url The s3 URL
  */
-function uploadFileToS3(fileURI: string, s3url: string) {
+function uploadFileToS3(file: FileUploadTask["file"], s3url: string) {
   const uploadProgressSubject = new Subject<number>();
 
   const task = FileSystem.createUploadTask(
     s3url,
-    fileURI,
+    file.uri,
     {
       httpMethod: "PUT",
       uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
+      headers: {
+        "Content-Type": file.mimeType ?? "application/octet-stream",
+      },
     },
     (progress) => {
       // Calculate the percentage
@@ -47,23 +51,6 @@ function uploadFileToS3(fileURI: string, s3url: string) {
       }),
     cancel: () => task.cancelAsync(),
   };
-}
-
-interface File {
-  name?: string;
-  size?: number;
-  mimeType?: string;
-  uri: string;
-}
-
-export interface FileUploadTask {
-  progress: Subject<number>;
-  start: () => Promise<FileSystem.FileSystemUploadResult | undefined>;
-  cancel: () => Promise<void>;
-  permission: UploadPermission;
-  file: File;
-  uploadResult?: FileSystem.FileSystemUploadResult;
-  started: boolean;
 }
 
 /**
@@ -198,10 +185,11 @@ export function useFileUpload() {
       await uploadPermissionMutation.mutateAsync({
         file_name: fileInfo.name,
         size_in_bytes: fileInfo.size,
+        mime: fileInfo.mimeType,
       });
 
     // Upload it!
-    const res = uploadFileToS3(fileInfo.uri, signedURL);
+    const res = uploadFileToS3(fileInfo, signedURL);
 
     const task: FileUploadTask = {
       ...res,
@@ -229,18 +217,20 @@ export function useFileUpload() {
               size_in_bytes: asset.fileSize,
             });
 
+          const file: FileUploadTask["file"] = {
+            name: asset.fileName ?? `media-${Date.now()}.jpg`,
+            size: asset.fileSize,
+            mimeType: `${asset.type}/*`,
+            uri: asset.uri,
+          };
+
           // Upload it!
-          const res = uploadFileToS3(asset.uri, signedURL);
+          const res = uploadFileToS3(file, signedURL);
 
           const task: FileUploadTask = {
             ...res,
+            file,
             permission,
-            file: {
-              name: asset.fileName ?? `media-${Date.now()}.jpg`,
-              size: asset.fileSize,
-              mimeType: `${asset.type}/*`,
-              uri: asset.uri,
-            },
             started: false,
           };
 
@@ -286,6 +276,10 @@ export function useFileUpload() {
     }
   }, []);
 
+  const removeAll = useCallback(() => {
+    setUploadTasksMap({});
+  }, []);
+
   return {
     pickAndUploadFile,
     pickAndUploadMediaLib,
@@ -294,5 +288,6 @@ export function useFileUpload() {
     allDone: totalDone >= uploadTasks.length,
     cameraPermissionStatus,
     mediaPermissionStatus,
+    removeAll,
   };
 }

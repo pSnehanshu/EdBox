@@ -10,14 +10,22 @@ import {
   getUserColor,
 } from "schooltalk-shared/misc";
 import { useConfig } from "../utils/config";
+import { FilePreview } from "../components/FilePreview";
 
 interface ChatMessageProps {
-  message: Message;
+  // Because messages are cached in SQLite, this type may not always
+  // be correct for old messages if the structure of a message changed
+  // e.g. Addition or removal of a field. Hence it's safer to mark this
+  // as Partial<...> so that while using any of the properties, the
+  // developer is forced to manually check if a property exists or not.
+  message: Partial<Message>;
 }
 function _ChatMessage({ message }: ChatMessageProps) {
   const config = useConfig();
   const { user } = useCurrentUser();
   const time = useMemo(() => {
+    if (!message.created_at) return "N/A";
+
     const date = new Date(message.created_at);
     const time = format(date, "hh:mm aaa");
 
@@ -36,24 +44,28 @@ function _ChatMessage({ message }: ChatMessageProps) {
   if (!user) return null;
 
   const sender = message.Sender;
-  const isSentByMe = user.id === sender.id;
+  const isSentByMe = user.id === sender?.id;
 
   const bgColor = useMemo(
     () => (isSentByMe ? "#005d4b" : "#1f2c34"),
     [isSentByMe],
   );
   const color = useMemo(() => getTextColorForGivenBG(bgColor), [bgColor]);
-  const senderDisplayName = useMemo(() => getDisplayName(sender), [sender]);
+  const senderDisplayName = useMemo(
+    () => (sender ? getDisplayName(sender) : "User"),
+    [sender],
+  );
   const senderColor = useMemo(
-    () => getUserColor(message.sender_id),
+    () => getUserColor(message.sender_id ?? ""),
     [message.sender_id],
   );
 
-  const shouldCollapse = message.text.length > config.previewMessageLength;
+  const shouldCollapse =
+    (message.text?.length ?? 0) > config.previewMessageLength;
   const trimmedMessage = useMemo(
     () =>
       shouldCollapse
-        ? message.text.slice(0, config.previewMessageLength).trimEnd()
+        ? message.text?.slice(0, config.previewMessageLength).trimEnd()
         : message.text,
     [message.text, config.previewMessageLength],
   );
@@ -78,7 +90,7 @@ function _ChatMessage({ message }: ChatMessageProps) {
         <Pressable
           onPress={() => {
             // TODO: Show basic user info as modal, with link to full profile
-            alert(`User: ${sender.name}\nID: ${sender.id}`);
+            alert(`User: ${sender?.name}\nID: ${sender?.id}`);
           }}
         >
           <Text style={[styles.senderName, { color: senderColor }]}>
@@ -104,6 +116,13 @@ function _ChatMessage({ message }: ChatMessageProps) {
           <Text style={styles.viewMoreBtn}>Read more</Text>
         </Pressable>
       )}
+
+      {message.Attachments?.map((attachment) => (
+        <FilePreview
+          fileIdOrObject={attachment.File}
+          key={attachment.file_id}
+        />
+      ))}
 
       <Text style={[styles.time, { color }]}>{time}</Text>
     </View>
