@@ -10,8 +10,17 @@ export type ArrayElement<ArrayType extends readonly unknown[]> =
 export type RouterOutput = inferRouterOutputs<AppRouter>;
 export type RouterInput = inferRouterInputs<AppRouter>;
 
-export type Message = ArrayElement<
-  RouterOutput["school"]["messaging"]["fetchGroupMessages"]["messages"]
+/**
+ * Because messages are cached in SQLite, this type may not always
+ * be correct for old messages if the structure of a message changed
+ * e.g. Addition or removal of a field. Hence it's safer to mark this
+ * as `Partial<...>` so that while using any of the properties, the
+ * developer is forced to manually check if a property exists or not.
+ */
+export type Message = Partial<
+  ArrayElement<
+    RouterOutput["school"]["messaging"]["fetchGroupMessages"]["messages"]
+  >
 >;
 
 export interface Group {

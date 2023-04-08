@@ -29,13 +29,17 @@ export default function initSocketIo(server: HTTPServer) {
     const schoolId = name.slice(1);
 
     // Make sure school exists and is active
-    const school = await prisma.school.findUnique({
-      where: { id: schoolId },
-      select: {
-        id: true,
-        is_active: true,
-      },
-    });
+    const school = await prisma.school
+      .findUnique({
+        where: { id: schoolId },
+        select: {
+          id: true,
+          is_active: true,
+        },
+      })
+      .catch((err) => {
+        console.error(err);
+      });
 
     const ok = !!(school && school.is_active);
 

@@ -18,6 +18,8 @@ function SingleAnnouncement({ message }: AnnouncementProps) {
   const config = useConfig();
   const { user } = useCurrentUser();
   const time = useMemo(() => {
+    if (!message.created_at) return "N/A";
+
     const date = new Date(message.created_at);
     const time = format(date, "hh:mm aaa");
 
@@ -34,15 +36,19 @@ function SingleAnnouncement({ message }: AnnouncementProps) {
   }, [message.created_at]);
 
   const sender = message.Sender;
-  const shouldCollapse = message.text.length > config.previewMessageLength;
+  const shouldCollapse =
+    (message.text ?? "").length > config.previewMessageLength;
   const trimmedMessage = useMemo(
     () =>
       shouldCollapse
-        ? message.text.slice(0, config.previewMessageLength).trimEnd()
+        ? (message.text ?? "").slice(0, config.previewMessageLength).trimEnd()
         : message.text,
     [message.text],
   );
-  const senderDisplayName = useMemo(() => getDisplayName(sender), [sender]);
+  const senderDisplayName = useMemo(
+    () => (sender ? getDisplayName(sender) : "User"),
+    [sender],
+  );
   const viewFullMessage = useCallback(() => {
     if (shouldCollapse) {
       Alert.alert(senderDisplayName, message.text);
@@ -51,7 +57,7 @@ function SingleAnnouncement({ message }: AnnouncementProps) {
 
   if (!user) return null;
 
-  const isSentByMe = user.id === sender.id;
+  const isSentByMe = user.id === sender?.id;
 
   return (
     <View style={styles.container}>

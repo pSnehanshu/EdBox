@@ -63,7 +63,11 @@ function GroupItem(props: GroupItemProps) {
         <Text style={styles.chatGroupLastMessage}>
           {lastMessage
             ? _.truncate(
-                `${getDisplayName(lastMessage.Sender)}: ${lastMessage.text}`,
+                `${
+                  lastMessage.Sender
+                    ? getDisplayName(lastMessage.Sender)
+                    : "User"
+                }: ${lastMessage.text}`,
                 {
                   length: 45,
                 },

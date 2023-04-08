@@ -13,12 +13,7 @@ import { useConfig } from "../utils/config";
 import { FilePreview } from "../components/FilePreview";
 
 interface ChatMessageProps {
-  // Because messages are cached in SQLite, this type may not always
-  // be correct for old messages if the structure of a message changed
-  // e.g. Addition or removal of a field. Hence it's safer to mark this
-  // as Partial<...> so that while using any of the properties, the
-  // developer is forced to manually check if a property exists or not.
-  message: Partial<Message>;
+  message: Message;
 }
 function _ChatMessage({ message }: ChatMessageProps) {
   const config = useConfig();
