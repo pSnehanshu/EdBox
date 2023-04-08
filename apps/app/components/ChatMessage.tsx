@@ -116,6 +116,7 @@ function _ChatMessage({ message }: ChatMessageProps) {
         <FilePreview
           fileIdOrObject={attachment.File}
           key={attachment.file_id}
+          style={{ borderWidth: 0 }}
         />
       ))}
 

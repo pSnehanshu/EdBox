@@ -123,7 +123,7 @@ function FilePreviewObject({ file, style }: FilePreviewObjectProps) {
             ]}
             onPress={download}
           >
-            <MaterialIcons name="file-download" size={32} color={iconColor} />
+            <MaterialIcons name="file-download" size={24} color={iconColor} />
           </Pressable>
         </View>
       </View>
@@ -198,7 +198,8 @@ const styles = StyleSheet.create({
     width: "100%",
     borderColor: "gray",
     borderWidth: 1,
-    borderRadius: 4,
+    borderRadius: 6,
+    overflow: "hidden",
   },
   image: {
     width: "100%",
@@ -216,18 +217,26 @@ const styles = StyleSheet.create({
     height: 50,
     borderTopColor: "gray",
     borderTopWidth: 0.5,
+    overflow: "hidden",
   },
   control_bar_left: {
     paddingHorizontal: 8,
+    flex: 85,
   },
-  control_bar_right: {},
-  file_name: {},
+  control_bar_right: {
+    flex: 15,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  file_name: {
+    fontSize: 12,
+  },
   file_size: {
     fontSize: 10,
+    opacity: 0.8,
   },
   action_btn: {
     height: "100%",
-    width: 40,
     justifyContent: "center",
     alignItems: "center",
   },
