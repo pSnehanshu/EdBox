@@ -136,11 +136,7 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
     <View style={styles.centeredView}>
       <Text>{JSON.stringify(allClassesNames, null, 2)}</Text>
       <Text>{JSON.stringify(allSubjectsName, null, 2)}</Text>
-      <Modal
-        transparent={true}
-        visible={createHomeWorkModal}
-        onRequestClose={onClose}
-      >
+      <Modal transparent={true} visible={true} onRequestClose={onClose}>
         <FAB
           icon={
             <Ionicons
@@ -305,6 +301,35 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
                 name="subject_id"
               />
               {errors.subject_id && <Text>This is required.</Text>}
+              {/* upload */}
+              <View
+                style={{
+                  flexDirection: "row",
+                  margin: 14,
+                  justifyContent: "space-between",
+                  marginLeft: 30,
+                  marginRight: 30,
+                }}
+              >
+                <View>
+                  <Ionicons
+                    name="cloud-upload-sharp"
+                    size={25}
+                    color="white"
+                    style={styles.round_icon}
+                  />
+                  <Text>Upload File</Text>
+                </View>
+                <View>
+                  <Ionicons
+                    name="camera"
+                    size={25}
+                    color="white"
+                    style={styles.round_icon}
+                  />
+                  <Text>Take Photo</Text>
+                </View>
+              </View>
               <Pressable
                 style={styles.button}
                 // onPress={() => {
@@ -414,5 +439,15 @@ const styles = StyleSheet.create({
   dropdown1RowTxtStyle: {
     color: "#2A2A2A",
     textAlign: "center",
+  },
+  round_icon: {
+    backgroundColor: "#4E48B2",
+    padding: 15,
+    alignItems: "center",
+    height: 60,
+    width: 60,
+    borderRadius: 999,
+    textAlign: "center",
+    justifyContent: "center",
   },
 });
