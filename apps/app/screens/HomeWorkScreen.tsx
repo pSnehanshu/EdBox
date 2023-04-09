@@ -121,8 +121,12 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
     formState: { errors },
   } = useForm({
     defaultValues: {
-      firstName: "",
-      lastName: "",
+      class_id: "",
+      section_id: "",
+      subject_id: "",
+      text: "",
+      due_date: "",
+      file_permissions: "",
     },
   });
   const onSubmit = (data: any) =>
@@ -175,6 +179,96 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
             />
             {/* form */}
             <View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  // marginLeft: 24,
+                  marginRight: 24,
+                }}
+              >
+                <View style={{ width: "50%" }}>
+                  <Text style={styles.text_class}>Class</Text>
+                  <Controller
+                    control={control}
+                    rules={{
+                      required: true,
+                    }}
+                    render={({ field: { onChange, onBlur, value } }) => (
+                      <SelectDropdown
+                        data={allClassesNames}
+                        onSelect={(item, index) => {}}
+                        defaultButtonText={"Select Sections"}
+                        buttonTextAfterSelection={(selectedItem, index) => {
+                          return selectedItem;
+                        }}
+                        rowTextForSelection={(item, index) => {
+                          return item;
+                        }}
+                        dropdownIconPosition={"right"}
+                        renderDropdownIcon={(isOpened) => {
+                          return (
+                            <FontAwesome
+                              name={isOpened ? "chevron-up" : "chevron-down"}
+                              color={"#444"}
+                              size={18}
+                            />
+                          );
+                        }}
+                        buttonStyle={styles.dropdown1BtnStyle}
+                        buttonTextStyle={styles.dropdown1BtnTxtStyle}
+                        dropdownStyle={styles.dropdown1DropdownStyle}
+                        rowStyle={styles.dropdown1RowStyle}
+                        rowTextStyle={styles.dropdown1RowTxtStyle}
+                      />
+                    )}
+                    name="class_id"
+                  />
+                  {errors.subject_id && <Text>This is required.</Text>}
+                </View>
+                <View style={{ width: "50%", marginLeft: 10 }}>
+                  <Text style={styles.text_class}>Section</Text>
+                  <Controller
+                    control={control}
+                    rules={{
+                      required: true,
+                    }}
+                    render={({ field: { onChange, onBlur, value } }) => (
+                      <SelectDropdown
+                        data={allSections}
+                        disabled={allSections.length === 0}
+                        onSelect={(item, index) => {}}
+                        defaultButtonText={"Select Sections"}
+                        buttonTextAfterSelection={(selectedItem, index) => {
+                          return selectedItem;
+                        }}
+                        rowTextForSelection={(item, index) => {
+                          return item;
+                        }}
+                        dropdownIconPosition={"right"}
+                        renderDropdownIcon={(isOpened) => {
+                          return (
+                            <FontAwesome
+                              name={isOpened ? "chevron-up" : "chevron-down"}
+                              color={"#444"}
+                              size={18}
+                            />
+                          );
+                        }}
+                        buttonStyle={styles.dropdown1BtnStyle}
+                        buttonTextStyle={styles.dropdown1BtnTxtStyle}
+                        dropdownStyle={styles.dropdown1DropdownStyle}
+                        rowStyle={styles.dropdown1RowStyle}
+                        rowTextStyle={styles.dropdown1RowTxtStyle}
+                      />
+                    )}
+                    name="section_id"
+                  />
+                  {errors.subject_id && <Text>This is required.</Text>}
+                </View>
+              </View>
+            </View>
+            <View>
+              <Text style={styles.text_class}>Subject</Text>
               <Controller
                 control={control}
                 rules={{
@@ -184,7 +278,7 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
                   <SelectDropdown
                     data={allSubjectsName}
                     onSelect={(item, index) => {}}
-                    defaultButtonText={"Select Sections"}
+                    defaultButtonText={"Select Subject"}
                     buttonTextAfterSelection={(selectedItem, index) => {
                       return selectedItem;
                     }}
@@ -208,9 +302,9 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
                     rowTextStyle={styles.dropdown1RowTxtStyle}
                   />
                 )}
-                name="lastName"
+                name="subject_id"
               />
-              {errors.lastName && <Text>This is required.</Text>}
+              {errors.subject_id && <Text>This is required.</Text>}
               <Pressable
                 style={styles.button}
                 // onPress={() => {
