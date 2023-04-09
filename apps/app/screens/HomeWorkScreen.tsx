@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet } from "react-native";
 import { RootStackParamList } from "../utils/types/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Text, TextInput, View } from "../components/Themed";
-import { FAB } from "@rneui/themed";
+import { Button, FAB } from "@rneui/themed";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { Modal } from "react-native";
 import SelectDropdown from "react-native-select-dropdown";
@@ -12,7 +12,7 @@ import useColorScheme from "../utils/useColorScheme";
 import { useConfig } from "../utils/config";
 import { ClassWithSections, Section, Subject } from "schooltalk-shared/types";
 import DateTimePicker from "@react-native-community/datetimepicker";
-
+import { useForm, Controller } from "react-hook-form";
 type Props = {};
 
 export default function HomeWorkScreen({}: NativeStackScreenProps<
@@ -101,19 +101,32 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
       ) ?? [],
     [classesAndSectionsData.isFetching],
   );
-  // const allSections = useMemo(() => {
-  //   if (selectedClass) {
-  //     return selectedClass.Sections.map(
-  //       (section) => `Section ${section.name ?? section.numeric_id}`,
-  //     );
-  //   }
-  //   return [];
-  // }, [selectedClass?.numeric_id]);
+  const allSections = useMemo(() => {
+    if (selectedClass) {
+      return selectedClass.Sections.map(
+        (section) => `Section ${section.name ?? section.numeric_id}`,
+      );
+    }
+    return [];
+  }, [selectedClass?.numeric_id]);
 
   const allSubjectsName = useMemo(
     () => allSubject.data?.map((a) => ` ${a.name ?? a.name}`) ?? [],
     [allSubject.isFetching],
   );
+  // form
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+    },
+  });
+  const onSubmit = (data: any) =>
+    alert(JSON.stringify(allSubjectsName, null, 2));
 
   return (
     <View style={styles.centeredView}>
@@ -160,141 +173,61 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
                 borderBottomWidth: StyleSheet.hairlineWidth,
               }}
             />
-            <View
-              style={{
-                flexDirection: "row",
-                // marginLeft: 24,
-                marginRight: 24,
-              }}
-            >
-              <View style={{ width: "50%" }}>
-                <Text style={styles.text_class}>Class</Text>
-                <SelectDropdown
-                  data={["class1", "class2"]}
-                  onSelect={(item, index) => {}}
-                  defaultButtonText={"Select Class"}
-                  buttonTextAfterSelection={(selectedItem, index) => {
-                    return selectedItem;
-                  }}
-                  rowTextForSelection={(item, index) => {
-                    return item;
-                  }}
-                  buttonStyle={styles.dropdown1BtnStyle}
-                  buttonTextStyle={styles.dropdown1BtnTxtStyle}
-                  dropdownIconPosition={"right"}
-                  renderDropdownIcon={(isOpened) => {
-                    return (
-                      <FontAwesome
-                        name={isOpened ? "chevron-up" : "chevron-down"}
-                        color={"#444"}
-                        size={18}
-                      />
-                    );
-                  }}
-                  dropdownStyle={styles.dropdown1DropdownStyle}
-                  rowStyle={styles.dropdown1RowStyle}
-                  rowTextStyle={styles.dropdown1RowTxtStyle}
-                />
-              </View>
-              <View style={{ width: "50%", marginLeft: 10 }}>
-                <Text style={styles.text_class}>Section</Text>
-                <SelectDropdown
-                  data={["Sec1", "Sec2"]}
-                  //   disabled={}
-                  onSelect={(item, index) => {}}
-                  defaultButtonText={"Select Sections"}
-                  buttonTextAfterSelection={(selectedItem, index) => {
-                    return selectedItem;
-                  }}
-                  rowTextForSelection={(item, index) => {
-                    return item;
-                  }}
-                  dropdownIconPosition={"right"}
-                  renderDropdownIcon={(isOpened) => {
-                    return (
-                      <FontAwesome
-                        name={isOpened ? "chevron-up" : "chevron-down"}
-                        color={"#444"}
-                        size={18}
-                      />
-                    );
-                  }}
-                  buttonStyle={styles.dropdown1BtnStyle}
-                  buttonTextStyle={styles.dropdown1BtnTxtStyle}
-                  dropdownStyle={styles.dropdown1DropdownStyle}
-                  rowStyle={styles.dropdown1RowStyle}
-                  rowTextStyle={styles.dropdown1RowTxtStyle}
-                />
-              </View>
-            </View>
+            {/* form */}
             <View>
-              <Text style={styles.text_class}>Subject</Text>
-              <SelectDropdown
-                data={["Sec1", "Sec2"]}
-                //   disabled={}
-                onSelect={(item, index) => {}}
-                defaultButtonText={"Select Sections"}
-                buttonTextAfterSelection={(selectedItem, index) => {
-                  return selectedItem;
+              <Controller
+                control={control}
+                rules={{
+                  required: true,
                 }}
-                rowTextForSelection={(item, index) => {
-                  return item;
-                }}
-                dropdownIconPosition={"right"}
-                renderDropdownIcon={(isOpened) => {
-                  return (
-                    <FontAwesome
-                      name={isOpened ? "chevron-up" : "chevron-down"}
-                      color={"#444"}
-                      size={18}
-                    />
-                  );
-                }}
-                buttonStyle={styles.dropdown1BtnStyle}
-                buttonTextStyle={styles.dropdown1BtnTxtStyle}
-                dropdownStyle={styles.dropdown1DropdownStyle}
-                rowStyle={styles.dropdown1RowStyle}
-                rowTextStyle={styles.dropdown1RowTxtStyle}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <SelectDropdown
+                    data={allSubjectsName}
+                    onSelect={(item, index) => {}}
+                    defaultButtonText={"Select Sections"}
+                    buttonTextAfterSelection={(selectedItem, index) => {
+                      return selectedItem;
+                    }}
+                    rowTextForSelection={(item, index) => {
+                      return item;
+                    }}
+                    dropdownIconPosition={"right"}
+                    renderDropdownIcon={(isOpened) => {
+                      return (
+                        <FontAwesome
+                          name={isOpened ? "chevron-up" : "chevron-down"}
+                          color={"#444"}
+                          size={18}
+                        />
+                      );
+                    }}
+                    buttonStyle={styles.dropdown1BtnStyle}
+                    buttonTextStyle={styles.dropdown1BtnTxtStyle}
+                    dropdownStyle={styles.dropdown1DropdownStyle}
+                    rowStyle={styles.dropdown1RowStyle}
+                    rowTextStyle={styles.dropdown1RowTxtStyle}
+                  />
+                )}
+                name="lastName"
               />
+              {errors.lastName && <Text>This is required.</Text>}
+              <Pressable
+                style={styles.button}
+                // onPress={() => {
+                //   createHomework.mutate({
+                //     // test
+                //     text: "new home work",
+                //     section_id: 1,
+                //     class_id: 1,
+                //     subject_id: "a",
+                //     // file_permissions: FilePermissionsSchema.array().default([]),
+                //   });
+                // }}
+                onPress={handleSubmit(onSubmit)}
+              >
+                <Text style={styles.textStyle}>Create</Text>
+              </Pressable>
             </View>
-            <Text style={styles.text_class}>Text</Text>
-            <TextInput
-              style={styles.inputText}
-              editable
-              multiline
-              numberOfLines={3}
-              maxLength={100}
-              //   value={""}
-              //   autoFocus
-            />
-            {/* datepicker */}
-            {/* <View style={{}}>
-              <DateTimePicker
-                testID="dateTimePicker"
-                timeZoneOffsetInMinutes={0}
-                value={date}
-                mode="date"
-                is24Hour={true}
-                display="default"
-                onChange={() => {}}
-              />
-            </View> */}
-
-            <Pressable
-              style={styles.button}
-              onPress={() => {
-                createHomework.mutate({
-                  // test
-                  text: "new home work",
-                  section_id: 1,
-                  class_id: 1,
-                  subject_id: "a",
-                  // file_permissions: FilePermissionsSchema.array().default([]),
-                });
-              }}
-            >
-              <Text style={styles.textStyle}>Create</Text>
-            </Pressable>
           </View>
         </View>
       </Modal>
@@ -351,6 +284,10 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderWidth: 1,
     borderRadius: 15,
+    textAlignVertical: "top",
+    paddingTop: 12,
+    padding: 20,
+    color: "#2A2A2A",
   },
   text_class: {
     paddingTop: 6,
@@ -366,13 +303,13 @@ const styles = StyleSheet.create({
     borderColor: "#444",
   },
   dropdown1BtnTxtStyle: {
-    color: "#858585",
+    color: "#000",
     textAlign: "left",
     fontSize: 14,
   },
   dropdown1DropdownStyle: {
     backgroundColor: "#EFEFEF",
-    marginTop: -30,
+    marginTop: 0,
     borderRadius: 15,
   },
   dropdown1RowStyle: {
