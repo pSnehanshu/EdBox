@@ -74,7 +74,7 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
   const [textContent, setTextContent] = useState<string>();
 
   const [datePickerVisible, setDatePickerVisible] = useState(false);
-  const [date, setDate] = useState(new Date());
+  const [date, setDate] = useState<Date>();
   const blurBg = color === "dark" ? "rgba(0,0,0,.6)" : "rgba(255,255,255,.6)";
 
   // mutation
@@ -321,6 +321,7 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
                 )}
                 name="subject"
               />
+
               {errors.subject && <Text>This is required.</Text>}
               <Text style={styles.text_class}>Text</Text>
               <Controller
@@ -349,7 +350,7 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
               >
                 <View>
                   <Pressable
-                    onPress={() => fileUpload.pickAndUploadMediaLib()}
+                    onPress={() => fileUpload.pickAndUploadFile()}
                     style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
                   >
                     <Ionicons
@@ -380,15 +381,18 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
               </View>
               {/* datepicker */}
               {/* todo */}
-              {/* <View style={{ height: 100, backgroundColor: "red" }}>
+              {datePickerVisible && (
                 <DateTimePicker
-                  style={{ height: 100 ,width:100}}
-                  testID="dateTimePicker"
+                  style={{ height: 100, width: 100 }}
                   timeZoneOffsetInMinutes={0}
-                  value={date}
+                  value={date ?? new Date()}
                   mode="date"
                 />
-              </View> */}
+              )}
+
+              <Button onPress={() => setDatePickerVisible((v) => !v)}>
+                Date {date?.toLocaleDateString() ?? "N/A"}
+              </Button>
 
               <Pressable
                 style={styles.button}
