@@ -67,7 +67,9 @@ export type Section = ArrayElement<ClassWithSections["Sections"]>;
 
 export type Homework = RouterOutput["school"]["homework"]["fetchHomework"];
 
-export type Subject = RouterOutput["school"]["subject"]["fetchSubjects"];
+export type Subject = ArrayElement<
+  RouterOutput["school"]["subject"]["fetchSubjects"]
+>;
 
 export type Attachment = ArrayElement<Homework["Attachments"]>;
 

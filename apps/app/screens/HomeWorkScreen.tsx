@@ -293,7 +293,6 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
                     data={allSubjectsName}
                     onSelect={(item, index) => {
                       const subject = allSubject?.data?.at(index);
-                      // todo: plz check the type
                       setSelectedSubject(subject);
                     }}
                     defaultButtonText={"Select Subject"}
