@@ -12,7 +12,9 @@ import useColorScheme from "../utils/useColorScheme";
 import { useConfig } from "../utils/config";
 import { ClassWithSections, Section, Subject } from "schooltalk-shared/types";
 import DateTimePicker from "@react-native-community/datetimepicker";
+
 import { useForm, Controller } from "react-hook-form";
+import { useFileUpload } from "../utils/file-upload";
 type Props = {};
 
 export default function HomeWorkScreen({}: NativeStackScreenProps<
@@ -65,9 +67,11 @@ interface props {
 function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
   const color = useColorScheme();
   const config = useConfig();
+  const fileUpload = useFileUpload();
   const [selectedClass, setSelectedClass] = useState<ClassWithSections>();
   const [selectedSection, setSelectedSection] = useState<Section>();
-  const [selectedSubject, setselectedSubject] = useState<Subject>();
+  const [selectedSubject, setSelectedSubject] = useState<Subject>();
+  const [textContent, setTextContent] = useState<string>();
 
   const [datePickerVisible, setDatePickerVisible] = useState(false);
   const [date, setDate] = useState(new Date());
@@ -121,22 +125,30 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
     formState: { errors },
   } = useForm({
     defaultValues: {
-      class_id: "",
-      section_id: "",
-      subject_id: "",
+      class: {},
+      section: {},
+      subject: {},
       text: "",
       due_date: "",
       file_permissions: "",
     },
   });
   const onSubmit = (data: any) =>
-    alert(JSON.stringify(allSubjectsName, null, 2));
+    console.log(
+      // selectedClass?.name,
+      // selectedSection?.numeric_id,
+      JSON.stringify(selectedSubject, null, 2),
+    );
 
   return (
     <View style={styles.centeredView}>
       <Text>{JSON.stringify(allClassesNames, null, 2)}</Text>
-      <Text>{JSON.stringify(allSubjectsName, null, 2)}</Text>
-      <Modal transparent={true} visible={true} onRequestClose={onClose}>
+      <Text>{JSON.stringify(selectedSubject, null, 2)}</Text>
+      <Modal
+        transparent={true}
+        visible={createHomeWorkModal}
+        onRequestClose={onClose}
+      >
         <FAB
           icon={
             <Ionicons
@@ -192,8 +204,11 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
                     render={({ field: { onChange, onBlur, value } }) => (
                       <SelectDropdown
                         data={allClassesNames}
-                        onSelect={(item, index) => {}}
-                        defaultButtonText={"Select Sections"}
+                        onSelect={(item, index) => {
+                          const Class = classesAndSectionsData?.data?.at(index);
+                          setSelectedClass(Class);
+                        }}
+                        defaultButtonText={"Select Class"}
                         buttonTextAfterSelection={(selectedItem, index) => {
                           return selectedItem;
                         }}
@@ -217,9 +232,9 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
                         rowTextStyle={styles.dropdown1RowTxtStyle}
                       />
                     )}
-                    name="class_id"
+                    name="class"
                   />
-                  {errors.subject_id && <Text>This is required.</Text>}
+                  {errors.subject && <Text>This is required.</Text>}
                 </View>
                 <View style={{ width: "50%", marginLeft: 10 }}>
                   <Text style={styles.text_class}>Section</Text>
@@ -232,7 +247,10 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
                       <SelectDropdown
                         data={allSections}
                         disabled={allSections.length === 0}
-                        onSelect={(item, index) => {}}
+                        onSelect={(item, index) => {
+                          const section = selectedClass?.Sections.at(index);
+                          setSelectedSection(section);
+                        }}
                         defaultButtonText={"Select Sections"}
                         buttonTextAfterSelection={(selectedItem, index) => {
                           return selectedItem;
@@ -257,9 +275,9 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
                         rowTextStyle={styles.dropdown1RowTxtStyle}
                       />
                     )}
-                    name="section_id"
+                    name="section"
                   />
-                  {errors.subject_id && <Text>This is required.</Text>}
+                  {errors.subject && <Text>This is required.</Text>}
                 </View>
               </View>
             </View>
@@ -273,7 +291,11 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
                 render={({ field: { onChange, onBlur, value } }) => (
                   <SelectDropdown
                     data={allSubjectsName}
-                    onSelect={(item, index) => {}}
+                    onSelect={(item, index) => {
+                      const subject = allSubject?.data?.at(index);
+                      // todo: plz check the type
+                      setSelectedSubject(subject);
+                    }}
                     defaultButtonText={"Select Subject"}
                     buttonTextAfterSelection={(selectedItem, index) => {
                       return selectedItem;
@@ -298,9 +320,24 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
                     rowTextStyle={styles.dropdown1RowTxtStyle}
                   />
                 )}
-                name="subject_id"
+                name="subject"
               />
-              {errors.subject_id && <Text>This is required.</Text>}
+              {errors.subject && <Text>This is required.</Text>}
+              <Text style={styles.text_class}>Text</Text>
+              <Controller
+                control={control}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    style={styles.inputText}
+                    multiline
+                    maxLength={100}
+                    value={textContent}
+                    onChangeText={setTextContent}
+                  />
+                )}
+                name="text"
+              />
+              {errors.text && <Text>This is required.</Text>}
               {/* upload */}
               <View
                 style={{
@@ -312,24 +349,48 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
                 }}
               >
                 <View>
-                  <Ionicons
-                    name="cloud-upload-sharp"
-                    size={25}
-                    color="white"
-                    style={styles.round_icon}
-                  />
+                  <Pressable
+                    onPress={() => fileUpload.pickAndUploadMediaLib()}
+                    style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+                  >
+                    <Ionicons
+                      name="cloud-upload-sharp"
+                      size={25}
+                      color="white"
+                      style={styles.round_icon}
+                    />
+                  </Pressable>
                   <Text>Upload File</Text>
                 </View>
+
                 <View>
-                  <Ionicons
-                    name="camera"
-                    size={25}
-                    color="white"
-                    style={styles.round_icon}
-                  />
+                  <Pressable
+                    onPress={() => fileUpload.pickAndUploadCamera()}
+                    style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+                  >
+                    <Ionicons
+                      name="camera"
+                      size={25}
+                      color="white"
+                      style={styles.round_icon}
+                    />
+                  </Pressable>
+
                   <Text>Take Photo</Text>
                 </View>
               </View>
+              {/* datepicker */}
+              {/* todo */}
+              {/* <View style={{ height: 100, backgroundColor: "red" }}>
+                <DateTimePicker
+                  style={{ height: 100 ,width:100}}
+                  testID="dateTimePicker"
+                  timeZoneOffsetInMinutes={0}
+                  value={date}
+                  mode="date"
+                />
+              </View> */}
+
               <Pressable
                 style={styles.button}
                 // onPress={() => {
