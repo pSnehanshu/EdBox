@@ -12,7 +12,6 @@ import useColorScheme from "../utils/useColorScheme";
 import { useConfig } from "../utils/config";
 import { ClassWithSections, Section, Subject } from "schooltalk-shared/types";
 import DatePicker from "react-native-date-picker";
-import { useForm, Controller } from "react-hook-form";
 import { useFileUpload } from "../utils/file-upload";
 
 export default function HomeWorkScreen({}: NativeStackScreenProps<
@@ -47,7 +46,6 @@ export default function HomeWorkScreen({}: NativeStackScreenProps<
         }}
         color={color === "dark" ? "white" : "black"}
         onPress={() => setCreateHomeWorkModal(true)}
-        // title={""}
       />
       <EditHomeWorkModal
         createHomeWorkModal={createHomeWorkModal}
@@ -86,7 +84,6 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
   });
 
   // class Section and subject data
-
   const classesAndSectionsData =
     trpc.school.class.fetchClassesAndSections.useQuery(
       { schoolId: config.schoolId },
@@ -116,21 +113,6 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
     () => allSubject.data?.map((a) => ` ${a.name ?? a.name}`) ?? [],
     [allSubject.isFetching],
   );
-  // form
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    defaultValues: {
-      class: {},
-      section: {},
-      subject: {},
-      text: "",
-      due_date: "",
-      file_permissions: "",
-    },
-  });
   const onSubmit = (data: any) =>
     console.log(
       // selectedClass?.name,
@@ -194,106 +176,14 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
               >
                 <View style={{ width: "50%" }}>
                   <Text style={styles.text_class}>Class</Text>
-                  <Controller
-                    control={control}
-                    rules={{
-                      required: true,
-                    }}
-                    render={({ field: { onChange, onBlur, value } }) => (
-                      <SelectDropdown
-                        data={allClassesNames}
-                        onSelect={(item, index) => {
-                          const Class = classesAndSectionsData?.data?.at(index);
-                          setSelectedClass(Class);
-                        }}
-                        defaultButtonText={"Select Class"}
-                        buttonTextAfterSelection={(selectedItem, index) => {
-                          return selectedItem;
-                        }}
-                        rowTextForSelection={(item, index) => {
-                          return item;
-                        }}
-                        dropdownIconPosition={"right"}
-                        renderDropdownIcon={(isOpened) => {
-                          return (
-                            <FontAwesome
-                              name={isOpened ? "chevron-up" : "chevron-down"}
-                              color={"#444"}
-                              size={18}
-                            />
-                          );
-                        }}
-                        buttonStyle={styles.dropdown1BtnStyle}
-                        buttonTextStyle={styles.dropdown1BtnTxtStyle}
-                        dropdownStyle={styles.dropdown1DropdownStyle}
-                        rowStyle={styles.dropdown1RowStyle}
-                        rowTextStyle={styles.dropdown1RowTxtStyle}
-                      />
-                    )}
-                    name="class"
-                  />
-                  {errors.subject && <Text>This is required.</Text>}
-                </View>
-                <View style={{ width: "50%", marginLeft: 10 }}>
-                  <Text style={styles.text_class}>Section</Text>
-                  <Controller
-                    control={control}
-                    rules={{
-                      required: true,
-                    }}
-                    render={({ field: { onChange, onBlur, value } }) => (
-                      <SelectDropdown
-                        data={allSections}
-                        disabled={allSections.length === 0}
-                        onSelect={(item, index) => {
-                          const section = selectedClass?.Sections.at(index);
-                          setSelectedSection(section);
-                        }}
-                        defaultButtonText={"Select Sections"}
-                        buttonTextAfterSelection={(selectedItem, index) => {
-                          return selectedItem;
-                        }}
-                        rowTextForSelection={(item, index) => {
-                          return item;
-                        }}
-                        dropdownIconPosition={"right"}
-                        renderDropdownIcon={(isOpened) => {
-                          return (
-                            <FontAwesome
-                              name={isOpened ? "chevron-up" : "chevron-down"}
-                              color={"#444"}
-                              size={18}
-                            />
-                          );
-                        }}
-                        buttonStyle={styles.dropdown1BtnStyle}
-                        buttonTextStyle={styles.dropdown1BtnTxtStyle}
-                        dropdownStyle={styles.dropdown1DropdownStyle}
-                        rowStyle={styles.dropdown1RowStyle}
-                        rowTextStyle={styles.dropdown1RowTxtStyle}
-                      />
-                    )}
-                    name="section"
-                  />
-                  {errors.subject && <Text>This is required.</Text>}
-                </View>
-              </View>
-            </View>
-            <View>
-              <Text style={styles.text_class}>Subject</Text>
-              <Controller
-                control={control}
-                rules={{
-                  required: true,
-                }}
-                render={({ field: { onChange, onBlur, value } }) => (
+
                   <SelectDropdown
-                    data={allSubjectsName}
+                    data={allClassesNames}
                     onSelect={(item, index) => {
-                      const subject = allSubject?.data?.at(index);
-                      setSelectedSubject(subject);
+                      const Class = classesAndSectionsData?.data?.at(index);
+                      setSelectedClass(Class);
                     }}
-                    defaultButtonText={"Select Subject"}
+                    defaultButtonText={"Select Class"}
                     buttonTextAfterSelection={(selectedItem, index) => {
                       return selectedItem;
                     }}
@@ -316,26 +206,99 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
                     rowStyle={styles.dropdown1RowStyle}
                     rowTextStyle={styles.dropdown1RowTxtStyle}
                   />
-                )}
-                name="subject"
+                </View>
+                <View style={{ width: "50%", marginLeft: 10 }}>
+                  <Text style={styles.text_class}>Section</Text>
+
+                  <SelectDropdown
+                    data={allSections}
+                    disabled={allSections.length === 0}
+                    onSelect={(item, index) => {
+                      const section = selectedClass?.Sections.at(index);
+                      setSelectedSection(section);
+                    }}
+                    defaultButtonText={"Select Sections"}
+                    buttonTextAfterSelection={(selectedItem, index) => {
+                      return selectedItem;
+                    }}
+                    rowTextForSelection={(item, index) => {
+                      return item;
+                    }}
+                    dropdownIconPosition={"right"}
+                    renderDropdownIcon={(isOpened) => {
+                      return (
+                        <FontAwesome
+                          name={isOpened ? "chevron-up" : "chevron-down"}
+                          color={"#444"}
+                          size={18}
+                        />
+                      );
+                    }}
+                    buttonStyle={styles.dropdown1BtnStyle}
+                    buttonTextStyle={styles.dropdown1BtnTxtStyle}
+                    dropdownStyle={styles.dropdown1DropdownStyle}
+                    rowStyle={styles.dropdown1RowStyle}
+                    rowTextStyle={styles.dropdown1RowTxtStyle}
+                  />
+                </View>
+              </View>
+            </View>
+            <View>
+              <Text style={styles.text_class}>Subject</Text>
+
+              <SelectDropdown
+                data={allSubjectsName}
+                onSelect={(item, index) => {
+                  const subject = allSubject?.data?.at(index);
+                  setSelectedSubject(subject);
+                }}
+                defaultButtonText={"Select Subject"}
+                buttonTextAfterSelection={(selectedItem, index) => {
+                  return selectedItem;
+                }}
+                rowTextForSelection={(item, index) => {
+                  return item;
+                }}
+                dropdownIconPosition={"right"}
+                renderDropdownIcon={(isOpened) => {
+                  return (
+                    <FontAwesome
+                      name={isOpened ? "chevron-up" : "chevron-down"}
+                      color={"#444"}
+                      size={18}
+                    />
+                  );
+                }}
+                buttonStyle={styles.dropdown1BtnStyle}
+                buttonTextStyle={styles.dropdown1BtnTxtStyle}
+                dropdownStyle={styles.dropdown1DropdownStyle}
+                rowStyle={styles.dropdown1RowStyle}
+                rowTextStyle={styles.dropdown1RowTxtStyle}
               />
 
-              {errors.subject && <Text>This is required.</Text>}
               <Text style={styles.text_class}>Text</Text>
-              <Controller
-                control={control}
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <TextInput
-                    style={styles.inputText}
-                    multiline
-                    maxLength={100}
-                    value={textContent}
-                    onChangeText={setTextContent}
-                  />
-                )}
-                name="text"
+
+              <TextInput
+                style={styles.inputText}
+                multiline
+                maxLength={100}
+                value={textContent}
+                onChangeText={setTextContent}
               />
-              {errors.text && <Text>This is required.</Text>}
+              <Text style={styles.text_class}>Due date</Text>
+              <Pressable
+                style={{
+                  backgroundColor: "gray",
+                  borderRadius: 15,
+                  padding: 15,
+                  marginBottom: 12,
+                }}
+                onPress={() => setDatePickerVisible((v) => !v)}
+              >
+                <Text style={styles.textStyle}>
+                  {date?.toLocaleDateString() ?? "Select a date"}
+                </Text>
+              </Pressable>
               {/* upload */}
               <View
                 style={{
@@ -395,23 +358,20 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
                 }}
               />
 
-              <Button onPress={() => setDatePickerVisible((v) => !v)}>
-                Due date: {date?.toLocaleDateString() ?? "N/A"}
-              </Button>
-
               <Pressable
                 style={styles.button}
-                // onPress={() => {
-                //   createHomework.mutate({
-                //     // test
-                //     text: "new home work",
-                //     section_id: 1,
-                //     class_id: 1,
-                //     subject_id: "a",
-                //     // file_permissions: FilePermissionsSchema.array().default([]),
-                //   });
-                // }}
-                onPress={handleSubmit(onSubmit)}
+                onPress={() => {
+                  console.log(JSON.stringify(selectedSubject?.id, null, 2));
+                  if (selectedSection && selectedClass && selectedSubject) {
+                    createHomework.mutate({
+                      text: textContent,
+                      section_id: selectedSection?.numeric_id,
+                      class_id: selectedClass?.numeric_id,
+                      subject_id: selectedSubject?.id,
+                      // file_permissions: FilePermissionsSchema.array().default([]),
+                    });
+                  }
+                }}
               >
                 <Text style={styles.textStyle}>Create</Text>
               </Pressable>
@@ -469,7 +429,7 @@ const styles = StyleSheet.create({
   },
   inputText: {
     height: 100,
-    marginBottom: 16,
+    marginBottom: 5,
     borderWidth: 1,
     borderRadius: 15,
     textAlignVertical: "top",
