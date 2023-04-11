@@ -11,11 +11,9 @@ import { trpc } from "../utils/trpc";
 import useColorScheme from "../utils/useColorScheme";
 import { useConfig } from "../utils/config";
 import { ClassWithSections, Section, Subject } from "schooltalk-shared/types";
-import DateTimePicker from "@react-native-community/datetimepicker";
-
+import DatePicker from "react-native-date-picker";
 import { useForm, Controller } from "react-hook-form";
 import { useFileUpload } from "../utils/file-upload";
-type Props = {};
 
 export default function HomeWorkScreen({}: NativeStackScreenProps<
   RootStackParamList,
@@ -379,19 +377,26 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
                   <Text>Take Photo</Text>
                 </View>
               </View>
-              {/* datepicker */}
-              {/* todo */}
-              {datePickerVisible && (
-                <DateTimePicker
-                  style={{ height: 100, width: 100 }}
-                  timeZoneOffsetInMinutes={0}
-                  value={date ?? new Date()}
-                  mode="date"
-                />
-              )}
+
+              {/* due date datepicker */}
+              <DatePicker
+                modal
+                open={datePickerVisible}
+                date={date ?? new Date()}
+                mode="datetime"
+                title="Select due date"
+                theme={color}
+                onConfirm={(date) => {
+                  setDate(date);
+                  setDatePickerVisible(false);
+                }}
+                onCancel={() => {
+                  setDatePickerVisible(false);
+                }}
+              />
 
               <Button onPress={() => setDatePickerVisible((v) => !v)}>
-                Date {date?.toLocaleDateString() ?? "N/A"}
+                Due date: {date?.toLocaleDateString() ?? "N/A"}
               </Button>
 
               <Pressable

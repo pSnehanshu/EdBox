@@ -3753,15 +3753,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-community/datetimepicker@npm:6.5.2":
-  version: 6.5.2
-  resolution: "@react-native-community/datetimepicker@npm:6.5.2"
-  dependencies:
-    invariant: ^2.2.4
-  checksum: ff17fd22750ec825366c980c7505b94a16690ffe529e62cded2d8f1af3f1eaba8fe17ddb67cc5f98fa242b4b939b899c013271b49d44438540e5c7d1a96fee39
-  languageName: node
-  linkType: hard
-
 "@react-native/assets@npm:1.0.0":
   version: 1.0.0
   resolution: "@react-native/assets@npm:1.0.0"
@@ -11549,7 +11540,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:15.8.1":
+"prop-types@npm:15.8.1, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -11776,6 +11767,18 @@ __metadata:
     jscodeshift: ^0.13.1
     nullthrows: ^1.1.1
   checksum: 2a50ad71e09bc8cbb3694057cf47d6e9665c16f3968d1dc2b71e83c8c4e7be3b07b74bea08750ec9c8f6c60e6c746a5f695963c8694e5a76edcbce35a53a6a06
+  languageName: node
+  linkType: hard
+
+"react-native-date-picker@npm:^4.2.10":
+  version: 4.2.10
+  resolution: "react-native-date-picker@npm:4.2.10"
+  dependencies:
+    prop-types: ^15.8.1
+  peerDependencies:
+    react: ">= 17.0.1"
+    react-native: ">= 0.64.3"
+  checksum: d42dccf555f74779ebb0f93c5d452a294e8e56fff9930d509f6ff0927f3ec40ef33534b6387944b38d8193543030cd7cb14a932219d9b9f9dd23a187499b1f63
   languageName: node
   linkType: hard
 
@@ -12563,7 +12566,6 @@ __metadata:
     "@babel/core": ^7.12.9
     "@expo/vector-icons": ^13.0.0
     "@react-native-async-storage/async-storage": ~1.17.3
-    "@react-native-community/datetimepicker": 6.5.2
     "@react-navigation/bottom-tabs": ^6.0.5
     "@react-navigation/native": ^6.0.2
     "@react-navigation/native-stack": ^6.1.0
@@ -12611,6 +12613,7 @@ __metadata:
     react: 18.1.0
     react-dom: 18.1.0
     react-native: 0.70.8
+    react-native-date-picker: ^4.2.10
     react-native-loading-spinner-overlay: ^3.0.1
     react-native-pager-view: 6.0.1
     react-native-raw-bottom-sheet: ^2.2.0
