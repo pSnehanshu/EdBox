@@ -10,6 +10,7 @@ import { useNavigation } from "@react-navigation/native";
 import { getSchoolGroupIdentifier } from "schooltalk-shared/group-identifier";
 import { useConfig } from "../utils/config";
 import useColorScheme from "../utils/useColorScheme";
+import { FilePreview } from "./FilePreview";
 
 interface AnnouncementProps {
   message: Message;
@@ -86,6 +87,18 @@ function SingleAnnouncement({ message }: AnnouncementProps) {
           <Text style={styles.read_more_btn}>Read more</Text>
         </Pressable>
       )}
+
+      {message.Attachments?.length ? (
+        <View style={styles.attachments_container}>
+          {message.Attachments?.map((attachment) => (
+            <FilePreview
+              fileIdOrObject={attachment.File}
+              key={attachment.file_id}
+              style={styles.attachment}
+            />
+          ))}
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -190,5 +203,14 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
     color: "#50b4c1",
     fontSize: 10,
+  },
+  attachments_container: {
+    backgroundColor: "transparent",
+    marginTop: 24,
+    marginRight: 8,
+  },
+  attachment: {
+    borderWidth: 0,
+    marginBottom: 8,
   },
 });
