@@ -13,6 +13,7 @@ import { useConfig } from "../utils/config";
 import { ClassWithSections, Section, Subject } from "schooltalk-shared/types";
 import DatePicker from "react-native-date-picker";
 import { useFileUpload } from "../utils/file-upload";
+import { format } from "date-fns";
 
 export default function HomeWorkScreen({}: NativeStackScreenProps<
   RootStackParamList,
@@ -27,7 +28,7 @@ export default function HomeWorkScreen({}: NativeStackScreenProps<
   return (
     <View style={{ flex: 1, marginTop: 0 }}>
       {/* list */}
-      <Text>{JSON.stringify(homeworkQuery.data, null, 2)}</Text>
+      <Text>{JSON.stringify(homeworkQuery.data?.total, null, 2)}</Text>
       <FAB
         icon={
           <Ionicons
@@ -77,6 +78,7 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
   const createHomework = trpc.school.homework.create.useMutation({
     onSuccess(data) {
       alert(JSON.stringify(data, null, 2));
+      onClose();
     },
     onError(error, variables, context) {
       alert(error);
@@ -113,12 +115,6 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
     () => allSubject.data?.map((a) => ` ${a.name ?? a.name}`) ?? [],
     [allSubject.isFetching],
   );
-  const onSubmit = (data: any) =>
-    console.log(
-      // selectedClass?.name,
-      // selectedSection?.numeric_id,
-      JSON.stringify(selectedSubject, null, 2),
-    );
 
   return (
     <View style={styles.centeredView}>
@@ -349,6 +345,7 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
                 mode="datetime"
                 title="Select due date"
                 theme={color}
+                minimumDate={new Date()}
                 onConfirm={(date) => {
                   setDate(date);
                   setDatePickerVisible(false);
@@ -357,17 +354,22 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
                   setDatePickerVisible(false);
                 }}
               />
-
               <Pressable
                 style={styles.button}
                 onPress={() => {
-                  console.log(JSON.stringify(selectedSubject?.id, null, 2));
-                  if (selectedSection && selectedClass && selectedSubject) {
+                  // console.log();
+                  if (
+                    selectedSection &&
+                    selectedClass &&
+                    selectedSubject &&
+                    date
+                  ) {
                     createHomework.mutate({
                       text: textContent,
                       section_id: selectedSection?.numeric_id,
                       class_id: selectedClass?.numeric_id,
                       subject_id: selectedSubject?.id,
+                      due_date: JSON.stringify(date),
                       // file_permissions: FilePermissionsSchema.array().default([]),
                     });
                   }
