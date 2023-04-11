@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -7,12 +7,15 @@ import {
   StyleProp,
   StyleSheet,
   ViewStyle,
+  ImageURISource,
 } from "react-native";
 import type { UploadedFile } from "schooltalk-shared/types";
 import MIMEType from "whatwg-mimetype";
 import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
 import * as WebBrowser from "expo-web-browser";
+import ImageView from "react-native-image-viewing";
+import { parseISO } from "date-fns";
 import { trpc } from "../utils/trpc";
 import { Text, View } from "./Themed";
 import useColorScheme from "../utils/useColorScheme";
@@ -54,8 +57,9 @@ function humanFileSize(bytes: number, si = false, dp = 1) {
 interface FilePreviewObjectProps {
   file: UploadedFile;
   style?: InnerStyle;
+  onPress?: (file: UploadedFile) => void;
 }
-function FilePreviewObject({ file, style }: FilePreviewObjectProps) {
+function FilePreviewObject({ file, style, onPress }: FilePreviewObjectProps) {
   const mime = useMemo(
     () => (file.mime ? MIMEType.parse(file.mime) : null),
     [file.mime],
@@ -92,7 +96,7 @@ function FilePreviewObject({ file, style }: FilePreviewObjectProps) {
   return (
     <View>
       {mime?.type === "image" ? (
-        <ImagePreview file={file} style={style?.image} />
+        <ImagePreview file={file} style={style?.image} onPress={onPress} />
       ) : (
         <Pressable
           style={({ pressed }) => [
@@ -100,7 +104,10 @@ function FilePreviewObject({ file, style }: FilePreviewObjectProps) {
             style?.others,
             { opacity: pressed ? 0.5 : 1 },
           ]}
-          onPress={download}
+          onPress={() => {
+            download();
+            onPress?.(file);
+          }}
         >
           <MaterialCommunityIcons
             name="file-outline"
@@ -134,8 +141,9 @@ function FilePreviewObject({ file, style }: FilePreviewObjectProps) {
 interface ImagePreviewProps {
   file: UploadedFile;
   style?: StyleProp<ImageStyle>;
+  onPress?: (file: UploadedFile) => void;
 }
-function ImagePreview({ file, style }: ImagePreviewProps) {
+function ImagePreview({ file, style, onPress }: ImagePreviewProps) {
   const urlQuery = trpc.school.attachment.getFileURL.useQuery(
     {
       file_id: file.id,
@@ -161,6 +169,7 @@ function ImagePreview({ file, style }: ImagePreviewProps) {
       style={({ pressed }) => ({
         opacity: pressed ? 0.5 : 1,
       })}
+      onPress={() => onPress?.(file)}
     >
       <Image
         source={{ uri: urlQuery.data?.url }}
@@ -179,11 +188,15 @@ interface FilePreviewProps {
   fileIdOrObject: string | UploadedFile;
   style?: StyleProp<ViewStyle>;
   innerStyle?: InnerStyle;
+  index: number;
+  onPress?: (file: UploadedFile, index: number) => void;
 }
 export function FilePreview({
   fileIdOrObject,
   style,
   innerStyle,
+  index,
+  onPress,
 }: FilePreviewProps) {
   const isIdPassed = typeof fileIdOrObject === "string";
 
@@ -198,13 +211,151 @@ export function FilePreview({
         fileQuery.isLoading ? (
           <ActivityIndicator />
         ) : (
-          <FilePreviewObject file={fileQuery.data!} style={innerStyle} />
+          <FilePreviewObject
+            file={fileQuery.data!}
+            style={innerStyle}
+            onPress={(file) => onPress?.(file, index)}
+          />
         )
       ) : (
-        <FilePreviewObject file={fileIdOrObject} style={innerStyle} />
+        <FilePreviewObject
+          file={fileIdOrObject}
+          style={innerStyle}
+          onPress={(file) => onPress?.(file, index)}
+        />
       )}
     </View>
   );
+}
+
+// FULL-SCREEN Slider
+
+interface FullScreenFilePreviewProps {
+  files: Array<string | UploadedFile>;
+  visible: boolean;
+  onClose?: () => void;
+  initialFileId?: string | null;
+}
+export function FullScreenFilePreview({
+  files,
+  visible,
+  onClose,
+  initialFileId,
+}: FullScreenFilePreviewProps) {
+  const [fileObjects, setFiles] = useState<
+    Array<{ file: UploadedFile; src: ImageURISource; rank: number }>
+  >([]);
+
+  const handleFileFetched = useCallback(
+    (file: UploadedFile, index: number, uri: string, expiry: Date) => {
+      setFiles((existingFiles) => {
+        // Filter out non-group items
+        const groupFiles = existingFiles.filter(
+          (f) =>
+            files.findIndex((f2) =>
+              typeof f2 === "string" ? f2 === f.file.id : f2.id === f.file.id,
+            ) >= 0,
+        );
+
+        // Check if item already exists
+        if (groupFiles.find((f) => f.file.id === file.id)) return groupFiles;
+
+        groupFiles.push({ file, src: { uri }, rank: index });
+        return groupFiles;
+      });
+    },
+    [files],
+  );
+
+  const sortedFiles = fileObjects.slice().sort((a, b) => a.rank - b.rank);
+
+  const images = sortedFiles.map((file) => file.src);
+
+  const imageIndex = sortedFiles.findIndex(
+    (sf) => sf.file.id === initialFileId,
+  );
+
+  if (!visible) return null;
+
+  return (
+    <>
+      {files.map((file, index) => (
+        <FileInfoFetcherComp
+          fileIdOrObject={file}
+          index={index}
+          key={typeof file === "string" ? file : file.id}
+          onFetched={handleFileFetched}
+        />
+      ))}
+
+      <ImageView
+        images={images}
+        imageIndex={imageIndex < 0 ? 0 : imageIndex}
+        visible={visible}
+        onRequestClose={() => onClose?.()}
+        keyExtractor={(src, index) => index.toString()}
+      />
+    </>
+  );
+}
+
+interface FileInfoFetcherCompProps {
+  fileIdOrObject: string | UploadedFile;
+  index: number;
+  onFetched: (
+    fileObject: UploadedFile,
+    index: number,
+    uri: string,
+    expiry: Date,
+  ) => void;
+}
+function FileInfoFetcherComp({
+  fileIdOrObject,
+  index,
+  onFetched,
+}: FileInfoFetcherCompProps) {
+  const isIdPassed = typeof fileIdOrObject === "string";
+  const fileQuery = trpc.school.attachment.fetchFile.useQuery(
+    { file: fileIdOrObject },
+    { enabled: isIdPassed },
+  );
+
+  const fileObject = isIdPassed ? fileQuery.data : fileIdOrObject;
+
+  const mime = useMemo(
+    () => (fileObject?.mime ? MIMEType.parse(fileObject.mime) : null),
+    [fileObject],
+  );
+
+  const isImage = mime?.type === "image";
+
+  const urlQuery = trpc.school.attachment.getFileURL.useQuery(
+    {
+      file_id: isIdPassed ? fileIdOrObject : fileIdOrObject.id,
+      via_imagekit: isImage,
+      imagekit_transformations: [
+        {
+          format: "jpg",
+          quality: "80",
+          progressive: "true",
+        },
+      ],
+    },
+    { staleTime: 5 * 60 * 1000, enabled: isImage },
+  );
+
+  useEffect(() => {
+    if (isImage && fileObject && urlQuery.data) {
+      onFetched(
+        fileObject,
+        index,
+        urlQuery.data.url,
+        parseISO(urlQuery.data.expiry),
+      );
+    }
+  }, [isImage && fileObject && urlQuery.data]);
+
+  return <></>;
 }
 
 const styles = StyleSheet.create({

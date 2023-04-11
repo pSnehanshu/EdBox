@@ -1,16 +1,17 @@
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { format, isThisYear, isToday, isYesterday } from "date-fns";
 import { useCurrentUser } from "../utils/auth";
 import { Text, View } from "./Themed";
 import { Alert, Pressable, StyleSheet } from "react-native";
-import type { Message } from "schooltalk-shared/types";
+import type { Message, UploadedFile } from "schooltalk-shared/types";
+import MIMEType from "whatwg-mimetype";
 import {
   getDisplayName,
   getTextColorForGivenBG,
   getUserColor,
 } from "schooltalk-shared/misc";
 import { useConfig } from "../utils/config";
-import { FilePreview } from "../components/FilePreview";
+import { FilePreview, FullScreenFilePreview } from "../components/FilePreview";
 
 interface ChatMessageProps {
   message: Message;
@@ -71,6 +72,15 @@ function _ChatMessage({ message }: ChatMessageProps) {
     }
   }, [senderDisplayName, message.text, shouldCollapse]);
 
+  const [pressedFileId, setPressedFileId] = useState<string | null>(null);
+  const handleFilePress = (file: UploadedFile, index: number) => {
+    const mime = file.mime ? MIMEType.parse(file.mime) : null;
+
+    if (mime?.type === "image") {
+      setPressedFileId(file.id);
+    }
+  };
+
   return (
     <View
       style={[
@@ -114,17 +124,26 @@ function _ChatMessage({ message }: ChatMessageProps) {
 
       {message.Attachments?.length ? (
         <View style={styles.attachments_container}>
-          {message.Attachments?.map((attachment) => (
+          {message.Attachments?.map((attachment, index) => (
             <FilePreview
               fileIdOrObject={attachment.File}
               key={attachment.file_id}
               style={styles.attachment}
+              index={index}
+              onPress={handleFilePress}
             />
           ))}
         </View>
       ) : null}
 
       <Text style={[styles.time, { color }]}>{time}</Text>
+
+      <FullScreenFilePreview
+        files={message.Attachments?.map((att) => att.File) ?? []}
+        visible={!!pressedFileId}
+        initialFileId={pressedFileId}
+        onClose={() => setPressedFileId(null)}
+      />
     </View>
   );
 }

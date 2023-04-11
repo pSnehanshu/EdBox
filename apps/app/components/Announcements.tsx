@@ -1,16 +1,17 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Text, View } from "./Themed";
 import { Alert, Pressable, StyleSheet } from "react-native";
-import { Group, Message } from "schooltalk-shared/types";
+import type { Group, Message, UploadedFile } from "schooltalk-shared/types";
 import { useMessages } from "../utils/messages-repository";
 import { useCurrentUser } from "../utils/auth";
 import { format, isThisYear, isToday, isYesterday } from "date-fns";
 import { getDisplayName } from "schooltalk-shared/misc";
 import { useNavigation } from "@react-navigation/native";
 import { getSchoolGroupIdentifier } from "schooltalk-shared/group-identifier";
+import MIMEType from "whatwg-mimetype";
 import { useConfig } from "../utils/config";
 import useColorScheme from "../utils/useColorScheme";
-import { FilePreview } from "./FilePreview";
+import { FilePreview, FullScreenFilePreview } from "./FilePreview";
 
 interface AnnouncementProps {
   message: Message;
@@ -56,6 +57,15 @@ function SingleAnnouncement({ message }: AnnouncementProps) {
     }
   }, [senderDisplayName, message.text, shouldCollapse]);
 
+  const [pressedFileId, setPressedFileId] = useState<string | null>(null);
+  const handleFilePress = (file: UploadedFile, index: number) => {
+    const mime = file.mime ? MIMEType.parse(file.mime) : null;
+
+    if (mime?.type === "image") {
+      setPressedFileId(file.id);
+    }
+  };
+
   if (!user) return null;
 
   const isSentByMe = user.id === sender?.id;
@@ -90,15 +100,24 @@ function SingleAnnouncement({ message }: AnnouncementProps) {
 
       {message.Attachments?.length ? (
         <View style={styles.attachments_container}>
-          {message.Attachments?.map((attachment) => (
+          {message.Attachments?.map((attachment, index) => (
             <FilePreview
               fileIdOrObject={attachment.File}
               key={attachment.file_id}
               style={styles.attachment}
+              index={index}
+              onPress={handleFilePress}
             />
           ))}
         </View>
       ) : null}
+
+      <FullScreenFilePreview
+        files={message.Attachments?.map((att) => att.File) ?? []}
+        visible={!!pressedFileId}
+        initialFileId={pressedFileId}
+        onClose={() => setPressedFileId(null)}
+      />
     </View>
   );
 }

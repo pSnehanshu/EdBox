@@ -59,6 +59,7 @@
     "react-dom": "18.1.0",
     "react-native": "0.70.8",
     "react-native-date-picker": "^4.2.10",
+    "react-native-image-viewing": "^0.2.2",
     "react-native-loading-spinner-overlay": "^3.0.1",
     "react-native-pager-view": "6.0.1",
     "react-native-raw-bottom-sheet": "^2.2.0",
