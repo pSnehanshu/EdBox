@@ -4,16 +4,10 @@ import {
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { ReactNode, useCallback, useMemo, useRef } from "react";
-import {
-  Button,
-  Pressable,
-  StyleProp,
-  StyleSheet,
-  TouchableWithoutFeedback,
-} from "react-native";
+import { ReactNode, useMemo, useRef } from "react";
+import { Pressable, StyleSheet } from "react-native";
 import RBSheet from "react-native-raw-bottom-sheet";
-import { ScrollView, Text, View } from "../components/Themed";
+import { Text, View } from "../components/Themed";
 import useColorScheme from "../utils/useColorScheme";
 
 interface MenuItem {
