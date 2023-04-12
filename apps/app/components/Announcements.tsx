@@ -2,16 +2,24 @@ import React, { useCallback, useMemo, useState } from "react";
 import { Text, View } from "./Themed";
 import { Alert, Pressable, StyleSheet } from "react-native";
 import type { Group, Message, UploadedFile } from "schooltalk-shared/types";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMessages } from "../utils/messages-repository";
 import { useCurrentUser } from "../utils/auth";
 import { format, isThisYear, isToday, isYesterday } from "date-fns";
-import { getDisplayName } from "schooltalk-shared/misc";
+import {
+  getDisplayName,
+  hasUserStaticRoles,
+  StaticRole,
+} from "schooltalk-shared/misc";
 import { useNavigation } from "@react-navigation/native";
 import { getSchoolGroupIdentifier } from "schooltalk-shared/group-identifier";
 import MIMEType from "whatwg-mimetype";
 import { useConfig } from "../utils/config";
 import useColorScheme from "../utils/useColorScheme";
 import { FilePreview, FullScreenFilePreview } from "./FilePreview";
+import { LottieAnimation } from "./LottieAnimation";
+import { Button } from "@rneui/themed";
+import { useSchool } from "../utils/useSchool";
 
 interface AnnouncementProps {
   message: Message;
@@ -71,7 +79,7 @@ function SingleAnnouncement({ message }: AnnouncementProps) {
   const isSentByMe = user.id === sender?.id;
 
   return (
-    <View style={styles.container}>
+    <View style={styles.single_announcement_container}>
       <View style={styles.announcement_header}>
         <Text style={styles.name_text}>
           {isSentByMe ? "You" : senderDisplayName}
@@ -136,7 +144,21 @@ export default function Announcements() {
 
   const groupMessages = messages.useFetchGroupMessages(group.identifier, 7);
   const navigation = useNavigation();
+
   const scheme = useColorScheme();
+  const color = scheme === "dark" ? "white" : "black";
+
+  const school = useSchool();
+  const { user } = useCurrentUser();
+  const isPrincipal = useMemo(
+    () =>
+      hasUserStaticRoles(
+        user,
+        [StaticRole.principal, StaticRole.vice_principal],
+        "some",
+      ),
+    [user],
+  );
 
   return (
     <View>
@@ -145,23 +167,63 @@ export default function Announcements() {
         <SingleAnnouncement message={message} key={message.id} />
       ))}
 
-      {groupMessages.messages.length > 0 && (
+      {groupMessages.messages.length > 0 ? (
         <Pressable
-          style={[
+          style={({ pressed }) => [
             styles.view_more_btn_wrapper,
-            { borderColor: scheme === "dark" ? "white" : "black" },
+            {
+              borderColor: color,
+              opacity: pressed ? 0.5 : 1,
+            },
           ]}
           onPress={() => navigation.navigate("ChatWindow", group)}
         >
           <Text style={styles.view_more_btn}>View more</Text>
         </Pressable>
+      ) : (
+        <LottieAnimation
+          src={require("../assets/lotties/shake-a-empty-box.json")}
+          caption="No announcements to show. It's quite empty!"
+          style={styles.no_announcements}
+          FooterComponent={
+            isPrincipal && (
+              <>
+                <Text style={{ textAlign: "center" }}>
+                  Messages sent in the {school?.name} group are automatically
+                  treated as announcements.
+                </Text>
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.view_more_btn_wrapper,
+                    {
+                      borderColor: color,
+                      opacity: pressed ? 0.5 : 1,
+                    },
+                  ]}
+                  onPress={() => navigation.navigate("ChatWindow", group)}
+                >
+                  <MaterialCommunityIcons
+                    name="lead-pencil"
+                    size={16}
+                    color={color}
+                    style={{ marginRight: 8 }}
+                  />
+                  <Text style={styles.view_more_btn}>
+                    Write an announcement
+                  </Text>
+                </Pressable>
+              </>
+            )
+          }
+          FooterComponentStyle={styles.write_announcement}
+        />
       )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  single_announcement_container: {
     flex: 1,
     paddingVertical: 8,
     paddingLeft: 16,
@@ -211,12 +273,14 @@ const styles = StyleSheet.create({
   },
   view_more_btn_wrapper: {
     flex: 1,
-    padding: 7,
+    padding: 8,
     borderRadius: 5,
     borderWidth: 2,
     marginVertical: 16,
     marginHorizontal: 24,
-    justifyContent: "flex-start",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
   },
   read_more_btn: {
     textDecorationLine: "underline",
@@ -231,5 +295,17 @@ const styles = StyleSheet.create({
   attachment: {
     borderWidth: 0,
     marginBottom: 8,
+  },
+  no_announcements: {
+    marginBottom: 16,
+  },
+  write_announcement: {
+    padding: 4,
+    paddingVertical: 16,
+    marginTop: 16,
+    marginHorizontal: 16,
+    borderRadius: 8,
+    borderColor: "gray",
+    borderWidth: 0.5,
   },
 });

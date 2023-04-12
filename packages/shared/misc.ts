@@ -123,7 +123,7 @@ export function getUserStaticRoles(
  * Check if the user has the static roles.
  * @param user
  * @param requiredRoles
- * @param mode all: The user must have all the roles; some: The user must have at least one of the roles.
+ * @param mode **all**: The user must have all the roles; **some**: The user must have at least one of the roles.
  */
 export function hasUserStaticRoles(
   user: UnserializedUser | User | null | undefined,

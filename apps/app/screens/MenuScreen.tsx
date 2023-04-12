@@ -4,16 +4,10 @@ import {
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { ReactNode, useCallback, useMemo, useRef } from "react";
-import {
-  Button,
-  Pressable,
-  StyleProp,
-  StyleSheet,
-  TouchableWithoutFeedback,
-} from "react-native";
+import { ReactNode, useMemo, useRef } from "react";
+import { Pressable, StyleSheet } from "react-native";
 import RBSheet from "react-native-raw-bottom-sheet";
-import { ScrollView, Text, View } from "../components/Themed";
+import { Text, View } from "../components/Themed";
 import useColorScheme from "../utils/useColorScheme";
 
 interface MenuItem {
@@ -59,20 +53,13 @@ export default function MenuScreen() {
 
   return (
     <View style={styles.container}>
-      <MaterialCommunityIcons
-        name="dots-grid"
-        size={34}
+      <Pressable
+        style={({ pressed }) => [styles.button, { opacity: pressed ? 0.5 : 1 }]}
         onPress={() => refRBSheet?.current?.open()}
-        color={"#999"}
-      />
-      <Text
-        style={{
-          ...styles.tab_icon_text,
-          color: "#999",
-        }}
       >
-        Menu
-      </Text>
+        <MaterialCommunityIcons name="dots-grid" size={34} color={"#999"} />
+        <Text style={styles.tab_icon_text}>Menu</Text>
+      </Pressable>
 
       <RBSheet
         ref={refRBSheet}
@@ -84,6 +71,8 @@ export default function MenuScreen() {
           wrapper: styles.bottom_sheet_wrapper,
           draggableIcon: styles.bottom_sheet_draggable_icon,
         }}
+        openDuration={200}
+        closeDuration={200}
       >
         <View style={styles.list_container}>
           {MenuItems.map((item, i) => (
@@ -114,14 +103,22 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "transparent",
     flex: 1,
+    marginTop: 1,
+  },
+  button: {
+    width: "100%",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 1,
   },
   list_container: {
     height: "100%",
   },
-  tab_icon_text: { fontSize: 10, marginTop: 0 },
+  tab_icon_text: {
+    fontSize: 10,
+    marginTop: 0,
+    color: "#999",
+    textAlign: "center",
+  },
   item: {
     paddingVertical: 16,
     borderBottomColor: "gray",

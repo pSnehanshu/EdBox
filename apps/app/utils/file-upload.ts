@@ -3,7 +3,6 @@ import * as DocumentPicker from "expo-document-picker";
 import { useCallback, useMemo, useState } from "react";
 import { Subject } from "rxjs";
 import * as ImagePicker from "expo-image-picker";
-import type { UploadPermission } from "schooltalk-shared/types";
 import Toast from "react-native-toast-message";
 import { trpc } from "./trpc";
 import type { FileUploadTask } from "./types/common";
@@ -24,6 +23,7 @@ function uploadFileToS3(file: FileUploadTask["file"], s3url: string) {
       uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
       headers: {
         "Content-Type": file.mimeType ?? "application/octet-stream",
+        "Content-Disposition": `attachment; filename="${file.name}"`,
       },
     },
     (progress) => {

@@ -17,6 +17,7 @@ import type { DayOfWeek } from "schooltalk-shared/types";
 import { useCurrentUser } from "../utils/auth";
 import { PeriodWithGap, useRoutineWithGaps } from "../utils/routine-utils";
 import { trpc } from "../utils/trpc";
+import { LottieAnimation } from "./LottieAnimation";
 import { Text, View } from "./Themed";
 
 interface SingleRoutineCardProps {
@@ -103,6 +104,14 @@ export function RoutineSlider(props: RoutineSliderProps) {
         inactiveSlideShift={0}
         useScrollView={true}
       />
+
+      {allPeriods.length < 1 && (
+        <LottieAnimation
+          src={require("../assets/lotties/no-classes.json")}
+          caption="No classes today, relax!"
+          height={150}
+        />
+      )}
     </View>
   );
 }

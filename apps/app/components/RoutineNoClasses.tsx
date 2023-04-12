@@ -1,22 +1,14 @@
-import { Text } from "@rneui/themed";
 import { StyleSheet } from "react-native";
-import Lottie from "lottie-react-native";
 import { View } from "./Themed";
+import { LottieAnimation } from "./LottieAnimation";
 
 export const NoClassesToday: React.FC = () => {
   return (
     <View style={styles.container}>
-      <View style={styles.animationContainer}>
-        <Lottie
-          source={{
-            // TODO: Don't use URLs, rather download the file and reference locally
-            uri: "https://assets10.lottiefiles.com/packages/lf20_bwncrbab.json",
-          }}
-          autoPlay
-          loop
-        />
-      </View>
-      <Text style={styles.text}>No classes today, relax!</Text>
+      <LottieAnimation
+        src={require("../assets/lotties/no-classes.json")}
+        caption="No classes today, relax!"
+      />
     </View>
   );
 };
@@ -24,15 +16,6 @@ export const NoClassesToday: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     justifyContent: "center",
-    width: "100%",
     height: "100%",
-  },
-  text: {
-    textAlign: "center",
-    fontSize: 16,
-  },
-  animationContainer: {
-    height: 300,
-    width: "100%",
   },
 });
