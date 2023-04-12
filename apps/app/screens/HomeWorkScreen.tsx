@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet } from "react-native";
 import { RootStackParamList } from "../utils/types/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -13,7 +13,7 @@ import { useConfig } from "../utils/config";
 import { ClassWithSections, Section, Subject } from "schooltalk-shared/types";
 import DatePicker from "react-native-date-picker";
 import { useFileUpload } from "../utils/file-upload";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 
 export default function HomeWorkScreen({}: NativeStackScreenProps<
   RootStackParamList,
@@ -25,10 +25,19 @@ export default function HomeWorkScreen({}: NativeStackScreenProps<
     limit: 10,
   });
   const color = useColorScheme();
+  const [homeworkFormData, setHomeworkFormData] = useState({});
   return (
     <View style={{ flex: 1, marginTop: 0 }}>
       {/* list */}
-      <Text>{JSON.stringify(homeworkQuery.data?.total, null, 2)}</Text>
+      {!homeworkQuery.isLoading &&
+        homeworkQuery.data?.data.map((homework) => (
+          <SingleHomework
+            key={homework.id}
+            homework={homework}
+            openModal={() => setCreateHomeWorkModal(true)}
+            setHomeworkFormData={setHomeworkFormData}
+          />
+        ))}
       <FAB
         icon={
           <Ionicons
@@ -51,6 +60,8 @@ export default function HomeWorkScreen({}: NativeStackScreenProps<
       <EditHomeWorkModal
         createHomeWorkModal={createHomeWorkModal}
         onClose={() => setCreateHomeWorkModal((prev) => !prev)}
+        homeworkFormData={homeworkFormData}
+        setHomeworkFormData={setHomeworkFormData}
       />
     </View>
   );
@@ -59,12 +70,21 @@ export default function HomeWorkScreen({}: NativeStackScreenProps<
 interface props {
   createHomeWorkModal: boolean;
   onClose: () => void;
+  homeworkFormData: any;
+  setHomeworkFormData: any;
 }
 
-function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
+function EditHomeWorkModal({
+  createHomeWorkModal,
+  onClose,
+  homeworkFormData,
+  setHomeworkFormData,
+}: props) {
   const color = useColorScheme();
   const config = useConfig();
   const fileUpload = useFileUpload();
+  console.log(JSON.stringify(homeworkFormData.section_id, null, 2));
+
   const [selectedClass, setSelectedClass] = useState<ClassWithSections>();
   const [selectedSection, setSelectedSection] = useState<Section>();
   const [selectedSubject, setSelectedSubject] = useState<Subject>();
@@ -77,7 +97,16 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
   // mutation
   const createHomework = trpc.school.homework.create.useMutation({
     onSuccess(data) {
-      alert(JSON.stringify(data, null, 2));
+      // alert(JSON.stringify(data, null, 2));
+      onClose();
+    },
+    onError(error, variables, context) {
+      alert(error);
+    },
+  });
+
+  const updateHomework = trpc.school.homework.update.useMutation({
+    onSuccess(data) {
       onClose();
     },
     onError(error, variables, context) {
@@ -118,8 +147,6 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
 
   return (
     <View style={styles.centeredView}>
-      <Text>{JSON.stringify(allClassesNames, null, 2)}</Text>
-      <Text>{JSON.stringify(selectedSubject, null, 2)}</Text>
       <Modal
         transparent={true}
         visible={createHomeWorkModal}
@@ -142,7 +169,10 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
             flex: 1,
           }}
           color={color === "dark" ? "white" : "black"}
-          onPress={onClose}
+          onPress={() => {
+            onClose();
+            setHomeworkFormData({});
+          }}
         />
         <View style={[styles.centeredView, { backgroundColor: blurBg }]}>
           <View
@@ -179,6 +209,7 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
                       const Class = classesAndSectionsData?.data?.at(index);
                       setSelectedClass(Class);
                     }}
+                    defaultValueByIndex={homeworkFormData.class_id ?? -1}
                     defaultButtonText={"Select Class"}
                     buttonTextAfterSelection={(selectedItem, index) => {
                       return selectedItem;
@@ -208,11 +239,12 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
 
                   <SelectDropdown
                     data={allSections}
-                    disabled={allSections.length === 0}
+                    // disabled={allSections.length === 0}
                     onSelect={(item, index) => {
                       const section = selectedClass?.Sections.at(index);
                       setSelectedSection(section);
                     }}
+                    defaultValueByIndex={homeworkFormData.section_id - 1 ?? -1}
                     defaultButtonText={"Select Sections"}
                     buttonTextAfterSelection={(selectedItem, index) => {
                       return selectedItem;
@@ -249,6 +281,7 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
                   setSelectedSubject(subject);
                 }}
                 defaultButtonText={"Select Subject"}
+                // defaultValueByIndex={3}
                 buttonTextAfterSelection={(selectedItem, index) => {
                   return selectedItem;
                 }}
@@ -369,13 +402,15 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
                       section_id: selectedSection?.numeric_id,
                       class_id: selectedClass?.numeric_id,
                       subject_id: selectedSubject?.id,
-                      due_date: date.toISOString,
+                      due_date: date.toISOString(),
                       // file_permissions: FilePermissionsSchema.array().default([]),
                     });
                   }
                 }}
               >
-                <Text style={styles.textStyle}>Create</Text>
+                <Text style={styles.textStyle}>
+                  {homeworkFormData.id ? "Update" : "Create"}
+                </Text>
               </Pressable>
             </View>
           </View>
@@ -385,7 +420,94 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
   );
 }
 
+interface HomeworkProps {
+  homework: any;
+  openModal: () => void;
+  setHomeworkFormData: any;
+}
+
+function SingleHomework({
+  homework,
+  openModal,
+  setHomeworkFormData,
+}: HomeworkProps) {
+  return (
+    <View
+      style={{
+        ...styles.container,
+        flexDirection: "row",
+        justifyContent: "space-between",
+
+        paddingRight: 15,
+      }}
+    >
+      <View style={{ backgroundColor: "transparent" }}>
+        <Text style={{ ...styles.mainText, color: "white" }}>
+          {homework.Subject.name}
+        </Text>
+        <View
+          style={{
+            backgroundColor: "transparent",
+            // flexDirection: "row",
+            justifyContent: "space-between",
+            marginRight: 10,
+          }}
+        >
+          <Text style={{ color: "white" }}>
+            {homework.text ? homework.text : ""}
+          </Text>
+          <Text style={{ color: "white" }}>
+            Due-
+            {homework.due_date
+              ? format(parseISO(homework.due_date), "dd-MM-yyyy")
+              : "NA"}
+          </Text>
+        </View>
+      </View>
+      <View
+        style={{
+          backgroundColor: "transparent",
+          margin: "auto",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Pressable
+          style={{
+            backgroundColor: "white",
+            borderRadius: 15,
+            padding: 15,
+            paddingLeft: 20,
+            paddingRight: 20,
+          }}
+          onPress={() => {
+            openModal();
+            setHomeworkFormData(homework);
+          }}
+        >
+          <Text style={{ fontSize: 16, fontWeight: "500" }}>View</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
+  container: {
+    // test
+    backgroundColor: "#4E48B2",
+    // flex: 1,
+    margin: 10,
+    borderRadius: 15,
+    paddingVertical: 8,
+    paddingLeft: 16,
+    shadowColor: "gray",
+    shadowRadius: 8,
+    shadowOffset: {
+      height: 8,
+      width: 8,
+    },
+  },
   centeredView: {
     position: "relative",
     flex: 1,
