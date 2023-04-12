@@ -184,6 +184,7 @@ export default function Announcements() {
         <LottieAnimation
           src={require("../assets/lotties/shake-a-empty-box.json")}
           caption="No announcements to show. It's quite empty!"
+          style={styles.no_announcements}
           FooterComponent={
             isPrincipal && (
               <>
@@ -294,6 +295,9 @@ const styles = StyleSheet.create({
   attachment: {
     borderWidth: 0,
     marginBottom: 8,
+  },
+  no_announcements: {
+    marginBottom: 16,
   },
   write_announcement: {
     padding: 4,
