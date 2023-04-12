@@ -10,7 +10,12 @@ import SelectDropdown from "react-native-select-dropdown";
 import { trpc } from "../utils/trpc";
 import useColorScheme from "../utils/useColorScheme";
 import { useConfig } from "../utils/config";
-import { ClassWithSections, Section, Subject } from "schooltalk-shared/types";
+import {
+  ClassWithSections,
+  Homework,
+  Section,
+  Subject,
+} from "schooltalk-shared/types";
 import DatePicker from "react-native-date-picker";
 import { useFileUpload } from "../utils/file-upload";
 import { format, parseISO } from "date-fns";
@@ -421,7 +426,7 @@ function EditHomeWorkModal({
 }
 
 interface HomeworkProps {
-  homework: any;
+  homework: Homework | any;
   openModal: () => void;
   setHomeworkFormData: any;
 }
