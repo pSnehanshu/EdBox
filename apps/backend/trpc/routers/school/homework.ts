@@ -14,7 +14,7 @@ import {
 
 const DateSchema = z
   .string()
-  // .datetime()
+  .datetime()
   .transform((d) => parseISO(d));
 
 const homeworkRouter = t.router({

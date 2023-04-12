@@ -369,7 +369,7 @@ function EditHomeWorkModal({ createHomeWorkModal, onClose }: props) {
                       section_id: selectedSection?.numeric_id,
                       class_id: selectedClass?.numeric_id,
                       subject_id: selectedSubject?.id,
-                      due_date: JSON.stringify(date),
+                      due_date: date.toISOString,
                       // file_permissions: FilePermissionsSchema.array().default([]),
                     });
                   }
