@@ -8,6 +8,8 @@ interface LottieAnimationProps {
   caption?: string;
   height?: number;
   style?: StyleProp<ViewStyle>;
+  FooterComponent?: React.ReactNode;
+  FooterComponentStyle?: StyleProp<ViewStyle>;
 }
 
 export function LottieAnimation({
@@ -15,6 +17,8 @@ export function LottieAnimation({
   caption,
   height,
   style,
+  FooterComponent,
+  FooterComponentStyle,
 }: LottieAnimationProps) {
   return (
     <View style={style}>
@@ -22,6 +26,12 @@ export function LottieAnimation({
         <Lottie source={src} autoPlay loop />
       </View>
       <Text style={styles.caption}>{caption}</Text>
+
+      {FooterComponent && (
+        <View style={[styles.footer, FooterComponentStyle]}>
+          {FooterComponent}
+        </View>
+      )}
     </View>
   );
 }
@@ -33,5 +43,9 @@ const styles = StyleSheet.create({
   caption: {
     textAlign: "center",
     fontSize: 16,
+    marginHorizontal: 8,
+  },
+  footer: {
+    justifyContent: "center",
   },
 });
