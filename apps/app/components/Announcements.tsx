@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import { Text, View } from "./Themed";
 import { Alert, Pressable, StyleSheet } from "react-native";
 import type { Group, Message, UploadedFile } from "schooltalk-shared/types";
+import Lottie from "lottie-react-native";
 import { useMessages } from "../utils/messages-repository";
 import { useCurrentUser } from "../utils/auth";
 import { format, isThisYear, isToday, isYesterday } from "date-fns";
@@ -12,6 +13,7 @@ import MIMEType from "whatwg-mimetype";
 import { useConfig } from "../utils/config";
 import useColorScheme from "../utils/useColorScheme";
 import { FilePreview, FullScreenFilePreview } from "./FilePreview";
+import { LottieAnimation } from "./LottieAnimation";
 
 interface AnnouncementProps {
   message: Message;
@@ -71,7 +73,7 @@ function SingleAnnouncement({ message }: AnnouncementProps) {
   const isSentByMe = user.id === sender?.id;
 
   return (
-    <View style={styles.container}>
+    <View style={styles.single_announcement_container}>
       <View style={styles.announcement_header}>
         <Text style={styles.name_text}>
           {isSentByMe ? "You" : senderDisplayName}
@@ -145,7 +147,7 @@ export default function Announcements() {
         <SingleAnnouncement message={message} key={message.id} />
       ))}
 
-      {groupMessages.messages.length > 0 && (
+      {groupMessages.messages.length > 0 ? (
         <Pressable
           style={[
             styles.view_more_btn_wrapper,
@@ -155,13 +157,18 @@ export default function Announcements() {
         >
           <Text style={styles.view_more_btn}>View more</Text>
         </Pressable>
+      ) : (
+        <LottieAnimation
+          src={require("../assets/lotties/shake-a-empty-box.json")}
+          caption="No announcements, it's quite empty!"
+        />
       )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  single_announcement_container: {
     flex: 1,
     paddingVertical: 8,
     paddingLeft: 16,
