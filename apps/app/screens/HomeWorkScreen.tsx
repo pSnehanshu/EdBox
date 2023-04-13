@@ -25,6 +25,7 @@ import {
 import DatePicker from "react-native-date-picker";
 import { useFileUpload } from "../utils/file-upload";
 import { format, parseISO } from "date-fns";
+import { useNavigation } from "@react-navigation/native";
 
 export default function HomeWorkScreen({}: NativeStackScreenProps<
   RootStackParamList,
@@ -36,6 +37,7 @@ export default function HomeWorkScreen({}: NativeStackScreenProps<
     limit: 10,
   });
   const color = useColorScheme();
+  const navigation = useNavigation();
   const [homeworkFormData, setHomeworkFormData] = useState({});
 
   const homeworkList = useMemo(() => {
@@ -43,7 +45,7 @@ export default function HomeWorkScreen({}: NativeStackScreenProps<
 
     return homeworkQuery.data.data;
   }, [homeworkQuery]);
-  console.log(JSON.stringify(homeworkList, null, 2));
+  // console.log(JSON.stringify(homeworkList, null, 2));
   return (
     <View style={{ flex: 1, marginTop: 0 }}>
       {/* list */}
@@ -55,7 +57,7 @@ export default function HomeWorkScreen({}: NativeStackScreenProps<
             openModal={() => setCreateHomeWorkModal(true)}
             setHomeworkFormData={setHomeworkFormData}
           />
-        ))}
+        ))}*/}
       <FAB
         icon={
           <Ionicons
@@ -73,8 +75,8 @@ export default function HomeWorkScreen({}: NativeStackScreenProps<
           flex: 1,
         }}
         color={color === "dark" ? "white" : "black"}
-        onPress={() => setCreateHomeWorkModal(true)}
-      /> */}
+        onPress={() => navigation.navigate("CreateHomeworkScreen")}
+      />
       <SafeAreaView style={{ height: "100%", width: "100%" }}>
         <List
           data={homeworkList}
@@ -83,7 +85,7 @@ export default function HomeWorkScreen({}: NativeStackScreenProps<
           renderItem={({ item: item }) => (
             <SingleHomework
               homework={item}
-              openModal={() => setCreateHomeWorkModal(true)}
+              onClick={() => navigation.navigate("DisplayHomeworkScreen")}
             />
           )}
         />
@@ -451,16 +453,17 @@ function EditHomeWorkModal({
 
 interface HomeworkProps {
   homework: Homework | any;
-  openModal: () => void;
+  onClick: () => void;
 }
 
-function SingleHomework({ homework, openModal }: HomeworkProps) {
+function SingleHomework({ homework, onClick }: HomeworkProps) {
   return (
     <Pressable
       style={({ pressed }) => [
         styles.chatGroup,
         { opacity: pressed ? 0.7 : 1 },
       ]}
+      onPress={onClick}
     >
       <View style={styles.chatGroupMiddle}>
         <Text style={styles.chatGroupName}>{homework.Subject.name}</Text>

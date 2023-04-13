@@ -36,6 +36,9 @@ export type RootStackParamList = {
   AboutApp: undefined;
   ExamsScreen: undefined;
   HomeWorkScreen: undefined;
+  CreateHomeworkScreen: undefined;
+  DisplayHomeworkScreen: undefined;
+  UpdateHomeworkScreen: undefined;
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> =

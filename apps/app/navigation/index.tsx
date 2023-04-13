@@ -34,6 +34,9 @@ import HomeWorkScreen from "../screens/HomeWorkScreen";
 import SchoolSelector from "../components/SchoolSelector";
 import { hasPreloadedSchool } from "../utils/config";
 import { View } from "../components/Themed";
+import CreateHomeworkScreen from "../screens/homework/CreateHomeworkScreen";
+import DisplayHomeworkScreen from "../screens/homework/DisplayHomeworkScreen";
+import UpdateHomeworkScreen from "../screens/homework/UpdateHomeworkScreen";
 
 export default function Navigation({
   colorScheme,
@@ -197,6 +200,30 @@ function RootNavigator() {
                 options={{
                   headerShown: true,
                   title: "Home Work",
+                }}
+              />
+              <Stack.Screen
+                name="CreateHomeworkScreen"
+                component={CreateHomeworkScreen}
+                options={{
+                  headerShown: true,
+                  title: "Create Home Work",
+                }}
+              />
+              <Stack.Screen
+                name="DisplayHomeworkScreen"
+                component={DisplayHomeworkScreen}
+                options={{
+                  headerShown: true,
+                  title: "Display Home Work",
+                }}
+              />
+              <Stack.Screen
+                name="UpdateHomeworkScreen"
+                component={UpdateHomeworkScreen}
+                options={{
+                  headerShown: true,
+                  title: "Update Home Work",
                 }}
               />
             </>
