@@ -20,8 +20,15 @@ export default function DisplayHomeworkScreen({
   return (
     <View>
       <Spinner visible={homeworkDetails.isLoading} />
-      <Text>dispalay hw page</Text>
-      <Pressable onPress={() => navigation.navigate("UpdateHomeworkScreen")}>
+      <Pressable
+        style={{ padding: 10, backgroundColor: "red" }}
+        onPress={() => {
+          if (homeworkDetails.data)
+            navigation.navigate("UpdateHomeworkScreen", {
+              homeworkDetails: homeworkDetails.data,
+            });
+        }}
+      >
         <Text>Edit</Text>
       </Pressable>
       <Text>{homeworkDetails.data?.text}</Text>

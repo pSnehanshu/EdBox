@@ -25,7 +25,7 @@ export default function CreateHomeworkScreen({}: NativeStackScreenProps<
 
   return (
     <View>
-      <Text>create hw page</Text>
+      <Text>Create Homework</Text>
       <HomeworkForm />
     </View>
   );

@@ -8,6 +8,7 @@ import type { Socket } from "socket.io-client";
 import type {
   ClientToServerEvents,
   Group,
+  Homework,
   ServerToClientEvents,
   UploadPermission,
 } from "schooltalk-shared/types";
@@ -38,7 +39,8 @@ export type RootStackParamList = {
   HomeWorkScreen: undefined;
   CreateHomeworkScreen: undefined;
   DisplayHomeworkScreen: { homeworkId: string };
-  UpdateHomeworkScreen: undefined;
+  //
+  UpdateHomeworkScreen: { homeworkDetails: Homework };
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> =

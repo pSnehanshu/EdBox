@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { View, Text, TextInput } from "./Themed";
 import DatePicker from "react-native-date-picker";
 import SelectDropdown from "react-native-select-dropdown";
@@ -19,7 +19,7 @@ interface HomeworkFormProps {
   homework?: Homework;
   //   onPress: () => void;
 }
-export default function HomeworkForm({}: HomeworkFormProps) {
+export default function HomeworkForm({ homework }: HomeworkFormProps) {
   const color = useColorScheme();
   const config = useConfig();
   const fileUpload = useFileUpload();
@@ -31,6 +31,13 @@ export default function HomeworkForm({}: HomeworkFormProps) {
   const [datePickerVisible, setDatePickerVisible] = useState(false);
   const [date, setDate] = useState<Date>();
   const blurBg = color === "dark" ? "rgba(0,0,0,.6)" : "rgba(255,255,255,.6)";
+
+  console.log(JSON.stringify(homework, null, 2));
+
+  useEffect(() => {
+    if (homework) {
+    }
+  }, [homework]);
 
   // mutation
   const createHomework = trpc.school.homework.create.useMutation({
@@ -84,10 +91,8 @@ export default function HomeworkForm({}: HomeworkFormProps) {
   );
   return (
     <View>
-      <Text>Form</Text>
       <View>
         <View>
-          <Text>Create new Home Work</Text>
           <View />
           {/* form */}
           <View>
@@ -284,7 +289,7 @@ export default function HomeworkForm({}: HomeworkFormProps) {
             //   }
             // }}
             >
-              <Text>Create</Text>
+              <Text>{!homework ? "Create" : "Update"}</Text>
             </Pressable>
           </View>
         </View>
