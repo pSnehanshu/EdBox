@@ -48,6 +48,7 @@ COPY .yarn/plugins .yarn/plugins
 COPY .yarnrc.yml package.json yarn.lock ./
 COPY apps/backend/package.json apps/backend/
 COPY apps/backend/prisma apps/backend/prisma
+COPY apps/backend/assets apps/backend/assets
 
 EXPOSE 5080
 ENV NODE_ENV=production
