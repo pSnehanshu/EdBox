@@ -491,7 +491,9 @@ function SingleHomework({
             setHomeworkFormData(homework);
           }}
         >
-          <Text style={{ fontSize: 16, fontWeight: "500" }}>View</Text>
+          <Text style={{ fontSize: 16, fontWeight: "500", color: "black" }}>
+            View
+          </Text>
         </Pressable>
       </View>
     </View>
