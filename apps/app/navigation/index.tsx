@@ -30,7 +30,7 @@ import ExamDetailsScreen from "../screens/exam/ExamDetails";
 import AboutAppScreen from "../screens/settings/AboutAppScreen";
 import { BottomTabNavigator } from "./BottomTabNav";
 import ExamListScreen from "../screens/exam/ExamList";
-import HomeWorkScreen from "../screens/HomeWorkScreen";
+import HomeWorkScreen from "../screens/homework/HomeWorkScreen";
 import SchoolSelector from "../components/SchoolSelector";
 import { hasPreloadedSchool } from "../utils/config";
 import { View } from "../components/Themed";
