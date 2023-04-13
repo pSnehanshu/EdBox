@@ -100,6 +100,7 @@ export default function ChatsListScreen() {
     }).reverse();
   }, [groupTimeMapping, groups?.length]);
 
+  console.log(JSON.stringify(sortedGroups, null, 2));
   return (
     <SafeAreaView style={styles.container}>
       <List

@@ -1,11 +1,17 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Pressable, ScrollView, StyleSheet } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  SafeAreaView,
+  Dimensions,
+} from "react-native";
 import { RootStackParamList } from "../utils/types/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { Text, TextInput, View } from "../components/Themed";
+import { List, Text, TextInput, View } from "../components/Themed";
 import { Button, FAB } from "@rneui/themed";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
-import { Modal } from "react-native";
+import { Modal, Image } from "react-native";
 import SelectDropdown from "react-native-select-dropdown";
 import { trpc } from "../utils/trpc";
 import useColorScheme from "../utils/useColorScheme";
@@ -31,10 +37,17 @@ export default function HomeWorkScreen({}: NativeStackScreenProps<
   });
   const color = useColorScheme();
   const [homeworkFormData, setHomeworkFormData] = useState({});
+
+  const homeworkList = useMemo(() => {
+    if (!homeworkQuery.data) return [];
+
+    return homeworkQuery.data.data;
+  }, [homeworkQuery]);
+  console.log(JSON.stringify(homeworkList, null, 2));
   return (
     <View style={{ flex: 1, marginTop: 0 }}>
       {/* list */}
-      {!homeworkQuery.isLoading &&
+      {/* {!homeworkQuery.isLoading &&
         homeworkQuery.data?.data.map((homework) => (
           <SingleHomework
             key={homework.id}
@@ -61,7 +74,20 @@ export default function HomeWorkScreen({}: NativeStackScreenProps<
         }}
         color={color === "dark" ? "white" : "black"}
         onPress={() => setCreateHomeWorkModal(true)}
-      />
+      /> */}
+      <SafeAreaView style={{ height: "100%", width: "100%" }}>
+        <List
+          data={homeworkList}
+          keyExtractor={(g) => g.id}
+          estimatedItemSize={200}
+          renderItem={({ item: item }) => (
+            <SingleHomework
+              homework={item}
+              openModal={() => setCreateHomeWorkModal(true)}
+            />
+          )}
+        />
+      </SafeAreaView>
       <EditHomeWorkModal
         createHomeWorkModal={createHomeWorkModal}
         onClose={() => setCreateHomeWorkModal((prev) => !prev)}
@@ -88,8 +114,6 @@ function EditHomeWorkModal({
   const color = useColorScheme();
   const config = useConfig();
   const fileUpload = useFileUpload();
-  console.log(JSON.stringify(homeworkFormData.section_id, null, 2));
-
   const [selectedClass, setSelectedClass] = useState<ClassWithSections>();
   const [selectedSection, setSelectedSection] = useState<Section>();
   const [selectedSubject, setSelectedSubject] = useState<Subject>();
@@ -396,7 +420,6 @@ function EditHomeWorkModal({
               <Pressable
                 style={styles.button}
                 onPress={() => {
-                  // console.log();
                   if (
                     selectedSection &&
                     selectedClass &&
@@ -429,56 +452,32 @@ function EditHomeWorkModal({
 interface HomeworkProps {
   homework: Homework | any;
   openModal: () => void;
-  setHomeworkFormData: any;
 }
 
-function SingleHomework({
-  homework,
-  openModal,
-  setHomeworkFormData,
-}: HomeworkProps) {
+function SingleHomework({ homework, openModal }: HomeworkProps) {
   return (
-    <View
-      style={{
-        ...styles.container,
-        flexDirection: "row",
-        justifyContent: "space-between",
-
-        paddingRight: 15,
-      }}
+    <Pressable
+      style={({ pressed }) => [
+        styles.chatGroup,
+        { opacity: pressed ? 0.7 : 1 },
+      ]}
     >
-      <View style={{ backgroundColor: "transparent" }}>
-        <Text style={{ ...styles.mainText, color: "white" }}>
-          {homework.Subject.name}
+      <View style={styles.chatGroupMiddle}>
+        <Text style={styles.chatGroupName}>{homework.Subject.name}</Text>
+        <Text style={styles.chatGroupLastMessage}>
+          {homework.text ? homework.text : ""}
         </Text>
-        <View
-          style={{
-            backgroundColor: "transparent",
-            // flexDirection: "row",
-            justifyContent: "space-between",
-            marginRight: 10,
-          }}
-        >
-          <Text style={{ color: "white" }}>
-            {homework.text ? homework.text : ""}
-          </Text>
-          <Text style={{ color: "white" }}>
-            Due-
-            {homework.due_date
-              ? format(parseISO(homework.due_date), "dd-MM-yyyy")
-              : "NA"}
-          </Text>
-        </View>
       </View>
-      <View
-        style={{
-          backgroundColor: "transparent",
-          margin: "auto",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Pressable
+      <View style={styles.chatGroupRight}>
+        <Text style={styles.chatGroupLastMessage}>
+          Due-
+          {homework.due_date
+            ? format(parseISO(homework.due_date), "dd-MM-yyyy")
+            : "NA"}
+        </Text>
+      </View>
+      <View>
+        {/* <Pressable
           style={{
             backgroundColor: "white",
             borderRadius: 15,
@@ -488,15 +487,15 @@ function SingleHomework({
           }}
           onPress={() => {
             openModal();
-            setHomeworkFormData(homework);
+            // setHomeworkFormData(homework);
           }}
         >
           <Text style={{ fontSize: 16, fontWeight: "500", color: "black" }}>
             View
           </Text>
-        </Pressable>
+        </Pressable> */}
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -610,5 +609,33 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     textAlign: "center",
     justifyContent: "center",
+  },
+  chatGroup: {
+    paddingVertical: 16,
+    borderBottomColor: "gray",
+    borderBottomWidth: 0.5,
+    flex: 1,
+    flexDirection: "row",
+    height: 80,
+    overflow: "hidden",
+  },
+  chatGroupMiddle: {
+    backgroundColor: undefined,
+    flexGrow: 1,
+    paddingLeft: 16,
+    maxWidth: "80%",
+  },
+  chatGroupName: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  chatGroupRight: {
+    backgroundColor: undefined,
+    paddingRight: 8,
+    marginLeft: "auto",
+  },
+  chatGroupLastMessage: {
+    fontSize: 12,
+    color: "gray",
   },
 });
