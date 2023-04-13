@@ -34,7 +34,6 @@ export default function HomeWorkScreen({}: NativeStackScreenProps<
   return (
     <View style={{ flex: 1, marginTop: 0 }}>
       {/* list */}
-      <Text style={styles.header_text}>Homeworks</Text>
       {!homeworkQuery.isLoading &&
         homeworkQuery.data?.data.map((homework) => (
           <SingleHomework
@@ -516,13 +515,6 @@ const styles = StyleSheet.create({
       height: 8,
       width: 8,
     },
-  },
-  header_text: {
-    fontSize: 25,
-    fontWeight: "500",
-    marginLeft: 20,
-    marginTop: 16,
-    marginBottom: 5,
   },
   centeredView: {
     position: "relative",
