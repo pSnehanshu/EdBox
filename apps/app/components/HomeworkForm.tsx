@@ -36,6 +36,7 @@ export default function HomeworkForm({ homework }: HomeworkFormProps) {
 
   useEffect(() => {
     if (homework) {
+      setTextContent(homework.text ?? "");
     }
   }, [homework]);
 
@@ -204,9 +205,19 @@ export default function HomeworkForm({ homework }: HomeworkFormProps) {
             <Text>Text</Text>
 
             <TextInput
+              style={{
+                height: 100,
+                marginBottom: 5,
+                borderWidth: 1,
+                borderRadius: 15,
+                textAlignVertical: "top",
+                paddingTop: 12,
+                padding: 20,
+                color: "#2A2A2A",
+              }}
               multiline
               maxLength={100}
-              // value={textContent}
+              value={textContent}
               // onChangeText={setTextContent}
             />
             <Text>Due date</Text>
