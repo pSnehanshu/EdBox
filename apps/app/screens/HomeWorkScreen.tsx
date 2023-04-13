@@ -157,6 +157,7 @@ function EditHomeWorkModal({
         transparent={true}
         visible={createHomeWorkModal}
         onRequestClose={onClose}
+        animationType="fade"
       >
         <FAB
           icon={
