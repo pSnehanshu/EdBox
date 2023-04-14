@@ -1,9 +1,9 @@
-import Spinner from "react-native-loading-spinner-overlay/lib";
-import { ScrollView } from "../../components/Themed";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import Spinner from "react-native-loading-spinner-overlay/lib";
+import { trpc } from "../../utils/trpc";
+import { View } from "../../components/Themed";
 import { RootStackParamList } from "../../utils/types/common";
 import HomeworkForm from "../../components/HomeworkForm";
-import { trpc } from "../../utils/trpc";
 
 export default function UpdateHomeworkScreen({
   route: {
@@ -27,7 +27,7 @@ export default function UpdateHomeworkScreen({
   });
 
   return (
-    <ScrollView keyboardShouldPersistTaps="always">
+    <View>
       <Spinner visible={homeworkQuery.isLoading} textContent="Fetching..." />
 
       {homeworkQuery.data && (
@@ -43,6 +43,6 @@ export default function UpdateHomeworkScreen({
           }}
         />
       )}
-    </ScrollView>
+    </View>
   );
 }

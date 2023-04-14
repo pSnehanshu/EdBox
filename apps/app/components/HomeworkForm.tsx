@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
-import { Modal, StyleProp, TextStyle } from "react-native";
-import { View, Text, ScrollView, TextInput } from "./Themed";
+import { useState } from "react";
+import { View, Text, ScrollView } from "./Themed";
 import DatePicker from "react-native-date-picker";
-import { FontAwesome, Ionicons } from "@expo/vector-icons";
-import { Pressable } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { Pressable, StyleProp, ViewStyle } from "react-native";
 import { useFileUpload } from "../utils/file-upload";
 import type {
   ClassWithSections,
@@ -11,11 +10,11 @@ import type {
   RouterInput,
 } from "schooltalk-shared/types";
 import ModalSelector from "react-native-modal-selector";
+import { FAB, ListItem } from "@rneui/themed";
 import { useConfig } from "../utils/config";
 import { trpc } from "../utils/trpc";
 import { parseISO } from "date-fns";
 import useColorScheme from "../utils/useColorScheme";
-import { Button, ListItem, Dialog } from "@rneui/themed";
 import { ModalTextInput } from "./ModalTextInput";
 
 interface HomeworkFormData {
@@ -31,10 +30,12 @@ interface HomeworkFormData {
 interface HomeworkFormProps {
   homework?: Homework;
   onSubmit: (data: HomeworkFormData) => void;
+  style?: StyleProp<ViewStyle>;
 }
 export default function HomeworkForm({
   homework,
   onSubmit,
+  style,
 }: HomeworkFormProps) {
   const config = useConfig();
   const scheme = useColorScheme();
@@ -73,7 +74,7 @@ export default function HomeworkForm({
 
   return (
     <>
-      <View>
+      <ScrollView style={style} keyboardShouldPersistTaps="always">
         <ModalSelector
           data={
             classesAndSectionsData.data?.map((c) => ({
@@ -98,7 +99,7 @@ export default function HomeworkForm({
                 {selectedClass ? `Class ${selectedClass.name}` : "Select class"}
               </ListItem.Subtitle>
             </ListItem.Content>
-            <FontAwesome name="chevron-right" color="#444" size={18} />
+            <Ionicons name="chevron-forward" color={iconColor} size={16} />
           </ListItem>
         </ModalSelector>
 
@@ -123,7 +124,7 @@ export default function HomeworkForm({
                   : "Select section"}
               </ListItem.Subtitle>
             </ListItem.Content>
-            <FontAwesome name="chevron-right" color="#444" size={18} />
+            <Ionicons name="chevron-forward" color={iconColor} size={16} />
           </ListItem>
         </ModalSelector>
 
@@ -145,45 +146,41 @@ export default function HomeworkForm({
                 {selectedSubject ?? "Select subject"}
               </ListItem.Subtitle>
             </ListItem.Content>
-            <FontAwesome name="chevron-right" color="#444" size={18} />
+            <Ionicons name="chevron-forward" color={iconColor} size={16} />
           </ListItem>
         </ModalSelector>
 
-        <ListItem onPress={() => setDatePickerVisible((v) => !v)}>
-          <ListItem.Content>
-            <ListItem.Title>Due date</ListItem.Title>
-            <ListItem.Subtitle>
-              {dueDate?.toLocaleDateString() ?? "Select date"}
-            </ListItem.Subtitle>
-          </ListItem.Content>
-          <FontAwesome name="chevron-right" color="#444" size={18} />
-        </ListItem>
+        <Pressable
+          onPress={() => setDatePickerVisible((v) => !v)}
+          style={({ pressed }) => ({
+            opacity: pressed ? 0.2 : 1,
+          })}
+        >
+          <ListItem>
+            <ListItem.Content>
+              <ListItem.Title>Due date</ListItem.Title>
+              <ListItem.Subtitle>
+                {dueDate?.toLocaleDateString() ?? "Select date"}
+              </ListItem.Subtitle>
+            </ListItem.Content>
+            <Ionicons name="chevron-forward" color={iconColor} size={16} />
+          </ListItem>
+        </Pressable>
 
-        {/* due date datepicker */}
-        <DatePicker
-          modal
-          open={datePickerVisible}
-          date={dueDate ?? new Date()}
-          mode="datetime"
-          title="Select due date"
-          theme={scheme}
-          minimumDate={new Date()}
-          onConfirm={(date) => {
-            setDueDate(date);
-            setDatePickerVisible(false);
-          }}
-          onCancel={() => {
-            setDatePickerVisible(false);
-          }}
-        />
-
-        <ListItem onPress={() => setIsTextModalOpen(true)}>
-          <ListItem.Content>
-            <ListItem.Title>Text</ListItem.Title>
-            <ListItem.Subtitle>{textContent}</ListItem.Subtitle>
-          </ListItem.Content>
-          <FontAwesome name="chevron-right" color="#444" size={18} />
-        </ListItem>
+        <Pressable
+          onPress={() => setIsTextModalOpen(true)}
+          style={({ pressed }) => ({
+            opacity: pressed ? 0.2 : 1,
+          })}
+        >
+          <ListItem>
+            <ListItem.Content>
+              <ListItem.Title>Text</ListItem.Title>
+              <ListItem.Subtitle>{textContent}</ListItem.Subtitle>
+            </ListItem.Content>
+            <Ionicons name="chevron-forward" color={iconColor} size={16} />
+          </ListItem>
+        </Pressable>
 
         {/* upload */}
         <View
@@ -217,37 +214,57 @@ export default function HomeworkForm({
           </View>
         </View>
 
-        <Pressable
-          onPress={() => {
-            if (selectedSection && selectedClass && selectedSubject) {
-              onSubmit({
-                class_id: selectedClass.numeric_id,
-                section_id: selectedSection,
-                subject_id: selectedSubject,
-                due_date: dueDate,
-                text: textContent,
-                // new_file_permissions,
-                // remove_attachments,
-              });
-            } else {
-              console.log("Select all data", {
-                selectedSection,
-                selectedClass,
-                selectedSubject,
-              });
-            }
-          }}
-        >
-          <Text>{homework ? "Update" : "Create"}</Text>
-        </Pressable>
-      </View>
+        {/* Text editor modal */}
+        <ModalTextInput
+          isVisible={isTextModalOpen}
+          onClose={() => setIsTextModalOpen(false)}
+          onChange={setTextContent}
+          defaultValue={textContent}
+          title="Write the homework"
+        />
 
-      <ModalTextInput
-        isVisible={isTextModalOpen}
-        onClose={() => setIsTextModalOpen(false)}
-        onChange={setTextContent}
-        defaultValue={textContent}
-        title="Write the homework"
+        {/* due date datepicker */}
+        <DatePicker
+          modal
+          open={datePickerVisible}
+          date={dueDate ?? new Date()}
+          mode="datetime"
+          title="Select due date"
+          theme={scheme}
+          minimumDate={new Date()}
+          onConfirm={(date) => {
+            setDueDate(date);
+            setDatePickerVisible(false);
+          }}
+          onCancel={() => {
+            setDatePickerVisible(false);
+          }}
+        />
+      </ScrollView>
+
+      <FAB
+        onPress={() => {
+          if (selectedSection && selectedClass && selectedSubject) {
+            onSubmit({
+              class_id: selectedClass.numeric_id,
+              section_id: selectedSection,
+              subject_id: selectedSubject,
+              due_date: dueDate,
+              text: textContent,
+              // new_file_permissions,
+              // remove_attachments,
+            });
+          } else {
+            console.log("Select all data", {
+              selectedSection,
+              selectedClass,
+              selectedSubject,
+            });
+          }
+        }}
+        buttonStyle={{ backgroundColor: "#4E48B2" }}
+        icon={<Ionicons name="checkmark" size={24} color={"white"} />}
+        placement="right"
       />
     </>
   );

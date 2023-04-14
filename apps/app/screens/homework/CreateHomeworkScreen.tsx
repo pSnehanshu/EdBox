@@ -1,7 +1,6 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { Text, ScrollView } from "../../components/Themed";
+import { View } from "../../components/Themed";
 import { trpc } from "../../utils/trpc";
-import { useConfig } from "../../utils/config";
 import { RootStackParamList } from "../../utils/types/common";
 import HomeworkForm from "../../components/HomeworkForm";
 
@@ -19,7 +18,7 @@ export default function CreateHomeworkScreen({
   });
 
   return (
-    <ScrollView keyboardShouldPersistTaps="always">
+    <View style={{ height: "100%" }}>
       <HomeworkForm
         onSubmit={(hw) =>
           createHomework.mutate({
@@ -29,6 +28,6 @@ export default function CreateHomeworkScreen({
           })
         }
       />
-    </ScrollView>
+    </View>
   );
 }
