@@ -6,30 +6,32 @@ import { trpc } from "../../utils/trpc";
 import Spinner from "react-native-loading-spinner-overlay/lib";
 
 export default function DisplayHomeworkScreen({
-  route: { params: homeworkId },
+  route: {
+    params: { homeworkId },
+  },
   navigation,
 }: NativeStackScreenProps<RootStackParamList, "DisplayHomeworkScreen">) {
   // query
-  const homeworkDetails = trpc.school.homework.fetchHomework.useQuery({
-    homework_id: homeworkId.homeworkId,
+  const homeworkQuery = trpc.school.homework.fetchHomework.useQuery({
+    homework_id: homeworkId,
   });
 
   return (
     <View>
-      <Spinner visible={homeworkDetails.isLoading} />
+      <Spinner visible={homeworkQuery.isLoading} />
       <Pressable
         style={{ padding: 10, backgroundColor: "red" }}
         onPress={() => {
-          if (homeworkDetails.data)
+          if (homeworkQuery.data)
             navigation.navigate("UpdateHomeworkScreen", {
-              homeworkDetails: homeworkDetails.data,
+              homeworkId,
             });
         }}
       >
         <Text>Edit</Text>
       </Pressable>
-      <Text>{homeworkDetails.data?.text}</Text>
-      <Text>{homeworkDetails.data?.Subject?.name}</Text>
+      <Text>{homeworkQuery.data?.text}</Text>
+      <Text>{homeworkQuery.data?.Subject?.name}</Text>
     </View>
   );
 }

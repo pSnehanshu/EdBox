@@ -39,8 +39,7 @@ export type RootStackParamList = {
   HomeWorkScreen: undefined;
   CreateHomeworkScreen: undefined;
   DisplayHomeworkScreen: { homeworkId: string };
-  //
-  UpdateHomeworkScreen: { homeworkDetails: Homework };
+  UpdateHomeworkScreen: { homeworkId: string };
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> =
