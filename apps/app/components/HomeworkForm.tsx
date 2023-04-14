@@ -13,6 +13,7 @@ import type {
 import { useConfig } from "../utils/config";
 import { trpc } from "../utils/trpc";
 import { parseISO } from "date-fns";
+import useColorScheme from "../utils/useColorScheme";
 
 interface HomeworkFormData {
   class_id: number;
@@ -33,6 +34,7 @@ export default function HomeworkForm({
   onSubmit,
 }: HomeworkFormProps) {
   const config = useConfig();
+  const scheme = useColorScheme();
 
   const [selectedClass, setSelectedClass] = useState<ClassWithSections>();
   const [selectedSection, setSelectedSection] = useState(homework?.section_id);
@@ -237,7 +239,7 @@ export default function HomeworkForm({
           date={dueDate ?? new Date()}
           mode="datetime"
           title="Select due date"
-          // theme={color}
+          theme={scheme}
           minimumDate={new Date()}
           onConfirm={(date) => {
             setDueDate(date);
