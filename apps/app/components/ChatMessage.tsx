@@ -11,7 +11,7 @@ import {
   getUserColor,
 } from "schooltalk-shared/misc";
 import { useConfig } from "../utils/config";
-import { FilePreview, FullScreenFilePreview } from "../components/FilePreview";
+import { FilePreview, FullScreenFilePreview } from "./attachments/FilePreview";
 
 interface ChatMessageProps {
   message: Message;

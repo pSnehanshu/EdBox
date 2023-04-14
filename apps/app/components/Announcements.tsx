@@ -16,7 +16,7 @@ import { getSchoolGroupIdentifier } from "schooltalk-shared/group-identifier";
 import MIMEType from "whatwg-mimetype";
 import { useConfig } from "../utils/config";
 import useColorScheme from "../utils/useColorScheme";
-import { FilePreview, FullScreenFilePreview } from "./FilePreview";
+import { FilePreview, FullScreenFilePreview } from "./attachments/FilePreview";
 import { LottieAnimation } from "./LottieAnimation";
 import { Button } from "@rneui/themed";
 import { useSchool } from "../utils/useSchool";
