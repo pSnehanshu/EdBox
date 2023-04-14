@@ -15,6 +15,7 @@ import { useMessages } from "../../utils/messages-repository";
 import { Message } from "schooltalk-shared/types";
 import { useGroupInfo } from "../../utils/groups";
 import { MsgComposer } from "../../components/ChatComposer";
+import { useFileUpload } from "../../utils/file-upload";
 
 const renderItem: ListRenderItem<Message> = ({ item }) => (
   <ChatMessage message={item} />
@@ -79,6 +80,20 @@ export default function ChatWindowScreen({
     [groupInfo.identifier, messages.sendMessage],
   );
 
+  // The handler for attachments
+  const fileUploadHandler = useFileUpload();
+
+  // Effect to delete pending uploads before exiting
+  useEffect(
+    () =>
+      navigation.addListener("beforeRemove", () => {
+        Promise.allSettled(
+          fileUploadHandler.uploadTasks.map((task) => task.cancel()),
+        );
+      }),
+    [navigation, fileUploadHandler.uploadTasks],
+  );
+
   return (
     <View style={styles.container}>
       <ImageBackground
@@ -98,7 +113,10 @@ export default function ChatWindowScreen({
           contentContainerStyle={{ backgroundColor: "transparent" }}
         />
 
-        <MsgComposer onSend={handleMsgSend} />
+        <MsgComposer
+          onSend={handleMsgSend}
+          fileUploadHandler={fileUploadHandler}
+        />
       </ImageBackground>
     </View>
   );

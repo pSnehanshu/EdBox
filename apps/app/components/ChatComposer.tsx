@@ -10,22 +10,20 @@ import { PendingAttachment } from "./attachments/PendingAttachment";
 
 interface MsgComposerProps {
   onSend: (msg: string, files?: FilePermissionsInput[]) => void;
+  fileUploadHandler: ReturnType<typeof useFileUpload>;
 }
-const _MsgComposer = ({ onSend }: MsgComposerProps) => {
+const _MsgComposer = ({ onSend, fileUploadHandler }: MsgComposerProps) => {
   const [messageText, setMessageText] = useState("");
   const scheme = useColorScheme();
   const iconColor = scheme === "dark" ? "white" : "black";
 
-  // Attachments
-  const fileUpload = useFileUpload();
-
   return (
     <View style={styles.container}>
-      {fileUpload.uploadTasks.length > 0 && (
+      {fileUploadHandler.uploadTasks.length > 0 && (
         <List
           horizontal
           estimatedItemSize={200}
-          data={fileUpload.uploadTasks}
+          data={fileUploadHandler.uploadTasks}
           contentContainerStyle={styles.pending_attachments_list}
           renderItem={({ item }) => <PendingAttachment uploadTask={item} />}
         />
@@ -42,7 +40,7 @@ const _MsgComposer = ({ onSend }: MsgComposerProps) => {
 
         <View style={styles.composer_actions}>
           <Pressable
-            onPress={() => fileUpload.pickAndUploadFile()}
+            onPress={() => fileUploadHandler.pickAndUploadFile()}
             style={({ pressed }) => [
               styles.attach_btn,
               { opacity: pressed ? 0.5 : 1 },
@@ -52,7 +50,7 @@ const _MsgComposer = ({ onSend }: MsgComposerProps) => {
           </Pressable>
 
           <Pressable
-            onPress={() => fileUpload.pickAndUploadMediaLib()}
+            onPress={() => fileUploadHandler.pickAndUploadMediaLib()}
             style={({ pressed }) => [
               styles.attach_btn,
               { opacity: pressed ? 0.5 : 1 },
@@ -60,7 +58,7 @@ const _MsgComposer = ({ onSend }: MsgComposerProps) => {
           >
             <MaterialIcons
               name={
-                fileUpload.mediaPermissionStatus?.status === "denied"
+                fileUploadHandler.mediaPermissionStatus?.status === "denied"
                   ? "image-not-supported"
                   : "image"
               }
@@ -70,7 +68,7 @@ const _MsgComposer = ({ onSend }: MsgComposerProps) => {
           </Pressable>
 
           <Pressable
-            onPress={() => fileUpload.pickAndUploadCamera()}
+            onPress={() => fileUploadHandler.pickAndUploadCamera()}
             style={({ pressed }) => [
               styles.attach_btn,
               { opacity: pressed ? 0.5 : 1 },
@@ -78,7 +76,7 @@ const _MsgComposer = ({ onSend }: MsgComposerProps) => {
           >
             <MaterialCommunityIcons
               name={
-                fileUpload.cameraPermissionStatus?.status === "denied"
+                fileUploadHandler.cameraPermissionStatus?.status === "denied"
                   ? "camera-off-outline"
                   : "camera-outline"
               }
@@ -93,21 +91,24 @@ const _MsgComposer = ({ onSend }: MsgComposerProps) => {
               { opacity: pressed ? 0.5 : 1 },
             ]}
             onPress={() => {
-              if (!fileUpload.allDone) {
+              if (!fileUploadHandler.allDone) {
                 return alert("Please wait for all uploads to complete");
               }
 
-              if (!messageText.trim() && fileUpload.uploadTasks.length < 1)
+              if (
+                !messageText.trim() &&
+                fileUploadHandler.uploadTasks.length < 1
+              )
                 return;
 
               onSend(
                 messageText.trim(),
-                fileUpload.uploadTasks.map((t) => ({
+                fileUploadHandler.uploadTasks.map((t) => ({
                   permission_id: t.permission.id,
                   file_name: t.file.name,
                 })),
               );
-              fileUpload.removeAll();
+              fileUploadHandler.removeAll();
 
               setMessageText("");
 
