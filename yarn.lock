@@ -11870,10 +11870,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-select-dropdown@npm:^3.3.0":
-  version: 3.3.0
-  resolution: "react-native-select-dropdown@npm:3.3.0"
-  checksum: 22a753ac0ca17e382d165fc557c1d871ba158d76e1defe76f241aa7d9b3a5fd6a911f924204c89658822735e990a73f441407614f4ecaa6335f5919433d1a7a6
+"react-native-select-dropdown@npm:3.3.2":
+  version: 3.3.2
+  resolution: "react-native-select-dropdown@npm:3.3.2"
+  checksum: ba38e7189d3e53ca9ce615344d52235d2c306ca91de8b52da309f3e7c4cb1a6b6b30b34c27796bc3520cb7fb2a2c10ce3e4a4c56f08ad6054ef374878d44000f
+  languageName: node
+  linkType: hard
+
+"react-native-select-dropdown@patch:react-native-select-dropdown@npm%3A3.3.2#./.yarn/patches/react-native-select-dropdown-npm-3.3.2-cff73d7920.patch::locator=schooltalk%40workspace%3A.":
+  version: 3.3.2
+  resolution: "react-native-select-dropdown@patch:react-native-select-dropdown@npm%3A3.3.2#./.yarn/patches/react-native-select-dropdown-npm-3.3.2-cff73d7920.patch::version=3.3.2&hash=de7d8f&locator=schooltalk%40workspace%3A."
+  checksum: b705732549a01af2b7d53e0121e205891c4279190bff4179a3b90d3e56160ce33b5c3f9904f1af29a35f299ab274b413def796bff33851037c9b7bf24f54e879
   languageName: node
   linkType: hard
 

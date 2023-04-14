@@ -29,6 +29,7 @@
     "prettier": "^2.8.4"
   },
   "resolutions": {
-    "react-native-raw-bottom-sheet@^2.2.0": "patch:react-native-raw-bottom-sheet@npm%3A2.2.0#./.yarn/patches/react-native-raw-bottom-sheet-npm-2.2.0-e9dc8fb4b8.patch"
+    "react-native-raw-bottom-sheet@^2.2.0": "patch:react-native-raw-bottom-sheet@npm%3A2.2.0#./.yarn/patches/react-native-raw-bottom-sheet-npm-2.2.0-e9dc8fb4b8.patch",
+    "react-native-select-dropdown@^3.3.0": "patch:react-native-select-dropdown@npm%3A3.3.2#./.yarn/patches/react-native-select-dropdown-npm-3.3.2-cff73d7920.patch"
   }
 }
