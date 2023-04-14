@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { View, Text, TextInput } from "./Themed";
 import DatePicker from "react-native-date-picker";
-import SelectDropdown from "react-native-select-dropdown";
-import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { Pressable } from "react-native";
 import { useFileUpload } from "../utils/file-upload";
 import type {
@@ -10,6 +9,7 @@ import type {
   Homework,
   RouterInput,
 } from "schooltalk-shared/types";
+import ModalSelector from "react-native-modal-selector";
 import { useConfig } from "../utils/config";
 import { trpc } from "../utils/trpc";
 import { parseISO } from "date-fns";
@@ -66,80 +66,45 @@ export default function HomeworkForm({
   // subjects
   const subjectsQuery = trpc.school.subject.fetchSubjects.useQuery({});
 
-  // Default values
-  const defaultClassIndex = classesAndSectionsData.data?.findIndex(
-    (c) => c.numeric_id === homework?.class_id,
-  );
-  const defaultSectionIndex = classesAndSectionsData.data
-    ?.at(defaultClassIndex ?? 0)
-    ?.Sections.findIndex((s) => s.numeric_id === homework?.section_id);
-  const defaultSubjectIndex = subjectsQuery.data?.findIndex(
-    (s) => s.id === homework?.subject_id,
-  );
-
   return (
     <>
       {/* form */}
       <View>
         <View style={{ width: "50%" }}>
           <Text>Class</Text>
-          <SelectDropdown
-            data={classesAndSectionsData.data ?? []}
-            onSelect={(item) => {
-              setSelectedClass(item);
+          <ModalSelector
+            data={
+              classesAndSectionsData.data?.map((c) => ({
+                key: c.numeric_id,
+                label: `Class ${c.name ?? c.numeric_id.toString()}`,
+              })) ?? []
+            }
+            onChange={(item) => {
+              const Class = classesAndSectionsData.data?.find(
+                (c) => c.numeric_id === item.key,
+              );
+              setSelectedClass(Class);
               setSelectedSection(undefined);
             }}
-            defaultButtonText={"Select Class"}
-            defaultValueByIndex={defaultClassIndex}
-            buttonTextAfterSelection={(selectedItem) =>
-              `Class ${selectedItem.name ?? selectedItem.numeric_id.toString()}`
-            }
-            rowTextForSelection={(item) =>
-              `Class ${item.name ?? item.numeric_id.toString()}`
-            }
-            dropdownIconPosition={"right"}
-            renderDropdownIcon={(isOpened) => (
-              <FontAwesome
-                name={isOpened ? "chevron-up" : "chevron-down"}
-                color={"#444"}
-                size={18}
-              />
-            )}
-            // buttonStyle={styles.dropdown1BtnStyle}
-            // buttonTextStyle={styles.dropdown1BtnTxtStyle}
-            // dropdownStyle={styles.dropdown1DropdownStyle}
-            // rowStyle={styles.dropdown1RowStyle}
-            // rowTextStyle={styles.dropdown1RowTxtStyle}
+            animationType="fade"
+            selectedKey={selectedClass?.numeric_id}
+            // selectStyle={{ backgroundColor: "red" }}
           />
         </View>
         <View style={{ width: "50%", marginLeft: 10 }}>
           <Text>Section</Text>
 
-          <SelectDropdown
-            data={selectedClass?.Sections ?? []}
-            disabled={!selectedClass}
-            onSelect={(item) => setSelectedSection(item.numeric_id)}
-            defaultButtonText={"Select Sections"}
-            defaultValueByIndex={defaultSectionIndex}
-            buttonTextAfterSelection={(selectedItem) =>
-              `Section ${selectedItem.name ?? selectedItem.numeric_id}`
+          <ModalSelector
+            data={
+              selectedClass?.Sections.map((s) => ({
+                key: s.numeric_id,
+                label: `Section ${s.name ?? s.numeric_id}`,
+              })) ?? []
             }
-            rowTextForSelection={(item) =>
-              `Section ${item.name ?? item.numeric_id}`
-            }
-            dropdownIconPosition={"right"}
-            renderDropdownIcon={(isOpened) => (
-              <FontAwesome
-                name={isOpened ? "chevron-up" : "chevron-down"}
-                color={"#444"}
-                size={18}
-              />
-            )}
-            // buttonStyle={styles.dropdown1BtnStyle}
-            // buttonTextStyle={styles.dropdown1BtnTxtStyle}
-            // dropdownStyle={styles.dropdown1DropdownStyle}
-            // rowStyle={styles.dropdown1RowStyle}
-            // rowTextStyle={styles.dropdown1RowTxtStyle}
+            onChange={(item) => setSelectedSection(item.key)}
+            animationType="fade"
+            selectedKey={selectedSection}
+            // selectStyle={{ backgroundColor: "red" }}
           />
         </View>
       </View>
@@ -147,26 +112,17 @@ export default function HomeworkForm({
         <>
           <Text>Subject</Text>
 
-          <SelectDropdown
-            data={subjectsQuery.data ?? []}
-            onSelect={(item) => setSelectedSubject(item.id)}
-            defaultButtonText={"Select Subject"}
-            defaultValueByIndex={defaultSubjectIndex}
-            buttonTextAfterSelection={(selectedItem) => selectedItem.name}
-            rowTextForSelection={(item) => item.name}
-            dropdownIconPosition={"right"}
-            renderDropdownIcon={(isOpened) => (
-              <FontAwesome
-                name={isOpened ? "chevron-up" : "chevron-down"}
-                color={"#444"}
-                size={18}
-              />
-            )}
-            // buttonStyle={styles.dropdown1BtnStyle}
-            // buttonTextStyle={styles.dropdown1BtnTxtStyle}
-            // dropdownStyle={styles.dropdown1DropdownStyle}
-            // rowStyle={styles.dropdown1RowStyle}
-            // rowTextStyle={styles.dropdown1RowTxtStyle}
+          <ModalSelector
+            data={
+              subjectsQuery.data?.map((sub) => ({
+                key: sub.id,
+                label: sub.name,
+              })) ?? []
+            }
+            onChange={(item) => setSelectedSubject(item.key)}
+            animationType="fade"
+            selectedKey={selectedSubject}
+            // selectStyle={{ backgroundColor: "red" }}
           />
         </>
 
