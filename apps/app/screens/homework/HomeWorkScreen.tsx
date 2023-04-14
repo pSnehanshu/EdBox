@@ -1,63 +1,25 @@
-import React, { useEffect, useMemo, useState } from "react";
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  SafeAreaView,
-  Dimensions,
-} from "react-native";
+import { Pressable, StyleSheet, SafeAreaView } from "react-native";
 import { RootStackParamList } from "../../utils/types/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { List, Text, TextInput, View } from "../../components/Themed";
-import { Button, FAB } from "@rneui/themed";
-import { FontAwesome, Ionicons } from "@expo/vector-icons";
-import { Modal, Image } from "react-native";
-import SelectDropdown from "react-native-select-dropdown";
+import { List, Text, View } from "../../components/Themed";
+import { FAB } from "@rneui/themed";
+import { Ionicons } from "@expo/vector-icons";
 import { trpc } from "../../utils/trpc";
 import useColorScheme from "../../utils/useColorScheme";
-import { useConfig } from "../../utils/config";
-import {
-  ClassWithSections,
-  Homework,
-  Section,
-  Subject,
-} from "schooltalk-shared/types";
-import DatePicker from "react-native-date-picker";
-import { useFileUpload } from "../../utils/file-upload";
+import { Homework } from "schooltalk-shared/types";
 import { format, parseISO } from "date-fns";
-import { useNavigation } from "@react-navigation/native";
 
-export default function HomeWorkScreen({}: NativeStackScreenProps<
-  RootStackParamList,
-  "HomeWorkScreen"
->) {
-  const [createHomeWorkModal, setCreateHomeWorkModal] = useState(false);
-
+export default function HomeWorkScreen({
+  navigation,
+}: NativeStackScreenProps<RootStackParamList, "HomeWorkScreen">) {
   const homeworkQuery = trpc.school.homework.fetchForTeacher.useQuery({
     limit: 10,
   });
+
   const color = useColorScheme();
-  const navigation = useNavigation();
-  const [homeworkFormData, setHomeworkFormData] = useState({});
 
-  const homeworkList = useMemo(() => {
-    if (!homeworkQuery.data) return [];
-
-    return homeworkQuery.data.data;
-  }, [homeworkQuery]);
-  // console.log(JSON.stringify(homeworkList, null, 2));
   return (
     <View style={{ flex: 1, marginTop: 0 }}>
-      {/* list */}
-      {/* {!homeworkQuery.isLoading &&
-        homeworkQuery.data?.data.map((homework) => (
-          <SingleHomework
-            key={homework.id}
-            homework={homework}
-            openModal={() => setCreateHomeWorkModal(true)}
-            setHomeworkFormData={setHomeworkFormData}
-          />
-        ))}*/}
       <FAB
         icon={
           <Ionicons
@@ -79,10 +41,10 @@ export default function HomeWorkScreen({}: NativeStackScreenProps<
       />
       <SafeAreaView style={{ height: "100%", width: "100%" }}>
         <List
-          data={homeworkList}
+          data={homeworkQuery?.data?.data}
           keyExtractor={(g) => g.id}
           estimatedItemSize={200}
-          renderItem={({ item: item }) => (
+          renderItem={({ item }) => (
             <SingleHomework
               homework={item}
               onClick={() =>
@@ -98,18 +60,10 @@ export default function HomeWorkScreen({}: NativeStackScreenProps<
   );
 }
 
-interface props {
-  createHomeWorkModal: boolean;
-  onClose: () => void;
-  homeworkFormData: any;
-  setHomeworkFormData: any;
-}
-
 interface HomeworkProps {
   homework: Homework | any;
   onClick: () => void;
 }
-
 function SingleHomework({ homework, onClick }: HomeworkProps) {
   return (
     <Pressable

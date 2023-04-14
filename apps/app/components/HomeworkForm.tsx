@@ -1,64 +1,55 @@
-import React, { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { View, Text, TextInput } from "./Themed";
 import DatePicker from "react-native-date-picker";
 import SelectDropdown from "react-native-select-dropdown";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { Pressable } from "react-native";
 import { useFileUpload } from "../utils/file-upload";
-import {
+import type {
   ClassWithSections,
   Homework,
   Section,
   Subject,
+  RouterInput,
 } from "schooltalk-shared/types";
 import useColorScheme from "../utils/useColorScheme";
 import { useConfig } from "../utils/config";
 import { trpc } from "../utils/trpc";
+import { parseISO } from "date-fns";
+
+interface HomeworkFormData {
+  class_id: number;
+  section_id: number;
+  subject_id: string;
+  text?: string;
+  due_date?: Date;
+  remove_attachments?: RouterInput["school"]["homework"]["update"]["remove_attachments"];
+  new_file_permissions?: RouterInput["school"]["homework"]["update"]["new_file_permissions"];
+}
 
 interface HomeworkFormProps {
   homework?: Homework;
-  //   onPress: () => void;
+  onSubmit: (data: HomeworkFormData) => void;
 }
-export default function HomeworkForm({ homework }: HomeworkFormProps) {
+export default function HomeworkForm({
+  homework,
+  onSubmit,
+}: HomeworkFormProps) {
   const color = useColorScheme();
   const config = useConfig();
+
   const fileUpload = useFileUpload();
   const [selectedClass, setSelectedClass] = useState<ClassWithSections>();
-  const [selectedSection, setSelectedSection] = useState<Section>();
-  const [selectedSubject, setSelectedSubject] = useState<Subject>();
-  const [textContent, setTextContent] = useState<string>();
+  const [selectedSection, setSelectedSection] = useState(homework?.section_id);
+  const [selectedSubject, setSelectedSubject] = useState(homework?.subject_id);
+  const [textContent, setTextContent] = useState(homework?.text);
+  const [dueDate, setDueDate] = useState(
+    homework?.due_date ? parseISO(homework.due_date) : null,
+  );
 
   const [datePickerVisible, setDatePickerVisible] = useState(false);
-  const [date, setDate] = useState<Date>();
+
   const blurBg = color === "dark" ? "rgba(0,0,0,.6)" : "rgba(255,255,255,.6)";
-
-  console.log(JSON.stringify(homework, null, 2));
-
-  useEffect(() => {
-    if (homework) {
-      setTextContent(homework.text ?? "");
-    }
-  }, [homework]);
-
-  // mutation
-  const createHomework = trpc.school.homework.create.useMutation({
-    onSuccess(data) {
-      // alert(JSON.stringify(data, null, 2));
-      // onClose();
-    },
-    onError(error, variables, context) {
-      alert(error);
-    },
-  });
-
-  const updateHomework = trpc.school.homework.update.useMutation({
-    onSuccess(data) {
-      // onClose();
-    },
-    onError(error, variables, context) {
-      alert(error);
-    },
-  });
 
   // class Section and subject data
   const classesAndSectionsData =
@@ -103,8 +94,8 @@ export default function HomeworkForm({ homework }: HomeworkFormProps) {
                 <SelectDropdown
                   data={allClassesNames}
                   onSelect={(item, index) => {
-                    //   const Class = classesAndSectionsData?.data?.at(index);
-                    //   setSelectedClass(Class);
+                    const Class = classesAndSectionsData?.data?.at(index);
+                    setSelectedClass(Class);
                   }}
                   // defaultValueByIndex={homeworkFormData.class_id ?? -1}
                   defaultButtonText={"Select Class"}
@@ -217,8 +208,8 @@ export default function HomeworkForm({ homework }: HomeworkFormProps) {
               }}
               multiline
               maxLength={100}
-              value={textContent}
-              // onChangeText={setTextContent}
+              value={textContent ?? ""}
+              onChangeText={setTextContent}
             />
             <Text>Due date</Text>
             <Pressable
@@ -230,7 +221,7 @@ export default function HomeworkForm({ homework }: HomeworkFormProps) {
               }}
               onPress={() => setDatePickerVisible((v) => !v)}
             >
-              <Text>{date?.toLocaleDateString() ?? "Select a date"}</Text>
+              <Text>{dueDate?.toLocaleDateString() ?? "Select a date"}</Text>
             </Pressable>
             {/* upload */}
             <View
@@ -268,13 +259,13 @@ export default function HomeworkForm({ homework }: HomeworkFormProps) {
             <DatePicker
               modal
               open={datePickerVisible}
-              date={date ?? new Date()}
+              date={dueDate ?? new Date()}
               mode="datetime"
               title="Select due date"
               // theme={color}
               minimumDate={new Date()}
               onConfirm={(date) => {
-                setDate(date);
+                setDueDate(date);
                 setDatePickerVisible(false);
               }}
               onCancel={() => {

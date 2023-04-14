@@ -184,7 +184,7 @@ const homeworkRouter = t.router({
         },
       });
 
-      return id;
+      return { id };
     }),
   update: t.procedure
     .use(teacherMiddleware)
