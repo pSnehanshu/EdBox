@@ -44,6 +44,10 @@ export default function HomeworkForm({
 
   const [selectedClass, setSelectedClass] = useState<ClassWithSections>();
   const [selectedSection, setSelectedSection] = useState(homework?.section_id);
+  const selectedSectionObject = selectedClass?.Sections?.find(
+    (s) => s.numeric_id === selectedSection,
+  );
+
   const [selectedSubject, setSelectedSubject] = useState(homework?.subject_id);
   const [textContent, setTextContent] = useState(homework?.text ?? "");
   const [dueDate, setDueDate] = useState(
@@ -71,6 +75,9 @@ export default function HomeworkForm({
 
   // subjects
   const subjectsQuery = trpc.school.subject.fetchSubjects.useQuery({});
+  const selectedSubjectObject = subjectsQuery.data?.find(
+    (s) => s.id === selectedSubject,
+  );
 
   return (
     <>
@@ -96,7 +103,9 @@ export default function HomeworkForm({
             <ListItem.Content>
               <ListItem.Title>Class</ListItem.Title>
               <ListItem.Subtitle>
-                {selectedClass ? `Class ${selectedClass.name}` : "Select class"}
+                {selectedClass
+                  ? `Class ${selectedClass.name ?? selectedClass.numeric_id}`
+                  : "Select class"}
               </ListItem.Subtitle>
             </ListItem.Content>
             <Ionicons name="chevron-forward" color={iconColor} size={16} />
@@ -119,8 +128,11 @@ export default function HomeworkForm({
             <ListItem.Content>
               <ListItem.Title>Section</ListItem.Title>
               <ListItem.Subtitle>
-                {selectedSection
-                  ? `Section ${selectedSection}`
+                {selectedSectionObject
+                  ? `Section ${
+                      selectedSectionObject.name ??
+                      selectedSectionObject.numeric_id
+                    }`
                   : "Select section"}
               </ListItem.Subtitle>
             </ListItem.Content>
@@ -143,7 +155,7 @@ export default function HomeworkForm({
             <ListItem.Content>
               <ListItem.Title>Subject</ListItem.Title>
               <ListItem.Subtitle>
-                {selectedSubject ?? "Select subject"}
+                {selectedSubjectObject?.name ?? "Select subject"}
               </ListItem.Subtitle>
             </ListItem.Content>
             <Ionicons name="chevron-forward" color={iconColor} size={16} />
@@ -158,9 +170,9 @@ export default function HomeworkForm({
         >
           <ListItem>
             <ListItem.Content>
-              <ListItem.Title>Due date</ListItem.Title>
+              <ListItem.Title>Due date (optional)</ListItem.Title>
               <ListItem.Subtitle>
-                {dueDate?.toLocaleDateString() ?? "Select date"}
+                {dueDate?.toLocaleDateString() ?? "No due date"}
               </ListItem.Subtitle>
             </ListItem.Content>
             <Ionicons name="chevron-forward" color={iconColor} size={16} />
@@ -176,7 +188,7 @@ export default function HomeworkForm({
           <ListItem>
             <ListItem.Content>
               <ListItem.Title>Text</ListItem.Title>
-              <ListItem.Subtitle>{textContent}</ListItem.Subtitle>
+              <ListItem.Subtitle>{textContent || "Empty"}</ListItem.Subtitle>
             </ListItem.Content>
             <Ionicons name="chevron-forward" color={iconColor} size={16} />
           </ListItem>
