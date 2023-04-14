@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { View, Text, ScrollView, List } from "./Themed";
 import DatePicker from "react-native-date-picker";
-import { Ionicons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Pressable, StyleProp, StyleSheet, ViewStyle } from "react-native";
 import { useFileUpload } from "../utils/file-upload";
 import type {
@@ -46,6 +46,10 @@ export default function HomeworkForm({
   const iconColor = scheme === "dark" ? "white" : "black";
   const [isTextModalOpen, setIsTextModalOpen] = useState(false);
 
+  const ChevronIcon = (
+    <MaterialCommunityIcons name="chevron-right" color={iconColor} size={16} />
+  );
+
   const [selectedClass, setSelectedClass] = useState<ClassWithSections>();
   const [selectedSection, setSelectedSection] = useState(homework?.section_id);
   const selectedSectionObject = selectedClass?.Sections?.find(
@@ -57,8 +61,6 @@ export default function HomeworkForm({
   const [dueDate, setDueDate] = useState(
     homework?.due_date ? parseISO(homework.due_date) : undefined,
   );
-
-  const fileUploadHandler = useFileUpload();
   const [datePickerVisible, setDatePickerVisible] = useState(false);
 
   // class Section and subject data
@@ -84,6 +86,9 @@ export default function HomeworkForm({
   );
 
   // Image preview
+  const fileUploadHandler = useFileUpload();
+  const [removedFiles, setRemovedFiles] = useState<string[]>([]);
+
   const [pressedFileId, setPressedFileId] = useState<string | null>(null);
   const handleFilePress = (file: UploadedFile, index: number) => {
     const mime = file.mime ? MIMEType.parse(file.mime) : null;
@@ -125,7 +130,7 @@ export default function HomeworkForm({
                   : "Select class"}
               </ListItem.Subtitle>
             </ListItem.Content>
-            <Ionicons name="chevron-forward" color={iconColor} size={16} />
+            {ChevronIcon}
           </ListItem>
         </ModalSelector>
 
@@ -153,7 +158,7 @@ export default function HomeworkForm({
                   : "Select section"}
               </ListItem.Subtitle>
             </ListItem.Content>
-            <Ionicons name="chevron-forward" color={iconColor} size={16} />
+            {ChevronIcon}
           </ListItem>
         </ModalSelector>
 
@@ -175,7 +180,7 @@ export default function HomeworkForm({
                 {selectedSubjectObject?.name ?? "Select subject"}
               </ListItem.Subtitle>
             </ListItem.Content>
-            <Ionicons name="chevron-forward" color={iconColor} size={16} />
+            {ChevronIcon}
           </ListItem>
         </ModalSelector>
 
@@ -192,7 +197,7 @@ export default function HomeworkForm({
                 {dueDate?.toLocaleDateString() ?? "No due date"}
               </ListItem.Subtitle>
             </ListItem.Content>
-            <Ionicons name="chevron-forward" color={iconColor} size={16} />
+            {ChevronIcon}
           </ListItem>
         </Pressable>
 
@@ -207,7 +212,7 @@ export default function HomeworkForm({
               <ListItem.Title>Text</ListItem.Title>
               <ListItem.Subtitle>{textContent || "Empty"}</ListItem.Subtitle>
             </ListItem.Content>
-            <Ionicons name="chevron-forward" color={iconColor} size={16} />
+            {ChevronIcon}
           </ListItem>
         </Pressable>
 
@@ -225,7 +230,7 @@ export default function HomeworkForm({
               { opacity: pressed ? 0.7 : 1, alignItems: "center" },
             ]}
           >
-            <Ionicons name="cloud-upload-sharp" size={25} color={iconColor} />
+            <MaterialCommunityIcons name="upload" size={25} color={iconColor} />
             <Text>Upload File</Text>
           </Pressable>
 
@@ -235,7 +240,7 @@ export default function HomeworkForm({
               { opacity: pressed ? 0.7 : 1, alignItems: "center" },
             ]}
           >
-            <Ionicons name="camera" size={25} color={iconColor} />
+            <MaterialCommunityIcons name="camera" size={25} color={iconColor} />
             <Text>Open camera</Text>
           </Pressable>
         </View>
@@ -258,16 +263,83 @@ export default function HomeworkForm({
           <View style={{ padding: 8, minHeight: 500 }}>
             <List
               estimatedItemSize={200}
-              data={homework.Attachments}
+              data={homework.Attachments.map((att) => ({
+                attachment: att,
+                isToBeRemoved: removedFiles.includes(att.file_id),
+              }))}
               contentContainerStyle={styles.pending_attachments_list}
-              renderItem={({ item, index }) => (
-                <FilePreview
-                  fileIdOrObject={item.File}
-                  index={index}
-                  style={{ marginBottom: 8 }}
-                  onPress={handleFilePress}
-                />
-              )}
+              renderItem={({ item: { attachment, isToBeRemoved }, index }) => {
+                return (
+                  <FilePreview
+                    fileIdOrObject={attachment.File}
+                    index={index}
+                    style={{
+                      marginBottom: 8,
+                      borderColor: isToBeRemoved ? "red" : iconColor,
+                      // borderWidth: 2,
+                    }}
+                    onPress={handleFilePress}
+                    downloadable={false}
+                    actions={
+                      isToBeRemoved ? (
+                        <Pressable
+                          style={({ pressed }) => [
+                            styles.action_btn,
+                            { opacity: pressed ? 0.5 : 1 },
+                          ]}
+                          onPress={() =>
+                            setRemovedFiles((f) => {
+                              const isToBeRemoved = f.includes(
+                                attachment.file_id,
+                              );
+                              if (isToBeRemoved) {
+                                return f.filter(
+                                  (id) => id !== attachment.file_id,
+                                );
+                              } else {
+                                return f;
+                              }
+                            })
+                          }
+                        >
+                          <MaterialCommunityIcons
+                            name="recycle"
+                            size={24}
+                            color="green"
+                          />
+                          <Text>Restore</Text>
+                        </Pressable>
+                      ) : (
+                        <Pressable
+                          style={({ pressed }) => [
+                            styles.action_btn,
+                            { opacity: pressed ? 0.5 : 1 },
+                          ]}
+                          onPress={() =>
+                            setRemovedFiles((f) => {
+                              const isToBeRemoved = f.includes(
+                                attachment.file_id,
+                              );
+                              if (isToBeRemoved) {
+                                return f;
+                              } else {
+                                return f.concat(attachment.file_id);
+                              }
+                            })
+                          }
+                        >
+                          <MaterialCommunityIcons
+                            name="trash-can-outline"
+                            size={24}
+                            color="red"
+                          />
+                          <Text>Remove</Text>
+                        </Pressable>
+                      )
+                    }
+                  />
+                );
+              }}
             />
           </View>
         )}
@@ -322,8 +394,9 @@ export default function HomeworkForm({
                   file_name: task.file.name,
                 }),
               ),
-              // remove_attachments,
+              remove_attachments: removedFiles,
             });
+            fileUploadHandler.removeAll();
           } else {
             console.log("Select all data", {
               selectedSection,
@@ -333,7 +406,7 @@ export default function HomeworkForm({
           }
         }}
         buttonStyle={{ backgroundColor: "#4E48B2" }}
-        icon={<Ionicons name="checkmark" size={24} color={"white"} />}
+        icon={<MaterialCommunityIcons name="check" size={24} color={"white"} />}
         placement="right"
       />
 
@@ -356,5 +429,10 @@ const styles = StyleSheet.create({
   },
   bottom_margin: {
     height: 64,
+  },
+  action_btn: {
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

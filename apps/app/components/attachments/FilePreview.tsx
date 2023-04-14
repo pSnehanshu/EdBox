@@ -58,8 +58,16 @@ interface FilePreviewObjectProps {
   file: UploadedFile;
   style?: InnerStyle;
   onPress?: (file: UploadedFile) => void;
+  actions?: React.ReactNode;
+  downloadable: boolean;
 }
-function FilePreviewObject({ file, style, onPress }: FilePreviewObjectProps) {
+function FilePreviewObject({
+  file,
+  style,
+  onPress,
+  actions,
+  downloadable,
+}: FilePreviewObjectProps) {
   const mime = useMemo(
     () => (file.mime ? MIMEType.parse(file.mime) : null),
     [file.mime],
@@ -77,6 +85,8 @@ function FilePreviewObject({ file, style, onPress }: FilePreviewObjectProps) {
   const utils = trpc.useContext();
 
   const download = useCallback(async () => {
+    if (!downloadable) return;
+
     try {
       const { url } = await utils.school.attachment.getFileURL.fetch({
         file_id: file.id,
@@ -123,15 +133,19 @@ function FilePreviewObject({ file, style, onPress }: FilePreviewObjectProps) {
           <Text style={styles.file_size}>{humanFriendlySize}</Text>
         </View>
         <View style={styles.control_bar_right}>
-          <Pressable
-            style={({ pressed }) => [
-              styles.action_btn,
-              { opacity: pressed ? 0.5 : 1 },
-            ]}
-            onPress={download}
-          >
-            <MaterialIcons name="file-download" size={24} color={iconColor} />
-          </Pressable>
+          {downloadable && (
+            <Pressable
+              style={({ pressed }) => [
+                styles.action_btn,
+                { opacity: pressed ? 0.5 : 1 },
+              ]}
+              onPress={download}
+            >
+              <MaterialIcons name="file-download" size={24} color={iconColor} />
+            </Pressable>
+          )}
+
+          {actions}
         </View>
       </View>
     </View>
@@ -190,6 +204,8 @@ interface FilePreviewProps {
   innerStyle?: InnerStyle;
   index: number;
   onPress?: (file: UploadedFile, index: number) => void;
+  actions?: React.ReactNode;
+  downloadable?: boolean;
 }
 export function FilePreview({
   fileIdOrObject,
@@ -197,6 +213,8 @@ export function FilePreview({
   innerStyle,
   index,
   onPress,
+  actions,
+  downloadable,
 }: FilePreviewProps) {
   const isIdPassed = typeof fileIdOrObject === "string";
 
@@ -214,14 +232,18 @@ export function FilePreview({
           <FilePreviewObject
             file={fileQuery.data!}
             style={innerStyle}
+            actions={actions}
             onPress={(file) => onPress?.(file, index)}
+            downloadable={downloadable ?? true}
           />
         )
       ) : (
         <FilePreviewObject
           file={fileIdOrObject}
           style={innerStyle}
+          actions={actions}
           onPress={(file) => onPress?.(file, index)}
+          downloadable={downloadable ?? true}
         />
       )}
     </View>
@@ -391,7 +413,8 @@ const styles = StyleSheet.create({
   control_bar_right: {
     flex: 15,
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "space-between",
+    flexDirection: "row",
   },
   file_name: {
     fontSize: 12,
