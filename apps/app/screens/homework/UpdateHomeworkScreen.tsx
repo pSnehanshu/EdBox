@@ -27,7 +27,7 @@ export default function UpdateHomeworkScreen({
   });
 
   return (
-    <ScrollView>
+    <ScrollView keyboardShouldPersistTaps="always">
       <Spinner visible={homeworkQuery.isLoading} textContent="Fetching..." />
 
       {homeworkQuery.data && (

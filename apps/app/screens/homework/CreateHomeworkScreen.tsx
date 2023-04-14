@@ -19,7 +19,7 @@ export default function CreateHomeworkScreen({
   });
 
   return (
-    <ScrollView>
+    <ScrollView keyboardShouldPersistTaps="always">
       <HomeworkForm
         onSubmit={(hw) =>
           createHomework.mutate({

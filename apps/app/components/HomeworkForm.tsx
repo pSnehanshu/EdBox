@@ -1,7 +1,8 @@
-import { useState } from "react";
-import { View, Text, TextInput } from "./Themed";
+import { useEffect, useState } from "react";
+import { Modal, StyleProp, TextStyle } from "react-native";
+import { View, Text, ScrollView, TextInput } from "./Themed";
 import DatePicker from "react-native-date-picker";
-import { Ionicons } from "@expo/vector-icons";
+import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { Pressable } from "react-native";
 import { useFileUpload } from "../utils/file-upload";
 import type {
@@ -14,6 +15,8 @@ import { useConfig } from "../utils/config";
 import { trpc } from "../utils/trpc";
 import { parseISO } from "date-fns";
 import useColorScheme from "../utils/useColorScheme";
+import { Button, ListItem, Dialog } from "@rneui/themed";
+import { ModalTextInput } from "./ModalTextInput";
 
 interface HomeworkFormData {
   class_id: number;
@@ -35,6 +38,8 @@ export default function HomeworkForm({
 }: HomeworkFormProps) {
   const config = useConfig();
   const scheme = useColorScheme();
+  const iconColor = scheme === "dark" ? "white" : "black";
+  const [isTextModalOpen, setIsTextModalOpen] = useState(false);
 
   const [selectedClass, setSelectedClass] = useState<ClassWithSections>();
   const [selectedSection, setSelectedSection] = useState(homework?.section_id);
@@ -68,125 +73,91 @@ export default function HomeworkForm({
 
   return (
     <>
-      {/* form */}
       <View>
-        <View style={{ width: "50%" }}>
-          <Text>Class</Text>
-          <ModalSelector
-            data={
-              classesAndSectionsData.data?.map((c) => ({
-                key: c.numeric_id,
-                label: `Class ${c.name ?? c.numeric_id.toString()}`,
-              })) ?? []
-            }
-            onChange={(item) => {
-              const Class = classesAndSectionsData.data?.find(
-                (c) => c.numeric_id === item.key,
-              );
-              setSelectedClass(Class);
-              setSelectedSection(undefined);
-            }}
-            animationType="fade"
-            selectedKey={selectedClass?.numeric_id}
-            // selectStyle={{ backgroundColor: "red" }}
-          />
-        </View>
-        <View style={{ width: "50%", marginLeft: 10 }}>
-          <Text>Section</Text>
-
-          <ModalSelector
-            data={
-              selectedClass?.Sections.map((s) => ({
-                key: s.numeric_id,
-                label: `Section ${s.name ?? s.numeric_id}`,
-              })) ?? []
-            }
-            onChange={(item) => setSelectedSection(item.key)}
-            animationType="fade"
-            selectedKey={selectedSection}
-            // selectStyle={{ backgroundColor: "red" }}
-          />
-        </View>
-      </View>
-      <View>
-        <>
-          <Text>Subject</Text>
-
-          <ModalSelector
-            data={
-              subjectsQuery.data?.map((sub) => ({
-                key: sub.id,
-                label: sub.name,
-              })) ?? []
-            }
-            onChange={(item) => setSelectedSubject(item.key)}
-            animationType="fade"
-            selectedKey={selectedSubject}
-            // selectStyle={{ backgroundColor: "red" }}
-          />
-        </>
-
-        <Text>Text</Text>
-
-        <TextInput
-          style={{
-            height: 100,
-            marginBottom: 5,
-            borderWidth: 1,
-            borderRadius: 15,
-            textAlignVertical: "top",
-            paddingTop: 12,
-            padding: 20,
-            color: "#2A2A2A",
+        <ModalSelector
+          data={
+            classesAndSectionsData.data?.map((c) => ({
+              key: c.numeric_id,
+              label: `Class ${c.name ?? c.numeric_id.toString()}`,
+            })) ?? []
+          }
+          onChange={(item) => {
+            const Class = classesAndSectionsData.data?.find(
+              (c) => c.numeric_id === item.key,
+            );
+            setSelectedClass(Class);
+            setSelectedSection(undefined);
           }}
-          multiline
-          maxLength={100}
-          value={textContent ?? ""}
-          onChangeText={setTextContent}
-        />
-        <Text>Due date</Text>
-        <Pressable
-          style={{
-            backgroundColor: "gray",
-            borderRadius: 15,
-            padding: 15,
-            marginBottom: 12,
-          }}
-          onPress={() => setDatePickerVisible((v) => !v)}
+          animationType="fade"
+          selectedKey={selectedClass?.numeric_id}
         >
-          <Text>{dueDate?.toLocaleDateString() ?? "Select a date"}</Text>
-        </Pressable>
-        {/* upload */}
-        <View
-          style={{
-            flexDirection: "row",
-            margin: 14,
-            justifyContent: "space-between",
-            marginLeft: 30,
-            marginRight: 30,
-          }}
+          <ListItem>
+            <ListItem.Content>
+              <ListItem.Title>Class</ListItem.Title>
+              <ListItem.Subtitle>
+                {selectedClass ? `Class ${selectedClass.name}` : "Select class"}
+              </ListItem.Subtitle>
+            </ListItem.Content>
+            <FontAwesome name="chevron-right" color="#444" size={18} />
+          </ListItem>
+        </ModalSelector>
+
+        <ModalSelector
+          data={
+            selectedClass?.Sections.map((s) => ({
+              key: s.numeric_id,
+              label: `Section ${s.name ?? s.numeric_id}`,
+            })) ?? []
+          }
+          disabled={!selectedClass}
+          onChange={(item) => setSelectedSection(item.key)}
+          animationType="fade"
+          selectedKey={selectedSection}
         >
-          <View>
-            <Pressable
-              onPress={() => fileUploadHandler.pickAndUploadFile()}
-              style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
-            >
-              <Ionicons name="cloud-upload-sharp" size={25} color="white" />
-            </Pressable>
-            <Text>Upload File</Text>
-          </View>
+          <ListItem>
+            <ListItem.Content>
+              <ListItem.Title>Section</ListItem.Title>
+              <ListItem.Subtitle>
+                {selectedSection
+                  ? `Section ${selectedSection}`
+                  : "Select section"}
+              </ListItem.Subtitle>
+            </ListItem.Content>
+            <FontAwesome name="chevron-right" color="#444" size={18} />
+          </ListItem>
+        </ModalSelector>
 
-          <View>
-            <Pressable
-              onPress={() => fileUploadHandler.pickAndUploadCamera()}
-              style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
-            >
-              <Ionicons name="camera" size={25} color="white" />
-            </Pressable>
+        <ModalSelector
+          data={
+            subjectsQuery.data?.map((sub) => ({
+              key: sub.id,
+              label: sub.name,
+            })) ?? []
+          }
+          onChange={(item) => setSelectedSubject(item.key)}
+          animationType="fade"
+          selectedKey={selectedSubject}
+        >
+          <ListItem>
+            <ListItem.Content>
+              <ListItem.Title>Subject</ListItem.Title>
+              <ListItem.Subtitle>
+                {selectedSubject ?? "Select subject"}
+              </ListItem.Subtitle>
+            </ListItem.Content>
+            <FontAwesome name="chevron-right" color="#444" size={18} />
+          </ListItem>
+        </ModalSelector>
 
-            <Text>Take Photo</Text>
-          </View>
-        </View>
+        <ListItem onPress={() => setDatePickerVisible((v) => !v)}>
+          <ListItem.Content>
+            <ListItem.Title>Due date</ListItem.Title>
+            <ListItem.Subtitle>
+              {dueDate?.toLocaleDateString() ?? "Select date"}
+            </ListItem.Subtitle>
+          </ListItem.Content>
+          <FontAwesome name="chevron-right" color="#444" size={18} />
+        </ListItem>
 
         {/* due date datepicker */}
         <DatePicker
@@ -205,6 +176,47 @@ export default function HomeworkForm({
             setDatePickerVisible(false);
           }}
         />
+
+        <ListItem onPress={() => setIsTextModalOpen(true)}>
+          <ListItem.Content>
+            <ListItem.Title>Text</ListItem.Title>
+            <ListItem.Subtitle>{textContent}</ListItem.Subtitle>
+          </ListItem.Content>
+          <FontAwesome name="chevron-right" color="#444" size={18} />
+        </ListItem>
+
+        {/* upload */}
+        <View
+          style={{
+            flexDirection: "row",
+            margin: 14,
+            justifyContent: "space-between",
+            marginLeft: 30,
+            marginRight: 30,
+          }}
+        >
+          <View>
+            <Pressable
+              onPress={() => fileUploadHandler.pickAndUploadFile()}
+              style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+            >
+              <Ionicons name="cloud-upload-sharp" size={25} color={iconColor} />
+            </Pressable>
+            <Text>Upload File</Text>
+          </View>
+
+          <View>
+            <Pressable
+              onPress={() => fileUploadHandler.pickAndUploadCamera()}
+              style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+            >
+              <Ionicons name="camera" size={25} color={iconColor} />
+            </Pressable>
+
+            <Text>Take Photo</Text>
+          </View>
+        </View>
+
         <Pressable
           onPress={() => {
             if (selectedSection && selectedClass && selectedSubject) {
@@ -229,6 +241,14 @@ export default function HomeworkForm({
           <Text>{homework ? "Update" : "Create"}</Text>
         </Pressable>
       </View>
+
+      <ModalTextInput
+        isVisible={isTextModalOpen}
+        onClose={() => setIsTextModalOpen(false)}
+        onChange={setTextContent}
+        defaultValue={textContent}
+        title="Write the homework"
+      />
     </>
   );
 }
