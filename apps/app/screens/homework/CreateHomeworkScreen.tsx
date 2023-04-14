@@ -27,6 +27,7 @@ export default function CreateHomeworkScreen({
             file_permissions: hw.new_file_permissions,
           })
         }
+        isSubmitting={createHomework.isLoading}
       />
     </View>
   );

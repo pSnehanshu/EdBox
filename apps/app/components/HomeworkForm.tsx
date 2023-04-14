@@ -2,7 +2,13 @@ import { useState } from "react";
 import { View, Text, ScrollView, List } from "./Themed";
 import DatePicker from "react-native-date-picker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Pressable, StyleProp, StyleSheet, ViewStyle } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleProp,
+  StyleSheet,
+  ViewStyle,
+} from "react-native";
 import { useFileUpload } from "../utils/file-upload";
 import type {
   ClassWithSections,
@@ -35,11 +41,13 @@ interface HomeworkFormProps {
   homework?: Homework;
   onSubmit: (data: HomeworkFormData) => void;
   style?: StyleProp<ViewStyle>;
+  isSubmitting: boolean;
 }
 export default function HomeworkForm({
   homework,
   onSubmit,
   style,
+  isSubmitting,
 }: HomeworkFormProps) {
   const config = useConfig();
   const scheme = useColorScheme();
@@ -406,7 +414,13 @@ export default function HomeworkForm({
           }
         }}
         buttonStyle={{ backgroundColor: "#4E48B2" }}
-        icon={<MaterialCommunityIcons name="check" size={24} color={"white"} />}
+        icon={
+          isSubmitting ? (
+            <ActivityIndicator size={24} color="white" />
+          ) : (
+            <MaterialCommunityIcons name="check" size={24} color={"white"} />
+          )
+        }
         placement="right"
       />
 

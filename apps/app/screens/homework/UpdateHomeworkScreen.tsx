@@ -41,6 +41,7 @@ export default function UpdateHomeworkScreen({
               due_date: hw.due_date?.toISOString(),
             });
           }}
+          isSubmitting={updateHomework.isLoading}
         />
       )}
     </View>
