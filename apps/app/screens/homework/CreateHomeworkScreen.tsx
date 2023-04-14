@@ -10,7 +10,7 @@ export default function CreateHomeworkScreen({
   // mutation
   const createHomework = trpc.school.homework.create.useMutation({
     onSuccess(data) {
-      navigation.navigate("DisplayHomeworkScreen", { homeworkId: data.id });
+      navigation.replace("DisplayHomeworkScreen", { homeworkId: data.id });
     },
     onError(error, variables, context) {
       alert(error);

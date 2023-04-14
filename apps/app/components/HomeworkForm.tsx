@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { View, Text, ScrollView } from "./Themed";
+import { View, Text, ScrollView, List } from "./Themed";
 import DatePicker from "react-native-date-picker";
 import { Ionicons } from "@expo/vector-icons";
-import { Pressable, StyleProp, ViewStyle } from "react-native";
+import { Pressable, StyleProp, StyleSheet, ViewStyle } from "react-native";
 import { useFileUpload } from "../utils/file-upload";
 import type {
   ClassWithSections,
@@ -16,6 +16,7 @@ import { trpc } from "../utils/trpc";
 import { parseISO } from "date-fns";
 import useColorScheme from "../utils/useColorScheme";
 import { ModalTextInput } from "./ModalTextInput";
+import { PendingAttachment } from "./attachments/PendingAttachment";
 
 interface HomeworkFormData {
   class_id: number;
@@ -198,33 +199,43 @@ export default function HomeworkForm({
         <View
           style={{
             flexDirection: "row",
-            margin: 14,
-            justifyContent: "space-between",
-            marginLeft: 30,
-            marginRight: 30,
+            margin: 16,
+            justifyContent: "space-around",
           }}
         >
-          <View>
-            <Pressable
-              onPress={() => fileUploadHandler.pickAndUploadFile()}
-              style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
-            >
-              <Ionicons name="cloud-upload-sharp" size={25} color={iconColor} />
-            </Pressable>
+          <Pressable
+            onPress={() => fileUploadHandler.pickAndUploadFile()}
+            style={({ pressed }) => [
+              { opacity: pressed ? 0.7 : 1, alignItems: "center" },
+            ]}
+          >
+            <Ionicons name="cloud-upload-sharp" size={25} color={iconColor} />
             <Text>Upload File</Text>
-          </View>
+          </Pressable>
 
-          <View>
-            <Pressable
-              onPress={() => fileUploadHandler.pickAndUploadCamera()}
-              style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
-            >
-              <Ionicons name="camera" size={25} color={iconColor} />
-            </Pressable>
-
-            <Text>Take Photo</Text>
-          </View>
+          <Pressable
+            onPress={() => fileUploadHandler.pickAndUploadCamera()}
+            style={({ pressed }) => [
+              { opacity: pressed ? 0.7 : 1, alignItems: "center" },
+            ]}
+          >
+            <Ionicons name="camera" size={25} color={iconColor} />
+            <Text>Open camera</Text>
+          </Pressable>
         </View>
+
+        {/* Pending attachments */}
+        {fileUploadHandler.uploadTasks.length > 0 && (
+          <View style={{ padding: 8 }}>
+            <List
+              horizontal
+              estimatedItemSize={200}
+              data={fileUploadHandler.uploadTasks}
+              contentContainerStyle={styles.pending_attachments_list}
+              renderItem={({ item }) => <PendingAttachment uploadTask={item} />}
+            />
+          </View>
+        )}
 
         {/* Text editor modal */}
         <ModalTextInput
@@ -256,14 +267,24 @@ export default function HomeworkForm({
 
       <FAB
         onPress={() => {
-          if (selectedSection && selectedClass && selectedSubject) {
+          if (
+            selectedSection &&
+            selectedClass &&
+            selectedSubject &&
+            fileUploadHandler.allDone
+          ) {
             onSubmit({
               class_id: selectedClass.numeric_id,
               section_id: selectedSection,
               subject_id: selectedSubject,
               due_date: dueDate,
               text: textContent,
-              // new_file_permissions,
+              new_file_permissions: fileUploadHandler.uploadTasks.map(
+                (task) => ({
+                  permission_id: task.permission.id,
+                  file_name: task.file.name,
+                }),
+              ),
               // remove_attachments,
             });
           } else {
@@ -281,3 +302,9 @@ export default function HomeworkForm({
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  pending_attachments_list: {
+    backgroundColor: "transparent",
+  },
+});
