@@ -8,15 +8,18 @@ import type {
   ClassWithSections,
   Homework,
   RouterInput,
+  UploadedFile,
 } from "schooltalk-shared/types";
 import ModalSelector from "react-native-modal-selector";
 import { FAB, ListItem } from "@rneui/themed";
+import MIMEType from "whatwg-mimetype";
 import { useConfig } from "../utils/config";
 import { trpc } from "../utils/trpc";
 import { parseISO } from "date-fns";
 import useColorScheme from "../utils/useColorScheme";
 import { ModalTextInput } from "./ModalTextInput";
 import { PendingAttachment } from "./attachments/PendingAttachment";
+import { FilePreview, FullScreenFilePreview } from "./attachments/FilePreview";
 
 interface HomeworkFormData {
   class_id: number;
@@ -80,9 +83,22 @@ export default function HomeworkForm({
     (s) => s.id === selectedSubject,
   );
 
+  // Image preview
+  const [pressedFileId, setPressedFileId] = useState<string | null>(null);
+  const handleFilePress = (file: UploadedFile, index: number) => {
+    const mime = file.mime ? MIMEType.parse(file.mime) : null;
+
+    if (mime?.type === "image") {
+      setPressedFileId(file.id);
+    }
+  };
+
   return (
     <>
-      <ScrollView style={style} keyboardShouldPersistTaps="always">
+      <ScrollView
+        style={[styles.container, style]}
+        keyboardShouldPersistTaps="always"
+      >
         <ModalSelector
           data={
             classesAndSectionsData.data?.map((c) => ({
@@ -237,6 +253,25 @@ export default function HomeworkForm({
           </View>
         )}
 
+        {/* Existing files */}
+        {homework?.Attachments && homework.Attachments.length > 0 && (
+          <View style={{ padding: 8, minHeight: 500 }}>
+            <List
+              estimatedItemSize={200}
+              data={homework.Attachments}
+              contentContainerStyle={styles.pending_attachments_list}
+              renderItem={({ item, index }) => (
+                <FilePreview
+                  fileIdOrObject={item.File}
+                  index={index}
+                  style={{ marginBottom: 8 }}
+                  onPress={handleFilePress}
+                />
+              )}
+            />
+          </View>
+        )}
+
         {/* Text editor modal */}
         <ModalTextInput
           isVisible={isTextModalOpen}
@@ -263,6 +298,8 @@ export default function HomeworkForm({
             setDatePickerVisible(false);
           }}
         />
+
+        <View style={styles.bottom_margin} />
       </ScrollView>
 
       <FAB
@@ -299,12 +336,25 @@ export default function HomeworkForm({
         icon={<Ionicons name="checkmark" size={24} color={"white"} />}
         placement="right"
       />
+
+      <FullScreenFilePreview
+        files={homework?.Attachments?.map((att) => att.File) ?? []}
+        visible={!!pressedFileId}
+        initialFileId={pressedFileId}
+        onClose={() => setPressedFileId(null)}
+      />
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    paddingBottom: 24,
+  },
   pending_attachments_list: {
     backgroundColor: "transparent",
+  },
+  bottom_margin: {
+    height: 64,
   },
 });

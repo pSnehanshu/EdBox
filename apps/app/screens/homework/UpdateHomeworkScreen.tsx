@@ -17,7 +17,7 @@ export default function UpdateHomeworkScreen({
 
   const updateHomework = trpc.school.homework.update.useMutation({
     onSuccess(data) {
-      navigation.navigate("DisplayHomeworkScreen", {
+      navigation.replace("DisplayHomeworkScreen", {
         homeworkId,
       });
     },
@@ -27,7 +27,7 @@ export default function UpdateHomeworkScreen({
   });
 
   return (
-    <View>
+    <View style={{ height: "100%" }}>
       <Spinner visible={homeworkQuery.isLoading} textContent="Fetching..." />
 
       {homeworkQuery.data && (
