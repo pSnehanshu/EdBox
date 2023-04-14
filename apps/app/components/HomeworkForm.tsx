@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { View, Text, TextInput } from "./Themed";
 import DatePicker from "react-native-date-picker";
 import SelectDropdown from "react-native-select-dropdown";
@@ -13,7 +13,6 @@ import type {
 import { useConfig } from "../utils/config";
 import { trpc } from "../utils/trpc";
 import { parseISO } from "date-fns";
-import { Button } from "@rneui/themed";
 
 interface HomeworkFormData {
   class_id: number;
@@ -50,11 +49,31 @@ export default function HomeworkForm({
   const classesAndSectionsData =
     trpc.school.class.fetchClassesAndSections.useQuery(
       { schoolId: config.schoolId },
-      { cacheTime: 0 },
+      {
+        cacheTime: 0,
+        onSuccess(data) {
+          // Initialize selected class and section
+          setSelectedClass((c) => {
+            if (c) return c;
+            return data.find((d) => d.numeric_id === homework?.class_id);
+          });
+        },
+      },
     );
 
   // subjects
   const subjectsQuery = trpc.school.subject.fetchSubjects.useQuery({});
+
+  // Default values
+  const defaultClassIndex = classesAndSectionsData.data?.findIndex(
+    (c) => c.numeric_id === homework?.class_id,
+  );
+  const defaultSectionIndex = classesAndSectionsData.data
+    ?.at(defaultClassIndex ?? 0)
+    ?.Sections.findIndex((s) => s.numeric_id === homework?.section_id);
+  const defaultSubjectIndex = subjectsQuery.data?.findIndex(
+    (s) => s.id === homework?.subject_id,
+  );
 
   return (
     <>
@@ -69,6 +88,7 @@ export default function HomeworkForm({
               setSelectedSection(undefined);
             }}
             defaultButtonText={"Select Class"}
+            defaultValueByIndex={defaultClassIndex}
             buttonTextAfterSelection={(selectedItem) =>
               `Class ${selectedItem.name ?? selectedItem.numeric_id.toString()}`
             }
@@ -96,10 +116,9 @@ export default function HomeworkForm({
           <SelectDropdown
             data={selectedClass?.Sections ?? []}
             disabled={!selectedClass}
-            onSelect={(item) => {
-              setSelectedSection(item.numeric_id);
-            }}
+            onSelect={(item) => setSelectedSection(item.numeric_id)}
             defaultButtonText={"Select Sections"}
+            defaultValueByIndex={defaultSectionIndex}
             buttonTextAfterSelection={(selectedItem) =>
               `Section ${selectedItem.name ?? selectedItem.numeric_id}`
             }
@@ -123,28 +142,31 @@ export default function HomeworkForm({
         </View>
       </View>
       <View>
-        <Text>Subject</Text>
+        <>
+          <Text>Subject</Text>
 
-        <SelectDropdown
-          data={subjectsQuery.data ?? []}
-          onSelect={(item) => setSelectedSubject(item.id)}
-          defaultButtonText={"Select Subject"}
-          buttonTextAfterSelection={(selectedItem) => selectedItem.name}
-          rowTextForSelection={(item) => item.name}
-          dropdownIconPosition={"right"}
-          renderDropdownIcon={(isOpened) => (
-            <FontAwesome
-              name={isOpened ? "chevron-up" : "chevron-down"}
-              color={"#444"}
-              size={18}
-            />
-          )}
-          // buttonStyle={styles.dropdown1BtnStyle}
-          // buttonTextStyle={styles.dropdown1BtnTxtStyle}
-          // dropdownStyle={styles.dropdown1DropdownStyle}
-          // rowStyle={styles.dropdown1RowStyle}
-          // rowTextStyle={styles.dropdown1RowTxtStyle}
-        />
+          <SelectDropdown
+            data={subjectsQuery.data ?? []}
+            onSelect={(item) => setSelectedSubject(item.id)}
+            defaultButtonText={"Select Subject"}
+            defaultValueByIndex={defaultSubjectIndex}
+            buttonTextAfterSelection={(selectedItem) => selectedItem.name}
+            rowTextForSelection={(item) => item.name}
+            dropdownIconPosition={"right"}
+            renderDropdownIcon={(isOpened) => (
+              <FontAwesome
+                name={isOpened ? "chevron-up" : "chevron-down"}
+                color={"#444"}
+                size={18}
+              />
+            )}
+            // buttonStyle={styles.dropdown1BtnStyle}
+            // buttonTextStyle={styles.dropdown1BtnTxtStyle}
+            // dropdownStyle={styles.dropdown1DropdownStyle}
+            // rowStyle={styles.dropdown1RowStyle}
+            // rowTextStyle={styles.dropdown1RowTxtStyle}
+          />
+        </>
 
         <Text>Text</Text>
 
@@ -237,10 +259,16 @@ export default function HomeworkForm({
                 // new_file_permissions,
                 // remove_attachments,
               });
+            } else {
+              console.log("Select all data", {
+                selectedSection,
+                selectedClass,
+                selectedSubject,
+              });
             }
           }}
         >
-          <Button>{homework ? "Update" : "Create"}</Button>
+          <Text>{homework ? "Update" : "Create"}</Text>
         </Pressable>
       </View>
     </>

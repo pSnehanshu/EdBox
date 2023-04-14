@@ -1,5 +1,5 @@
 import Spinner from "react-native-loading-spinner-overlay/lib";
-import { View } from "../../components/Themed";
+import { ScrollView } from "../../components/Themed";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../utils/types/common";
 import HomeworkForm from "../../components/HomeworkForm";
@@ -27,21 +27,22 @@ export default function UpdateHomeworkScreen({
   });
 
   return (
-    <View>
+    <ScrollView>
       <Spinner visible={homeworkQuery.isLoading} textContent="Fetching..." />
 
       {homeworkQuery.data && (
         <HomeworkForm
           homework={homeworkQuery.data}
-          onSubmit={(hw) =>
+          onSubmit={(hw) => {
+            homeworkQuery.remove();
             updateHomework.mutate({
               ...hw,
               homework_id: homeworkId,
               due_date: hw.due_date?.toISOString(),
-            })
-          }
+            });
+          }}
         />
       )}
-    </View>
+    </ScrollView>
   );
 }

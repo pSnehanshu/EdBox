@@ -54,6 +54,8 @@ export default function HomeWorkScreen({
               }
             />
           )}
+          onRefresh={() => homeworkQuery.refetch()}
+          refreshing={homeworkQuery.isFetching}
         />
       </SafeAreaView>
     </View>

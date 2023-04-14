@@ -192,6 +192,9 @@ const homeworkRouter = t.router({
       z.object({
         homework_id: z.string().cuid(),
         text: z.string().optional(),
+        section_id: z.number().int().optional(),
+        class_id: z.number().int().optional(),
+        subject_id: z.string().cuid().optional(),
         due_date: DateSchema.optional(),
         remove_attachments: z.string().cuid().array().optional(),
         new_file_permissions: FilePermissionsInputSchema.array().default([]),
@@ -219,6 +222,9 @@ const homeworkRouter = t.router({
         data: {
           text: input.text,
           due_date: input.due_date,
+          class_id: input.class_id,
+          section_id: input.section_id,
+          subject_id: input.subject_id,
         },
       });
 
