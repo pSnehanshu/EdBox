@@ -25,7 +25,7 @@ const homeworkRouter = t.router({
         section_id: z.number().int(),
         class_id: z.number().int(),
         limit: z.number().int().min(1).max(20).default(10),
-        page: z.number().int().min(1).default(1),
+        cursor: z.number().int().min(1).default(1),
         after_due_date: DateSchema.optional(),
       }),
     )
@@ -72,20 +72,26 @@ const homeworkRouter = t.router({
             Class: true,
             Section: true,
           },
-          take: input.limit,
-          skip: (input.page - 1) * input.limit,
+          take: input.limit + 1,
+          skip: (input.cursor - 1) * input.limit,
         }),
         prisma.homework.count({ where }),
       ]);
 
-      return { data: homeworks, total };
+      let nextCursor: number | undefined = undefined;
+      if (homeworks.length > input.limit) {
+        nextCursor = input.cursor + 1;
+        homeworks.pop();
+      }
+
+      return { data: homeworks, total, nextCursor };
     }),
   fetchForTeacher: t.procedure
     .use(teacherMiddleware)
     .input(
       z.object({
         limit: z.number().int().min(1).max(20).default(10),
-        page: z.number().int().min(1).default(1),
+        cursor: z.number().int().min(1).default(1),
         after_due_date: DateSchema.optional(),
       }),
     )
@@ -131,13 +137,19 @@ const homeworkRouter = t.router({
             Class: true,
             Section: true,
           },
-          take: input.limit,
-          skip: (input.page - 1) * input.limit,
+          take: input.limit + 1,
+          skip: (input.cursor - 1) * input.limit,
         }),
         prisma.homework.count({ where }),
       ]);
 
-      return { data: homeworks, total };
+      let nextCursor: number | undefined = undefined;
+      if (homeworks.length > input.limit) {
+        nextCursor = input.cursor + 1;
+        homeworks.pop();
+      }
+
+      return { data: homeworks, total, nextCursor };
     }),
   fetchHomework: t.procedure
     .use(authMiddleware)
