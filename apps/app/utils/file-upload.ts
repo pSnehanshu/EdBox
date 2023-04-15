@@ -23,7 +23,9 @@ function uploadFileToS3(file: FileUploadTask["file"], s3url: string) {
       uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
       headers: {
         "Content-Type": file.mimeType ?? "application/octet-stream",
-        "Content-Disposition": `attachment; filename="${file.name}"`,
+        "Content-Disposition": `attachment; filename="${encodeURIComponent(
+          file.name ?? "",
+        )}"`,
       },
     },
     (progress) => {

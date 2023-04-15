@@ -220,17 +220,17 @@ function RootNavigator() {
                   title: "Homeworks",
                 }}
               />
-
-              <Stack.Screen
-                name="DisplayHomeworkScreen"
-                component={DisplayHomeworkScreen}
-                options={{
-                  headerShown: true,
-                  title: "Homework details",
-                }}
-              />
             </>
           ) : null}
+
+          <Stack.Screen
+            name="DisplayHomeworkScreen"
+            component={DisplayHomeworkScreen}
+            options={{
+              headerShown: true,
+              title: "Homework",
+            }}
+          />
 
           <Stack.Screen
             name="AboutApp"
