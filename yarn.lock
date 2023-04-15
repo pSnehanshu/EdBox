@@ -9676,6 +9676,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"linkify-it@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "linkify-it@npm:4.0.1"
+  dependencies:
+    uc.micro: ^1.0.1
+  checksum: 3e0a29921269c14eb7ac6f5db2da68d4854ea9acca6e9014a323f75f2dd39b197ffab57c1fbd6a906ceb021aad3ee6d7ba7d0181236dd9630ffc452b392f7f71
+  languageName: node
+  linkType: hard
+
 "locate-path@npm:^3.0.0":
   version: 3.0.0
   resolution: "locate-path@npm:3.0.0"
@@ -9923,6 +9932,13 @@ __metadata:
   version: 1.0.0
   resolution: "md5hex@npm:1.0.0"
   checksum: eabca53391ef32429f78fc5c83d7c7cebee9ee88db79854492a5e19de2880d4497523b4489abeeb920fcd5bae9ee7a6d8aa343d55ed91866b2d50e619047b639
+  languageName: node
+  linkType: hard
+
+"mdurl@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "mdurl@npm:1.0.1"
+  checksum: 71731ecba943926bfbf9f9b51e28b5945f9411c4eda80894221b47cc105afa43ba2da820732b436f0798fd3edbbffcd1fc1415843c41a87fea08a41cc1e3d02b
   languageName: node
   linkType: hard
 
@@ -11780,6 +11796,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-hyperlink@npm:^0.0.22":
+  version: 0.0.22
+  resolution: "react-native-hyperlink@npm:0.0.22"
+  dependencies:
+    linkify-it: ^4.0.1
+    mdurl: ^1.0.1
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: c459688c4d9541bc1be17bbed13d1ceac127097ac0a07013a7555a824821a630e76962c63e336cf77916d21f1cb703b8b5f0c98662e85eefe2055e7a7334c389
+  languageName: node
+  linkType: hard
+
 "react-native-image-viewing@npm:^0.2.2":
   version: 0.2.2
   resolution: "react-native-image-viewing@npm:0.2.2"
@@ -12631,6 +12660,7 @@ __metadata:
     react-dom: 18.1.0
     react-native: 0.70.8
     react-native-date-picker: ^4.2.10
+    react-native-hyperlink: ^0.0.22
     react-native-image-viewing: ^0.2.2
     react-native-loading-spinner-overlay: ^3.0.1
     react-native-modal-selector: ^2.1.2
@@ -13948,6 +13978,13 @@ __metadata:
   version: 0.7.32
   resolution: "ua-parser-js@npm:0.7.32"
   checksum: 6b6b035dd78a0ab3369f166ab6f26225d823d83630788806d634f16259297a8f4ae6fe0be4e48f4353ac10dffded3971d7745c55d1432fdfc78a893ba58ef044
+  languageName: node
+  linkType: hard
+
+"uc.micro@npm:^1.0.1":
+  version: 1.0.6
+  resolution: "uc.micro@npm:1.0.6"
+  checksum: 6898bb556319a38e9cf175e3628689347bd26fec15fc6b29fa38e0045af63075ff3fea4cf1fdba9db46c9f0cbf07f2348cd8844889dd31ebd288c29fe0d27e7a
   languageName: node
   linkType: hard
 

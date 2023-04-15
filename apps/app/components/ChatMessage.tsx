@@ -2,6 +2,7 @@ import { memo, useCallback, useMemo, useState } from "react";
 import { format, isThisYear, isToday, isYesterday } from "date-fns";
 import { useCurrentUser } from "../utils/auth";
 import { Text, View } from "./Themed";
+import Hyperlink from "react-native-hyperlink";
 import { Alert, Pressable, StyleSheet } from "react-native";
 import type { Message, UploadedFile } from "schooltalk-shared/types";
 import MIMEType from "whatwg-mimetype";
@@ -110,10 +111,15 @@ function _ChatMessage({ message }: ChatMessageProps) {
           opacity: pressed ? 0.4 : 1,
         })}
       >
-        <Text style={[styles.body, { color }]}>
-          {trimmedMessage}
-          {shouldCollapse ? "..." : ""}
-        </Text>
+        <Hyperlink
+          linkDefault
+          linkStyle={{ color: "#54bfe5", textDecorationLine: "underline" }}
+        >
+          <Text style={[styles.body, { color }]}>
+            {trimmedMessage}
+            {shouldCollapse ? "..." : ""}
+          </Text>
+        </Hyperlink>
       </Pressable>
 
       {shouldCollapse && (

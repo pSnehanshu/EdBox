@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import Hyperlink from "react-native-hyperlink";
 import { View, Text, ScrollView, List } from "../../components/Themed";
 import { RootStackParamList } from "../../utils/types/common";
 import {
@@ -161,7 +162,12 @@ export default function DisplayHomeworkScreen({
         {homework?.text && (
           <Card>
             <Card.Title>Homework Description</Card.Title>
-            <Text style={styles.text}>{homework?.text}</Text>
+            <Hyperlink
+              linkDefault
+              linkStyle={{ color: "#2980b9", textDecorationLine: "underline" }}
+            >
+              <Text style={styles.text}>{homework?.text}</Text>
+            </Hyperlink>
           </Card>
         )}
 
