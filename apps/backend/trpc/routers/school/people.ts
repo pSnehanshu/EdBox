@@ -96,7 +96,7 @@ const peopleRouter = t.router({
         section: true,
         CurrentBatch: {
           select: {
-            class_id: true,
+            Class: true,
           },
         },
       },
@@ -107,9 +107,27 @@ const peopleRouter = t.router({
         code: "NOT_FOUND",
       });
 
+    if (!student.CurrentBatch?.Class) {
+      return null;
+    }
+
+    if (!student.section) {
+      return { Class: student.CurrentBatch.Class, Section: null };
+    }
+
+    const Section = await prisma.classSection.findUnique({
+      where: {
+        numeric_id_class_id_school_id: {
+          class_id: student.CurrentBatch.Class.numeric_id,
+          numeric_id: student.section,
+          school_id: ctx.user.school_id,
+        },
+      },
+    });
+
     return {
-      class_id: student.CurrentBatch?.class_id,
-      section_id: student.section,
+      Class: student.CurrentBatch.Class,
+      Section: Section,
     };
   }),
 });

@@ -39,11 +39,12 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
       testId,
       periodsFilter:
         hasUserStaticRoles(user, [StaticRole.student], "all") &&
-        typeof classAndSectionQuery.data?.class_id === "number"
+        classAndSectionQuery.data?.Class
           ? {
               // Filter out periods (and teachers) if the user is a student
-              class_id: classAndSectionQuery.data.class_id,
-              section_id: classAndSectionQuery.data.section_id ?? undefined,
+              class_id: classAndSectionQuery.data.Class.numeric_id,
+              section_id:
+                classAndSectionQuery.data?.Section?.numeric_id ?? undefined,
             }
           : undefined,
     },
