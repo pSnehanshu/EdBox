@@ -1,13 +1,14 @@
+import { useMemo } from "react";
 import { Pressable, StyleSheet, SafeAreaView } from "react-native";
 import { RootStackParamList } from "../../utils/types/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { List, Text, View } from "../../components/Themed";
 import { FAB } from "@rneui/themed";
 import { Ionicons } from "@expo/vector-icons";
+import { Homework } from "schooltalk-shared/types";
+import { format, parseISO, isPast } from "date-fns";
 import { trpc } from "../../utils/trpc";
 import useColorScheme from "../../utils/useColorScheme";
-import { Homework } from "schooltalk-shared/types";
-import { format, parseISO } from "date-fns";
 
 export default function HomeWorkScreen({
   navigation,
@@ -63,10 +64,29 @@ export default function HomeWorkScreen({
 }
 
 interface HomeworkProps {
-  homework: Homework | any;
+  homework: Homework;
   onClick: () => void;
 }
 function SingleHomework({ homework, onClick }: HomeworkProps) {
+  const dueDate = useMemo(
+    () => (homework.due_date ? parseISO(homework.due_date) : null),
+    [homework.due_date],
+  );
+
+  const dueDateStr = useMemo(() => {
+    if (!dueDate) return null;
+
+    return `${format(dueDate, "MMM dd, yyyy")}\n${format(
+      dueDate,
+      "hh:mm aaa",
+    )}`;
+  }, [dueDate]);
+
+  const isPastDue = useMemo(
+    () => (dueDate ? isPast(dueDate) : false),
+    [dueDate],
+  );
+
   return (
     <Pressable
       style={({ pressed }) => [
@@ -82,31 +102,16 @@ function SingleHomework({ homework, onClick }: HomeworkProps) {
         </Text>
       </View>
       <View style={styles.chatGroupRight}>
-        <Text style={styles.chatGroupLastMessage}>
-          Due-
-          {homework.due_date
-            ? format(parseISO(homework.due_date), "dd-MM-yyyy")
-            : "NA"}
-        </Text>
-      </View>
-      <View>
-        {/* <Pressable
-          style={{
-            backgroundColor: "white",
-            borderRadius: 15,
-            padding: 15,
-            paddingLeft: 20,
-            paddingRight: 20,
-          }}
-          onPress={() => {
-            openModal();
-            // setHomeworkFormData(homework);
-          }}
-        >
-          <Text style={{ fontSize: 16, fontWeight: "500", color: "black" }}>
-            View
+        {dueDateStr && (
+          <Text
+            style={[
+              styles.chatGroupLastMessage,
+              { textAlign: "right", color: isPastDue ? "red" : "gray" },
+            ]}
+          >
+            Due date: {"\n" + dueDateStr}
           </Text>
-        </Pressable> */}
+        )}
       </View>
     </Pressable>
   );

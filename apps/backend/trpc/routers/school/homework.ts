@@ -64,7 +64,13 @@ const homeworkRouter = t.router({
                 },
               },
             },
-            Attachments: true,
+            Attachments: {
+              include: {
+                File: true,
+              },
+            },
+            Class: true,
+            Section: true,
           },
           take: input.limit,
           skip: (input.page - 1) * input.limit,
@@ -108,7 +114,22 @@ const homeworkRouter = t.router({
           },
           include: {
             Subject: true,
-            Attachments: true,
+            Teacher: {
+              include: {
+                User: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
+            Attachments: {
+              include: {
+                File: true,
+              },
+            },
+            Class: true,
+            Section: true,
           },
           take: input.limit,
           skip: (input.page - 1) * input.limit,
@@ -138,6 +159,15 @@ const homeworkRouter = t.router({
           Attachments: {
             include: {
               File: true,
+            },
+          },
+          Teacher: {
+            include: {
+              User: {
+                select: {
+                  name: true,
+                },
+              },
             },
           },
         },

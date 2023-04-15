@@ -107,14 +107,32 @@ function RootNavigator() {
             })}
           />
           {hasUserStaticRoles(user, [StaticRole.teacher], "all") ? (
-            <Stack.Screen
-              name="AttendanceTaker"
-              component={AttendanceTakerScreen}
-              options={{
-                headerShown: true,
-                title: "Take Attendance",
-              }}
-            />
+            <>
+              <Stack.Screen
+                name="AttendanceTaker"
+                component={AttendanceTakerScreen}
+                options={{
+                  headerShown: true,
+                  title: "Take Attendance",
+                }}
+              />
+              <Stack.Screen
+                name="CreateHomeworkScreen"
+                component={CreateHomeworkScreen}
+                options={{
+                  headerShown: true,
+                  title: "Create Homework",
+                }}
+              />
+              <Stack.Screen
+                name="UpdateHomeworkScreen"
+                component={UpdateHomeworkScreen}
+                options={{
+                  headerShown: true,
+                  title: "Update Homework",
+                }}
+              />
+            </>
           ) : null}
           {hasUserStaticRoles(
             user,
@@ -199,31 +217,16 @@ function RootNavigator() {
                 component={HomeWorkScreen}
                 options={{
                   headerShown: true,
-                  title: "Home Work",
+                  title: "Homeworks",
                 }}
               />
-              <Stack.Screen
-                name="CreateHomeworkScreen"
-                component={CreateHomeworkScreen}
-                options={{
-                  headerShown: true,
-                  title: "Create Home Work",
-                }}
-              />
+
               <Stack.Screen
                 name="DisplayHomeworkScreen"
                 component={DisplayHomeworkScreen}
                 options={{
                   headerShown: true,
-                  title: "Display Home Work",
-                }}
-              />
-              <Stack.Screen
-                name="UpdateHomeworkScreen"
-                component={UpdateHomeworkScreen}
-                options={{
-                  headerShown: true,
-                  title: "Update Home Work",
+                  title: "Homework details",
                 }}
               />
             </>

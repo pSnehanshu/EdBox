@@ -19,9 +19,9 @@ import type {
 import ModalSelector from "react-native-modal-selector";
 import { FAB, ListItem } from "@rneui/themed";
 import MIMEType from "whatwg-mimetype";
+import { format, parseISO } from "date-fns";
 import { useConfig } from "../utils/config";
 import { trpc } from "../utils/trpc";
-import { parseISO } from "date-fns";
 import useColorScheme from "../utils/useColorScheme";
 import { ModalTextInput } from "./ModalTextInput";
 import { PendingAttachment } from "./attachments/PendingAttachment";
@@ -108,10 +108,7 @@ export default function HomeworkForm({
 
   return (
     <>
-      <ScrollView
-        style={[styles.container, style]}
-        keyboardShouldPersistTaps="always"
-      >
+      <ScrollView style={[styles.container, style]}>
         <ModalSelector
           data={
             classesAndSectionsData.data?.map((c) => ({
@@ -202,7 +199,9 @@ export default function HomeworkForm({
             <ListItem.Content>
               <ListItem.Title>Due date (optional)</ListItem.Title>
               <ListItem.Subtitle>
-                {dueDate?.toLocaleDateString() ?? "No due date"}
+                {dueDate
+                  ? format(dueDate, "MMM dd, yyyy hh:mm aaa")
+                  : "No due date"}
               </ListItem.Subtitle>
             </ListItem.Content>
             {ChevronIcon}
@@ -217,7 +216,7 @@ export default function HomeworkForm({
         >
           <ListItem>
             <ListItem.Content>
-              <ListItem.Title>Text</ListItem.Title>
+              <ListItem.Title>Description (optional)</ListItem.Title>
               <ListItem.Subtitle>{textContent || "Empty"}</ListItem.Subtitle>
             </ListItem.Content>
             {ChevronIcon}
@@ -352,15 +351,6 @@ export default function HomeworkForm({
           </View>
         )}
 
-        {/* Text editor modal */}
-        <ModalTextInput
-          isVisible={isTextModalOpen}
-          onClose={() => setIsTextModalOpen(false)}
-          onChange={setTextContent}
-          defaultValue={textContent}
-          title="Write the homework"
-        />
-
         {/* due date datepicker */}
         <DatePicker
           modal
@@ -381,6 +371,15 @@ export default function HomeworkForm({
 
         <View style={styles.bottom_margin} />
       </ScrollView>
+
+      {/* Text editor modal */}
+      <ModalTextInput
+        isVisible={isTextModalOpen}
+        onClose={() => setIsTextModalOpen(false)}
+        onChange={setTextContent}
+        defaultValue={textContent}
+        title="Homework description"
+      />
 
       <FAB
         onPress={() => {
