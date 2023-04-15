@@ -1,6 +1,11 @@
 import { useMemo } from "react";
 import { Pressable, StyleSheet, SafeAreaView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import {
+  getUserRoleHierarchical,
+  hasUserStaticRoles,
+  StaticRole,
+} from "schooltalk-shared/misc";
 import { RootStackParamList } from "../../utils/types/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { List, Text, View } from "../../components/Themed";
@@ -9,40 +14,77 @@ import { Homework } from "schooltalk-shared/types";
 import { format, parseISO, isPast } from "date-fns";
 import { trpc } from "../../utils/trpc";
 import useColorScheme from "../../utils/useColorScheme";
+import { useCurrentUser } from "../../utils/auth";
+
+const pageLimit = 10;
 
 export default function HomeWorkScreen({
   navigation,
 }: NativeStackScreenProps<RootStackParamList, "HomeWorkScreen">) {
-  const homeworkQuery = trpc.school.homework.fetchForTeacher.useQuery({
-    limit: 10,
-  });
+  const { user } = useCurrentUser();
+  const role = getUserRoleHierarchical(user);
+  const isStudent = hasUserStaticRoles(user, [StaticRole.student], "all");
+  const isTeacher = hasUserStaticRoles(user, [StaticRole.teacher], "all");
+
+  const homeworkTeacherQuery = trpc.school.homework.fetchForTeacher.useQuery(
+    { limit: pageLimit },
+    { enabled: isTeacher },
+  );
+
+  const classAndSectionQuery = trpc.school.people.getStudentClass.useQuery(
+    undefined,
+    { enabled: isStudent },
+  );
+
+  const canFetchSectionHW =
+    isStudent &&
+    classAndSectionQuery.isFetched &&
+    typeof classAndSectionQuery.data?.Class.numeric_id === "number" &&
+    typeof classAndSectionQuery.data?.Section?.numeric_id === "number";
+
+  const homeworkSectionQuery = trpc.school.homework.fetchForSection.useQuery(
+    {
+      limit: pageLimit,
+      class_id: classAndSectionQuery.data?.Class.numeric_id!,
+      section_id: classAndSectionQuery.data?.Section?.numeric_id!,
+    },
+    {
+      enabled: canFetchSectionHW,
+    },
+  );
 
   const color = useColorScheme();
 
   return (
     <View style={{ flex: 1, marginTop: 0 }}>
-      <FAB
-        icon={
-          <Ionicons
-            name="add"
-            size={24}
-            color={color === "dark" ? "black" : "white"}
-          />
-        }
-        style={{
-          position: "absolute",
-          bottom: 10,
-          right: 10,
-          zIndex: 100,
-          elevation: 1,
-          flex: 1,
-        }}
-        color={color === "dark" ? "white" : "black"}
-        onPress={() => navigation.navigate("CreateHomeworkScreen")}
-      />
+      {isTeacher && (
+        <FAB
+          icon={
+            <Ionicons
+              name="add"
+              size={24}
+              color={color === "dark" ? "black" : "white"}
+            />
+          }
+          style={{
+            position: "absolute",
+            bottom: 10,
+            right: 10,
+            zIndex: 100,
+            elevation: 1,
+            flex: 1,
+          }}
+          color={color === "dark" ? "white" : "black"}
+          onPress={() => navigation.navigate("CreateHomeworkScreen")}
+        />
+      )}
       <SafeAreaView style={{ height: "100%", width: "100%" }}>
         <List
-          data={homeworkQuery?.data?.data}
+          data={
+            role === StaticRole.teacher
+              ? homeworkTeacherQuery?.data?.data
+              : homeworkSectionQuery.data?.data
+          }
           keyExtractor={(g) => g.id}
           estimatedItemSize={200}
           renderItem={({ item }) => (
@@ -55,8 +97,13 @@ export default function HomeWorkScreen({
               }
             />
           )}
-          onRefresh={() => homeworkQuery.refetch()}
-          refreshing={homeworkQuery.isFetching}
+          onRefresh={() => {
+            if (isTeacher) homeworkTeacherQuery.refetch();
+            if (canFetchSectionHW) homeworkSectionQuery.refetch();
+          }}
+          refreshing={
+            homeworkTeacherQuery.isFetching || homeworkSectionQuery.isFetching
+          }
         />
       </SafeAreaView>
     </View>
