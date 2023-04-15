@@ -1,10 +1,10 @@
 import { useMemo } from "react";
 import { Pressable, StyleSheet, SafeAreaView } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { RootStackParamList } from "../../utils/types/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { List, Text, View } from "../../components/Themed";
 import { FAB } from "@rneui/themed";
-import { Ionicons } from "@expo/vector-icons";
 import { Homework } from "schooltalk-shared/types";
 import { format, parseISO, isPast } from "date-fns";
 import { trpc } from "../../utils/trpc";
@@ -97,9 +97,17 @@ function SingleHomework({ homework, onClick }: HomeworkProps) {
     >
       <View style={styles.chatGroupMiddle}>
         <Text style={styles.chatGroupName}>{homework.Subject.name}</Text>
-        <Text style={styles.chatGroupLastMessage}>
+        <Text style={styles.chatGroupLastMessage} numberOfLines={1}>
           {homework.text ? homework.text : ""}
         </Text>
+        <View>
+          {homework.Attachments.length > 0 && (
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Ionicons name="attach" size={16} color="gray" />
+              <Text>{homework.Attachments.length}</Text>
+            </View>
+          )}
+        </View>
       </View>
       <View style={styles.chatGroupRight}>
         {dueDateStr && (
