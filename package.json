@@ -21,8 +21,7 @@
   ],
   "dependencies": {
     "@trpc/server": "^10.10.0",
-    "core-js": "^3.27.2",
-    "invariant": "^2.2.4"
+    "core-js": "^3.27.2"
   },
   "packageManager": "yarn@3.3.1",
   "devDependencies": {
