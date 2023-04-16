@@ -20,11 +20,11 @@
     "packages/*"
   ],
   "dependencies": {
-    "core-js": "^3.27.2"
+    "core-js": "^3.30.1"
   },
   "packageManager": "yarn@3.3.1",
   "devDependencies": {
-    "prettier": "^2.8.4"
+    "prettier": "^2.8.7"
   },
   "resolutions": {
     "react-native-raw-bottom-sheet@^2.2.0": "patch:react-native-raw-bottom-sheet@npm%3A2.2.0#./.yarn/patches/react-native-raw-bottom-sheet-npm-2.2.0-e9dc8fb4b8.patch",
