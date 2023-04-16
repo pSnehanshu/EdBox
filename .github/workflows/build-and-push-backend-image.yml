@@ -1,9 +1,9 @@
 name: build-deploy-backend
 
 on:
-  create:
+  push:
     tags:
-      - '*'
+      - 'v*'
     branches:
       - main
 
