@@ -73,7 +73,6 @@
     "react-native-timeline-flatlist": "^0.8.0",
     "react-native-toast-message": "^2.1.5",
     "react-native-web": "~0.18.9",
-    "react-native-webview": "11.26.0",
     "rxjs": "^7.8.0",
     "schooltalk-shared": "*",
     "socket.io-client": "^4.6.1",
