@@ -1,15 +1,25 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Text, View } from "./Themed";
 import { Alert, Pressable, StyleSheet } from "react-native";
-import { Group, Message } from "schooltalk-shared/types";
+import type { Group, Message, UploadedFile } from "schooltalk-shared/types";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMessages } from "../utils/messages-repository";
 import { useCurrentUser } from "../utils/auth";
 import { format, isThisYear, isToday, isYesterday } from "date-fns";
-import { getDisplayName } from "schooltalk-shared/misc";
+import {
+  getDisplayName,
+  hasUserStaticRoles,
+  StaticRole,
+} from "schooltalk-shared/misc";
 import { useNavigation } from "@react-navigation/native";
 import { getSchoolGroupIdentifier } from "schooltalk-shared/group-identifier";
+import MIMEType from "whatwg-mimetype";
+import Hyperlink from "react-native-hyperlink";
 import { useConfig } from "../utils/config";
 import useColorScheme from "../utils/useColorScheme";
+import { FilePreview, FullScreenFilePreview } from "./attachments/FilePreview";
+import { LottieAnimation } from "./LottieAnimation";
+import { useSchool } from "../utils/useSchool";
 
 interface AnnouncementProps {
   message: Message;
@@ -18,6 +28,8 @@ function SingleAnnouncement({ message }: AnnouncementProps) {
   const config = useConfig();
   const { user } = useCurrentUser();
   const time = useMemo(() => {
+    if (!message.created_at) return "N/A";
+
     const date = new Date(message.created_at);
     const time = format(date, "hh:mm aaa");
 
@@ -34,33 +46,44 @@ function SingleAnnouncement({ message }: AnnouncementProps) {
   }, [message.created_at]);
 
   const sender = message.Sender;
-  const shouldCollapse = message.text.length > config.previewMessageLength;
+  const shouldCollapse =
+    (message.text ?? "").length > config.previewMessageLength;
   const trimmedMessage = useMemo(
     () =>
       shouldCollapse
-        ? message.text.slice(0, config.previewMessageLength).trimEnd()
+        ? (message.text ?? "").slice(0, config.previewMessageLength).trimEnd()
         : message.text,
     [message.text],
   );
-  const senderDisplayName = useMemo(() => getDisplayName(sender), [sender]);
+  const senderDisplayName = useMemo(
+    () => (sender ? getDisplayName(sender) : "User"),
+    [sender],
+  );
   const viewFullMessage = useCallback(() => {
     if (shouldCollapse) {
       Alert.alert(senderDisplayName, message.text);
     }
   }, [senderDisplayName, message.text, shouldCollapse]);
 
+  const [pressedFileId, setPressedFileId] = useState<string | null>(null);
+  const handleFilePress = (file: UploadedFile, index: number) => {
+    const mime = file.mime ? MIMEType.parse(file.mime) : null;
+
+    if (mime?.type === "image") {
+      setPressedFileId(file.id);
+    }
+  };
+
   if (!user) return null;
 
-  const isSentByMe = user.id === sender.id;
+  const isSentByMe = user.id === sender?.id;
 
   return (
-    <View style={styles.container}>
+    <View style={styles.single_announcement_container}>
       <View style={styles.announcement_header}>
-        {isSentByMe ? (
-          <Text style={styles.name_text}>You</Text>
-        ) : (
-          <Text style={styles.name_text}>{senderDisplayName}</Text>
-        )}
+        <Text style={styles.name_text}>
+          {isSentByMe ? "You" : senderDisplayName}
+        </Text>
 
         <Text style={styles.time}>{time}</Text>
       </View>
@@ -71,10 +94,17 @@ function SingleAnnouncement({ message }: AnnouncementProps) {
         })}
         onPress={viewFullMessage}
       >
-        <Text style={styles.message_text}>
-          {trimmedMessage}
-          {shouldCollapse ? "..." : ""}
-        </Text>
+        <Hyperlink
+          linkDefault
+          linkStyle={{
+            textDecorationLine: "underline",
+          }}
+        >
+          <Text style={styles.message_text}>
+            {trimmedMessage}
+            {shouldCollapse ? "..." : ""}
+          </Text>
+        </Hyperlink>
       </Pressable>
 
       {shouldCollapse && (
@@ -82,6 +112,27 @@ function SingleAnnouncement({ message }: AnnouncementProps) {
           <Text style={styles.read_more_btn}>Read more</Text>
         </Pressable>
       )}
+
+      {message.Attachments?.length ? (
+        <View style={styles.attachments_container}>
+          {message.Attachments?.map((attachment, index) => (
+            <FilePreview
+              fileIdOrObject={attachment.File}
+              key={attachment.file_id}
+              style={styles.attachment}
+              index={index}
+              onPress={handleFilePress}
+            />
+          ))}
+        </View>
+      ) : null}
+
+      <FullScreenFilePreview
+        files={message.Attachments?.map((att) => att.File) ?? []}
+        visible={!!pressedFileId}
+        initialFileId={pressedFileId}
+        onClose={() => setPressedFileId(null)}
+      />
     </View>
   );
 }
@@ -100,7 +151,21 @@ export default function Announcements() {
 
   const groupMessages = messages.useFetchGroupMessages(group.identifier, 7);
   const navigation = useNavigation();
+
   const scheme = useColorScheme();
+  const color = scheme === "dark" ? "white" : "black";
+
+  const school = useSchool();
+  const { user } = useCurrentUser();
+  const isPrincipal = useMemo(
+    () =>
+      hasUserStaticRoles(
+        user,
+        [StaticRole.principal, StaticRole.vice_principal],
+        "some",
+      ),
+    [user],
+  );
 
   return (
     <View>
@@ -109,23 +174,63 @@ export default function Announcements() {
         <SingleAnnouncement message={message} key={message.id} />
       ))}
 
-      {groupMessages.messages.length > 0 && (
+      {groupMessages.messages.length > 0 ? (
         <Pressable
-          style={[
+          style={({ pressed }) => [
             styles.view_more_btn_wrapper,
-            { borderColor: scheme === "dark" ? "white" : "black" },
+            {
+              borderColor: color,
+              opacity: pressed ? 0.5 : 1,
+            },
           ]}
           onPress={() => navigation.navigate("ChatWindow", group)}
         >
           <Text style={styles.view_more_btn}>View more</Text>
         </Pressable>
+      ) : (
+        <LottieAnimation
+          src={require("../assets/lotties/shake-a-empty-box.json")}
+          caption="No announcements to show. It's quite empty!"
+          style={styles.no_announcements}
+          FooterComponent={
+            isPrincipal && (
+              <>
+                <Text style={{ textAlign: "center" }}>
+                  Messages sent in the {school?.name} group are automatically
+                  treated as announcements.
+                </Text>
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.view_more_btn_wrapper,
+                    {
+                      borderColor: color,
+                      opacity: pressed ? 0.5 : 1,
+                    },
+                  ]}
+                  onPress={() => navigation.navigate("ChatWindow", group)}
+                >
+                  <MaterialCommunityIcons
+                    name="lead-pencil"
+                    size={16}
+                    color={color}
+                    style={{ marginRight: 8 }}
+                  />
+                  <Text style={styles.view_more_btn}>
+                    Write an announcement
+                  </Text>
+                </Pressable>
+              </>
+            )
+          }
+          FooterComponentStyle={styles.write_announcement}
+        />
       )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  single_announcement_container: {
     flex: 1,
     paddingVertical: 8,
     paddingLeft: 16,
@@ -159,11 +264,13 @@ const styles = StyleSheet.create({
     textAlign: "right",
     paddingRight: 6,
     opacity: 0.6,
+    color: "white",
   },
   name_text: {
     fontSize: 12,
     opacity: 0.6,
     textDecorationLine: "underline",
+    color: "white",
   },
   message_text: {
     color: "white",
@@ -173,16 +280,39 @@ const styles = StyleSheet.create({
   },
   view_more_btn_wrapper: {
     flex: 1,
-    padding: 7,
+    padding: 8,
     borderRadius: 5,
     borderWidth: 2,
     marginVertical: 16,
     marginHorizontal: 24,
-    justifyContent: "flex-start",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
   },
   read_more_btn: {
     textDecorationLine: "underline",
     color: "#50b4c1",
     fontSize: 10,
+  },
+  attachments_container: {
+    backgroundColor: "transparent",
+    marginTop: 24,
+    marginRight: 8,
+  },
+  attachment: {
+    borderWidth: 0,
+    marginBottom: 8,
+  },
+  no_announcements: {
+    marginBottom: 16,
+  },
+  write_announcement: {
+    padding: 4,
+    paddingVertical: 16,
+    marginTop: 16,
+    marginHorizontal: 16,
+    borderRadius: 8,
+    borderColor: "gray",
+    borderWidth: 0.5,
   },
 });

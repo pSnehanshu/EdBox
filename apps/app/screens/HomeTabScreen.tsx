@@ -65,6 +65,7 @@ export default function HomeTabScreen({}: RootTabScreenProps<"HomeTab">) {
 const styles = StyleSheet.create({
   container: {
     marginTop: 0,
+    flex: 1,
   },
   header_container: {
     paddingTop: 55,

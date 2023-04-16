@@ -85,17 +85,11 @@ const examRouter = t.router({
         include: {
           Exam: true,
           Subjects: {
-            where: {
-              Subject: {
-                is_active: true,
-              },
-            },
             include: {
               Subject: {
                 include: {
                   Periods: {
                     where: {
-                      is_active: true,
                       school_id: ctx.user.school_id,
                       class_id: input.periodsFilter?.class_id,
                       section_id: input.periodsFilter?.section_id,
@@ -115,7 +109,7 @@ const examRouter = t.router({
         },
       });
 
-      if (!test || !test.is_active || test.school_id !== ctx.user.school_id)
+      if (!test || test.school_id !== ctx.user.school_id)
         throw new TRPCError({
           code: "NOT_FOUND",
         });
@@ -273,23 +267,14 @@ const examRouter = t.router({
         where: {
           id: input.examId,
           school_id: ctx.user.school_id,
-          is_active: true,
         },
         include: {
           Tests: {
-            where: {
-              is_active: true,
-            },
             orderBy: {
               date_of_exam: "asc",
             },
             include: {
               Subjects: {
-                where: {
-                  Subject: {
-                    is_active: true,
-                  },
-                },
                 include: {
                   Subject: true,
                 },
@@ -396,11 +381,7 @@ const examRouter = t.router({
         },
       });
 
-      if (
-        !student ||
-        !student.CurrentBatch?.is_active ||
-        !student.CurrentBatch.class_id
-      )
+      if (!student || !student.CurrentBatch?.class_id)
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Student not found",
@@ -409,20 +390,12 @@ const examRouter = t.router({
       const tests: ExamTest[] = await prisma.examTest.findMany({
         where: {
           school_id: ctx.user.school_id,
-          class_id: student.CurrentBatch.class_id,
+          class_id: student.CurrentBatch?.class_id,
           date_of_exam: { gte: input.after_date },
-          is_active: true,
           OR: [{ section_id: student.section }, { section_id: null }],
           AND: [
             {
-              OR: [
-                { exam_id: null },
-                {
-                  Exam: {
-                    is_active: true,
-                  },
-                },
-              ],
+              OR: [{ exam_id: null }],
             },
           ],
         },
@@ -431,7 +404,6 @@ const examRouter = t.router({
             include: {
               Tests: {
                 where: {
-                  is_active: true,
                   class_id: student.CurrentBatch.class_id,
                   OR: [{ section_id: student.section }, { section_id: null }],
                 },
@@ -440,11 +412,6 @@ const examRouter = t.router({
                 },
                 include: {
                   Subjects: {
-                    where: {
-                      Subject: {
-                        is_active: true,
-                      },
-                    },
                     include: {
                       Subject: true,
                     },
@@ -454,11 +421,6 @@ const examRouter = t.router({
             },
           },
           Subjects: {
-            where: {
-              Subject: {
-                is_active: true,
-              },
-            },
             include: {
               Subject: true,
             },
@@ -516,15 +478,12 @@ const examRouter = t.router({
     .query(async ({ input, ctx }): Promise<ExamItem[]> => {
       const tests: ExamTest[] = await prisma.examTest.findMany({
         where: {
-          is_active: true,
           school_id: ctx.user.school_id,
           Subjects: {
             some: {
               Subject: {
-                is_active: true,
                 Periods: {
                   some: {
-                    is_active: true,
                     teacher_id: ctx.user.Teacher?.id,
                   },
                 },
@@ -537,14 +496,11 @@ const examRouter = t.router({
             include: {
               Tests: {
                 where: {
-                  is_active: true,
                   Subjects: {
                     some: {
                       Subject: {
-                        is_active: true,
                         Periods: {
                           some: {
-                            is_active: true,
                             teacher_id: ctx.user.Teacher?.id,
                           },
                         },
@@ -557,11 +513,6 @@ const examRouter = t.router({
                 },
                 include: {
                   Subjects: {
-                    where: {
-                      Subject: {
-                        is_active: true,
-                      },
-                    },
                     include: {
                       Subject: true,
                     },
@@ -571,11 +522,6 @@ const examRouter = t.router({
             },
           },
           Subjects: {
-            where: {
-              Subject: {
-                is_active: true,
-              },
-            },
             include: {
               Subject: true,
             },

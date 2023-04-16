@@ -6,6 +6,7 @@
  */
 module.exports = ({ config }) => ({
   ...config,
+  plugins: ["expo-image-picker"],
   extra: {
     ...config.extra,
     backendHost: process.env.HOSTNAME,

@@ -23,16 +23,9 @@ const subjectRouter = t.router({
       const subjects = await prisma.subject.findMany({
         where: {
           school_id: ctx.user.school_id,
-          is_active: true,
         },
         include: {
           Periods: {
-            where: {
-              is_active: true,
-              Class: {
-                is_active: true,
-              },
-            },
             select: {
               Class: true,
             },

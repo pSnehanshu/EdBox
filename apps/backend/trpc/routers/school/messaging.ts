@@ -146,7 +146,6 @@ const messagingRouter = t.router({
         where: { id: input.userId },
         select: {
           id: true,
-          is_active: true,
           school_id: true,
         },
       });
@@ -233,7 +232,6 @@ const messagingRouter = t.router({
         where: { id: input.userId },
         select: {
           id: true,
-          is_active: true,
           school_id: true,
         },
       });
@@ -442,7 +440,6 @@ const messagingRouter = t.router({
           where: {
             id: input.groupIdentifier.id,
             school_id: input.groupIdentifier.sc,
-            is_active: true,
           },
           select: {
             name: true,
@@ -488,11 +485,10 @@ const messagingRouter = t.router({
           },
           select: {
             name: true,
-            is_active: true,
           },
         });
 
-        if (!Class || !Class.is_active) {
+        if (!Class) {
           throw new TRPCError({
             code: "NOT_FOUND",
           });
@@ -518,13 +514,12 @@ const messagingRouter = t.router({
               select: {
                 name: true,
                 numeric_id: true,
-                is_active: true,
               },
             },
           },
         });
 
-        if (!section || !section.Class.is_active) {
+        if (!section) {
           throw new TRPCError({
             code: "NOT_FOUND",
           });
@@ -542,7 +537,6 @@ const messagingRouter = t.router({
             where: {
               id: input.groupIdentifier.su,
               school_id: input.groupIdentifier.sc,
-              is_active: true,
             },
             select: {
               name: true,
@@ -607,6 +601,11 @@ const messagingRouter = t.router({
                 Teacher: true,
                 Parent: true,
                 Staff: true,
+              },
+            },
+            Attachments: {
+              include: {
+                File: true,
               },
             },
           },

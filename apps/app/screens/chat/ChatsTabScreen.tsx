@@ -48,12 +48,10 @@ function GroupItem(props: GroupItemProps) {
 
   return (
     <Pressable
-      style={({ pressed }) => {
-        return {
-          ...styles.chatGroup,
-          opacity: pressed ? 0.5 : 1,
-        };
-      }}
+      style={({ pressed }) => [
+        styles.chatGroup,
+        { opacity: pressed ? 0.5 : 1 },
+      ]}
       onPress={props.onClick}
     >
       <Image
@@ -65,7 +63,11 @@ function GroupItem(props: GroupItemProps) {
         <Text style={styles.chatGroupLastMessage}>
           {lastMessage
             ? _.truncate(
-                `${getDisplayName(lastMessage.Sender)}: ${lastMessage.text}`,
+                `${
+                  lastMessage.Sender
+                    ? getDisplayName(lastMessage.Sender)
+                    : "User"
+                }: ${lastMessage.text}`,
                 {
                   length: 45,
                 },
@@ -103,7 +105,7 @@ export default function ChatsListScreen() {
       <List
         data={sortedGroups}
         keyExtractor={(g) => g.identifier}
-        estimatedItemSize={styles.chatGroup.minHeight}
+        estimatedItemSize={styles.chatGroup.height}
         renderItem={({ item: group }) => (
           <GroupItem
             group={group}
@@ -132,7 +134,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.5,
     flex: 1,
     flexDirection: "row",
-    minHeight: 80,
+    height: 80,
+    overflow: "hidden",
   },
   chatGroupIcon: {
     width: 48,
@@ -147,6 +150,7 @@ const styles = StyleSheet.create({
     backgroundColor: undefined,
     flexGrow: 1,
     paddingLeft: 16,
+    maxWidth: "80%",
   },
   chatGroupName: {
     fontSize: 16,
@@ -155,6 +159,7 @@ const styles = StyleSheet.create({
   chatGroupRight: {
     backgroundColor: undefined,
     paddingRight: 8,
+    marginLeft: "auto",
   },
   chatGroupLastMessage: {
     fontSize: 12,

@@ -15,14 +15,14 @@ datasource db {
 }
 
 model School {
-  id                        String              @id @default(cuid()) @db.VarChar(32)
-  name                      String              @db.VarChar(50)
-  logo                      String?             @db.Text
-  icon                      String?             @db.Text
-  website                   String?             @db.VarChar(256)
-  is_active                 Boolean             @default(true)
-  created_at                DateTime            @default(now())
-  updated_at                DateTime            @updatedAt
+  id                        String                 @id @default(cuid()) @db.VarChar(32)
+  name                      String                 @db.VarChar(50)
+  logo                      String?                @db.Text
+  icon                      String?                @db.Text
+  website                   String?                @db.VarChar(256)
+  is_active                 Boolean                @default(true)
+  created_at                DateTime               @default(now())
+  updated_at                DateTime               @updatedAt
   Users                     User[]
   Students                  Student[]
   Batches                   StudentsBatch[]
@@ -40,43 +40,48 @@ model School {
   Exams                     Exam[]
   Tests                     ExamTest[]
   DynamicRoles              DynamicRole[]
-  app_scheme                String              @default("edbox")
+  Homeworks                 Homework[]
+  FileUploadPermissions     FileUploadPermission[]
+  UploadedFiles             UploadedFile[]
+  MessageAttachments        MessageAttachment[]
+  app_scheme                String                 @default("edbox")
   app_splash                String?
   app_ios_bundle_identifier String?
   app_android_package_name  String?
-  app_google_services_json  String?             @db.Text
+  app_google_services_json  String?                @db.Text
 }
 
 model User {
-  id                  String               @id @default(cuid()) @db.VarChar(32)
-  name                String               @db.VarChar(50)
-  phone               String?              @db.VarChar(15)
-  phone_isd_code      Int                  @default(91) @db.SmallInt()
-  email               String?              @db.VarChar(256)
-  password            String?              @db.VarChar(80)
-  otp                 String?              @db.VarChar(10)
-  otp_expiry          DateTime?
-  gender              Gender?
-  school_id           String               @db.VarChar(32)
-  School              School               @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  student_id          String?              @unique @db.VarChar(32)
-  Student             Student?             @relation(fields: [student_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  teacher_id          String?              @unique @db.VarChar(32)
-  Teacher             Teacher?             @relation(fields: [teacher_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  parent_id           String?              @unique @db.VarChar(32)
-  Parent              Parent?              @relation(fields: [parent_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  staff_id            String?              @unique @db.VarChar(32)
-  Staff               SchoolStaff?         @relation(fields: [staff_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  is_active           Boolean              @default(true)
-  created_at          DateTime             @default(now())
-  updated_at          DateTime             @updatedAt
-  Sessions            LoginSession[]
-  CustomGroups        CustomGroupMembers[]
-  CreatedCustomGroups CustomGroup[]
-  Messages            Message[]
-  TestsCreated        ExamTest[]
-  DynamicRoles        RoleUserMapping[]
-  PushTokens          PushToken[]
+  id                    String                 @id @default(cuid()) @db.VarChar(32)
+  name                  String                 @db.VarChar(50)
+  phone                 String?                @db.VarChar(15)
+  phone_isd_code        Int                    @default(91) @db.SmallInt()
+  email                 String?                @db.VarChar(256)
+  password              String?                @db.VarChar(80)
+  otp                   String?                @db.VarChar(10)
+  otp_expiry            DateTime?
+  gender                Gender?
+  school_id             String                 @db.VarChar(32)
+  School                School                 @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  student_id            String?                @unique @db.VarChar(32)
+  Student               Student?               @relation(fields: [student_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  teacher_id            String?                @unique @db.VarChar(32)
+  Teacher               Teacher?               @relation(fields: [teacher_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  parent_id             String?                @unique @db.VarChar(32)
+  Parent                Parent?                @relation(fields: [parent_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  staff_id              String?                @unique @db.VarChar(32)
+  Staff                 SchoolStaff?           @relation(fields: [staff_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  created_at            DateTime               @default(now())
+  updated_at            DateTime               @updatedAt
+  Sessions              LoginSession[]
+  CustomGroups          CustomGroupMembers[]
+  CreatedCustomGroups   CustomGroup[]
+  Messages              Message[]
+  TestsCreated          ExamTest[]
+  DynamicRoles          RoleUserMapping[]
+  FileUploadPermissions FileUploadPermission[]
+  UploadedFiles         UploadedFile[]
+  PushTokens            PushToken[]
 
   @@unique([email, school_id])
   @@unique([phone_isd_code, phone, school_id])
@@ -93,11 +98,11 @@ model Subject {
   name       String               @db.VarChar(50)
   school_id  String               @db.VarChar(32)
   School     School               @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  is_active  Boolean              @default(true)
   created_at DateTime             @default(now())
   updated_at DateTime             @updatedAt
   Periods    RoutinePeriod[]
   Tests      TestSubjectMapping[]
+  Homeworks  Homework[]
 }
 
 model ClassStd {
@@ -106,13 +111,13 @@ model ClassStd {
   name       String?         @db.VarChar(50)
   school_id  String          @db.VarChar(32)
   School     School          @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  is_active  Boolean         @default(true)
   created_at DateTime        @default(now())
   updated_at DateTime        @updatedAt
   Sections   ClassSection[]
   Batch      StudentsBatch?
   Periods    RoutinePeriod[]
   Tests      ExamTest[]
+  Homeworks  Homework[]
 
   @@id([numeric_id, school_id])
 }
@@ -126,6 +131,7 @@ model ClassSection {
   name       String?         @db.VarChar(10)
   Periods    RoutinePeriod[]
   Tests      ExamTest[]
+  Homeworks  Homework[]
 
   @@id([numeric_id, class_id, school_id])
 }
@@ -147,7 +153,6 @@ model RoutinePeriod {
   end_min          Int                @db.SmallInt
   teacher_id       String?            @db.VarChar(32)
   Teacher          Teacher?           @relation(fields: [teacher_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  is_active        Boolean            @default(true)
   created_at       DateTime           @default(now())
   updated_at       DateTime           @updatedAt
   AttendancesTaken PeriodAttendance[]
@@ -227,7 +232,6 @@ model StudentsBatch {
   Class           ClassStd? @relation(fields: [class_id, school_id], references: [numeric_id, school_id], onDelete: Restrict)
   JoiningStudents Student[] @relation("JoiningBatch")
   CurrentStudents Student[] @relation("CurrentBatch")
-  is_active       Boolean   @default(true)
   created_at      DateTime  @default(now())
   updated_at      DateTime  @updatedAt
 
@@ -236,34 +240,37 @@ model StudentsBatch {
 }
 
 model Student {
-  id                String                  @id @default(cuid()) @db.VarChar(32)
-  school_id         String                  @db.VarChar(32)
-  School            School                  @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  roll_num          Int                     @db.SmallInt
-  joining_batch_num Int                     @db.SmallInt
-  JoiningBatch      StudentsBatch           @relation("JoiningBatch", fields: [joining_batch_num, school_id], references: [numeric_id, school_id], onDelete: Restrict)
-  current_batch_num Int?                    @db.SmallInt
-  CurrentBatch      StudentsBatch?          @relation("CurrentBatch", fields: [current_batch_num, school_id], references: [numeric_id, school_id], onDelete: Restrict)
-  section           Int?                    @db.SmallInt
-  created_at        DateTime                @default(now())
-  updated_at        DateTime                @updatedAt
-  Parents           ParentStudent_mapping[]
-  User              User?
-  Attendances       StudentAttendance[]
-  TestResults       ExamTestResult[]
+  id                  String                  @id @default(cuid()) @db.VarChar(32)
+  school_id           String                  @db.VarChar(32)
+  School              School                  @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  roll_num            Int                     @db.SmallInt
+  joining_batch_num   Int                     @db.SmallInt
+  JoiningBatch        StudentsBatch           @relation("JoiningBatch", fields: [joining_batch_num, school_id], references: [numeric_id, school_id], onDelete: Restrict)
+  current_batch_num   Int?                    @db.SmallInt
+  CurrentBatch        StudentsBatch?          @relation("CurrentBatch", fields: [current_batch_num, school_id], references: [numeric_id, school_id], onDelete: Restrict)
+  section             Int?                    @db.SmallInt
+  created_at          DateTime                @default(now())
+  updated_at          DateTime                @updatedAt
+  Parents             ParentStudent_mapping[]
+  User                User?
+  Attendances         StudentAttendance[]
+  TestResults         ExamTestResult[]
+  HomeworkSubmissions HomeworkSubmission[]
 
   @@unique([roll_num, section, current_batch_num])
 }
 
 model Teacher {
-  id               String             @id @default(cuid()) @db.VarChar(32)
-  school_id        String             @db.VarChar(32)
-  School           School             @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  created_at       DateTime           @default(now())
-  updated_at       DateTime           @updatedAt
-  Periods          RoutinePeriod[]
-  User             User?
-  AttendancesTaken PeriodAttendance[]
+  id                        String                     @id @default(cuid()) @db.VarChar(32)
+  school_id                 String                     @db.VarChar(32)
+  School                    School                     @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  created_at                DateTime                   @default(now())
+  updated_at                DateTime                   @updatedAt
+  Periods                   RoutinePeriod[]
+  User                      User?
+  AttendancesTaken          PeriodAttendance[]
+  Homeworks                 Homework[]
+  HomeworkSubmissionRemarks HomeworkSubmissionRemark[]
 }
 
 model Parent {
@@ -309,7 +316,6 @@ model CustomGroup {
   School        School               @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   created_by_id String?              @db.VarChar(32)
   CreatedBy     User?                @relation(fields: [created_by_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  is_active     Boolean              @default(true)
   created_at    DateTime             @default(now())
   updated_at    DateTime             @updatedAt
   Members       CustomGroupMembers[]
@@ -327,26 +333,38 @@ model CustomGroupMembers {
 }
 
 model Message {
-  id                String     @default(cuid()) @db.VarChar(32)
-  parent_message_id String?    @db.VarChar(32)
-  ParentMessage     Message?   @relation("Replies", fields: [parent_message_id, school_id], references: [id, school_id], onDelete: Cascade, onUpdate: Cascade)
-  school_id         String     @db.VarChar(32)
-  School            School     @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  text              String     @db.Text
-  sender_id         String     @db.VarChar(32)
-  Sender            User       @relation(fields: [sender_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id                String              @default(cuid()) @db.VarChar(32)
+  parent_message_id String?             @db.VarChar(32)
+  ParentMessage     Message?            @relation("Replies", fields: [parent_message_id, school_id], references: [id, school_id], onDelete: Cascade, onUpdate: Cascade)
+  school_id         String              @db.VarChar(32)
+  School            School              @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  text              String              @db.Text
+  sender_id         String              @db.VarChar(32)
+  Sender            User                @relation(fields: [sender_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   sender_role       SenderRole
   group_identifier  String
   attachments       Json?
   edit_history      Json?
-  is_active         Boolean    @default(true)
-  created_at        DateTime   @default(now())
-  updated_at        DateTime   @updatedAt
-  sort_key          BigInt     @unique @default(autoincrement()) @db.BigInt
-  Replies           Message[]  @relation("Replies")
+  created_at        DateTime            @default(now())
+  updated_at        DateTime            @updatedAt
+  sort_key          BigInt              @unique @default(autoincrement()) @db.BigInt
+  Replies           Message[]           @relation("Replies")
+  Attachments       MessageAttachment[]
 
   @@id([id, school_id])
   @@index([group_identifier, school_id])
+}
+
+model MessageAttachment {
+  message_id String       @db.VarChar(32)
+  Message    Message      @relation(fields: [message_id, school_id], references: [id, school_id], onDelete: Cascade, onUpdate: Cascade)
+  school_id  String       @db.VarChar(32)
+  School     School       @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  file_id    String       @db.VarChar(32)
+  File       UploadedFile @relation(fields: [file_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  created_at DateTime     @default(now())
+
+  @@id([message_id, file_id])
 }
 
 enum SenderRole {
@@ -369,7 +387,6 @@ model Exam {
   name       String     @db.VarChar(100)
   school_id  String     @db.VarChar(32)
   School     School     @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  is_active  Boolean    @default(true)
   created_at DateTime   @default(now())
   updated_at DateTime   @updatedAt
   Tests      ExamTest[]
@@ -388,7 +405,6 @@ model ExamTest {
   Section          ClassSection?        @relation(fields: [section_id, class_id, school_id], references: [numeric_id, class_id, school_id], onDelete: Cascade, onUpdate: Cascade)
   date_of_exam     DateTime
   duration_minutes Int                  @default(0) @db.SmallInt
-  is_active        Boolean              @default(true)
   creator_user_id  String?              @db.VarChar(32)
   CreatorUser      User?                @relation(fields: [creator_user_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
   created_at       DateTime             @default(now())
@@ -424,7 +440,6 @@ model DynamicRole {
   school_id   String            @db.VarChar(32)
   School      School            @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   permissions Int[]             @db.SmallInt
-  is_active   Boolean           @default(true)
   created_at  DateTime          @default(now())
   updated_at  DateTime          @updatedAt
   Users       RoleUserMapping[]
@@ -437,6 +452,117 @@ model RoleUserMapping {
   Role    DynamicRole @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@id([user_id, role_id])
+}
+
+model FileUploadPermission {
+  id         String   @id @default(cuid()) @db.VarChar(32)
+  file_name  String?
+  size_bytes Int?
+  mime       String?  @db.VarChar(30)
+  s3key      String
+  user_id    String   @db.VarChar(32)
+  User       User     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  school_id  String   @db.VarChar(32)
+  School     School   @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  expiry     DateTime
+  created_at DateTime @default(now())
+}
+
+model UploadedFile {
+  id                        String                               @id @default(cuid()) @db.VarChar(32)
+  file_name                 String
+  s3key                     String
+  size_bytes                Int?
+  mime                      String?                              @db.VarChar(30)
+  school_id                 String                               @db.VarChar(32)
+  School                    School                               @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  uploader_user_id          String?                              @db.VarChar(32)
+  UploaderUser              User?                                @relation(fields: [uploader_user_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  preview_type              PreviewType?
+  preview_value             String?                              @db.Text
+  created_at                DateTime                             @default(now())
+  Homeworks                 HomeworkAttachment[]
+  HomeworkSubmissions       HomeworkSubmissionAttachment[]
+  HomeworkSubmissionRemarks HomeworkSubmissionRemarkAttachment[]
+  Messages                  MessageAttachment[]
+}
+
+enum PreviewType {
+  blurhash
+  b64img
+}
+
+model Homework {
+  id          String               @id @default(cuid()) @db.VarChar(32)
+  text        String?              @db.Text
+  due_date    DateTime?
+  teacher_id  String?              @db.VarChar(32)
+  Teacher     Teacher?             @relation(fields: [teacher_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  subject_id  String               @db.VarChar(32)
+  Subject     Subject              @relation(fields: [subject_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  section_id  Int                  @db.SmallInt
+  Section     ClassSection         @relation(fields: [section_id, class_id, school_id], references: [numeric_id, class_id, school_id], onDelete: Cascade, onUpdate: Cascade)
+  class_id    Int                  @db.SmallInt
+  Class       ClassStd             @relation(fields: [class_id, school_id], references: [numeric_id, school_id], onDelete: Cascade, onUpdate: Cascade)
+  school_id   String               @db.VarChar(32)
+  School      School               @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  created_at  DateTime             @default(now())
+  updated_at  DateTime             @updatedAt
+  Submissions HomeworkSubmission[]
+  Attachments HomeworkAttachment[]
+}
+
+model HomeworkAttachment {
+  homework_id String       @db.VarChar(32)
+  Homework    Homework     @relation(fields: [homework_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  file_id     String       @db.VarChar(32)
+  File        UploadedFile @relation(fields: [file_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  created_at  DateTime     @default(now())
+
+  @@id([homework_id, file_id])
+}
+
+model HomeworkSubmission {
+  id          String                         @id @default(cuid()) @db.VarChar(32)
+  text        String?                        @db.Text
+  homework_id String                         @db.VarChar(32)
+  Homework    Homework                       @relation(fields: [homework_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  student_id  String                         @db.VarChar(32)
+  Student     Student                        @relation(fields: [student_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  created_at  DateTime                       @default(now())
+  updated_at  DateTime                       @updatedAt
+  Remarks     HomeworkSubmissionRemark[]
+  Attachments HomeworkSubmissionAttachment[]
+}
+
+model HomeworkSubmissionAttachment {
+  submission_id String             @db.VarChar(32)
+  Submission    HomeworkSubmission @relation(fields: [submission_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  file_id       String             @db.VarChar(32)
+  File          UploadedFile       @relation(fields: [file_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  created_at    DateTime           @default(now())
+
+  @@id([submission_id, file_id])
+}
+
+model HomeworkSubmissionRemark {
+  id            String                               @id @default(cuid()) @db.VarChar(32)
+  text          String?                              @db.Text
+  submission_id String                               @db.VarChar(32)
+  Submission    HomeworkSubmission                   @relation(fields: [submission_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  teacher_id    String?                              @db.VarChar(32)
+  Teacher       Teacher?                             @relation(fields: [teacher_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  Attachments   HomeworkSubmissionRemarkAttachment[]
+}
+
+model HomeworkSubmissionRemarkAttachment {
+  remark_id  String                   @db.VarChar(32)
+  Submission HomeworkSubmissionRemark @relation(fields: [remark_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  file_id    String                   @db.VarChar(32)
+  File       UploadedFile             @relation(fields: [file_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  created_at DateTime                 @default(now())
+
+  @@id([remark_id, file_id])
 }
 
 model PushToken {

@@ -1,23 +1,28 @@
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { format, isThisYear, isToday, isYesterday } from "date-fns";
 import { useCurrentUser } from "../utils/auth";
 import { Text, View } from "./Themed";
+import Hyperlink from "react-native-hyperlink";
 import { Alert, Pressable, StyleSheet } from "react-native";
-import type { Message } from "schooltalk-shared/types";
+import type { Message, UploadedFile } from "schooltalk-shared/types";
+import MIMEType from "whatwg-mimetype";
 import {
   getDisplayName,
   getTextColorForGivenBG,
   getUserColor,
 } from "schooltalk-shared/misc";
 import { useConfig } from "../utils/config";
+import { FilePreview, FullScreenFilePreview } from "./attachments/FilePreview";
 
 interface ChatMessageProps {
   message: Message;
 }
-function ChatMessage({ message }: ChatMessageProps) {
+function _ChatMessage({ message }: ChatMessageProps) {
   const config = useConfig();
   const { user } = useCurrentUser();
   const time = useMemo(() => {
+    if (!message.created_at) return "N/A";
+
     const date = new Date(message.created_at);
     const time = format(date, "hh:mm aaa");
 
@@ -36,24 +41,28 @@ function ChatMessage({ message }: ChatMessageProps) {
   if (!user) return null;
 
   const sender = message.Sender;
-  const isSentByMe = user.id === sender.id;
+  const isSentByMe = user.id === sender?.id;
 
   const bgColor = useMemo(
     () => (isSentByMe ? "#005d4b" : "#1f2c34"),
     [isSentByMe],
   );
   const color = useMemo(() => getTextColorForGivenBG(bgColor), [bgColor]);
-  const senderDisplayName = useMemo(() => getDisplayName(sender), [sender]);
+  const senderDisplayName = useMemo(
+    () => (sender ? getDisplayName(sender) : "User"),
+    [sender],
+  );
   const senderColor = useMemo(
-    () => getUserColor(message.sender_id),
+    () => getUserColor(message.sender_id ?? ""),
     [message.sender_id],
   );
 
-  const shouldCollapse = message.text.length > config.previewMessageLength;
+  const shouldCollapse =
+    (message.text?.length ?? 0) > config.previewMessageLength;
   const trimmedMessage = useMemo(
     () =>
       shouldCollapse
-        ? message.text.slice(0, config.previewMessageLength).trimEnd()
+        ? message.text?.slice(0, config.previewMessageLength).trimEnd()
         : message.text,
     [message.text, config.previewMessageLength],
   );
@@ -63,6 +72,15 @@ function ChatMessage({ message }: ChatMessageProps) {
       Alert.alert(senderDisplayName, message.text);
     }
   }, [senderDisplayName, message.text, shouldCollapse]);
+
+  const [pressedFileId, setPressedFileId] = useState<string | null>(null);
+  const handleFilePress = (file: UploadedFile, index: number) => {
+    const mime = file.mime ? MIMEType.parse(file.mime) : null;
+
+    if (mime?.type === "image") {
+      setPressedFileId(file.id);
+    }
+  };
 
   return (
     <View
@@ -78,7 +96,7 @@ function ChatMessage({ message }: ChatMessageProps) {
         <Pressable
           onPress={() => {
             // TODO: Show basic user info as modal, with link to full profile
-            alert(`User: ${sender.name}\nID: ${sender.id}`);
+            alert(`User: ${sender?.name}\nID: ${sender?.id}`);
           }}
         >
           <Text style={[styles.senderName, { color: senderColor }]}>
@@ -93,10 +111,15 @@ function ChatMessage({ message }: ChatMessageProps) {
           opacity: pressed ? 0.4 : 1,
         })}
       >
-        <Text style={[styles.body, { color }]}>
-          {trimmedMessage}
-          {shouldCollapse ? "..." : ""}
-        </Text>
+        <Hyperlink
+          linkDefault
+          linkStyle={{ color: "#54bfe5", textDecorationLine: "underline" }}
+        >
+          <Text style={[styles.body, { color }]}>
+            {trimmedMessage}
+            {shouldCollapse ? "..." : ""}
+          </Text>
+        </Hyperlink>
       </Pressable>
 
       {shouldCollapse && (
@@ -105,7 +128,28 @@ function ChatMessage({ message }: ChatMessageProps) {
         </Pressable>
       )}
 
+      {message.Attachments?.length ? (
+        <View style={styles.attachments_container}>
+          {message.Attachments?.map((attachment, index) => (
+            <FilePreview
+              fileIdOrObject={attachment.File}
+              key={attachment.file_id}
+              style={styles.attachment}
+              index={index}
+              onPress={handleFilePress}
+            />
+          ))}
+        </View>
+      ) : null}
+
       <Text style={[styles.time, { color }]}>{time}</Text>
+
+      <FullScreenFilePreview
+        files={message.Attachments?.map((att) => att.File) ?? []}
+        visible={!!pressedFileId}
+        initialFileId={pressedFileId}
+        onClose={() => setPressedFileId(null)}
+      />
     </View>
   );
 }
@@ -147,6 +191,14 @@ const styles = StyleSheet.create({
     color: "#50b4c1",
     fontSize: 10,
   },
+  attachments_container: {
+    backgroundColor: "transparent",
+    marginTop: 24,
+  },
+  attachment: {
+    borderWidth: 0,
+    marginBottom: 4,
+  },
 });
 
-export default memo(ChatMessage);
+export const ChatMessage = memo(_ChatMessage);

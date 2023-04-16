@@ -14,6 +14,7 @@ import {
 } from "schooltalk-shared/types";
 import { getUserGroups } from "../utils/groups";
 import { defaultTransformer } from "@trpc/server";
+import { consumeMultiplePermissions } from "../utils/file.service";
 
 export default function initSocketIo(server: HTTPServer) {
   const io = new Server<
@@ -28,13 +29,17 @@ export default function initSocketIo(server: HTTPServer) {
     const schoolId = name.slice(1);
 
     // Make sure school exists and is active
-    const school = await prisma.school.findUnique({
-      where: { id: schoolId },
-      select: {
-        id: true,
-        is_active: true,
-      },
-    });
+    const school = await prisma.school
+      .findUnique({
+        where: { id: schoolId },
+        select: {
+          id: true,
+          is_active: true,
+        },
+      })
+      .catch((err) => {
+        console.error(err);
+      });
 
     const ok = !!(school && school.is_active);
 
@@ -99,60 +104,85 @@ export default function initSocketIo(server: HTTPServer) {
 
       const myGroups = await joinGroupRooms();
 
-      socket.on("messageCreate", async (groupIdentifier, text, callback) => {
-        try {
-          // Parse the incoming group identifier string, make sure it is valid format
-          const identifier = parseGroupIdentifierString(groupIdentifier);
+      socket.on(
+        "messageCreate",
+        async (groupIdentifier, text, filePermissions, callback) => {
+          try {
+            // Parse the incoming group identifier string, make sure it is valid format
+            const identifier = parseGroupIdentifierString(groupIdentifier);
 
-          if (identifier.sc !== school.id) {
-            throw new Error("Can't send message to another school");
+            if (identifier.sc !== school.id) {
+              throw new Error("Can't send message to another school");
+            }
+
+            // Regenerate identifier string, to make sure it is ordered
+            const cleanGroupIdentifier =
+              convertObjectToOrderedQueryString(identifier);
+
+            // Check if the user is a member of the auto-group
+            if (
+              identifier.gd === "a" &&
+              !myGroups.includes(cleanGroupIdentifier)
+            ) {
+              throw new Error("User not member of the given group");
+            }
+
+            // TODO: Check membership of custom groups
+
+            // Consume the given files
+            const files = await consumeMultiplePermissions(
+              filePermissions,
+              user.id,
+            );
+
+            // Save message
+            const message = await prisma.message.create({
+              data: {
+                group_identifier: cleanGroupIdentifier,
+                sender_id: user.id,
+                sender_role: "student",
+                text,
+                school_id: school.id,
+                // Consume the files
+                Attachments: {
+                  createMany: {
+                    data: files.map((file) => ({
+                      file_id: file.id,
+                    })),
+                    skipDuplicates: true,
+                  },
+                },
+              },
+              include: {
+                ParentMessage: true,
+                Sender: true,
+                Attachments: {
+                  include: {
+                    File: true,
+                  },
+                },
+              },
+            });
+
+            // Must do this, becasue JSON.stringify can't serialize big ints
+            message.sort_key = message.sort_key.toString() as any;
+
+            const serializedMessage =
+              defaultTransformer.output.serialize(message);
+
+            // Broadcast to all clients
+            socket
+              .to(cleanGroupIdentifier)
+              .emit("newMessage", serializedMessage);
+
+            // Send acknowledgement
+            callback(serializedMessage);
+
+            // TODO, send FCM and APN messages
+          } catch (error) {
+            console.error("Failed to receive message", error);
           }
-
-          // Regenerate identifier string, to make sure it is ordered
-          const cleanGroupIdentifier =
-            convertObjectToOrderedQueryString(identifier);
-
-          // Check if the user is a member of the auto-group
-          if (
-            identifier.gd === "a" &&
-            !myGroups.includes(cleanGroupIdentifier)
-          ) {
-            throw new Error("User not member of the given group");
-          }
-
-          // TODO: Check membership of custom groups
-
-          // Save message
-          const message = await prisma.message.create({
-            data: {
-              group_identifier: cleanGroupIdentifier,
-              sender_id: user.id,
-              sender_role: "student",
-              text,
-              school_id: school.id,
-            },
-            include: {
-              ParentMessage: true,
-              Sender: true,
-            },
-          });
-
-          // Must do this, becasue JSON.stringify can't serialize big ints
-          message.sort_key = message.sort_key.toString() as any;
-
-          const serializedMessage =
-            defaultTransformer.output.serialize(message);
-
-          // Broadcast to all clients
-          socket.to(cleanGroupIdentifier).emit("newMessage", serializedMessage);
-
-          // Send acknowledgement
-          callback(serializedMessage);
-
-          // TODO, send FCM and APN messages
-        } catch (error) {
-          console.error("Failed to receive message", error);
-        }
-      });
+        },
+      );
     });
 }

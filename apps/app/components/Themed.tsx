@@ -39,7 +39,10 @@ export type ListProps<ItemT> = ThemeProps &
   Omit<FlashList<ItemT>["props"], "style"> & {
     innerRef?: ComponentPropsWithRef<typeof FlashList<ItemT>>["ref"];
   };
-export type ScrollViewProps = ThemeProps & DefaultScrollView["props"];
+export type ScrollViewProps = ThemeProps &
+  DefaultScrollView["props"] & {
+    innerRef?: ComponentPropsWithRef<typeof DefaultScrollView>["ref"];
+  };
 
 export function Text(props: TextProps) {
   const { style, lightColor, darkColor, ...otherProps } = props;
@@ -66,7 +69,11 @@ export function ScrollView(props: ScrollViewProps) {
   );
 
   return (
-    <DefaultScrollView style={[{ backgroundColor }, style]} {...otherProps} />
+    <DefaultScrollView
+      style={[{ backgroundColor }, style]}
+      {...otherProps}
+      ref={props.innerRef}
+    />
   );
 }
 

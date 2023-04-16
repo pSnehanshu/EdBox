@@ -15,6 +15,7 @@ import { TestComp } from "../../components/TestComp";
 import { useCurrentUser } from "../../utils/auth";
 import { getUserRoleHierarchical, StaticRole } from "schooltalk-shared/misc";
 import { Banner } from "../../components/Banner";
+import { LottieAnimation } from "../../components/LottieAnimation";
 
 const ExamComp: React.FC<{
   exam: Extract<ExamItem, { type: "exam" }>["item"];
@@ -90,21 +91,29 @@ const ExamListScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <List
-        onRefresh={() => query.refetch()}
-        refreshing={query.isFetching}
-        data={query.data}
-        estimatedItemSize={77}
-        keyExtractor={({ item, type }) => `${type}-${item.id}`}
-        ItemSeparatorComponent={Divider}
-        renderItem={({ item }) =>
-          item.type === "exam" ? (
-            <ExamComp exam={item.item} />
-          ) : (
-            <TestComp test={item.item} />
-          )
-        }
-      />
+      {query.data.length > 0 ? (
+        <List
+          onRefresh={() => query.refetch()}
+          refreshing={query.isFetching}
+          data={query.data}
+          estimatedItemSize={77}
+          keyExtractor={({ item, type }) => `${type}-${item.id}`}
+          ItemSeparatorComponent={Divider}
+          renderItem={({ item }) =>
+            item.type === "exam" ? (
+              <ExamComp exam={item.item} />
+            ) : (
+              <TestComp test={item.item} />
+            )
+          }
+        />
+      ) : (
+        <LottieAnimation
+          src={require("../../assets/lotties/person-floating.json")}
+          caption="No upcoming exams"
+          style={styles.no_exam_animation}
+        />
+      )}
     </SafeAreaView>
   );
 };
@@ -117,5 +126,9 @@ const styles = StyleSheet.create({
   },
   examHeading: {
     width: "90%",
+  },
+  no_exam_animation: {
+    height: "100%",
+    justifyContent: "center",
   },
 });
