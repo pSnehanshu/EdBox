@@ -20,6 +20,7 @@ import ModalSelector from "react-native-modal-selector";
 import { FAB, ListItem } from "@rneui/themed";
 import MIMEType from "whatwg-mimetype";
 import { format, parseISO } from "date-fns";
+import Toast from "react-native-toast-message";
 import { useConfig } from "../utils/config";
 import { trpc } from "../utils/trpc";
 import useColorScheme from "../utils/useColorScheme";
@@ -405,10 +406,9 @@ export default function HomeworkForm({
             });
             fileUploadHandler.removeAll();
           } else {
-            console.log("Select all data", {
-              selectedSection,
-              selectedClass,
-              selectedSubject,
+            Toast.show({
+              type: "error",
+              text1: "Please provide all information",
             });
           }
         }}

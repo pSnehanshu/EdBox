@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Hyperlink from "react-native-hyperlink";
 import { View, Text, ScrollView, List } from "../../components/Themed";
@@ -204,9 +204,7 @@ export default function DisplayHomeworkScreen({
                   <FilePreview
                     fileIdOrObject={attachment.File}
                     index={index}
-                    style={{
-                      marginBottom: 8,
-                    }}
+                    style={{ marginBottom: 8 }}
                     onPress={handleFilePress}
                   />
                 );
@@ -235,9 +233,10 @@ export default function DisplayHomeworkScreen({
                 navigation.navigate("UpdateHomeworkScreen", { homeworkId })
               }
               buttonStyle={{ backgroundColor: "#4E48B2" }}
+              key={1}
             />
           ) : (
-            <></>
+            <React.Fragment key={3} />
           ),
 
           isEditable ? (
@@ -263,9 +262,10 @@ export default function DisplayHomeworkScreen({
                 ]);
               }}
               buttonStyle={{ backgroundColor: "#4E48B2" }}
+              key={2}
             />
           ) : (
-            <></>
+            <React.Fragment key={4} />
           ),
         ]}
       </SpeedDial>

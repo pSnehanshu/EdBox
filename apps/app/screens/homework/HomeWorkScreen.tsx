@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Pressable, StyleSheet } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import {
   getUserRoleHierarchical,
@@ -13,7 +13,6 @@ import { FAB } from "@rneui/themed";
 import { Homework } from "schooltalk-shared/types";
 import { format, parseISO, isPast } from "date-fns";
 import { trpc } from "../../utils/trpc";
-import useColorScheme from "../../utils/useColorScheme";
 import { useCurrentUser } from "../../utils/auth";
 
 const pageLimit = 10;
@@ -26,10 +25,11 @@ export default function HomeWorkScreen({
   const isStudent = hasUserStaticRoles(user, [StaticRole.student], "all");
   const isTeacher = hasUserStaticRoles(user, [StaticRole.teacher], "all");
 
-  const homeworkTeacherQuery = trpc.school.homework.fetchForTeacher.useQuery(
-    { limit: pageLimit },
-    { enabled: isTeacher },
-  );
+  const homeworkTeacherQuery =
+    trpc.school.homework.fetchForTeacher.useInfiniteQuery(
+      { limit: pageLimit },
+      { enabled: isTeacher, getNextPageParam: (item) => item.nextCursor },
+    );
 
   const classAndSectionQuery = trpc.school.people.getStudentClass.useQuery(
     undefined,
@@ -42,27 +42,31 @@ export default function HomeWorkScreen({
     typeof classAndSectionQuery.data?.Class.numeric_id === "number" &&
     typeof classAndSectionQuery.data?.Section?.numeric_id === "number";
 
-  const homeworkSectionQuery = trpc.school.homework.fetchForSection.useQuery(
-    {
-      limit: pageLimit,
-      class_id: classAndSectionQuery.data?.Class.numeric_id!,
-      section_id: classAndSectionQuery.data?.Section?.numeric_id!,
-    },
-    {
-      enabled: canFetchSectionHW,
-    },
-  );
+  const homeworkSectionQuery =
+    trpc.school.homework.fetchForSection.useInfiniteQuery(
+      {
+        limit: pageLimit,
+        class_id: classAndSectionQuery.data?.Class.numeric_id!,
+        section_id: classAndSectionQuery.data?.Section?.numeric_id!,
+      },
+      {
+        enabled: canFetchSectionHW,
+        getNextPageParam: (item) => item.nextCursor,
+      },
+    );
 
-  const color = useColorScheme();
+  const query =
+    role === StaticRole.teacher ? homeworkTeacherQuery : homeworkSectionQuery;
+
+  const homeworks: Homework[] = [];
+  query.data?.pages.forEach((page) => {
+    homeworks.push(...page.data);
+  });
 
   return (
     <View style={{ flex: 1, marginTop: 0 }}>
       <List
-        data={
-          role === StaticRole.teacher
-            ? homeworkTeacherQuery?.data?.data
-            : homeworkSectionQuery.data?.data
-        }
+        data={homeworks}
         keyExtractor={(g) => g.id}
         estimatedItemSize={200}
         renderItem={({ item }) => (
@@ -82,6 +86,16 @@ export default function HomeWorkScreen({
         refreshing={
           homeworkTeacherQuery.isFetching || homeworkSectionQuery.isFetching
         }
+        onEndReached={() => {
+          query.fetchNextPage();
+        }}
+        onEndReachedThreshold={1}
+        ListFooterComponent={
+          query.isFetchingNextPage ? (
+            <ActivityIndicator size="large" style={{ margin: 16 }} />
+          ) : null
+        }
+        contentContainerStyle={styles.list}
       />
 
       {isTeacher && (
@@ -120,17 +134,24 @@ function SingleHomework({ homework, onClick }: HomeworkProps) {
     [dueDate],
   );
 
+  const classAndSection = useMemo(
+    () =>
+      `Class ${homework.Class.name ?? homework.Class.numeric_id} (${
+        homework.Section.name ?? homework.Section.numeric_id
+      })`,
+    [homework.Class.name, homework.Section.name],
+  );
+
   return (
     <Pressable
-      style={({ pressed }) => [
-        styles.chatGroup,
-        { opacity: pressed ? 0.7 : 1 },
-      ]}
+      style={({ pressed }) => [styles.homework, { opacity: pressed ? 0.7 : 1 }]}
       onPress={onClick}
     >
-      <View style={styles.chatGroupMiddle}>
-        <Text style={styles.chatGroupName}>{homework.Subject.name}</Text>
-        <Text style={styles.chatGroupLastMessage} numberOfLines={1}>
+      <View style={styles.homework_middle}>
+        <Text style={styles.homework_name}>
+          {homework.Subject.name} — {classAndSection}
+        </Text>
+        <Text style={styles.homework_description} numberOfLines={1}>
           {homework.text ? homework.text : ""}
         </Text>
         <View>
@@ -142,11 +163,11 @@ function SingleHomework({ homework, onClick }: HomeworkProps) {
           )}
         </View>
       </View>
-      <View style={styles.chatGroupRight}>
+      <View style={styles.homework_right}>
         {dueDateStr && (
           <Text
             style={[
-              styles.chatGroupLastMessage,
+              styles.homework_description,
               { textAlign: "right", color: isPastDue ? "red" : "gray" },
             ]}
           >
@@ -159,117 +180,8 @@ function SingleHomework({ homework, onClick }: HomeworkProps) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    // test
-    backgroundColor: "#4E48B2",
-    // flex: 1,
-    margin: 10,
-    borderRadius: 15,
-    paddingVertical: 8,
-    paddingLeft: 16,
-    shadowColor: "gray",
-    shadowRadius: 8,
-    shadowOffset: {
-      height: 8,
-      width: 8,
-    },
-  },
-  centeredView: {
-    position: "relative",
-    flex: 1,
-    justifyContent: "center",
-    marginTop: 12,
-    backgroundColor: "transparent",
-  },
-  modalView: {
-    margin: 20,
-    borderRadius: 15,
-    padding: 35,
-    // alignItems: "center",
-    width: "90%",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  button: {
-    backgroundColor: "#4E48B2",
-    borderRadius: 15,
-    padding: 15,
-    marginBottom: 12,
-  },
-  textStyle: {
-    color: "white",
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  mainText: {
-    textAlign: "left",
-    fontSize: 24,
-    marginBottom: 12,
-    fontWeight: "bold",
-  },
-  subText: {
-    fontSize: 16,
-    marginBottom: 5,
-    textAlign: "center",
-  },
-  inputText: {
-    height: 100,
-    marginBottom: 5,
-    borderWidth: 1,
-    borderRadius: 15,
-    textAlignVertical: "top",
-    paddingTop: 12,
-    padding: 20,
-    color: "#2A2A2A",
-  },
-  text_class: {
-    paddingTop: 6,
-    paddingBottom: 8,
-    fontSize: 18,
-  },
-  dropdown1BtnStyle: {
-    width: "100%",
-    height: 50,
-    backgroundColor: "#FFF",
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "#444",
-  },
-  dropdown1BtnTxtStyle: {
-    color: "#000",
-    textAlign: "left",
-    fontSize: 14,
-  },
-  dropdown1DropdownStyle: {
-    backgroundColor: "#EFEFEF",
-    marginTop: 0,
-    borderRadius: 15,
-  },
-  dropdown1RowStyle: {
-    backgroundColor: "white",
-    borderBottomColor: "#C5C5C5",
-    height: 40,
-  },
-  dropdown1RowTxtStyle: {
-    color: "#2A2A2A",
-    textAlign: "center",
-  },
-  round_icon: {
-    backgroundColor: "#4E48B2",
-    padding: 15,
-    alignItems: "center",
-    height: 60,
-    width: 60,
-    borderRadius: 999,
-    textAlign: "center",
-    justifyContent: "center",
-  },
-  chatGroup: {
+  list: {},
+  homework: {
     paddingVertical: 16,
     borderBottomColor: "gray",
     borderBottomWidth: 0.5,
@@ -278,22 +190,22 @@ const styles = StyleSheet.create({
     height: 80,
     overflow: "hidden",
   },
-  chatGroupMiddle: {
+  homework_middle: {
     backgroundColor: undefined,
     flexGrow: 1,
     paddingLeft: 16,
     maxWidth: "80%",
   },
-  chatGroupName: {
+  homework_name: {
     fontSize: 18,
     fontWeight: "bold",
   },
-  chatGroupRight: {
+  homework_right: {
     backgroundColor: undefined,
     paddingRight: 8,
     marginLeft: "auto",
   },
-  chatGroupLastMessage: {
+  homework_description: {
     fontSize: 12,
     color: "gray",
   },
