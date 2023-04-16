@@ -1,16 +1,18 @@
-name: build-and-push-backend-image
+name: build-deploy-backend
 
 on:
-  push:
+  create:
+    tags:
+      - '*'
     branches:
-      - "main"
+      - main
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}_backend
 
 jobs:
-  build-image:
+  build-push-image:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
