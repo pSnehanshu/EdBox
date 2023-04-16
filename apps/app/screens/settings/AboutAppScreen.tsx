@@ -1,6 +1,10 @@
-import { Button, ScrollView } from "react-native";
+import { ScrollView } from "react-native";
+import { Text } from "../../components/Themed";
 // import * as Updates from "expo-updates";
 // import { Text } from "../../components/Themed";
+
+// @ts-ignore
+const isHermes = () => !!global.HermesInternal;
 
 export default function AboutAppScreen() {
   // async function onFetchUpdateAsync() {
@@ -17,7 +21,8 @@ export default function AboutAppScreen() {
   // }
 
   return (
-    <ScrollView>
+    <ScrollView style={{ padding: 8 }}>
+      <Text>Is running on Hermes? {isHermes() ? "Yes" : "No"}</Text>
       {/* <Button title="Fetch update" onPress={onFetchUpdateAsync} />
       <Text>
         isEmbeddedLaunch: {Updates.isEmbeddedLaunch ? "true" : "false"}

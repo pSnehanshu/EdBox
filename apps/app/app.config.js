@@ -12,4 +12,5 @@ module.exports = ({ config }) => ({
     backendHost: process.env.HOSTNAME,
     schoolId: process.env.SCHOOLID,
   },
+  jsEngine: "hermes",
 });
