@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Pressable, StyleSheet, SafeAreaView } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import {
   getUserRoleHierarchical,
@@ -57,55 +57,41 @@ export default function HomeWorkScreen({
 
   return (
     <View style={{ flex: 1, marginTop: 0 }}>
+      <List
+        data={
+          role === StaticRole.teacher
+            ? homeworkTeacherQuery?.data?.data
+            : homeworkSectionQuery.data?.data
+        }
+        keyExtractor={(g) => g.id}
+        estimatedItemSize={200}
+        renderItem={({ item }) => (
+          <SingleHomework
+            homework={item}
+            onClick={() =>
+              navigation.navigate("DisplayHomeworkScreen", {
+                homeworkId: item.id,
+              })
+            }
+          />
+        )}
+        onRefresh={() => {
+          if (isTeacher) homeworkTeacherQuery.refetch();
+          if (canFetchSectionHW) homeworkSectionQuery.refetch();
+        }}
+        refreshing={
+          homeworkTeacherQuery.isFetching || homeworkSectionQuery.isFetching
+        }
+      />
+
       {isTeacher && (
         <FAB
-          icon={
-            <Ionicons
-              name="add"
-              size={24}
-              color={color === "dark" ? "black" : "white"}
-            />
-          }
-          style={{
-            position: "absolute",
-            bottom: 10,
-            right: 10,
-            zIndex: 100,
-            elevation: 1,
-            flex: 1,
-          }}
-          color={color === "dark" ? "white" : "black"}
+          icon={<Ionicons name="add" size={24} color="white" />}
+          buttonStyle={{ backgroundColor: "#4E48B2" }}
           onPress={() => navigation.navigate("CreateHomeworkScreen")}
+          placement="right"
         />
       )}
-      <SafeAreaView style={{ height: "100%", width: "100%" }}>
-        <List
-          data={
-            role === StaticRole.teacher
-              ? homeworkTeacherQuery?.data?.data
-              : homeworkSectionQuery.data?.data
-          }
-          keyExtractor={(g) => g.id}
-          estimatedItemSize={200}
-          renderItem={({ item }) => (
-            <SingleHomework
-              homework={item}
-              onClick={() =>
-                navigation.navigate("DisplayHomeworkScreen", {
-                  homeworkId: item.id,
-                })
-              }
-            />
-          )}
-          onRefresh={() => {
-            if (isTeacher) homeworkTeacherQuery.refetch();
-            if (canFetchSectionHW) homeworkSectionQuery.refetch();
-          }}
-          refreshing={
-            homeworkTeacherQuery.isFetching || homeworkSectionQuery.isFetching
-          }
-        />
-      </SafeAreaView>
     </View>
   );
 }

@@ -8,7 +8,7 @@ import {
   ScrollView as RNScrollView,
   Pressable,
 } from "react-native";
-import { FAB, Card, ListItem } from "@rneui/themed";
+import { SpeedDial, Card, ListItem } from "@rneui/themed";
 import MIMEType from "whatwg-mimetype";
 import type { UploadedFile } from "schooltalk-shared/types";
 import Spinner from "react-native-loading-spinner-overlay/lib";
@@ -32,6 +32,7 @@ export default function DisplayHomeworkScreen({
   const scheme = useColorScheme();
   const color = scheme === "dark" ? "black" : "white";
   const oppColor = scheme === "dark" ? "white" : "black";
+  const [isActionOpen, setActionOpen] = useState(false);
 
   // query
   const homeworkQuery = trpc.school.homework.fetchHomework.useQuery({
@@ -199,23 +200,40 @@ export default function DisplayHomeworkScreen({
         <View style={styles.gap} />
       </ScrollView>
 
-      {isEditable && (
-        <FAB
-          icon={<FontAwesome5 name="pencil-alt" size={24} color={color} />}
-          style={{
-            position: "absolute",
-            bottom: 10,
-            right: 10,
-            zIndex: 100,
-            elevation: 1,
-            flex: 1,
-          }}
-          color={oppColor}
-          onPress={() =>
-            navigation.navigate("UpdateHomeworkScreen", { homeworkId })
-          }
-        />
-      )}
+      <SpeedDial
+        isOpen={isActionOpen}
+        icon={{ name: "menu", color: "white" }}
+        openIcon={{ name: "close", color: "white" }}
+        onOpen={() => setActionOpen(true)}
+        onClose={() => setActionOpen(false)}
+        buttonStyle={{ backgroundColor: "#4E48B2" }}
+      >
+        {[
+          isEditable ? (
+            <SpeedDial.Action
+              icon={{ name: "edit", color: "white" }}
+              title="Edit"
+              onPress={() =>
+                navigation.navigate("UpdateHomeworkScreen", { homeworkId })
+              }
+              buttonStyle={{ backgroundColor: "#4E48B2" }}
+            />
+          ) : (
+            <></>
+          ),
+
+          isEditable ? (
+            <SpeedDial.Action
+              icon={{ name: "delete", color: "white" }}
+              title="Delete"
+              onPress={() => console.log("Delete Something")}
+              buttonStyle={{ backgroundColor: "#4E48B2" }}
+            />
+          ) : (
+            <></>
+          ),
+        ]}
+      </SpeedDial>
 
       <FullScreenFilePreview
         files={homework?.Attachments?.map((att) => att.File) ?? []}
