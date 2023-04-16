@@ -7,6 +7,7 @@ import {
   StyleSheet,
   ScrollView as RNScrollView,
   Pressable,
+  Alert,
 } from "react-native";
 import { SpeedDial, Card, ListItem } from "@rneui/themed";
 import MIMEType from "whatwg-mimetype";
@@ -30,13 +31,30 @@ export default function DisplayHomeworkScreen({
   navigation,
 }: NativeStackScreenProps<RootStackParamList, "DisplayHomeworkScreen">) {
   const scheme = useColorScheme();
-  const color = scheme === "dark" ? "black" : "white";
   const oppColor = scheme === "dark" ? "white" : "black";
   const [isActionOpen, setActionOpen] = useState(false);
+  const utils = trpc.useContext();
 
   // query
   const homeworkQuery = trpc.school.homework.fetchHomework.useQuery({
     homework_id: homeworkId,
+  });
+
+  // Delete
+  const deleteMutation = trpc.school.homework.delete.useMutation({
+    async onSuccess(data, variables, context) {
+      await utils.school.homework.fetchForSection.invalidate();
+      await utils.school.homework.fetchForTeacher.invalidate();
+
+      if (navigation.canGoBack()) {
+        navigation.goBack();
+      } else {
+        navigation.replace("HomeWorkScreen");
+      }
+    },
+    onError(error, variables, context) {
+      //
+    },
   });
 
   const { data: homework } = homeworkQuery;
@@ -82,7 +100,7 @@ export default function DisplayHomeworkScreen({
 
   return (
     <View style={styles.container}>
-      <Spinner visible={homeworkQuery.isLoading} />
+      <Spinner visible={homeworkQuery.isLoading || deleteMutation.isLoading} />
 
       <ScrollView innerRef={scrollRef}>
         <Card>
@@ -226,7 +244,24 @@ export default function DisplayHomeworkScreen({
             <SpeedDial.Action
               icon={{ name: "delete", color: "white" }}
               title="Delete"
-              onPress={() => console.log("Delete Something")}
+              onPress={() => {
+                Alert.alert("Delete", "Do you want to delete this homework?", [
+                  {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress(value) {
+                      deleteMutation.mutate({ homework_id: homeworkId });
+                    },
+                  },
+                  {
+                    text: "Cancel",
+                    style: "cancel",
+                    onPress(value) {
+                      setActionOpen(false);
+                    },
+                  },
+                ]);
+              }}
               buttonStyle={{ backgroundColor: "#4E48B2" }}
             />
           ) : (
