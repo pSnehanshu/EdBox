@@ -3527,31 +3527,31 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@prisma/client@npm:^4.11.0":
-  version: 4.11.0
-  resolution: "@prisma/client@npm:4.11.0"
+"@prisma/client@npm:^4.12.0":
+  version: 4.12.0
+  resolution: "@prisma/client@npm:4.12.0"
   dependencies:
-    "@prisma/engines-version": 4.11.0-57.8fde8fef4033376662cad983758335009d522acb
+    "@prisma/engines-version": 4.12.0-67.659ef412370fa3b41cd7bf6e94587c1dfb7f67e7
   peerDependencies:
     prisma: "*"
   peerDependenciesMeta:
     prisma:
       optional: true
-  checksum: ca8d8f820caaf4a76b94674f88207d5bb14f57a9682d37d2f79c56378f259cd3b14b30a110ab59a97647fcf3c46f896e7a2d20ded2777e09b835d7accd70cf1d
+  checksum: bbd17500ee218a71e765a75b649c56bc0da1903e63d69d716b6a0e6995c8e1cc5265423ba1518a789c3e71b91d93e7937180db2d107e426bd4ad2f51998240f0
   languageName: node
   linkType: hard
 
-"@prisma/engines-version@npm:4.11.0-57.8fde8fef4033376662cad983758335009d522acb":
-  version: 4.11.0-57.8fde8fef4033376662cad983758335009d522acb
-  resolution: "@prisma/engines-version@npm:4.11.0-57.8fde8fef4033376662cad983758335009d522acb"
-  checksum: f040b93d09b21feaef193080eed22142fa26b3cf86d089ebb4286f5f45ed17a98e030a8bb55c0bec2892e15880a697f6754c6966b7795cf7ba4553f59fb387e7
+"@prisma/engines-version@npm:4.12.0-67.659ef412370fa3b41cd7bf6e94587c1dfb7f67e7":
+  version: 4.12.0-67.659ef412370fa3b41cd7bf6e94587c1dfb7f67e7
+  resolution: "@prisma/engines-version@npm:4.12.0-67.659ef412370fa3b41cd7bf6e94587c1dfb7f67e7"
+  checksum: 54615d6982db9c50eed6132ad7ab3f32ef93f64d36b7f932b0d6109cd54028ea459293833e48b849a5dd968d934bb3cfb275b9a9172934032f95355d6f663dcf
   languageName: node
   linkType: hard
 
-"@prisma/engines@npm:4.11.0":
-  version: 4.11.0
-  resolution: "@prisma/engines@npm:4.11.0"
-  checksum: 98030cead39e5009b7a91fd2463433ccdb16cbeb6c7345ed7950c25dbe0731a425fc888458a1423b594d659972e081ca3d63d301ef647f05a634209c75769db2
+"@prisma/engines@npm:4.12.0":
+  version: 4.12.0
+  resolution: "@prisma/engines@npm:4.12.0"
+  checksum: 5d226a2c86bee5bc6fa34910ec9ba9a68a1c0248977d0da47964372edcfe773ee6c4bb00e244258f535570f018d883f0ab9e2677cf06471869bb8857f79880f6
   languageName: node
   linkType: hard
 
@@ -4004,12 +4004,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@trpc/client@npm:^10.7.0":
-  version: 10.8.1
-  resolution: "@trpc/client@npm:10.8.1"
+"@trpc/client@npm:^10.20.0":
+  version: 10.20.0
+  resolution: "@trpc/client@npm:10.20.0"
   peerDependencies:
-    "@trpc/server": 10.8.1
-  checksum: 06a7e6cca68d91188d2de826b7b1d5352af0761daa364fdb04723c3047b0e139125ee813ab66cffd82914f72d60ae3eb4d5a37f2db8484c9506766bf80dcc823
+    "@trpc/server": 10.20.0
+  checksum: 28e576f8752c35fec038772cfda33c8c1e83735bb41711df1164ba5ca7fe7f8cad12a791c8ce3f9d9a6b19cf603791e35a7fab2e5bdb0a196a85fa0d2fbddec6
   languageName: node
   linkType: hard
 
@@ -4026,10 +4026,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@trpc/server@npm:^10.10.0":
-  version: 10.10.0
-  resolution: "@trpc/server@npm:10.10.0"
-  checksum: a50724416886d6ec406c87e03086baa4abb2509ea87984a96f1a1a891a67ffd2e13fdfcde9bc490ca2bb41083d7beb5d59d889446b3341af887d1d6281b5fe41
+"@trpc/server@npm:^10.20.0":
+  version: 10.20.0
+  resolution: "@trpc/server@npm:10.20.0"
+  checksum: a06b8053cbd6340fb3bffbcd1ae70fa8b7ec4e162be4dafbefe545362f9232e282949c938503b5b497a06ae91243fa347cb3207e3d7373da90be4bae858aa4a6
   languageName: node
   linkType: hard
 
@@ -11478,15 +11478,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prisma@npm:^4.11.0":
-  version: 4.11.0
-  resolution: "prisma@npm:4.11.0"
+"prisma@npm:^4.12.0":
+  version: 4.12.0
+  resolution: "prisma@npm:4.12.0"
   dependencies:
-    "@prisma/engines": 4.11.0
+    "@prisma/engines": 4.12.0
   bin:
     prisma: build/index.js
     prisma2: build/index.js
-  checksum: 760d80766ae16ad2d25cfc20d75433b020dff0937eab864b94b95beadd89e481508e4d3c6370a5df90749d5ac5c7af77c9c2f293b74bfdee0e548b04a905c2e7
+  checksum: 826b90901391eead0aa2e1ab4539474c308f8a956b480e87594b241bfaba423ebd781b8082fc329f4e7e780f3a7162a09ac61c367d3f43382e93d506e4a66c7c
   languageName: node
   linkType: hard
 
@@ -12619,9 +12619,9 @@ __metadata:
     "@rneui/themed": ^4.0.0-rc.7
     "@shopify/flash-list": 1.3.1
     "@tanstack/react-query": ^4.20.4
-    "@trpc/client": ^10.7.0
+    "@trpc/client": ^10.20.0
     "@trpc/react-query": ^10.7.0
-    "@trpc/server": ^10.10.0
+    "@trpc/server": ^10.20.0
     "@types/lodash": ^4.14.191
     "@types/react": ~18.0.24
     "@types/react-native": ~0.70.6
@@ -12692,8 +12692,8 @@ __metadata:
   dependencies:
     "@aws-sdk/client-s3": ^3.303.0
     "@aws-sdk/s3-request-presigner": ^3.303.0
-    "@prisma/client": ^4.11.0
-    "@trpc/server": ^10.10.0
+    "@prisma/client": ^4.12.0
+    "@trpc/server": ^10.20.0
     "@types/async": ^3.2.18
     "@types/express": ^4.17.15
     "@types/lodash": ^4.14.191
@@ -12710,7 +12710,7 @@ __metadata:
     lodash: ^4.17.21
     nodemon: ^2.0.20
     parse-data-url: ^5.0.0
-    prisma: ^4.11.0
+    prisma: ^4.12.0
     schooltalk-shared: "*"
     socket.io: ^4.5.4
     ts-node: ^10.9.1
@@ -12733,7 +12733,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "schooltalk@workspace:."
   dependencies:
-    "@trpc/server": ^10.10.0
     core-js: ^3.27.2
     prettier: ^2.8.4
   languageName: unknown
