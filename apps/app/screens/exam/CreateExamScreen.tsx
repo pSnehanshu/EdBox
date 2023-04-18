@@ -28,6 +28,7 @@ export default function CreateExamScreen({
   });
   const [isTextModalOpen, setIsTextModalOpen] = useState(false);
   const [examName, setExamName] = useState("");
+  const [isTestCreateModal, setIsTestCreateModal] = useState(false);
 
   return (
     <View style={{ height: "100%" }}>
@@ -59,9 +60,22 @@ export default function CreateExamScreen({
       </Pressable>
 
       {/* tests */}
+      <View style={{ alignItems: "flex-end", margin: 5 }}>
+        <Pressable
+          style={{ borderWidth: 1, padding: 10 }}
+          onPress={() => {
+            setIsTestCreateModal(true);
+          }}
+        >
+          <Text>Add Test</Text>
+        </Pressable>
+      </View>
       {/* new test modal */}
       <View style={{ width: "10%" }}>
-        <TestModal />
+        <TestModal
+          isTestCreateModal={isTestCreateModal}
+          onClose={() => setIsTestCreateModal(false)}
+        />
       </View>
 
       <FAB

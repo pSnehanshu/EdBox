@@ -6,7 +6,11 @@ import ModalSelector from "react-native-modal-selector";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import useColorScheme from "../../utils/useColorScheme";
 
-export default function () {
+interface TestModalProps {
+  isTestCreateModal: boolean;
+  onClose: () => void;
+}
+export default function ({ isTestCreateModal, onClose }: TestModalProps) {
   const scheme = useColorScheme();
   const iconColor = scheme === "dark" ? "white" : "black";
   const ChevronIcon = (
@@ -14,8 +18,8 @@ export default function () {
   );
   return (
     <Dialog
-      isVisible={true}
-      //   onBackdropPress={props.onClose}
+      isVisible={isTestCreateModal}
+      onBackdropPress={onClose}
       animationType="fade"
       style={{ width: "100%" }}
     >
