@@ -7,15 +7,21 @@ import type { ExamItem } from "schooltalk-shared/types";
 import _ from "lodash";
 import { format, parseISO } from "date-fns";
 import { ListItem, Divider } from "@rneui/themed";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { List, Text, View } from "../../components/Themed";
 import { trpc } from "../../utils/trpc";
 import useColorScheme from "../../utils/useColorScheme";
 import { TestComp } from "../../components/TestComp";
 import { useCurrentUser } from "../../utils/auth";
-import { getUserRoleHierarchical, StaticRole } from "schooltalk-shared/misc";
+import {
+  getUserRoleHierarchical,
+  hasUserStaticRoles,
+  StaticRole,
+} from "schooltalk-shared/misc";
 import { Banner } from "../../components/Banner";
 import { LottieAnimation } from "../../components/LottieAnimation";
+import { FAB } from "@rneui/themed";
+import { useNavigation } from "@react-navigation/native";
 
 const ExamComp: React.FC<{
   exam: Extract<ExamItem, { type: "exam" }>["item"];
@@ -88,7 +94,8 @@ const ExamListScreen: React.FC = () => {
   if (query.isLoading) return <Spinner visible />;
   if (query.isError)
     return <Banner text="Failed to fetch exams!" type="error" />;
-
+  const isTeacher = hasUserStaticRoles(user, [StaticRole.teacher], "all");
+  const navigation = useNavigation();
   return (
     <SafeAreaView style={styles.container}>
       {query.data.length > 0 ? (
@@ -112,6 +119,14 @@ const ExamListScreen: React.FC = () => {
           src={require("../../assets/lotties/person-floating.json")}
           caption="No upcoming exams"
           style={styles.no_exam_animation}
+        />
+      )}
+      {isTeacher && (
+        <FAB
+          icon={<Ionicons name="add" size={24} color="white" />}
+          buttonStyle={{ backgroundColor: "#4E48B2" }}
+          onPress={() => navigation.navigate("CreateExamScreen")}
+          placement="right"
         />
       )}
     </SafeAreaView>

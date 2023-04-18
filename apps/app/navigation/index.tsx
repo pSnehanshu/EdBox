@@ -37,6 +37,7 @@ import { View } from "../components/Themed";
 import CreateHomeworkScreen from "../screens/homework/CreateHomeworkScreen";
 import DisplayHomeworkScreen from "../screens/homework/DisplayHomeworkScreen";
 import UpdateHomeworkScreen from "../screens/homework/UpdateHomeworkScreen";
+import CreateExamScreen from "../screens/exam/CreateExamScreen";
 
 export default function Navigation({
   colorScheme,
@@ -130,6 +131,14 @@ function RootNavigator() {
                 options={{
                   headerShown: true,
                   title: "Update Homework",
+                }}
+              />
+              <Stack.Screen
+                name="CreateExamScreen"
+                component={CreateExamScreen}
+                options={{
+                  headerShown: true,
+                  title: "Create New Exam",
                 }}
               />
             </>
