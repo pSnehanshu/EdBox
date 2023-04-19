@@ -22,6 +22,7 @@ const examTestSchema = z.object({
     .transform((d) => parseISO(d)),
   duration_minutes: z.number().int().min(0).default(0),
   subjectIds: z.string().cuid().array(),
+  total_marks: z.number().int(),
 });
 
 type ExamTest = NonNullable<
@@ -134,6 +135,7 @@ const examRouter = t.router({
           class_id: input.class_id,
           section_id: input.section_id,
           date_of_exam: input.date,
+          total_marks: input.total_marks,
           duration_minutes: input.duration_minutes,
           school_id: ctx.user.school_id,
           creator_user_id: ctx.user.id,
@@ -318,6 +320,7 @@ const examRouter = t.router({
               section_id: test.section_id,
               date_of_exam: test.date,
               duration_minutes: test.duration_minutes,
+              total_marks: test.total_marks,
               school_id: ctx.user.school_id,
               creator_user_id: ctx.user.id,
               Subjects: {

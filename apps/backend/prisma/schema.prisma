@@ -405,6 +405,7 @@ model ExamTest {
   Section          ClassSection?        @relation(fields: [section_id, class_id, school_id], references: [numeric_id, class_id, school_id], onDelete: Cascade, onUpdate: Cascade)
   date_of_exam     DateTime
   duration_minutes Int                  @default(0) @db.SmallInt
+  total_marks      Int
   creator_user_id  String?              @db.VarChar(32)
   CreatorUser      User?                @relation(fields: [creator_user_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
   created_at       DateTime             @default(now())
@@ -425,6 +426,7 @@ model TestSubjectMapping {
 model ExamTestResult {
   id                   String          @id @default(cuid()) @db.VarChar(32)
   test_id              String          @db.VarChar(32)
+  obtained_marks       Int
   Test                 ExamTest        @relation(fields: [test_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   student_id           String          @db.VarChar(32)
   Student              Student         @relation(fields: [student_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
