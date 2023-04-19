@@ -91,11 +91,13 @@ const ExamListScreen: React.FC = () => {
       ? trpc.school.exam.fetchExamsAndTestsForStudent.useQuery({})
       : trpc.school.exam.fetchExamsAndTestsForTeacher.useQuery({});
 
+  const isTeacher = hasUserStaticRoles(user, [StaticRole.teacher], "all");
+  const navigation = useNavigation();
+
   if (query.isLoading) return <Spinner visible />;
   if (query.isError)
     return <Banner text="Failed to fetch exams!" type="error" />;
-  const isTeacher = hasUserStaticRoles(user, [StaticRole.teacher], "all");
-  const navigation = useNavigation();
+
   return (
     <SafeAreaView style={styles.container}>
       {query.data.length > 0 ? (
