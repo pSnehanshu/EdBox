@@ -84,9 +84,12 @@ export const principalMiddleware = authMiddleware.unstable_pipe(
   },
 );
 
-export const roleMiddleware = (allowedRoles: StaticRole[]) =>
+export const roleMiddleware = (
+  allowedRoles: StaticRole[],
+  mode: "all" | "some" = "some",
+) =>
   authMiddleware.unstable_pipe(({ ctx, next }) => {
-    if (!hasUserStaticRoles(ctx.user, allowedRoles, "all")) {
+    if (!hasUserStaticRoles(ctx.user, allowedRoles, mode)) {
       throw new TRPCError({
         code: "FORBIDDEN",
       });
