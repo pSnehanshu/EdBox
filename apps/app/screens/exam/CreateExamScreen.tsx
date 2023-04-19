@@ -20,7 +20,7 @@ export default function CreateExamScreen({
 
   const createExam = trpc.school.exam.createExam.useMutation({
     onSuccess(data) {
-      navigation.replace("CreateExamScreen");
+      navigation.replace("ExamsScreen");
     },
     onError(error, variables, context) {
       console.log(error, variables, context);

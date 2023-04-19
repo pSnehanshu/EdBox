@@ -11977,7 +11977,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:*, prop-types@npm:15.8.1, prop-types@npm:^15.5.10, prop-types@npm:^15.8.1":
+"prop-types@npm:*, prop-types@npm:15.8.1, prop-types@npm:^15.5.10, prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -12284,6 +12284,21 @@ __metadata:
   dependencies:
     prop-types: ^15.5.10
   checksum: c7b00ebceb6fe15e025ef1655483bc98fdb150453fb27e71d17a282a87317c5b1e242a1108f5247fac99594e6778470513d19c21e02eb2ce81f80688dd616419
+  languageName: node
+  linkType: hard
+
+"react-native-multiple-select@npm:^0.5.12":
+  version: 0.5.12
+  resolution: "react-native-multiple-select@npm:0.5.12"
+  dependencies:
+    prop-types: ^15.7.2
+  peerDependencies:
+    deprecated-react-native-prop-types: ">2.0.0"
+    lodash: "*"
+    react: ">16.6.0"
+    react-native: ">0.57.0"
+    react-native-vector-icons: ">6.0.0"
+  checksum: 79ba4e8cdb20db4e9c2c9dd67c4e3502883e22ebed96cf588f67cd8cb24a418d68d5c5b47fbe86b722dd4b8decfeabe4cb90a4d16bf4e3d0eef0ea5113dc598b
   languageName: node
   linkType: hard
 
@@ -13195,6 +13210,8 @@ __metadata:
   dependencies:
     core-js: ^3.30.1
     prettier: ^2.8.7
+    prop-types: ^15.8.1
+    react-native-multiple-select: ^0.5.12
   languageName: unknown
   linkType: soft
 
