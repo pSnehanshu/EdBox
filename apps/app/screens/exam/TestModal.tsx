@@ -16,45 +16,7 @@ interface TestModalProps {
 
 export default function ({ isTestCreateModal, onClose }: TestModalProps) {
   const subjectsQuery = trpc.school.subject.fetchSubjects.useQuery({});
-  // test
-  const items = [
-    {
-      id: "1",
-      name: "Ondo",
-    },
-    {
-      id: "2",
-      name: "Ogun",
-    },
-    {
-      id: "3",
-      name: "Calabar",
-    },
-    {
-      id: "4",
-      name: "Lagos",
-    },
-    {
-      id: "5",
-      name: "Maiduguri",
-    },
-    {
-      id: "7",
-      name: "Anambra",
-    },
-    {
-      id: "8",
-      name: "Benue",
-    },
-    {
-      id: "8",
-      name: "Kaduna",
-    },
-    {
-      id: "10",
-      name: "Abuja",
-    },
-  ];
+
   const [selectedItems, setSelectedItems] = useState();
 
   const onSelectedItemsChange = (selectedItems: any) => {
