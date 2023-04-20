@@ -11,6 +11,7 @@ import useColorScheme from "../../utils/useColorScheme";
 import { ModalTextInput } from "../../components/ModalTextInput";
 import { Toast } from "react-native-toast-message/lib/src/Toast";
 import TestModal from "./TestModal";
+import { Subject } from "schooltalk-shared/types";
 
 export default function CreateExamScreen({
   navigation,
@@ -29,6 +30,7 @@ export default function CreateExamScreen({
   const [isTextModalOpen, setIsTextModalOpen] = useState(false);
   const [examName, setExamName] = useState("");
   const [isTestCreateModal, setIsTestCreateModal] = useState(false);
+  const [selectedSubject, setSelectedSubject] = useState<string>("");
 
   return (
     <View style={{ height: "100%" }}>
@@ -75,6 +77,8 @@ export default function CreateExamScreen({
         <TestModal
           isTestCreateModal={isTestCreateModal}
           onClose={() => setIsTestCreateModal(false)}
+          selectedSubject={selectedSubject}
+          setSelectedSubject={setSelectedSubject}
         />
       </View>
 

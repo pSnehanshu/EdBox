@@ -6,23 +6,30 @@ import ModalSelector from "react-native-modal-selector";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import useColorScheme from "../../utils/useColorScheme";
 import MultiSelect from "react-native-multiple-select";
-import { ArrayElement } from "schooltalk-shared/types";
+import { ArrayElement, Subject } from "schooltalk-shared/types";
 import { trpc } from "../../utils/trpc";
+import { Switch } from "@rneui/themed";
 
 interface TestModalProps {
   isTestCreateModal: boolean;
   onClose: () => void;
+  selectedSubject: string;
+  setSelectedSubject: (selectedSubject: string) => void;
 }
 
-export default function ({ isTestCreateModal, onClose }: TestModalProps) {
+export default function ({
+  isTestCreateModal,
+  onClose,
+  selectedSubject,
+  setSelectedSubject,
+}: TestModalProps) {
   const subjectsQuery = trpc.school.subject.fetchSubjects.useQuery({});
+  // const [selectedSubject, setSelectedSubject] = useState<any>();
+  const selectedSubjectObject = subjectsQuery.data?.find(
+    (s) => s.id === selectedSubject,
+  );
 
-  const [selectedItems, setSelectedItems] = useState();
-
-  const onSelectedItemsChange = (selectedItems: any) => {
-    setSelectedItems(selectedItems);
-  };
-  //
+  const [multiselectSub, setMultiselectSub] = useState(false);
   const scheme = useColorScheme();
   const iconColor = scheme === "dark" ? "white" : "black";
   const ChevronIcon = (
@@ -37,43 +44,52 @@ export default function ({ isTestCreateModal, onClose }: TestModalProps) {
     >
       <Dialog.Title title={"Create Test"} />
 
-      {/* <ModalSelector
-        data={[]}
-        //   onChange={(item) => setSelectedSubject(item.key)}
-        animationType="fade"
-        //   selectedKey={selectedSubject}
+      {!multiselectSub ? (
+        <ModalSelector
+          data={
+            subjectsQuery.data?.map((sub) => ({
+              key: sub.id,
+              label: sub.name,
+            })) ?? []
+          }
+          onChange={(item) => setSelectedSubject(item.key)}
+          animationType="fade"
+          selectedKey={selectedSubject}
+        >
+          <ListItem
+            containerStyle={{
+              marginTop: 5,
+              padding: 0,
+            }}
+          >
+            <ListItem.Content>
+              <ListItem.Title>Subject</ListItem.Title>
+              <ListItem.Subtitle>
+                {selectedSubjectObject?.name ?? "Select subject"}
+              </ListItem.Subtitle>
+            </ListItem.Content>
+            {ChevronIcon}
+          </ListItem>
+        </ModalSelector>
+      ) : (
+        <Text>Multiselect</Text>
+      )}
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "flex-start",
+        }}
       >
-        <ListItem>
-          <ListItem.Content>
-            <ListItem.Title>Subject</ListItem.Title>
-            <ListItem.Subtitle>{"Select subject"}</ListItem.Subtitle>
-          </ListItem.Content>
-          {ChevronIcon}
-        </ListItem>
-      </ModalSelector> */}
-      <View style={{}}>
-        <MultiSelect
-          hideTags
-          items={subjectsQuery.data ?? []}
-          uniqueKey="name"
-          onSelectedItemsChange={onSelectedItemsChange}
-          selectedItems={selectedItems}
-          selectText="Pick Subjects"
-          searchInputPlaceholderText="Search Subjects"
-          tagRemoveIconColor="#CCC"
-          tagBorderColor="#CCC"
-          tagTextColor="#CCC"
-          selectedItemTextColor="#CCC"
-          selectedItemIconColor="#CCC"
-          itemTextColor="#000"
-          displayKey="name"
-          submitButtonColor="black"
-          submitButtonText="Submit"
-          textInputProps={{ editable: false, autoFocus: false }}
-          // searchIcon={false}
-          // searchInputStyle={{ display: "none" }}
+        <Text style={{ textAlignVertical: "center", textAlign: "center" }}>
+          Select Multiple Subjects
+        </Text>
+        <Switch
+          trackColor={{ true: "#3bde50", false: "#f5f6fc" }}
+          // change
+          thumbColor="#FFF"
+          value={multiselectSub}
+          onValueChange={(value) => setMultiselectSub(value)}
         />
-        <Text>{JSON.stringify(selectedItems, null, 2)}</Text>
       </View>
 
       <Dialog.Actions>
@@ -81,7 +97,7 @@ export default function ({ isTestCreateModal, onClose }: TestModalProps) {
           title="Done"
           onPress={() => {
             // props.onChange?.(value);
-            // props.onClose?.();
+            onClose?.();
           }}
           type="solid"
         />
