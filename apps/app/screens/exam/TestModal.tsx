@@ -5,7 +5,6 @@ import { Text, TextInput, View } from "../../components/Themed";
 import ModalSelector from "react-native-modal-selector";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import useColorScheme from "../../utils/useColorScheme";
-import MultiSelect from "react-native-multiple-select";
 import { ArrayElement, Subject } from "schooltalk-shared/types";
 import { trpc } from "../../utils/trpc";
 import { Switch } from "@rneui/themed";
