@@ -1,7 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Modal, Pressable, StyleSheet } from "react-native";
-import * as Haptics from "expo-haptics";
 import type { ListRenderItem } from "@shopify/flash-list";
 import type { ArrayElement } from "schooltalk-shared/types";
 import { List, Text, View } from "./Themed";
@@ -76,9 +75,6 @@ function ModalSelect<T>(props: MultiSelectProps<T>) {
 
   const handleItemPress = useCallback(
     (item: T) => {
-      // Vibrate!
-      Haptics.selectionAsync();
-
       // Update selection
       setSelectedItems((items) => {
         const id = props.idExtractor(item);
@@ -108,7 +104,11 @@ function ModalSelect<T>(props: MultiSelectProps<T>) {
       const id = props.idExtractor(item);
 
       return (
-        <Pressable key={id} onPress={() => handleItemPress(item)}>
+        <Pressable
+          key={id}
+          onPress={() => handleItemPress(item)}
+          style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
+        >
           {props.itemComponent?.(item, isSelected, index) ??
             defaultItemComponent(item, isSelected, index)}
         </Pressable>
