@@ -16,6 +16,7 @@ interface MultiSelectProps<T = unknown> {
   isVisible: boolean;
   items: T[];
   selected: T[];
+  isSingle?: boolean;
   idExtractor: (item: T) => string | number;
   labelExtractor?: (item: T) => string;
   onClose?: () => void;
@@ -76,27 +77,35 @@ function ModalSelect<T>(props: MultiSelectProps<T>) {
   const handleItemPress = useCallback(
     (item: T) => {
       // Update selection
-      setSelectedItems((items) => {
-        const id = props.idExtractor(item);
+      setSelectedItems((selectedItems) => {
+        if (props.isSingle) {
+          setTimeout(() => {
+            props.onSubmit?.([item]);
+            props.onClose?.();
+          }, 100);
 
-        const index = items.findIndex(
+          return [item];
+        }
+
+        const id = props.idExtractor(item);
+        const index = selectedItems.findIndex(
           (sitem) => props.idExtractor(sitem) === id,
         );
 
         if (index >= 0) {
           // Item is already selected, unselect it
 
-          const copy = items.slice();
+          const copy = selectedItems.slice();
           copy.splice(index, 1);
           return copy;
         } else {
           // Item isn't selected already, select it
 
-          return items.concat(item);
+          return selectedItems.concat(item);
         }
       });
     },
-    [props.idExtractor],
+    [props.idExtractor, props.isSingle],
   );
 
   const renderItem = useCallback<ListRenderItem<ArrayElement<typeof items>>>(
@@ -142,16 +151,18 @@ function ModalSelect<T>(props: MultiSelectProps<T>) {
           <Text>Cancel</Text>
         </Pressable>
 
-        <MaterialIcons.Button
-          name="check"
-          size={24}
-          onPress={() => {
-            props.onSubmit?.(selectedItems);
-            props.onClose?.();
-          }}
-        >
-          Done
-        </MaterialIcons.Button>
+        {props.isSingle ? null : (
+          <MaterialIcons.Button
+            name="check"
+            size={24}
+            onPress={() => {
+              props.onSubmit?.(selectedItems);
+              props.onClose?.();
+            }}
+          >
+            Done
+          </MaterialIcons.Button>
+        )}
       </View>
 
       <View style={styles.list}>
