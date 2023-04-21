@@ -1,7 +1,9 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Modal, Pressable, StyleSheet } from "react-native";
 import * as Haptics from "expo-haptics";
+import type { ListRenderItem } from "@shopify/flash-list";
+import type { ArrayElement } from "schooltalk-shared/types";
 import { List, Text, View } from "./Themed";
 import useColorScheme from "../utils/useColorScheme";
 
@@ -39,26 +41,80 @@ function ModalSelect<T>(props: MultiSelectProps<T>) {
 
   const [selectedItems, setSelectedItems] = useState<T[]>(props.selected);
 
-  const items = props.items.map((item) => {
-    const isSelected =
-      selectedItems.findIndex(
-        (sitem) => props.idExtractor(sitem) === props.idExtractor(item),
-      ) >= 0;
-    return { item, isSelected };
-  });
+  const items = useMemo(
+    () =>
+      props.items.map((item) => {
+        const isSelected =
+          selectedItems.findIndex(
+            (sitem) => props.idExtractor(sitem) === props.idExtractor(item),
+          ) >= 0;
+        return { item, isSelected };
+      }),
+    [props.items, selectedItems],
+  );
 
-  const defaultItemComponent: ItemComponent<T> = (item, isSelected) => (
-    <View style={styles.item}>
-      <Text style={{ maxWidth: "80%" }}>
-        {props.labelExtractor?.(item) ?? props.idExtractor(item)}
-      </Text>
+  const defaultItemComponent = useCallback<ItemComponent<T>>(
+    (item, isSelected) => (
+      <View style={styles.item}>
+        <Text style={{ maxWidth: "80%" }}>
+          {props.labelExtractor?.(item) ?? props.idExtractor(item)}
+        </Text>
 
-      {isSelected ? (
-        <MaterialIcons name="radio-button-checked" size={24} color={color} />
-      ) : (
-        <MaterialIcons name="radio-button-unchecked" size={24} color={color} />
-      )}
-    </View>
+        {isSelected ? (
+          <MaterialIcons name="radio-button-checked" size={24} color={color} />
+        ) : (
+          <MaterialIcons
+            name="radio-button-unchecked"
+            size={24}
+            color={color}
+          />
+        )}
+      </View>
+    ),
+    [props.labelExtractor, props.idExtractor, color],
+  );
+
+  const handleItemPress = useCallback(
+    (item: T) => {
+      // Vibrate!
+      Haptics.selectionAsync();
+
+      // Update selection
+      setSelectedItems((items) => {
+        const id = props.idExtractor(item);
+
+        const index = items.findIndex(
+          (sitem) => props.idExtractor(sitem) === id,
+        );
+
+        if (index >= 0) {
+          // Item is already selected, unselect it
+
+          const copy = items.slice();
+          copy.splice(index, 1);
+          return copy;
+        } else {
+          // Item isn't selected already, select it
+
+          return items.concat(item);
+        }
+      });
+    },
+    [props.idExtractor],
+  );
+
+  const renderItem = useCallback<ListRenderItem<ArrayElement<typeof items>>>(
+    ({ item: { item, isSelected }, index }) => {
+      const id = props.idExtractor(item);
+
+      return (
+        <Pressable key={id} onPress={() => handleItemPress(item)}>
+          {props.itemComponent?.(item, isSelected, index) ??
+            defaultItemComponent(item, isSelected, index)}
+        </Pressable>
+      );
+    },
+    [props.idExtractor, props.itemComponent, defaultItemComponent],
   );
 
   return (
@@ -101,34 +157,7 @@ function ModalSelect<T>(props: MultiSelectProps<T>) {
       <View style={styles.list}>
         <List
           data={items}
-          renderItem={({ item: { item, isSelected }, index }) => {
-            const id = props.idExtractor(item);
-
-            return (
-              <Pressable
-                key={id}
-                onPress={() => {
-                  Haptics.selectionAsync();
-                  setSelectedItems((items) => {
-                    const index = items.findIndex(
-                      (sitem) => props.idExtractor(sitem) === id,
-                    );
-
-                    if (index >= 0) {
-                      const copy = items.slice();
-                      copy.splice(index, 1);
-                      return copy;
-                    } else {
-                      return items.concat(item);
-                    }
-                  });
-                }}
-              >
-                {props.itemComponent?.(item, isSelected, index) ??
-                  defaultItemComponent(item, isSelected, index)}
-              </Pressable>
-            );
-          }}
+          renderItem={renderItem}
           estimatedItemSize={styles.item.height}
         />
       </View>
