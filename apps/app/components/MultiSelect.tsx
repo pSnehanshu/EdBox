@@ -1,8 +1,15 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Modal, Pressable, StyleSheet } from "react-native";
+import { useCallback, useMemo, useState } from "react";
+import {
+  Modal,
+  Pressable,
+  StyleSheet,
+  ViewStyle,
+  StyleProp,
+} from "react-native";
 import type { ListRenderItem } from "@shopify/flash-list";
 import type { ArrayElement } from "schooltalk-shared/types";
+import { ListItem } from "@rneui/themed";
 import { List, Text, View } from "./Themed";
 import useColorScheme from "../utils/useColorScheme";
 
@@ -13,29 +20,72 @@ type ItemComponent<T = unknown> = (
 ) => React.ReactNode;
 
 interface MultiSelectProps<T = unknown> {
-  isVisible: boolean;
   items: T[];
   selected: T[];
   isSingle?: boolean;
+  title: string;
   idExtractor: (item: T) => string | number;
   labelExtractor?: (item: T) => string;
-  onClose?: () => void;
   onSubmit?: (selected: T[]) => void;
   itemComponent?: ItemComponent<T>;
+  children?: React.ReactNode;
+  style?: StyleProp<ViewStyle>;
 }
 export function MultiSelect<T>(props: MultiSelectProps<T>) {
-  const [isVisible, setIsVisible] = useState(props.isVisible);
+  const [isVisible, setIsVisible] = useState(false);
 
-  useEffect(() => {
-    setTimeout(() => setIsVisible(props.isVisible), 0);
-  }, [props.isVisible]);
+  const selectedItemsText = useMemo(() => {
+    const labels = props.selected.map((selectedItem) =>
+      (
+        props.labelExtractor?.(selectedItem) ?? props.idExtractor(selectedItem)
+      ).toString(),
+    );
 
-  if (!isVisible) return <></>;
+    if (labels.length < 1) {
+      return `Select ${props.title}`;
+    } else if (labels.length === 1) {
+      return labels[0];
+    } else {
+      return `${labels[0]} and ${labels.length - 1} more`;
+    }
+  }, [props.selected, props.labelExtractor, props.idExtractor, props.title]);
 
-  return <ModalSelect {...props} />;
+  return (
+    <>
+      <View style={[{}, props.style]}>
+        <Pressable
+          onPress={() => setIsVisible(true)}
+          style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
+        >
+          {props.children ?? (
+            <ListItem>
+              <ListItem.Content>
+                <ListItem.Title>{props.title}</ListItem.Title>
+                <ListItem.Subtitle>{selectedItemsText}</ListItem.Subtitle>
+              </ListItem.Content>
+              <ListItem.Chevron />
+            </ListItem>
+          )}
+        </Pressable>
+      </View>
+
+      {isVisible && (
+        <ModalSelect
+          {...props}
+          isVisible={isVisible}
+          onClose={() => setIsVisible(false)}
+        />
+      )}
+    </>
+  );
 }
 
-function ModalSelect<T>(props: MultiSelectProps<T>) {
+function ModalSelect<T>(
+  props: Omit<MultiSelectProps<T>, "children"> & {
+    isVisible: boolean;
+    onClose?: () => void;
+  },
+) {
   const scheme = useColorScheme();
   const color = scheme === "dark" ? "white" : "black";
 
@@ -130,6 +180,7 @@ function ModalSelect<T>(props: MultiSelectProps<T>) {
     <Modal
       transparent
       animationType="fade"
+      role="list"
       visible={props.isVisible}
       onRequestClose={props.onClose}
       style={styles.container}
