@@ -8,7 +8,7 @@ import { trpc } from "../../utils/trpc";
 import { useConfig } from "../../utils/config";
 import OtpPopup from "../../components/OtpPopup";
 import useColorScheme from "../../utils/useColorScheme";
-import { CustomSelect } from "../../components/MultiSelect";
+import { CustomSelect } from "../../components/CustomSelect";
 
 export default function LoginScreen({}: RootStackScreenProps<"Login">) {
   const config = useConfig();

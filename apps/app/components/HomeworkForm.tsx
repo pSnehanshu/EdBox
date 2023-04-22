@@ -25,7 +25,7 @@ import useColorScheme from "../utils/useColorScheme";
 import { ModalTextInput } from "./ModalTextInput";
 import { PendingAttachment } from "./attachments/PendingAttachment";
 import { FilePreview, FullScreenFilePreview } from "./attachments/FilePreview";
-import { CustomSelect } from "./MultiSelect";
+import { CustomSelect } from "./CustomSelect";
 
 interface HomeworkFormData {
   class_id: number;
