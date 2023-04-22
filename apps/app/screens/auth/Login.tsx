@@ -153,7 +153,10 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
             />
 
             <Pressable
-              style={styles.main_button}
+              style={({ pressed }) => [
+                styles.main_button,
+                { opacity: pressed ? 0.5 : 1 },
+              ]}
               onPress={() => {
                 if (phone)
                   requestOtp.mutate({
@@ -219,7 +222,10 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
               )}
 
               <Pressable
-                style={styles.main_button}
+                style={({ pressed }) => [
+                  styles.main_button,
+                  { opacity: pressed ? 0.5 : 1 },
+                ]}
                 onPress={() => {
                   if (
                     typeof rollnum === "number" &&
