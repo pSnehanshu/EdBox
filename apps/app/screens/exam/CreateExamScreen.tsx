@@ -12,6 +12,7 @@ import { ModalTextInput } from "../../components/ModalTextInput";
 import { Toast } from "react-native-toast-message/lib/src/Toast";
 import TestModal from "./TestModal";
 import { Subject } from "schooltalk-shared/types";
+import { AnyKindOfDictionary } from "lodash";
 
 export default function CreateExamScreen({
   navigation,
@@ -30,8 +31,9 @@ export default function CreateExamScreen({
   const [isTextModalOpen, setIsTextModalOpen] = useState(false);
   const [examName, setExamName] = useState("");
   const [isTestCreateModal, setIsTestCreateModal] = useState(false);
-  const [selectedSubject, setSelectedSubject] = useState<string>("");
+  const [selectedSubject, setSelectedSubject] = useState<Subject | null>();
 
+  console.log(JSON.stringify(selectedSubject, null, 2), "a");
   return (
     <View style={{ height: "100%" }}>
       <ModalTextInput
@@ -77,7 +79,7 @@ export default function CreateExamScreen({
         <TestModal
           isTestCreateModal={isTestCreateModal}
           onClose={() => setIsTestCreateModal(false)}
-          selectedSubject={selectedSubject}
+          selectedSubject={selectedSubject ?? null}
           setSelectedSubject={setSelectedSubject}
         />
       </View>

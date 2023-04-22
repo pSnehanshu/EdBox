@@ -1,19 +1,29 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Dialog, ListItem } from "@rneui/themed";
 import React from "react";
 import { Text, TextInput, View } from "../../components/Themed";
 import ModalSelector from "react-native-modal-selector";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import useColorScheme from "../../utils/useColorScheme";
-import { ArrayElement, Subject } from "schooltalk-shared/types";
+import {
+  ArrayElement,
+  ClassWithSections,
+  Section,
+  Subject,
+} from "schooltalk-shared/types";
 import { trpc } from "../../utils/trpc";
 import { Switch } from "@rneui/themed";
+import { MultiSelect } from "../../components/MultiSelect";
+import { useNavigation } from "@react-navigation/native";
+import { ModalTextInput } from "../../components/ModalTextInput";
+import { Pressable } from "react-native";
+import { useConfig } from "../../utils/config";
 
 interface TestModalProps {
   isTestCreateModal: boolean;
   onClose: () => void;
-  selectedSubject: string;
-  setSelectedSubject: (selectedSubject: string) => void;
+  selectedSubject: Subject | null;
+  setSelectedSubject: (selectedSubject: Subject) => void;
 }
 
 export default function ({
@@ -22,11 +32,8 @@ export default function ({
   selectedSubject,
   setSelectedSubject,
 }: TestModalProps) {
-  const subjectsQuery = trpc.school.subject.fetchSubjects.useQuery({});
-  // const [selectedSubject, setSelectedSubject] = useState<any>();
-  const selectedSubjectObject = subjectsQuery.data?.find(
-    (s) => s.id === selectedSubject,
-  );
+  const navigation = useNavigation();
+  const config = useConfig();
 
   const [multiselectSub, setMultiselectSub] = useState(false);
   const scheme = useColorScheme();
@@ -34,6 +41,39 @@ export default function ({
   const ChevronIcon = (
     <MaterialCommunityIcons name="chevron-right" color={iconColor} size={16} />
   );
+  const [name, setName] = useState<string>("");
+  const [mark, setMark] = useState<number>(50);
+  const [isTextModalOpenName, setIsTextModalOpenName] = useState(false);
+  const [isTextModalOpenMark, setIsTextModalOpenMark] = useState(false);
+  const [selectedClass, setSelectedClass] = useState<ClassWithSections>();
+  const [selectedSection, setSelectedSection] = useState<Section>();
+
+  const subjectsQuery = trpc.school.subject.fetchSubjects.useQuery({});
+
+  const createTest = trpc.school.exam.createTest.useMutation({
+    onSuccess(data) {
+      navigation.navigate("CreateExamScreen");
+      // set tests
+    },
+    onError(error, variables, context) {
+      console.log(error, variables, context);
+    },
+  });
+
+  const classesAndSectionsData =
+    trpc.school.class.fetchClassesAndSections.useQuery(
+      { schoolId: config.schoolId },
+      {
+        cacheTime: 0,
+        onSuccess(data) {
+          // Initialize selected class and section
+          // setSelectedClass((c) => {
+          //   if (c) return c;
+          //   return data.find((d) => d.numeric_id === ?.class_id);
+          // });
+        },
+      },
+    );
   return (
     <Dialog
       isVisible={isTestCreateModal}
@@ -43,36 +83,93 @@ export default function ({
     >
       <Dialog.Title title={"Create Test"} />
 
+      <ModalTextInput
+        isVisible={isTextModalOpenName}
+        onClose={() => setIsTextModalOpenName(false)}
+        onChange={setName}
+        defaultValue={name}
+        title="Name"
+      />
+      <Pressable
+        onPress={() => setIsTextModalOpenName(true)}
+        style={({ pressed }) => ({
+          opacity: pressed ? 0.2 : 1,
+          borderBottomWidth: 1,
+        })}
+      >
+        <ListItem>
+          <ListItem.Content>
+            <ListItem.Subtitle>Name</ListItem.Subtitle>
+            <ListItem.Title>{name || "Empty"}</ListItem.Title>
+          </ListItem.Content>
+          <MaterialCommunityIcons
+            name="chevron-right"
+            color={iconColor}
+            size={16}
+          />
+        </ListItem>
+      </Pressable>
+      <MultiSelect
+        isSingle
+        title="Class"
+        items={classesAndSectionsData.data ?? []}
+        selected={selectedClass ? [selectedClass] : []}
+        onSubmit={([item]) => {
+          setSelectedClass(item);
+        }}
+        idExtractor={(item) => item.numeric_id}
+        labelExtractor={(item) => `Class ${item.name ?? item.numeric_id}`}
+        style={{ flexGrow: 1 }}
+      />
+      <MultiSelect
+        isSingle
+        title="Section"
+        items={selectedClass?.Sections ?? []}
+        selected={selectedSection ? [selectedSection] : []}
+        onSubmit={([item]) => setSelectedSection(item)}
+        idExtractor={(item) => item.numeric_id}
+        labelExtractor={(item) => `Section ${item.name ?? item.numeric_id}`}
+        style={{ flexGrow: 1 }}
+      />
+
       {!multiselectSub ? (
-        <ModalSelector
-          data={
-            subjectsQuery.data?.map((sub) => ({
-              key: sub.id,
-              label: sub.name,
-            })) ?? []
-          }
-          onChange={(item) => setSelectedSubject(item.key)}
-          animationType="fade"
-          selectedKey={selectedSubject}
-        >
-          <ListItem
-            containerStyle={{
-              marginTop: 5,
-              padding: 0,
-            }}
-          >
-            <ListItem.Content>
-              <ListItem.Title>Subject</ListItem.Title>
-              <ListItem.Subtitle>
-                {selectedSubjectObject?.name ?? "Select subject"}
-              </ListItem.Subtitle>
-            </ListItem.Content>
-            {ChevronIcon}
-          </ListItem>
-        </ModalSelector>
+        <MultiSelect
+          isSingle
+          title="Subject"
+          items={subjectsQuery.data ?? []}
+          selected={selectedSubject ? [selectedSubject] : []}
+          onSubmit={([item]) => {
+            setSelectedSubject(item);
+          }}
+          idExtractor={(item) => item.id}
+          labelExtractor={(item) => `${item.name}`}
+          style={{ flexGrow: 1 }}
+        />
       ) : (
-        <Text>Multiselect</Text>
+        <MultiSelect
+          title="Subject"
+          items={subjectsQuery.data ?? []}
+          selected={selectedSubject ? [selectedSubject] : []}
+          onSubmit={([item]) => {
+            setSelectedSubject(item);
+          }}
+          idExtractor={(item) => item.id}
+          labelExtractor={(item) => `${item.name}`}
+          style={{ flexGrow: 1 }}
+        />
       )}
+      <MultiSelect
+        isSingle
+        title="Section"
+        items={[25, 50, 100]}
+        selected={[mark]}
+        onSubmit={(item) => {
+          setMark(item[0]);
+        }}
+        idExtractor={(item) => item}
+        labelExtractor={(item) => `${item}`}
+        style={{ flexGrow: 1 }}
+      />
       <View
         style={{
           flexDirection: "row",
@@ -95,7 +192,14 @@ export default function ({
         <Dialog.Button
           title="Done"
           onPress={() => {
-            // props.onChange?.(value);
+            // createTest.mutate({
+            //   name: "test1",
+            //   class_id: 2,
+            //   section_id: 1,
+            //   date: new Date().toISOString(),
+            //   subjectIds: [],
+            //   total_marks: 60,
+            // });
             onClose?.();
           }}
           type="solid"
