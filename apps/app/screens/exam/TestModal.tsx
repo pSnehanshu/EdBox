@@ -115,21 +115,22 @@ export default function ({
       <CustomSelect
         isSingle
         title="Class"
-        items={classesAndSectionsData.data ?? []}
-        selected={selectedClass ? [selectedClass] : []}
-        onSubmit={([item]) => {
+        items={classesAndSectionsData.data}
+        selected={selectedClass}
+        onSubmit={(item) => {
           setSelectedClass(item);
         }}
         idExtractor={(item) => item.numeric_id}
         labelExtractor={(item) => `Class ${item.name ?? item.numeric_id}`}
         style={{ flexGrow: 1 }}
+        isLoading={classesAndSectionsData.isLoading}
       />
       <CustomSelect
         isSingle
         title="Section"
-        items={selectedClass?.Sections ?? []}
-        selected={selectedSection ? [selectedSection] : []}
-        onSubmit={([item]) => setSelectedSection(item)}
+        items={selectedClass?.Sections}
+        selected={selectedSection}
+        onSubmit={(item) => setSelectedSection(item)}
         idExtractor={(item) => item.numeric_id}
         labelExtractor={(item) => `Section ${item.name ?? item.numeric_id}`}
         style={{ flexGrow: 1 }}
@@ -139,19 +140,21 @@ export default function ({
         <CustomSelect
           isSingle
           title="Subject"
-          items={subjectsQuery.data ?? []}
-          selected={selectedSubject ? [selectedSubject] : []}
-          onSubmit={([item]) => {
-            setSelectedSubject(item);
+          items={subjectsQuery.data}
+          selected={selectedSubject}
+          onSubmit={(item) => {
+            if (item) setSelectedSubject(item);
           }}
-          idExtractor={(item) => item.id}
-          labelExtractor={(item) => `${item.name}`}
+          idExtractor={(item) => item?.id ?? 0}
+          labelExtractor={(item) => `${item?.name}`}
           style={{ flexGrow: 1 }}
+          isLoading={subjectsQuery.isLoading}
         />
       ) : (
         <CustomSelect
+          isSingle={false}
           title="Subject"
-          items={subjectsQuery.data ?? []}
+          items={subjectsQuery.data}
           selected={selectedSubject ? [selectedSubject] : []}
           onSubmit={([item]) => {
             setSelectedSubject(item);
@@ -159,6 +162,7 @@ export default function ({
           idExtractor={(item) => item.id}
           labelExtractor={(item) => `${item.name}`}
           style={{ flexGrow: 1 }}
+          isLoading={subjectsQuery.isLoading}
         />
       )}
       <DatePicker
@@ -199,9 +203,9 @@ export default function ({
         isSingle
         title="Section"
         items={[25, 50, 100]}
-        selected={[mark]}
+        selected={mark}
         onSubmit={(item) => {
-          setMark(item[0]);
+          setMark(item);
         }}
         idExtractor={(item) => item}
         labelExtractor={(item) => `${item}`}
