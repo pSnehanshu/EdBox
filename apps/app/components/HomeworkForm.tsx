@@ -95,6 +95,7 @@ export default function HomeworkForm({
         <MultiSelect
           isSingle
           items={classesAndSectionsData.data ?? []}
+          isLoading={classesAndSectionsData.isLoading}
           selected={selectedClass ? [selectedClass] : []}
           title="Class"
           idExtractor={(item) => item.numeric_id}
@@ -108,6 +109,7 @@ export default function HomeworkForm({
         <MultiSelect
           isSingle
           items={availableSections ?? []}
+          isLoading={classesAndSectionsData.isLoading}
           selected={selectedSection ? [selectedSection] : []}
           title="Section"
           idExtractor={(item) => item.numeric_id}
@@ -118,6 +120,7 @@ export default function HomeworkForm({
         <MultiSelect
           isSingle
           items={subjectsQuery.data ?? []}
+          isLoading={subjectsQuery.isLoading}
           selected={selectedSubject ? [selectedSubject] : []}
           title="Subject"
           idExtractor={(item) => item.id}

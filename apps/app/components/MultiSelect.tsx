@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ViewStyle,
   StyleProp,
+  ActivityIndicator,
 } from "react-native";
 import type { ListRenderItem } from "@shopify/flash-list";
 import type { ArrayElement } from "schooltalk-shared/types";
@@ -30,6 +31,7 @@ interface MultiSelectProps<T = unknown> {
   itemComponent?: ItemComponent<T>;
   children?: React.ReactNode;
   style?: StyleProp<ViewStyle>;
+  isLoading?: boolean;
 }
 export function MultiSelect<T>(props: MultiSelectProps<T>) {
   const [isVisible, setIsVisible] = useState(false);
@@ -217,11 +219,15 @@ function ModalSelect<T>(
       </View>
 
       <View style={styles.list}>
-        <List
-          data={items}
-          renderItem={renderItem}
-          estimatedItemSize={styles.item.height}
-        />
+        {props.isLoading ? (
+          <ActivityIndicator size={56} style={{ height: "100%" }} />
+        ) : (
+          <List
+            data={items}
+            renderItem={renderItem}
+            estimatedItemSize={styles.item.height}
+          />
+        )}
       </View>
     </Modal>
   );
