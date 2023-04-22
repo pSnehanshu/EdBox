@@ -18,6 +18,8 @@ import { useNavigation } from "@react-navigation/native";
 import { ModalTextInput } from "../../components/ModalTextInput";
 import { Pressable } from "react-native";
 import { useConfig } from "../../utils/config";
+import DatePicker from "react-native-date-picker";
+import { format, parseISO } from "date-fns";
 
 interface TestModalProps {
   isTestCreateModal: boolean;
@@ -47,6 +49,8 @@ export default function ({
   const [isTextModalOpenMark, setIsTextModalOpenMark] = useState(false);
   const [selectedClass, setSelectedClass] = useState<ClassWithSections>();
   const [selectedSection, setSelectedSection] = useState<Section>();
+  const [dueDate, setDueDate] = useState<any>();
+  const [datePickerVisible, setDatePickerVisible] = useState(false);
 
   const subjectsQuery = trpc.school.subject.fetchSubjects.useQuery({});
 
@@ -158,6 +162,40 @@ export default function ({
           style={{ flexGrow: 1 }}
         />
       )}
+      <DatePicker
+        modal
+        open={datePickerVisible}
+        date={dueDate ?? new Date()}
+        mode="datetime"
+        title="Select due date"
+        theme={scheme}
+        minimumDate={new Date()}
+        onConfirm={(date) => {
+          setDueDate(date);
+          setDatePickerVisible(false);
+        }}
+        onCancel={() => {
+          setDatePickerVisible(false);
+        }}
+      />
+      <Pressable
+        onPress={() => setDatePickerVisible((v) => !v)}
+        style={({ pressed }) => ({
+          opacity: pressed ? 0.2 : 1,
+        })}
+      >
+        <ListItem>
+          <ListItem.Content>
+            <ListItem.Title>Exam date</ListItem.Title>
+            <ListItem.Subtitle>
+              {dueDate
+                ? format(dueDate, "MMM dd, yyyy hh:mm aaa")
+                : "No due date"}
+            </ListItem.Subtitle>
+          </ListItem.Content>
+          {ChevronIcon}
+        </ListItem>
+      </Pressable>
       <MultiSelect
         isSingle
         title="Section"
@@ -192,14 +230,21 @@ export default function ({
         <Dialog.Button
           title="Done"
           onPress={() => {
-            // createTest.mutate({
-            //   name: "test1",
-            //   class_id: 2,
-            //   section_id: 1,
-            //   date: new Date().toISOString(),
-            //   subjectIds: [],
-            //   total_marks: 60,
-            // });
+            if (
+              mark &&
+              name &&
+              selectedClass &&
+              selectedSection &&
+              selectedSubject
+            )
+              createTest.mutate({
+                name: "test1",
+                class_id: 2,
+                section_id: 1,
+                date: new Date().toISOString(),
+                subjectIds: [],
+                total_marks: 60,
+              });
             onClose?.();
           }}
           type="solid"
