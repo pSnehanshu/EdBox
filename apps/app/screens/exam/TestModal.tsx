@@ -2,8 +2,6 @@ import { useMemo, useState } from "react";
 import { Dialog, ListItem } from "@rneui/themed";
 import React from "react";
 import { Text, TextInput, View } from "../../components/Themed";
-import ModalSelector from "react-native-modal-selector";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import useColorScheme from "../../utils/useColorScheme";
 import {
   ArrayElement,
@@ -13,13 +11,14 @@ import {
 } from "schooltalk-shared/types";
 import { trpc } from "../../utils/trpc";
 import { Switch } from "@rneui/themed";
-import { MultiSelect } from "../../components/MultiSelect";
+import { CustomSelect } from "../../components/CustomSelect";
 import { useNavigation } from "@react-navigation/native";
 import { ModalTextInput } from "../../components/ModalTextInput";
 import { Pressable } from "react-native";
 import { useConfig } from "../../utils/config";
 import DatePicker from "react-native-date-picker";
 import { format, parseISO } from "date-fns";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 interface TestModalProps {
   isTestCreateModal: boolean;
@@ -113,7 +112,7 @@ export default function ({
           />
         </ListItem>
       </Pressable>
-      <MultiSelect
+      <CustomSelect
         isSingle
         title="Class"
         items={classesAndSectionsData.data ?? []}
@@ -125,7 +124,7 @@ export default function ({
         labelExtractor={(item) => `Class ${item.name ?? item.numeric_id}`}
         style={{ flexGrow: 1 }}
       />
-      <MultiSelect
+      <CustomSelect
         isSingle
         title="Section"
         items={selectedClass?.Sections ?? []}
@@ -137,7 +136,7 @@ export default function ({
       />
 
       {!multiselectSub ? (
-        <MultiSelect
+        <CustomSelect
           isSingle
           title="Subject"
           items={subjectsQuery.data ?? []}
@@ -150,7 +149,7 @@ export default function ({
           style={{ flexGrow: 1 }}
         />
       ) : (
-        <MultiSelect
+        <CustomSelect
           title="Subject"
           items={subjectsQuery.data ?? []}
           selected={selectedSubject ? [selectedSubject] : []}
@@ -196,7 +195,7 @@ export default function ({
           {ChevronIcon}
         </ListItem>
       </Pressable>
-      <MultiSelect
+      <CustomSelect
         isSingle
         title="Section"
         items={[25, 50, 100]}

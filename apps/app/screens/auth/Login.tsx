@@ -8,7 +8,7 @@ import { trpc } from "../../utils/trpc";
 import { useConfig } from "../../utils/config";
 import OtpPopup from "../../components/OtpPopup";
 import useColorScheme from "../../utils/useColorScheme";
-import { MultiSelect } from "../../components/MultiSelect";
+import { CustomSelect } from "../../components/CustomSelect";
 
 export default function LoginScreen({}: RootStackScreenProps<"Login">) {
   const config = useConfig();
@@ -174,12 +174,12 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
           {/* student */}
           <View>
             <View style={{ flexDirection: "row" }}>
-              <MultiSelect
+              <CustomSelect
                 isSingle
                 title="Class"
-                items={classesAndSectionsData.data ?? []}
-                selected={selectedClass ? [selectedClass] : []}
-                onSubmit={([item]) => {
+                items={classesAndSectionsData.data}
+                selected={selectedClass}
+                onSubmit={(item) => {
                   setSelectedClass(item);
                   setSelectedSection(undefined);
                 }}
@@ -190,12 +190,12 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
                 style={{ flexGrow: 1 }}
               />
 
-              <MultiSelect
+              <CustomSelect
                 isSingle
                 title="Section"
-                items={selectedClass?.Sections ?? []}
-                selected={selectedSection ? [selectedSection] : []}
-                onSubmit={([item]) => setSelectedSection(item)}
+                items={selectedClass?.Sections}
+                selected={selectedSection}
+                onSubmit={(item) => setSelectedSection(item)}
                 idExtractor={(item) => item.numeric_id}
                 labelExtractor={(item) =>
                   `Section ${item.name ?? item.numeric_id}`

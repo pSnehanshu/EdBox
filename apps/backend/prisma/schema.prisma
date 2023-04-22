@@ -2,11 +2,13 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native"]
+  provider        = "prisma-client-js"
+  binaryTargets   = ["native"]
   // Error: Segmentation fault (core dumped).
   // Fix: https://github.com/prisma/prisma/issues/10649#issuecomment-1003642803
-  engineType    = "binary"
+  // Edit: Looks like this has been fixed, hence commented temporarily: https://github.com/prisma/prisma/issues/10649#issuecomment-1511410731
+  // engineType    = "binary"
+  previewFeatures = ["jsonProtocol"] // https://github.com/prisma/prisma/issues/18095
 }
 
 datasource db {
