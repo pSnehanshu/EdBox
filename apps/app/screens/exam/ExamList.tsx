@@ -1,5 +1,3 @@
-// This screen shows a time line with the exams and class tests
-
 import React, { useMemo, useState } from "react";
 import { SafeAreaView, StyleSheet } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
@@ -8,7 +6,7 @@ import _ from "lodash";
 import { format, parseISO } from "date-fns";
 import { ListItem, Divider } from "@rneui/themed";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { List, Text, View } from "../../components/Themed";
+import { List, View } from "../../components/Themed";
 import { trpc } from "../../utils/trpc";
 import useColorScheme from "../../utils/useColorScheme";
 import { TestComp } from "../../components/TestComp";

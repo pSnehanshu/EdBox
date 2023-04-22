@@ -14,6 +14,7 @@ import { Homework } from "schooltalk-shared/types";
 import { format, parseISO, isPast } from "date-fns";
 import { trpc } from "../../utils/trpc";
 import { useCurrentUser } from "../../utils/auth";
+import { LottieAnimation } from "../../components/LottieAnimation";
 
 const pageLimit = 10;
 
@@ -96,6 +97,13 @@ export default function HomeWorkScreen({
           ) : null
         }
         contentContainerStyle={styles.list}
+        ListEmptyComponent={
+          <LottieAnimation
+            src={require("../../assets/lotties/person-floating.json")}
+            caption="No homeworks"
+            style={styles.empty}
+          />
+        }
       />
 
       {isTeacher && (
@@ -208,5 +216,9 @@ const styles = StyleSheet.create({
   homework_description: {
     fontSize: 12,
     color: "gray",
+  },
+  empty: {
+    height: "100%",
+    justifyContent: "center",
   },
 });
