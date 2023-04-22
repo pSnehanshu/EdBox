@@ -11,12 +11,10 @@ import {
 } from "react-native";
 import { useFileUpload } from "../utils/file-upload";
 import type {
-  ClassWithSections,
   Homework,
   RouterInput,
   UploadedFile,
 } from "schooltalk-shared/types";
-import ModalSelector from "react-native-modal-selector";
 import { FAB, ListItem } from "@rneui/themed";
 import MIMEType from "whatwg-mimetype";
 import { format, parseISO } from "date-fns";
@@ -27,6 +25,7 @@ import useColorScheme from "../utils/useColorScheme";
 import { ModalTextInput } from "./ModalTextInput";
 import { PendingAttachment } from "./attachments/PendingAttachment";
 import { FilePreview, FullScreenFilePreview } from "./attachments/FilePreview";
+import { MultiSelect } from "./MultiSelect";
 
 interface HomeworkFormData {
   class_id: number;
@@ -55,17 +54,9 @@ export default function HomeworkForm({
   const iconColor = scheme === "dark" ? "white" : "black";
   const [isTextModalOpen, setIsTextModalOpen] = useState(false);
 
-  const ChevronIcon = (
-    <MaterialCommunityIcons name="chevron-right" color={iconColor} size={16} />
-  );
-
-  const [selectedClass, setSelectedClass] = useState<ClassWithSections>();
-  const [selectedSection, setSelectedSection] = useState(homework?.section_id);
-  const selectedSectionObject = selectedClass?.Sections?.find(
-    (s) => s.numeric_id === selectedSection,
-  );
-
-  const [selectedSubject, setSelectedSubject] = useState(homework?.subject_id);
+  const [selectedClass, setSelectedClass] = useState(homework?.Class);
+  const [selectedSection, setSelectedSection] = useState(homework?.Section);
+  const [selectedSubject, setSelectedSubject] = useState(homework?.Subject);
   const [textContent, setTextContent] = useState(homework?.text ?? "");
   const [dueDate, setDueDate] = useState(
     homework?.due_date ? parseISO(homework.due_date) : undefined,
@@ -74,25 +65,16 @@ export default function HomeworkForm({
 
   // class Section and subject data
   const classesAndSectionsData =
-    trpc.school.class.fetchClassesAndSections.useQuery(
-      { schoolId: config.schoolId },
-      {
-        cacheTime: 0,
-        onSuccess(data) {
-          // Initialize selected class and section
-          setSelectedClass((c) => {
-            if (c) return c;
-            return data.find((d) => d.numeric_id === homework?.class_id);
-          });
-        },
-      },
-    );
+    trpc.school.class.fetchClassesAndSections.useQuery({
+      schoolId: config.schoolId,
+    });
+
+  const availableSections = classesAndSectionsData.data?.find(
+    (Class) => Class.numeric_id === selectedClass?.numeric_id,
+  )?.Sections;
 
   // subjects
   const subjectsQuery = trpc.school.subject.fetchSubjects.useQuery({});
-  const selectedSubjectObject = subjectsQuery.data?.find(
-    (s) => s.id === selectedSubject,
-  );
 
   // Image preview
   const fileUploadHandler = useFileUpload();
@@ -110,85 +92,38 @@ export default function HomeworkForm({
   return (
     <>
       <ScrollView style={[styles.container, style]}>
-        <ModalSelector
-          data={
-            classesAndSectionsData.data?.map((c) => ({
-              key: c.numeric_id,
-              label: `Class ${c.name ?? c.numeric_id.toString()}`,
-            })) ?? []
-          }
-          onChange={(item) => {
-            const Class = classesAndSectionsData.data?.find(
-              (c) => c.numeric_id === item.key,
-            );
-            setSelectedClass(Class);
+        <MultiSelect
+          isSingle
+          items={classesAndSectionsData.data ?? []}
+          selected={selectedClass ? [selectedClass] : []}
+          title="Class"
+          idExtractor={(item) => item.numeric_id}
+          labelExtractor={(item) => `Class ${item.name ?? item.numeric_id}`}
+          onSubmit={([item]) => {
+            setSelectedClass(item);
             setSelectedSection(undefined);
           }}
-          animationType="fade"
-          selectedKey={selectedClass?.numeric_id}
-        >
-          <ListItem>
-            <ListItem.Content>
-              <ListItem.Title>Class</ListItem.Title>
-              <ListItem.Subtitle>
-                {selectedClass
-                  ? `Class ${selectedClass.name ?? selectedClass.numeric_id}`
-                  : "Select class"}
-              </ListItem.Subtitle>
-            </ListItem.Content>
-            {ChevronIcon}
-          </ListItem>
-        </ModalSelector>
+        />
 
-        <ModalSelector
-          data={
-            selectedClass?.Sections.map((s) => ({
-              key: s.numeric_id,
-              label: `Section ${s.name ?? s.numeric_id}`,
-            })) ?? []
-          }
-          disabled={!selectedClass}
-          onChange={(item) => setSelectedSection(item.key)}
-          animationType="fade"
-          selectedKey={selectedSection}
-        >
-          <ListItem>
-            <ListItem.Content>
-              <ListItem.Title>Section</ListItem.Title>
-              <ListItem.Subtitle>
-                {selectedSectionObject
-                  ? `Section ${
-                      selectedSectionObject.name ??
-                      selectedSectionObject.numeric_id
-                    }`
-                  : "Select section"}
-              </ListItem.Subtitle>
-            </ListItem.Content>
-            {ChevronIcon}
-          </ListItem>
-        </ModalSelector>
+        <MultiSelect
+          isSingle
+          items={availableSections ?? []}
+          selected={selectedSection ? [selectedSection] : []}
+          title="Section"
+          idExtractor={(item) => item.numeric_id}
+          labelExtractor={(item) => `Section ${item.name ?? item.numeric_id}`}
+          onSubmit={([item]) => setSelectedSection(item)}
+        />
 
-        <ModalSelector
-          data={
-            subjectsQuery.data?.map((sub) => ({
-              key: sub.id,
-              label: sub.name,
-            })) ?? []
-          }
-          onChange={(item) => setSelectedSubject(item.key)}
-          animationType="fade"
-          selectedKey={selectedSubject}
-        >
-          <ListItem>
-            <ListItem.Content>
-              <ListItem.Title>Subject</ListItem.Title>
-              <ListItem.Subtitle>
-                {selectedSubjectObject?.name ?? "Select subject"}
-              </ListItem.Subtitle>
-            </ListItem.Content>
-            {ChevronIcon}
-          </ListItem>
-        </ModalSelector>
+        <MultiSelect
+          isSingle
+          items={subjectsQuery.data ?? []}
+          selected={selectedSubject ? [selectedSubject] : []}
+          title="Subject"
+          idExtractor={(item) => item.id}
+          labelExtractor={(item) => item.name}
+          onSubmit={([item]) => setSelectedSubject(item)}
+        />
 
         <Pressable
           onPress={() => setDatePickerVisible((v) => !v)}
@@ -205,7 +140,7 @@ export default function HomeworkForm({
                   : "No due date"}
               </ListItem.Subtitle>
             </ListItem.Content>
-            {ChevronIcon}
+            <ListItem.Chevron />
           </ListItem>
         </Pressable>
 
@@ -220,7 +155,7 @@ export default function HomeworkForm({
               <ListItem.Title>Description (optional)</ListItem.Title>
               <ListItem.Subtitle>{textContent || "Empty"}</ListItem.Subtitle>
             </ListItem.Content>
-            {ChevronIcon}
+            <ListItem.Chevron />
           </ListItem>
         </Pressable>
 
@@ -392,8 +327,8 @@ export default function HomeworkForm({
           ) {
             onSubmit({
               class_id: selectedClass.numeric_id,
-              section_id: selectedSection,
-              subject_id: selectedSubject,
+              section_id: selectedSection.numeric_id,
+              subject_id: selectedSubject.id,
               due_date: dueDate,
               text: textContent,
               new_file_permissions: fileUploadHandler.uploadTasks.map(
