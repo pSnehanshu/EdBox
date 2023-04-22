@@ -21,7 +21,7 @@ type ItemComponent<T = unknown> = (
 ) => React.ReactNode;
 
 interface MultiSelectProps<T = unknown> {
-  items: T[];
+  items?: T[];
   selected: T[];
   isSingle?: boolean;
   title: string;
@@ -95,13 +95,13 @@ function ModalSelect<T>(
 
   const items = useMemo(
     () =>
-      props.items.map((item) => {
+      props.items?.map((item) => {
         const isSelected =
           selectedItems.findIndex(
             (sitem) => props.idExtractor(sitem) === props.idExtractor(item),
           ) >= 0;
         return { item, isSelected };
-      }),
+      }) ?? [],
     [props.items, selectedItems],
   );
 

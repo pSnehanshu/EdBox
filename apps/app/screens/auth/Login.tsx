@@ -177,7 +177,7 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
               <MultiSelect
                 isSingle
                 title="Class"
-                items={classesAndSectionsData.data ?? []}
+                items={classesAndSectionsData.data}
                 selected={selectedClass ? [selectedClass] : []}
                 onSubmit={([item]) => {
                   setSelectedClass(item);
@@ -193,7 +193,7 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
               <MultiSelect
                 isSingle
                 title="Section"
-                items={selectedClass?.Sections ?? []}
+                items={selectedClass?.Sections}
                 selected={selectedSection ? [selectedSection] : []}
                 onSubmit={([item]) => setSelectedSection(item)}
                 idExtractor={(item) => item.numeric_id}

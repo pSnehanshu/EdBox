@@ -94,7 +94,7 @@ export default function HomeworkForm({
       <ScrollView style={[styles.container, style]}>
         <MultiSelect
           isSingle
-          items={classesAndSectionsData.data ?? []}
+          items={classesAndSectionsData.data}
           isLoading={classesAndSectionsData.isLoading}
           selected={selectedClass ? [selectedClass] : []}
           title="Class"
@@ -108,7 +108,7 @@ export default function HomeworkForm({
 
         <MultiSelect
           isSingle
-          items={availableSections ?? []}
+          items={availableSections}
           isLoading={classesAndSectionsData.isLoading}
           selected={selectedSection ? [selectedSection] : []}
           title="Section"
@@ -119,7 +119,7 @@ export default function HomeworkForm({
 
         <MultiSelect
           isSingle
-          items={subjectsQuery.data ?? []}
+          items={subjectsQuery.data}
           isLoading={subjectsQuery.isLoading}
           selected={selectedSubject ? [selectedSubject] : []}
           title="Subject"
