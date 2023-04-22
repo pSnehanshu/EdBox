@@ -7,11 +7,20 @@ import { appRouter as trpcRouter } from "../trpc";
 import { createContext } from "../trpc/context";
 import prisma from "../prisma";
 import path from "path";
+import config from "../config";
 
 const app = express();
 app.use(bodyParser.json());
 
 app.set("trust proxy", true);
+
+// Intentional latency for dev
+if (config.NODE_ENV === "development") {
+  console.log(
+    `Requests are artificially delayed by ${config.ARTIFICIAL_LATENCY} ms`,
+  );
+  app.use((req, res, next) => setTimeout(next, config.ARTIFICIAL_LATENCY));
+}
 
 // tRPC
 app.use(
