@@ -25,7 +25,7 @@ import useColorScheme from "../utils/useColorScheme";
 import { ModalTextInput } from "./ModalTextInput";
 import { PendingAttachment } from "./attachments/PendingAttachment";
 import { FilePreview, FullScreenFilePreview } from "./attachments/FilePreview";
-import { MultiSelect } from "./MultiSelect";
+import { CustomSelect } from "./MultiSelect";
 
 interface HomeworkFormData {
   class_id: number;
@@ -92,40 +92,40 @@ export default function HomeworkForm({
   return (
     <>
       <ScrollView style={[styles.container, style]}>
-        <MultiSelect
+        <CustomSelect
           isSingle
           items={classesAndSectionsData.data}
           isLoading={classesAndSectionsData.isLoading}
-          selected={selectedClass ? [selectedClass] : []}
+          selected={selectedClass}
           title="Class"
           idExtractor={(item) => item.numeric_id}
           labelExtractor={(item) => `Class ${item.name ?? item.numeric_id}`}
-          onSubmit={([item]) => {
+          onSubmit={(item) => {
             setSelectedClass(item);
             setSelectedSection(undefined);
           }}
         />
 
-        <MultiSelect
+        <CustomSelect
           isSingle
           items={availableSections}
           isLoading={classesAndSectionsData.isLoading}
-          selected={selectedSection ? [selectedSection] : []}
+          selected={selectedSection}
           title="Section"
           idExtractor={(item) => item.numeric_id}
           labelExtractor={(item) => `Section ${item.name ?? item.numeric_id}`}
-          onSubmit={([item]) => setSelectedSection(item)}
+          onSubmit={(item) => setSelectedSection(item)}
         />
 
-        <MultiSelect
+        <CustomSelect
           isSingle
           items={subjectsQuery.data}
           isLoading={subjectsQuery.isLoading}
-          selected={selectedSubject ? [selectedSubject] : []}
+          selected={selectedSubject}
           title="Subject"
           idExtractor={(item) => item.id}
           labelExtractor={(item) => item.name}
-          onSubmit={([item]) => setSelectedSubject(item)}
+          onSubmit={(item) => setSelectedSubject(item)}
         />
 
         <Pressable

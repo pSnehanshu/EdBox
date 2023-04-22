@@ -20,24 +20,43 @@ type ItemComponent<T = unknown> = (
   index: number,
 ) => React.ReactNode;
 
-interface MultiSelectProps<T = unknown> {
+interface SelectProps<T = unknown> {
   items?: T[];
-  selected: T[];
-  isSingle?: boolean;
   title: string;
   idExtractor: (item: T) => string | number;
   labelExtractor?: (item: T) => string;
-  onSubmit?: (selected: T[]) => void;
   itemComponent?: ItemComponent<T>;
-  children?: React.ReactNode;
   style?: StyleProp<ViewStyle>;
   isLoading?: boolean;
 }
-export function MultiSelect<T>(props: MultiSelectProps<T>) {
+
+interface MultiSelectProps<T = unknown> extends SelectProps<T> {
+  isSingle: false;
+  selected?: T[];
+  onSubmit?: (selected: T[]) => void;
+}
+
+interface SingleSelectProps<T = unknown> extends SelectProps<T> {
+  isSingle: true;
+  selected?: T;
+  onSubmit?: (selected: T) => void;
+}
+
+type CustomSelectProps<T> = SingleSelectProps<T> | MultiSelectProps<T>;
+
+export function CustomSelect<T>(
+  props: CustomSelectProps<T> & { children?: React.ReactNode },
+) {
   const [isVisible, setIsVisible] = useState(false);
 
   const selectedItemsText = useMemo(() => {
-    const labels = props.selected.map((selectedItem) =>
+    const selected = Array.isArray(props.selected)
+      ? props.selected
+      : props.selected
+      ? [props.selected]
+      : [];
+
+    const labels = selected.map((selectedItem) =>
       (
         props.labelExtractor?.(selectedItem) ?? props.idExtractor(selectedItem)
       ).toString(),
@@ -83,7 +102,7 @@ export function MultiSelect<T>(props: MultiSelectProps<T>) {
 }
 
 function ModalSelect<T>(
-  props: Omit<MultiSelectProps<T>, "children"> & {
+  props: CustomSelectProps<T> & {
     isVisible: boolean;
     onClose?: () => void;
   },
@@ -91,7 +110,15 @@ function ModalSelect<T>(
   const scheme = useColorScheme();
   const color = scheme === "dark" ? "white" : "black";
 
-  const [selectedItems, setSelectedItems] = useState<T[]>(props.selected);
+  const [selectedItems, setSelectedItems] = useState<T[]>(() => {
+    if (Array.isArray(props.selected)) {
+      return props.selected;
+    } else if (props.selected) {
+      return [props.selected];
+    } else {
+      return [];
+    }
+  });
 
   const items = useMemo(
     () =>
@@ -132,7 +159,7 @@ function ModalSelect<T>(
       setSelectedItems((selectedItems) => {
         if (props.isSingle) {
           setTimeout(() => {
-            props.onSubmit?.([item]);
+            props.onSubmit?.(item);
             props.onClose?.();
           }, 100);
 
