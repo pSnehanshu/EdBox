@@ -235,15 +235,16 @@ export default function ({
               name &&
               selectedClass &&
               selectedSection &&
-              selectedSubject
+              selectedSubject &&
+              dueDate
             )
               createTest.mutate({
                 name: "test1",
-                class_id: 2,
-                section_id: 1,
-                date: new Date().toISOString(),
-                subjectIds: [],
-                total_marks: 60,
+                class_id: selectedClass.numeric_id,
+                section_id: selectedSection.numeric_id,
+                date: dueDate.toISOString(),
+                subjectIds: [selectedSubject.id],
+                total_marks: mark,
               });
             onClose?.();
           }}
