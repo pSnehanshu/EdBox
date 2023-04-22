@@ -2,10 +2,8 @@ import { useState } from "react";
 import { Dialog, ListItem } from "@rneui/themed";
 import React from "react";
 import { Text, TextInput, View } from "../../components/Themed";
-import ModalSelector from "react-native-modal-selector";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import useColorScheme from "../../utils/useColorScheme";
-import { ArrayElement, Subject } from "schooltalk-shared/types";
+import type { ArrayElement, Subject } from "schooltalk-shared/types";
 import { trpc } from "../../utils/trpc";
 import { Switch } from "@rneui/themed";
 
@@ -31,9 +29,7 @@ export default function ({
   const [multiselectSub, setMultiselectSub] = useState(false);
   const scheme = useColorScheme();
   const iconColor = scheme === "dark" ? "white" : "black";
-  const ChevronIcon = (
-    <MaterialCommunityIcons name="chevron-right" color={iconColor} size={16} />
-  );
+
   return (
     <Dialog
       isVisible={isTestCreateModal}
@@ -43,35 +39,12 @@ export default function ({
     >
       <Dialog.Title title={"Create Test"} />
 
-      {!multiselectSub ? (
-        <ModalSelector
-          data={
-            subjectsQuery.data?.map((sub) => ({
-              key: sub.id,
-              label: sub.name,
-            })) ?? []
-          }
-          onChange={(item) => setSelectedSubject(item.key)}
-          animationType="fade"
-          selectedKey={selectedSubject}
-        >
-          <ListItem
-            containerStyle={{
-              marginTop: 5,
-              padding: 0,
-            }}
-          >
-            <ListItem.Content>
-              <ListItem.Title>Subject</ListItem.Title>
-              <ListItem.Subtitle>
-                {selectedSubjectObject?.name ?? "Select subject"}
-              </ListItem.Subtitle>
-            </ListItem.Content>
-            {ChevronIcon}
-          </ListItem>
-        </ModalSelector>
+      {multiselectSub ? (
+        // TODO: Use <CustomSelect isSingle={false} />
+        <Text>Multi select</Text>
       ) : (
-        <Text>Multiselect</Text>
+        // TODO: Use <CustomSelect isSingle />
+        <Text>Single select</Text>
       )}
       <View
         style={{
