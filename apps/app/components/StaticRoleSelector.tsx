@@ -6,9 +6,12 @@ import { getUserRoleHierarchical, StaticRole } from "schooltalk-shared/misc";
 import { useCurrentUser } from "../utils/auth";
 import { useConfig, useConfigUpdate } from "../utils/config";
 import useColorScheme from "../utils/useColorScheme";
-import { View } from "./Themed";
+import { ScrollView, View } from "./Themed";
 
-export function StaticRoleSelector() {
+interface StaticRoleSelector {
+  onChange?: (role: StaticRole) => void;
+}
+export function StaticRoleSelector({ onChange }: StaticRoleSelector) {
   const scheme = useColorScheme();
   const color = scheme === "dark" ? "white" : "black";
 
@@ -37,35 +40,40 @@ export function StaticRoleSelector() {
 
   return (
     <View>
-      {availableRoles.map((role) => (
-        <Pressable
-          key={role}
-          onPress={() => {
-            setConfig({ activeStaticRole: role });
-          }}
-          style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
-        >
-          <ListItem>
-            <ListItem.Content>
-              <ListItem.Title>{StaticRole[role].toUpperCase()}</ListItem.Title>
-            </ListItem.Content>
+      <ScrollView>
+        {availableRoles.map((role) => (
+          <Pressable
+            key={role}
+            onPress={() => {
+              setConfig({ activeStaticRole: role });
+              onChange?.(role);
+            }}
+            style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
+          >
+            <ListItem>
+              <ListItem.Content>
+                <ListItem.Title>
+                  {StaticRole[role].toUpperCase()}
+                </ListItem.Title>
+              </ListItem.Content>
 
-            {config.activeStaticRole === role ? (
-              <MaterialIcons
-                name="radio-button-checked"
-                size={24}
-                color={color}
-              />
-            ) : (
-              <MaterialIcons
-                name="radio-button-unchecked"
-                size={24}
-                color={color}
-              />
-            )}
-          </ListItem>
-        </Pressable>
-      ))}
+              {config.activeStaticRole === role ? (
+                <MaterialIcons
+                  name="radio-button-checked"
+                  size={24}
+                  color={color}
+                />
+              ) : (
+                <MaterialIcons
+                  name="radio-button-unchecked"
+                  size={24}
+                  color={color}
+                />
+              )}
+            </ListItem>
+          </Pressable>
+        ))}
+      </ScrollView>
     </View>
   );
 }
