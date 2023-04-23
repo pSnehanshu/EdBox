@@ -8,13 +8,9 @@ import {
   ViewStyle,
 } from "react-native";
 import { Carousel } from "react-native-snap-carousel";
-import {
-  getUserRoleHierarchical,
-  hasUserStaticRoles,
-  StaticRole,
-} from "schooltalk-shared/misc";
+import { StaticRole } from "schooltalk-shared/misc";
 import type { DayOfWeek } from "schooltalk-shared/types";
-import { useCurrentUser } from "../utils/auth";
+import { useConfig } from "../utils/config";
 import { PeriodWithGap, useRoutineWithGaps } from "../utils/routine-utils";
 import { trpc } from "../utils/trpc";
 import { LottieAnimation } from "./LottieAnimation";
@@ -26,8 +22,8 @@ interface SingleRoutineCardProps {
 }
 function SinglePeriodCard({ period }: SingleRoutineCardProps) {
   const navigation = useNavigation();
-  const { user } = useCurrentUser();
-  const isTeacher = hasUserStaticRoles(user, [StaticRole.teacher], "all");
+  const config = useConfig();
+  const isTeacher = config.activeStaticRole === StaticRole.teacher;
 
   return (
     <View style={styles.container_carousel}>
@@ -68,13 +64,13 @@ interface RoutineSliderProps {
 }
 export function RoutineSlider(props: RoutineSliderProps) {
   const dayOfWeek = format(new Date(), "iii").toLowerCase() as DayOfWeek;
-  const { user } = useCurrentUser();
+  const config = useConfig();
 
   const SLIDER_WIDTH = Dimensions.get("window").width;
   const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.8);
 
   const routineQuery =
-    getUserRoleHierarchical(user) === StaticRole.student
+    config.activeStaticRole === StaticRole.student
       ? trpc.school.routine.fetchForStudent.useQuery({
           daysOfWeek: [dayOfWeek],
         })

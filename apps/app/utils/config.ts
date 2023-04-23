@@ -7,12 +7,14 @@ import { z } from "zod";
 import Constants from "expo-constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SELECTED_SCHOOL_ID } from "./async-storage-keys";
+import { StaticRole } from "schooltalk-shared/misc";
 
 /** The schema */
 const ConfigSchema = z.object({
   backendHost: z.string().url(),
   schoolId: z.union([z.string().cuid(), z.literal("")]),
   previewMessageLength: z.number().int().default(200),
+  activeStaticRole: z.nativeEnum(StaticRole).default(StaticRole.none),
 });
 
 type Config = z.infer<typeof ConfigSchema>;

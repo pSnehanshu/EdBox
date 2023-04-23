@@ -19,7 +19,7 @@ import { MessagesProvider } from "../utils/messages-repository";
 import ChatWindowScreen from "../screens/chat/ChatWindow";
 import { navigationRef } from "./navRef";
 import AttendanceTakerScreen from "../screens/attendance/AttendanceTakerScreen";
-import { hasUserStaticRoles, StaticRole } from "schooltalk-shared/misc";
+import { StaticRole } from "schooltalk-shared/misc";
 import SchoolSettingsScreen from "../screens/settings/school/SchoolSettingsScreen";
 import SubjectsSettingsScreen from "../screens/settings/school/SubjectsSettingsScreen";
 import ClassSectionSettingsScreen from "../screens/settings/school/ClassSectionSettingsScreen";
@@ -32,7 +32,7 @@ import { BottomTabNavigator } from "./BottomTabNav";
 import ExamListScreen from "../screens/exam/ExamList";
 import HomeWorkScreen from "../screens/homework/HomeWorkScreen";
 import SchoolSelector from "../components/SchoolSelector";
-import { hasPreloadedSchool } from "../utils/config";
+import { hasPreloadedSchool, useConfig } from "../utils/config";
 import { View } from "../components/Themed";
 import CreateHomeworkScreen from "../screens/homework/CreateHomeworkScreen";
 import DisplayHomeworkScreen from "../screens/homework/DisplayHomeworkScreen";
@@ -79,9 +79,10 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
   const school = useSchool();
-  const { isLoggedIn, user } = useCurrentUser();
+  const { isLoggedIn } = useCurrentUser();
   const { scheme } = useContext(ColorSchemeContext);
   const [isSchoolSelectorOpen, setIsSchoolSelectorOpen] = useState(false);
+  const config = useConfig();
 
   if (!school) return null;
 
@@ -98,6 +99,7 @@ function RootNavigator() {
             component={BottomTabNavigator}
             options={{ headerShown: false }}
           />
+
           <Stack.Screen
             name="ChatWindow"
             component={ChatWindowScreen}
@@ -106,7 +108,8 @@ function RootNavigator() {
               title: `${route.params.name ?? "Messages"}`,
             })}
           />
-          {hasUserStaticRoles(user, [StaticRole.teacher], "all") ? (
+
+          {config.activeStaticRole === StaticRole.teacher ? (
             <>
               <Stack.Screen
                 name="AttendanceTaker"
@@ -134,10 +137,9 @@ function RootNavigator() {
               />
             </>
           ) : null}
-          {hasUserStaticRoles(
-            user,
-            [StaticRole.principal, StaticRole.vice_principal],
-            "some",
+
+          {[StaticRole.principal, StaticRole.vice_principal].includes(
+            config.activeStaticRole,
           ) ? (
             <>
               <Stack.Screen
@@ -182,10 +184,9 @@ function RootNavigator() {
               />
             </>
           ) : null}
-          {hasUserStaticRoles(
-            user,
-            [StaticRole.teacher, StaticRole.student],
-            "some",
+
+          {[StaticRole.teacher, StaticRole.student].includes(
+            config.activeStaticRole,
           ) ? (
             <>
               <Stack.Screen
