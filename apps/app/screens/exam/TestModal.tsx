@@ -20,6 +20,7 @@ import DatePicker from "react-native-date-picker";
 import { format, parseISO } from "date-fns";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import type { ExamTestSchema } from "schooltalk-shared/misc";
+import { Toast } from "react-native-toast-message/lib/src/Toast";
 
 interface TestModalProps {
   isTestCreateModal: boolean;
@@ -263,6 +264,12 @@ export default function ({
               // for muliple subject make a arry outside
               subjectIds: [selectedSubject.id],
               total_marks: mark,
+            });
+            onClose?.();
+          } else {
+            Toast.show({
+              type: "error",
+              text1: "Insufficient Data",
             });
           }
         }}
