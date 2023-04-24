@@ -97,7 +97,8 @@ export default function CreateExamScreen({
             onClose={() => setIsTestCreateModal(false)}
             onSubmit={(test) => {
               // TODO: Push `test` to an array
-              setTest(test);
+              setTest([selectedTests].concat(test));
+              // type error
             }}
           />
           {/* <Dialog.Actions>
@@ -112,7 +113,7 @@ export default function CreateExamScreen({
           if (examName && selectedTests) {
             createExam.mutate({
               name: examName,
-              tests: [selectedTests],
+              tests: [],
               // type error
             });
           } else {
