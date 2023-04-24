@@ -259,7 +259,7 @@ export default function ({
               name: name,
               class_id: selectedClass?.numeric_id,
               section_id: selectedSection?.numeric_id,
-              date: dueDate,
+              date: parseISO(dueDate),
               duration_minutes: duration,
               // for muliple subject make a arry outside
               subjectIds: [selectedSubject.id],

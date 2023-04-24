@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useState } from "react";
-import { Text, View } from "../../components/Themed";
+import { useCallback, useState } from "react";
+import { List, Text, View } from "../../components/Themed";
 import { trpc } from "../../utils/trpc";
 import { RootStackParamList } from "../../utils/types/common";
 import HomeworkForm from "../../components/HomeworkForm";
@@ -11,9 +11,10 @@ import useColorScheme from "../../utils/useColorScheme";
 import { ModalTextInput } from "../../components/ModalTextInput";
 import { Toast } from "react-native-toast-message/lib/src/Toast";
 import TestModal from "./TestModal";
-import { Subject } from "schooltalk-shared/types";
+import { ArrayElement, Subject } from "schooltalk-shared/types";
 import { AnyKindOfDictionary } from "lodash";
 import type { ExamTestSchema } from "schooltalk-shared/misc";
+import { ListRenderItem } from "@shopify/flash-list";
 
 export default function CreateExamScreen({
   navigation,
@@ -32,8 +33,9 @@ export default function CreateExamScreen({
   const [isTextModalOpen, setIsTextModalOpen] = useState(false);
   const [examName, setExamName] = useState("");
   const [isTestCreateModal, setIsTestCreateModal] = useState(false);
-  const [test, setTest] = useState<ExamTestSchema>();
-  console.log(JSON.stringify(test, null, 2));
+  const [selectedTests, setTest] = useState<ExamTestSchema>();
+  console.log(JSON.stringify(selectedTests, null, 2));
+
   return (
     <View style={{ height: "100%" }}>
       <ModalTextInput
@@ -76,7 +78,11 @@ export default function CreateExamScreen({
       </View>
 
       {/* test list */}
-
+      <List
+        data={selectedTests ? [selectedTests] : []}
+        renderItem={({ item }) => <TestItem test={item} />}
+        estimatedItemSize={200}
+      />
       <View style={{ width: "10%" }}>
         {/* new test modal */}
         <Dialog
@@ -103,10 +109,11 @@ export default function CreateExamScreen({
       <FAB
         buttonStyle={{ backgroundColor: "#4E48B2" }}
         onPress={() => {
-          if (examName) {
+          if (examName && selectedTests) {
             createExam.mutate({
               name: examName,
-              tests: [],
+              tests: [selectedTests],
+              // type error
             });
           } else {
             Toast.show({
@@ -119,5 +126,16 @@ export default function CreateExamScreen({
         placement="right"
       />
     </View>
+  );
+}
+interface TestItemInterface {
+  test: ExamTestSchema;
+  // onRemove?:()=>void;
+}
+function TestItem({ test }: TestItemInterface) {
+  return (
+    <Pressable style={({ pressed }) => [{ opacity: pressed ? 0.5 : 1 }]}>
+      <Text>{test.name}</Text>
+    </Pressable>
   );
 }
