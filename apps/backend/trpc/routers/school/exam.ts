@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { parseISO } from "date-fns";
 import _ from "lodash";
-import { StaticRole } from "schooltalk-shared/misc";
+import { StaticRole, examTestSchema } from "schooltalk-shared/misc";
 import { z } from "zod";
 import prisma from "../../../prisma";
 import { authMiddleware, roleMiddleware, t } from "../../trpc";
@@ -11,19 +11,6 @@ const dateStringSchema = z
   .datetime()
   .default(() => new Date().toISOString())
   .transform((d) => parseISO(d));
-
-const examTestSchema = z.object({
-  name: z.string().max(100).trim().optional(),
-  class_id: z.number().int(),
-  section_id: z.number().int().optional(),
-  date: z
-    .string()
-    .datetime()
-    .transform((d) => parseISO(d)),
-  duration_minutes: z.number().int().min(0).default(0),
-  subjectIds: z.string().cuid().array(),
-  total_marks: z.number().int(),
-});
 
 type ExamTest = NonNullable<
   Awaited<

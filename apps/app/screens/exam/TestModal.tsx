@@ -19,19 +19,18 @@ import { useConfig } from "../../utils/config";
 import DatePicker from "react-native-date-picker";
 import { format, parseISO } from "date-fns";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import type { ExamTestSchema } from "schooltalk-shared/misc";
 
 interface TestModalProps {
   isTestCreateModal: boolean;
   onClose: () => void;
-  selectedSubject: Subject | null;
-  setSelectedSubject: (selectedSubject: Subject) => void;
+  onSubmit: (test: ExamTestSchema) => void;
 }
 
 export default function ({
   isTestCreateModal,
   onClose,
-  selectedSubject,
-  setSelectedSubject,
+  onSubmit,
 }: TestModalProps) {
   const navigation = useNavigation();
   const config = useConfig();
@@ -44,24 +43,26 @@ export default function ({
   );
   const [name, setName] = useState<string>("");
   const [mark, setMark] = useState<number>(50);
+  const [duration, setDuration] = useState<number>(30);
   const [isTextModalOpenName, setIsTextModalOpenName] = useState(false);
   const [isTextModalOpenMark, setIsTextModalOpenMark] = useState(false);
   const [selectedClass, setSelectedClass] = useState<ClassWithSections>();
   const [selectedSection, setSelectedSection] = useState<Section>();
   const [dueDate, setDueDate] = useState<any>();
   const [datePickerVisible, setDatePickerVisible] = useState(false);
+  const [selectedSubject, setSelectedSubject] = useState<Subject | null>();
 
   const subjectsQuery = trpc.school.subject.fetchSubjects.useQuery({});
 
-  const createTest = trpc.school.exam.createTest.useMutation({
-    onSuccess(data) {
-      navigation.navigate("CreateExamScreen");
-      // set tests
-    },
-    onError(error, variables, context) {
-      console.log(error, variables, context);
-    },
-  });
+  // const createTest = trpc.school.exam.createTest.useMutation({
+  //   onSuccess(data) {
+  //     navigation.navigate("CreateExamScreen");
+  //     // set tests
+  //   },
+  //   onError(error, variables, context) {
+  //     console.log(error, variables, context);
+  //   },
+  // });
 
   const classesAndSectionsData =
     trpc.school.class.fetchClassesAndSections.useQuery(
@@ -77,15 +78,17 @@ export default function ({
         },
       },
     );
+  // working as a form
   return (
-    <Dialog
-      isVisible={isTestCreateModal}
-      onBackdropPress={onClose}
-      animationType="fade"
-      style={{ width: "100%" }}
-    >
-      <Dialog.Title title={"Create Test"} />
+    // <Dialog
+    //   isVisible={isTestCreateModal}
+    //   onBackdropPress={onClose}
+    //   animationType="fade"
+    //   style={{ width: "100%" }}
+    // >
+    //   <Dialog.Title title={"Create Test"} />
 
+    <View>
       <ModalTextInput
         isVisible={isTextModalOpenName}
         onClose={() => setIsTextModalOpenName(false)}
@@ -201,7 +204,19 @@ export default function ({
       </Pressable>
       <CustomSelect
         isSingle
-        title="Section"
+        title="Duration"
+        items={[15, 30, 60, 120, 180]}
+        selected={mark}
+        onSubmit={(item) => {
+          setDuration(item);
+        }}
+        idExtractor={(item) => item}
+        labelExtractor={(item) => `${item}`}
+        style={{ flexGrow: 1 }}
+      />
+      <CustomSelect
+        isSingle
+        title="Mark"
         items={[25, 50, 100]}
         selected={mark}
         onSubmit={(item) => {
@@ -228,32 +243,59 @@ export default function ({
           onValueChange={(value) => setMultiselectSub(value)}
         />
       </View>
+      <Pressable
+        onPress={() => {
+          if (
+            name &&
+            selectedClass &&
+            selectedSection &&
+            selectedSubject &&
+            mark &&
+            dueDate &&
+            duration
+          ) {
+            onSubmit({
+              name: name,
+              class_id: selectedClass?.numeric_id,
+              section_id: selectedSection?.numeric_id,
+              date: dueDate,
+              duration_minutes: duration,
+              // for muliple subject make a arry outside
+              subjectIds: [selectedSubject.id],
+              total_marks: mark,
+            });
+          }
+        }}
+      >
+        <Text>Done</Text>
+      </Pressable>
+    </View>
 
-      <Dialog.Actions>
-        <Dialog.Button
-          title="Done"
-          onPress={() => {
-            if (
-              mark &&
-              name &&
-              selectedClass &&
-              selectedSection &&
-              selectedSubject &&
-              dueDate
-            )
-              createTest.mutate({
-                name: "test1",
-                class_id: selectedClass.numeric_id,
-                section_id: selectedSection.numeric_id,
-                date: dueDate.toISOString(),
-                subjectIds: [selectedSubject.id],
-                total_marks: mark,
-              });
-            onClose?.();
-          }}
-          type="solid"
-        />
-      </Dialog.Actions>
-    </Dialog>
+    //   <Dialog.Actions>
+    //     <Dialog.Button
+    //       title="Done"
+    //       onPress={() => {
+    //         if (
+    //           mark &&
+    //           name &&
+    //           selectedClass &&
+    //           selectedSection &&
+    //           selectedSubject &&
+    //           dueDate
+    //         )
+    //           createTest.mutate({
+    //             name: "test1",
+    //             class_id: selectedClass.numeric_id,
+    //             section_id: selectedSection.numeric_id,
+    //             date: dueDate.toISOString(),
+    //             subjectIds: [selectedSubject.id],
+    //             total_marks: mark,
+    //           });
+    //         onClose?.();
+    //       }}
+    //       type="solid"
+    //     />
+    //   </Dialog.Actions>
+    // </Dialog>
   );
 }

@@ -4,7 +4,7 @@ import { Text, View } from "../../components/Themed";
 import { trpc } from "../../utils/trpc";
 import { RootStackParamList } from "../../utils/types/common";
 import HomeworkForm from "../../components/HomeworkForm";
-import { FAB, ListItem } from "@rneui/themed";
+import { Dialog, FAB, ListItem } from "@rneui/themed";
 import { Pressable, StyleProp, StyleSheet } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import useColorScheme from "../../utils/useColorScheme";
@@ -13,6 +13,7 @@ import { Toast } from "react-native-toast-message/lib/src/Toast";
 import TestModal from "./TestModal";
 import { Subject } from "schooltalk-shared/types";
 import { AnyKindOfDictionary } from "lodash";
+import type { ExamTestSchema } from "schooltalk-shared/misc";
 
 export default function CreateExamScreen({
   navigation,
@@ -31,9 +32,8 @@ export default function CreateExamScreen({
   const [isTextModalOpen, setIsTextModalOpen] = useState(false);
   const [examName, setExamName] = useState("");
   const [isTestCreateModal, setIsTestCreateModal] = useState(false);
-  const [selectedSubject, setSelectedSubject] = useState<Subject | null>();
-
-  console.log(JSON.stringify(selectedSubject, null, 2), "a");
+  const [test, setTest] = useState<ExamTestSchema>();
+  console.log(JSON.stringify(test, null, 2));
   return (
     <View style={{ height: "100%" }}>
       <ModalTextInput
@@ -74,14 +74,28 @@ export default function CreateExamScreen({
           <Text>Add Test</Text>
         </Pressable>
       </View>
-      {/* new test modal */}
+
       <View style={{ width: "10%" }}>
-        <TestModal
-          isTestCreateModal={isTestCreateModal}
-          onClose={() => setIsTestCreateModal(false)}
-          selectedSubject={selectedSubject ?? null}
-          setSelectedSubject={setSelectedSubject}
-        />
+        {/* new test modal */}
+        <Dialog
+          isVisible={isTestCreateModal}
+          onBackdropPress={() => setIsTestCreateModal(false)}
+          animationType="fade"
+          style={{ width: "100%" }}
+        >
+          <Dialog.Title title={"Create Test"} />
+          <TestModal
+            isTestCreateModal={isTestCreateModal}
+            onClose={() => setIsTestCreateModal(false)}
+            onSubmit={(test) => {
+              // TODO: Push `test` to an array
+              setTest(test);
+            }}
+          />
+          {/* <Dialog.Actions>
+            <Dialog.Button title="Done" onPress={() => {}} type="solid" />
+          </Dialog.Actions> */}
+        </Dialog>
       </View>
 
       <FAB
