@@ -33,8 +33,7 @@ export default function CreateExamScreen({
   const [isTextModalOpen, setIsTextModalOpen] = useState(false);
   const [examName, setExamName] = useState("");
   const [isTestCreateModal, setIsTestCreateModal] = useState(false);
-  const [selectedTests, setTest] = useState<ExamTestSchema>();
-  console.log(JSON.stringify(selectedTests, null, 2));
+  const [selectedTests, setTest] = useState<ExamTestSchema[]>([]);
 
   return (
     <View style={{ height: "100%" }}>
@@ -79,7 +78,7 @@ export default function CreateExamScreen({
 
       {/* test list */}
       <List
-        data={selectedTests ? [selectedTests] : []}
+        data={selectedTests}
         renderItem={({ item }) => <TestItem test={item} />}
         estimatedItemSize={200}
       />
@@ -97,8 +96,7 @@ export default function CreateExamScreen({
             onClose={() => setIsTestCreateModal(false)}
             onSubmit={(test) => {
               // TODO: Push `test` to an array
-              setTest([selectedTests].concat(test));
-              // type error
+              setTest((tests) => tests.concat(test));
             }}
           />
           {/* <Dialog.Actions>
