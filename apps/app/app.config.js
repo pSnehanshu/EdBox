@@ -9,7 +9,7 @@ module.exports = ({ config }) => ({
   plugins: ["expo-image-picker"],
   extra: {
     ...config.extra,
-    backendHost: process.env.HOSTNAME,
+    backendHost: process.env.BE_HOST,
     schoolId: process.env.SCHOOLID,
   },
   jsEngine: "hermes",

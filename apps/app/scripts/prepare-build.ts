@@ -23,8 +23,8 @@ const GOOGLE_SERVICES_JSON_PATH = path.join(
   "google-services.json",
 );
 
-if (!process.env.HOSTNAME) {
-  throw new Error("HOSTNAME is not defined");
+if (!process.env.BE_HOST) {
+  throw new Error("BE_HOST is not defined");
 }
 
 const promise = fetchAppConfig().then((config) =>
@@ -61,7 +61,7 @@ async function setupPreconfiguredApp(
       result: { data: school },
     },
   } = await axios.get<OUTPUT>(
-    `${process.env.HOSTNAME}/trpc/school.schoolBasicInfo`,
+    `${process.env.BE_HOST}/trpc/school.schoolBasicInfo`,
     {
       params: {
         input: JSON.stringify(input),
@@ -71,7 +71,7 @@ async function setupPreconfiguredApp(
 
   config.name = school.name;
   config.scheme = school.app_scheme ?? config.scheme;
-  config.icon = `${process.env.HOSTNAME}/school-info/${school.id}/icon`;
+  config.icon = `${process.env.BE_HOST}/school-info/${school.id}/icon`;
   config.splash = {
     ...config.splash,
     image: school.app_splash ?? config.splash?.image,
