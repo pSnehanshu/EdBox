@@ -13,7 +13,8 @@
     "expo": "yarn workspace schooltalk-app expo",
     "eas": "yarn workspace schooltalk-app eas",
     "prisma": "yarn workspace schooltalk-backend prisma",
-    "pretty": "prettier . -w"
+    "pretty": "prettier . -w",
+    "postinstall": "yarn prisma generate"
   },
   "workspaces": [
     "apps/*",
