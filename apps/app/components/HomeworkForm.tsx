@@ -318,6 +318,7 @@ export default function HomeworkForm({
         onChange={setTextContent}
         defaultValue={textContent}
         title="Homework description"
+        multiline
       />
 
       <FAB
