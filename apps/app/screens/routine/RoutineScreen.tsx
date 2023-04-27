@@ -5,7 +5,6 @@ import { format } from "date-fns";
 import { TabView, TabBar } from "react-native-tab-view";
 import Spinner from "react-native-loading-spinner-overlay";
 import Timeline from "react-native-timeline-flatlist";
-import { Text } from "@rneui/themed";
 import { useNavigation } from "@react-navigation/native";
 import { trpc } from "../../utils/trpc";
 import useColorScheme from "../../utils/useColorScheme";
@@ -20,10 +19,10 @@ import {
   TimelineOnPressProp,
 } from "../../utils/types/routine-types";
 import { NoClassesToday } from "../../components/RoutineNoClasses";
-import { getUserRoleHierarchical, StaticRole } from "schooltalk-shared/misc";
-import { useCurrentUser } from "../../utils/auth";
+import { StaticRole } from "schooltalk-shared/misc";
 import { useRoutineWithGaps } from "../../utils/routine-utils";
 import { Banner } from "../../components/Banner";
+import { useConfig } from "../../utils/config";
 
 const DayRoutine = memo(
   ({ periods, isFetching, onRefresh }: DayRoutineProps<RoutinePeriod>) => {
@@ -97,11 +96,10 @@ const DayRoutine = memo(
 );
 
 export default function RoutineScreen() {
-  const { user } = useCurrentUser();
-  const hierarchicalRole = getUserRoleHierarchical(user);
+  const config = useConfig();
 
   const routineQuery =
-    hierarchicalRole === StaticRole.student
+    config.activeStaticRole === StaticRole.student
       ? trpc.school.routine.fetchForStudent.useQuery({})
       : trpc.school.routine.fetchForTeacher.useQuery({});
 

@@ -5,21 +5,22 @@ import { MaterialCommunityIcons, FontAwesome5 } from "@expo/vector-icons";
 import { List, Text, View } from "../../components/Themed";
 import { ColorSchemeContext } from "../../utils/useColorScheme";
 import { useCallback, useContext, useMemo } from "react";
-import { useCurrentUser, useLogout } from "../../utils/auth";
-import { hasUserStaticRoles, StaticRole } from "schooltalk-shared/misc";
+import { useLogout } from "../../utils/auth";
+import { StaticRole } from "schooltalk-shared/misc";
 import { SettingsOption } from "../../utils/types/common";
+import { useConfig } from "../../utils/config";
 
 export default function SettingsScreen() {
   const { scheme: colorScheme, change } = useContext(ColorSchemeContext);
   const iconColor = colorScheme === "dark" ? "white" : "black";
   const navigation = useNavigation();
-  const { user } = useCurrentUser();
-  const isPrincipal = hasUserStaticRoles(
-    user,
-    [StaticRole.principal, StaticRole.vice_principal],
-    "some",
-  );
   const logout = useLogout();
+  const config = useConfig();
+
+  const isPrincipal = [
+    StaticRole.principal,
+    StaticRole.vice_principal,
+  ].includes(config.activeStaticRole);
 
   const settingsOptions = useMemo<SettingsOption[]>(() => {
     const items: SettingsOption[] = [];

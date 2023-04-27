@@ -1,11 +1,7 @@
 import { useMemo } from "react";
 import { ActivityIndicator, Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import {
-  getUserRoleHierarchical,
-  hasUserStaticRoles,
-  StaticRole,
-} from "schooltalk-shared/misc";
+import { StaticRole } from "schooltalk-shared/misc";
 import { RootStackParamList } from "../../utils/types/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { List, Text, View } from "../../components/Themed";
@@ -13,17 +9,17 @@ import { FAB } from "@rneui/themed";
 import { Homework } from "schooltalk-shared/types";
 import { format, parseISO, isPast } from "date-fns";
 import { trpc } from "../../utils/trpc";
-import { useCurrentUser } from "../../utils/auth";
+import { useConfig } from "../../utils/config";
 
 const pageLimit = 10;
 
 export default function HomeWorkScreen({
   navigation,
 }: NativeStackScreenProps<RootStackParamList, "HomeWorkScreen">) {
-  const { user } = useCurrentUser();
-  const role = getUserRoleHierarchical(user);
-  const isStudent = hasUserStaticRoles(user, [StaticRole.student], "all");
-  const isTeacher = hasUserStaticRoles(user, [StaticRole.teacher], "all");
+  const config = useConfig();
+
+  const isStudent = config.activeStaticRole === StaticRole.student;
+  const isTeacher = config.activeStaticRole === StaticRole.teacher;
 
   const homeworkTeacherQuery =
     trpc.school.homework.fetchForTeacher.useInfiniteQuery(
@@ -56,7 +52,9 @@ export default function HomeWorkScreen({
     );
 
   const query =
-    role === StaticRole.teacher ? homeworkTeacherQuery : homeworkSectionQuery;
+    config.activeStaticRole === StaticRole.teacher
+      ? homeworkTeacherQuery
+      : homeworkSectionQuery;
 
   const homeworks: Homework[] = [];
   query.data?.pages.forEach((page) => {

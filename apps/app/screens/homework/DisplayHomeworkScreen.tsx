@@ -13,7 +13,7 @@ import { SpeedDial, Card, ListItem } from "@rneui/themed";
 import MIMEType from "whatwg-mimetype";
 import type { UploadedFile } from "schooltalk-shared/types";
 import Spinner from "react-native-loading-spinner-overlay/lib";
-import { hasUserStaticRoles, StaticRole } from "schooltalk-shared/misc";
+import { StaticRole } from "schooltalk-shared/misc";
 import { format, isPast, parseISO } from "date-fns";
 import { MaterialCommunityIcons, FontAwesome5 } from "@expo/vector-icons";
 import { trpc } from "../../utils/trpc";
@@ -23,6 +23,7 @@ import {
   FilePreview,
   FullScreenFilePreview,
 } from "../../components/attachments/FilePreview";
+import { useConfig } from "../../utils/config";
 
 export default function DisplayHomeworkScreen({
   route: {
@@ -34,6 +35,7 @@ export default function DisplayHomeworkScreen({
   const oppColor = scheme === "dark" ? "white" : "black";
   const [isActionOpen, setActionOpen] = useState(false);
   const utils = trpc.useContext();
+  const config = useConfig();
 
   // query
   const homeworkQuery = trpc.school.homework.fetchHomework.useQuery({
@@ -69,7 +71,7 @@ export default function DisplayHomeworkScreen({
   }, [homework?.Subject.name]);
 
   const { user } = useCurrentUser();
-  const isTeacher = hasUserStaticRoles(user, [StaticRole.teacher], "all");
+  const isTeacher = config.activeStaticRole === StaticRole.teacher;
   const isEditable = isTeacher && user?.teacher_id === homework?.teacher_id;
 
   const [pressedFileId, setPressedFileId] = useState<string | null>(null);

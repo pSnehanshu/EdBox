@@ -1,5 +1,8 @@
-import { SafeAreaView, StyleSheet } from "react-native";
-import { StaticRole, hasUserStaticRoles } from "schooltalk-shared/misc";
+import { useMemo, useState } from "react";
+import { Pressable, StyleSheet } from "react-native";
+import { StaticRole } from "schooltalk-shared/misc";
+import { Dialog } from "@rneui/themed";
+import { Entypo } from "@expo/vector-icons";
 import { Text, View, ScrollView } from "../components/Themed";
 import { RootTabScreenProps } from "../utils/types/common";
 import { useCurrentUser } from "../utils/auth";
@@ -7,6 +10,8 @@ import { useSchool } from "../utils/useSchool";
 import { RoutineSlider } from "../components/RoutineSlider";
 import Announcements from "../components/Announcements";
 import useColorScheme from "../utils/useColorScheme";
+import { useConfig } from "../utils/config";
+import { StaticRoleSelector } from "../components/StaticRoleSelector";
 
 /**
  * Get a greeting by the time of day.
@@ -30,34 +35,63 @@ export default function HomeTabScreen({}: RootTabScreenProps<"HomeTab">) {
   const { user } = useCurrentUser();
   const school = useSchool();
   const scheme = useColorScheme();
+  const color = scheme === "dark" ? "black" : "white";
+  const config = useConfig();
 
-  if (!user) return null;
+  const [isVisible, setIsVisible] = useState(false);
+
+  const initials = useMemo(() => {
+    if (user?.name) {
+      return user.name
+        .split(" ")
+        .map((s) => s.charAt(0))
+        .join("")
+        .toUpperCase();
+    }
+    return "";
+  }, [user?.name]);
 
   return (
     <View style={styles.container}>
       <ScrollView stickyHeaderIndices={[0]}>
         {/* header */}
-        <View
-          style={[
-            styles.header_container,
-            { backgroundColor: scheme === "dark" ? "black" : "white" },
-          ]}
-        >
-          <Text style={styles.text_head}>
-            {greeting(new Date())}, {user.name.split(" ")[0]}
-          </Text>
-          <Text style={styles.text}>Welcome to {school?.name ?? "Home"}</Text>
+        <View>
+          <View style={[styles.header_container, { backgroundColor: color }]}>
+            <View style={styles.greeting}>
+              <Text style={styles.text_head}>
+                {greeting(new Date())}, {user?.name.split(" ")[0]}
+              </Text>
+              <Text style={styles.text}>
+                Welcome to {school?.name ?? "your school"}
+              </Text>
+            </View>
+
+            <Pressable
+              onPress={() => setIsVisible(true)}
+              style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
+            >
+              <Entypo
+                name="user"
+                size={32}
+                color="white"
+                style={styles.user_avatar}
+              />
+            </Pressable>
+          </View>
         </View>
 
         {/* Routine carousel */}
-        {hasUserStaticRoles(
-          user,
-          [StaticRole.student, StaticRole.teacher],
-          "some",
+        {[StaticRole.student, StaticRole.teacher].includes(
+          config.activeStaticRole,
         ) && <RoutineSlider style={styles.carousel} />}
 
         <Announcements />
       </ScrollView>
+
+      <Dialog isVisible={isVisible} onBackdropPress={() => setIsVisible(false)}>
+        <Dialog.Title title="Choose your role" />
+        <StaticRoleSelector onChange={() => setIsVisible(false)} />
+      </Dialog>
     </View>
   );
 }
@@ -69,18 +103,31 @@ const styles = StyleSheet.create({
   },
   header_container: {
     paddingTop: 55,
-    paddingLeft: 30,
-    paddingBottom: 10,
+    padding: 16,
+    flex: 0,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  greeting: {
+    flexGrow: 1,
+  },
+  user_avatar: {
+    backgroundColor: "blue",
+    margin: 2,
+    borderRadius: 24,
+    padding: 8,
   },
   title: {
     fontSize: 20,
     fontWeight: "bold",
   },
   text_head: {
-    fontSize: 30,
+    fontSize: 24,
     fontWeight: "500",
   },
-  text: { fontSize: 18 },
+  text: {
+    fontSize: 18,
+  },
   carousel: {
     paddingTop: 5,
   },

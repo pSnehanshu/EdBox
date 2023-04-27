@@ -1,11 +1,11 @@
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useContext } from "react";
-import { hasUserStaticRoles, StaticRole } from "schooltalk-shared/misc";
-import { useCurrentUser } from "../utils/auth";
+import { StaticRole } from "schooltalk-shared/misc";
 import { RootTabParamList } from "../utils/types/common";
 import { ColorSchemeContext } from "../utils/useColorScheme";
 import { useSchool } from "../utils/useSchool";
+import { useConfig } from "../utils/config";
 import Colors from "../constants/Colors";
 import ChatsListScreen from "../screens/chat/ChatsTabScreen";
 import HomeTabScreen from "../screens/HomeTabScreen";
@@ -22,12 +22,7 @@ const BottomTab = createBottomTabNavigator<RootTabParamList>();
 export function BottomTabNavigator() {
   const { scheme } = useContext(ColorSchemeContext);
   const school = useSchool();
-  const { user } = useCurrentUser();
-  const isStudentOrTeacher = hasUserStaticRoles(
-    user,
-    [StaticRole.teacher, StaticRole.student],
-    "some",
-  );
+  const config = useConfig();
 
   return (
     <BottomTab.Navigator
@@ -80,7 +75,9 @@ export function BottomTabNavigator() {
         }}
       />
 
-      {isStudentOrTeacher ? (
+      {[StaticRole.teacher, StaticRole.student].includes(
+        config.activeStaticRole,
+      ) ? (
         <>
           <BottomTab.Screen
             name="Routine"

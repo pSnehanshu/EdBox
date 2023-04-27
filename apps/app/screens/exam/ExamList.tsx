@@ -8,14 +8,14 @@ import _ from "lodash";
 import { format, parseISO } from "date-fns";
 import { ListItem, Divider } from "@rneui/themed";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { List, Text, View } from "../../components/Themed";
+import { List, View } from "../../components/Themed";
 import { trpc } from "../../utils/trpc";
 import useColorScheme from "../../utils/useColorScheme";
 import { TestComp } from "../../components/TestComp";
-import { useCurrentUser } from "../../utils/auth";
-import { getUserRoleHierarchical, StaticRole } from "schooltalk-shared/misc";
+import { StaticRole } from "schooltalk-shared/misc";
 import { Banner } from "../../components/Banner";
 import { LottieAnimation } from "../../components/LottieAnimation";
+import { useConfig } from "../../utils/config";
 
 const ExamComp: React.FC<{
   exam: Extract<ExamItem, { type: "exam" }>["item"];
@@ -77,11 +77,10 @@ const ExamComp: React.FC<{
 };
 
 const ExamListScreen: React.FC = () => {
-  const { user } = useCurrentUser();
-  const hierarchicalRole = getUserRoleHierarchical(user);
+  const config = useConfig();
 
   const query =
-    hierarchicalRole === StaticRole.student
+    config.activeStaticRole === StaticRole.student
       ? trpc.school.exam.fetchExamsAndTestsForStudent.useQuery({})
       : trpc.school.exam.fetchExamsAndTestsForTeacher.useQuery({});
 

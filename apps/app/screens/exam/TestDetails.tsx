@@ -8,8 +8,8 @@ import { trpc } from "../../utils/trpc";
 import { View } from "../../components/Themed";
 import { addMinutes, format, parseISO } from "date-fns";
 import { ArrayElement } from "schooltalk-shared/types";
-import { hasUserStaticRoles, StaticRole } from "schooltalk-shared/misc";
-import { useCurrentUser } from "../../utils/auth";
+import { StaticRole } from "schooltalk-shared/misc";
+import { useConfig } from "../../utils/config";
 
 const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
   route: {
@@ -17,7 +17,7 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
   },
   navigation,
 }) => {
-  const { user } = useCurrentUser();
+  const config = useConfig();
 
   // Fetch the class and section the user belongs to
   const classAndSectionQuery = trpc.school.people.getStudentClass.useQuery(
@@ -38,7 +38,7 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
     {
       testId,
       periodsFilter:
-        hasUserStaticRoles(user, [StaticRole.student], "all") &&
+        config.activeStaticRole === StaticRole.student &&
         classAndSectionQuery.data?.Class
           ? {
               // Filter out periods (and teachers) if the user is a student
