@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { Pressable, StyleSheet } from "react-native";
 import { StaticRole } from "schooltalk-shared/misc";
-import { Avatar, Dialog } from "@rneui/themed";
+import { Dialog } from "@rneui/themed";
+import { Entypo } from "@expo/vector-icons";
 import { Text, View, ScrollView } from "../components/Themed";
 import { RootTabScreenProps } from "../utils/types/common";
 import { useCurrentUser } from "../utils/auth";
@@ -69,11 +70,11 @@ export default function HomeTabScreen({}: RootTabScreenProps<"HomeTab">) {
               onPress={() => setIsVisible(true)}
               style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
             >
-              <Avatar
-                size={40}
-                rounded
-                icon={{ name: "user", type: "entypo" }}
-                containerStyle={styles.user_avatar}
+              <Entypo
+                name="user"
+                size={32}
+                color="white"
+                style={styles.user_avatar}
               />
             </Pressable>
           </View>
@@ -113,6 +114,8 @@ const styles = StyleSheet.create({
   user_avatar: {
     backgroundColor: "blue",
     margin: 2,
+    borderRadius: 24,
+    padding: 8,
   },
   title: {
     fontSize: 20,
