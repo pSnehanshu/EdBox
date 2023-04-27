@@ -43,8 +43,8 @@ export default function ({
     <MaterialCommunityIcons name="chevron-right" color={iconColor} size={16} />
   );
   const [name, setName] = useState<string>("");
-  const [mark, setMark] = useState<number>(50);
-  const [duration, setDuration] = useState<number>(30);
+  const [mark, setMark] = useState<string>();
+  const [duration, setDuration] = useState<string>();
   const [isTextModalOpenName, setIsTextModalOpenName] = useState(false);
   const [isTextModalOpenMark, setIsTextModalOpenMark] = useState(false);
   const [selectedClass, setSelectedClass] = useState<ClassWithSections>();
@@ -169,6 +169,24 @@ export default function ({
           isLoading={subjectsQuery.isLoading}
         />
       )}
+      <View
+        // add margins
+        style={{
+          flexDirection: "row",
+          justifyContent: "flex-start",
+        }}
+      >
+        <Text style={{ textAlignVertical: "center", textAlign: "center" }}>
+          Select Multiple Subjects
+        </Text>
+        <Switch
+          trackColor={{ true: "#3bde50", false: "#f5f6fc" }}
+          // change
+          thumbColor="#FFF"
+          value={multiselectSub}
+          onValueChange={(value) => setMultiselectSub(value)}
+        />
+      </View>
       <DatePicker
         modal
         open={datePickerVisible}
@@ -203,7 +221,7 @@ export default function ({
           {ChevronIcon}
         </ListItem>
       </Pressable>
-      <CustomSelect
+      {/* <CustomSelect
         isSingle
         title="Duration"
         items={[15, 30, 60, 120, 180]}
@@ -214,68 +232,74 @@ export default function ({
         idExtractor={(item) => item}
         labelExtractor={(item) => `${item}`}
         style={{ flexGrow: 1 }}
-      />
-      <CustomSelect
-        isSingle
-        title="Mark"
-        items={[25, 50, 100]}
-        selected={mark}
-        onSubmit={(item) => {
-          setMark(item);
-        }}
-        idExtractor={(item) => item}
-        labelExtractor={(item) => `${item}`}
-        style={{ flexGrow: 1 }}
-      />
+      /> */}
+      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <View>
+          <Text>Duration</Text>
+          <View style={{ flexDirection: "row" }}>
+            <TextInput
+              style={{ borderWidth: 1, width: "70%" }}
+              onChangeText={setDuration}
+              value={duration}
+              placeholder="Enter duration"
+              keyboardType="numeric"
+            />
+            <Text>Minutes</Text>
+          </View>
+        </View>
+        <View>
+          <Text>Total Marks</Text>
+          <View>
+            <TextInput
+              style={{ borderWidth: 1, width: "70%" }}
+              onChangeText={setMark}
+              value={mark}
+              placeholder="Enter total marks"
+              keyboardType="numeric"
+            />
+          </View>
+        </View>
+      </View>
       <View
         style={{
           flexDirection: "row",
-          justifyContent: "flex-start",
+          justifyContent: "flex-end",
         }}
       >
-        <Text style={{ textAlignVertical: "center", textAlign: "center" }}>
-          Select Multiple Subjects
-        </Text>
-        <Switch
-          trackColor={{ true: "#3bde50", false: "#f5f6fc" }}
-          // change
-          thumbColor="#FFF"
-          value={multiselectSub}
-          onValueChange={(value) => setMultiselectSub(value)}
-        />
+        <Pressable
+          style={{ margin: 4 }}
+          onPress={() => {
+            if (
+              name &&
+              selectedClass &&
+              selectedSection &&
+              selectedSubject &&
+              mark &&
+              dueDate &&
+              duration
+            ) {
+              onSubmit({
+                name: name,
+                class_id: selectedClass?.numeric_id,
+                section_id: selectedSection?.numeric_id,
+                date: parseISO(dueDate),
+                duration_minutes: Number(duration),
+                // for muliple subject make a arry outside
+                subjectIds: [selectedSubject.id],
+                total_marks: Number(mark),
+              });
+              onClose?.();
+            } else {
+              Toast.show({
+                type: "error",
+                text1: "Insufficient Data",
+              });
+            }
+          }}
+        >
+          <Text>Done</Text>
+        </Pressable>
       </View>
-      <Pressable
-        onPress={() => {
-          if (
-            name &&
-            selectedClass &&
-            selectedSection &&
-            selectedSubject &&
-            mark &&
-            dueDate &&
-            duration
-          ) {
-            onSubmit({
-              name: name,
-              class_id: selectedClass?.numeric_id,
-              section_id: selectedSection?.numeric_id,
-              date: parseISO(dueDate),
-              duration_minutes: duration,
-              // for muliple subject make a arry outside
-              subjectIds: [selectedSubject.id],
-              total_marks: mark,
-            });
-            onClose?.();
-          } else {
-            Toast.show({
-              type: "error",
-              text1: "Insufficient Data",
-            });
-          }
-        }}
-      >
-        <Text>Done</Text>
-      </Pressable>
     </View>
 
     //   <Dialog.Actions>
