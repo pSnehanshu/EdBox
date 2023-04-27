@@ -81,14 +81,6 @@ export default function ({
     );
   // working as a form
   return (
-    // <Dialog
-    //   isVisible={isTestCreateModal}
-    //   onBackdropPress={onClose}
-    //   animationType="fade"
-    //   style={{ width: "100%" }}
-    // >
-    //   <Dialog.Title title={"Create Test"} />
-
     <View>
       <ModalTextInput
         isVisible={isTextModalOpenName}
@@ -309,7 +301,12 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 3,
   },
-  text_input: { borderWidth: 1, width: "80%", borderRadius: 3 },
+  text_input: {
+    borderWidth: 1,
+    width: "80%",
+    borderRadius: 3,
+    paddingHorizontal: 10,
+  },
   text_input_font: {
     fontSize: 16,
   },
