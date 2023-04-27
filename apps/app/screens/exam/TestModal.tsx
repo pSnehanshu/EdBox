@@ -14,7 +14,7 @@ import { Switch } from "@rneui/themed";
 import { CustomSelect } from "../../components/CustomSelect";
 import { useNavigation } from "@react-navigation/native";
 import { ModalTextInput } from "../../components/ModalTextInput";
-import { Pressable } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 import { useConfig } from "../../utils/config";
 import DatePicker from "react-native-date-picker";
 import { format, parseISO } from "date-fns";
@@ -101,13 +101,16 @@ export default function ({
         onPress={() => setIsTextModalOpenName(true)}
         style={({ pressed }) => ({
           opacity: pressed ? 0.2 : 1,
-          borderBottomWidth: 1,
         })}
       >
         <ListItem>
           <ListItem.Content>
-            <ListItem.Subtitle>Name</ListItem.Subtitle>
-            <ListItem.Title>{name || "Empty"}</ListItem.Title>
+            <ListItem.Subtitle style={styles.text_input_font}>
+              Name
+            </ListItem.Subtitle>
+            <ListItem.Title style={{ fontSize: 14 }}>
+              {name || "Empty"}
+            </ListItem.Title>
           </ListItem.Content>
           <MaterialCommunityIcons
             name="chevron-right"
@@ -170,8 +173,8 @@ export default function ({
         />
       )}
       <View
-        // add margins
         style={{
+          marginHorizontal: 16,
           flexDirection: "row",
           justifyContent: "flex-start",
         }}
@@ -221,53 +224,41 @@ export default function ({
           {ChevronIcon}
         </ListItem>
       </Pressable>
-      {/* <CustomSelect
-        isSingle
-        title="Duration"
-        items={[15, 30, 60, 120, 180]}
-        selected={mark}
-        onSubmit={(item) => {
-          setDuration(item);
+
+      <View
+        style={{
+          marginHorizontal: 16,
+          flexDirection: "row",
+          justifyContent: "space-between",
         }}
-        idExtractor={(item) => item}
-        labelExtractor={(item) => `${item}`}
-        style={{ flexGrow: 1 }}
-      /> */}
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-        <View>
-          <Text>Duration</Text>
-          <View style={{ flexDirection: "row" }}>
+      >
+        <View style={{ width: "50%" }}>
+          <Text style={styles.text_input_font}>Duration(min)</Text>
+          <View style={{ flexDirection: "row", marginTop: 5 }}>
             <TextInput
-              style={{ borderWidth: 1, width: "70%" }}
+              style={styles.text_input}
               onChangeText={setDuration}
               value={duration}
-              placeholder="Enter duration"
               keyboardType="numeric"
             />
-            <Text>Minutes</Text>
+            {/* <Text>Minutes</Text> */}
           </View>
         </View>
-        <View>
-          <Text>Total Marks</Text>
-          <View>
+        <View style={{ width: "50%" }}>
+          <Text style={styles.text_input_font}>Total Marks</Text>
+          <View style={{ flexDirection: "row", marginTop: 5 }}>
             <TextInput
-              style={{ borderWidth: 1, width: "70%" }}
+              style={styles.text_input}
               onChangeText={setMark}
               value={mark}
-              placeholder="Enter total marks"
               keyboardType="numeric"
             />
           </View>
         </View>
       </View>
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "flex-end",
-        }}
-      >
+      <View style={styles.button_container}>
         <Pressable
-          style={{ margin: 4 }}
+          style={styles.button}
           onPress={() => {
             if (
               name &&
@@ -297,36 +288,29 @@ export default function ({
             }
           }}
         >
-          <Text>Done</Text>
+          <Text style={{ color: "white", fontSize: 18 }}>Done</Text>
         </Pressable>
       </View>
     </View>
-
-    //   <Dialog.Actions>
-    //     <Dialog.Button
-    //       title="Done"
-    //       onPress={() => {
-    //         if (
-    //           mark &&
-    //           name &&
-    //           selectedClass &&
-    //           selectedSection &&
-    //           selectedSubject &&
-    //           dueDate
-    //         )
-    //           createTest.mutate({
-    //             name: "test1",
-    //             class_id: selectedClass.numeric_id,
-    //             section_id: selectedSection.numeric_id,
-    //             date: dueDate.toISOString(),
-    //             subjectIds: [selectedSubject.id],
-    //             total_marks: mark,
-    //           });
-    //         onClose?.();
-    //       }}
-    //       type="solid"
-    //     />
-    //   </Dialog.Actions>
-    // </Dialog>
   );
 }
+
+const styles = StyleSheet.create({
+  button_container: {
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    marginHorizontal: 16,
+    marginVertical: 10,
+  },
+  button: {
+    marginTop: 10,
+    backgroundColor: "#4E48B2",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 3,
+  },
+  text_input: { borderWidth: 1, width: "80%", borderRadius: 3 },
+  text_input_font: {
+    fontSize: 16,
+  },
+});

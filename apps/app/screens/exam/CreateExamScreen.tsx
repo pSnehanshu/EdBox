@@ -91,6 +91,7 @@ export default function CreateExamScreen({
           style={{ width: "100%" }}
         >
           <Dialog.Title title={"Create Test"} />
+          <View style={{ borderBottomWidth: 2 }}></View>
           <TestModal
             isTestCreateModal={isTestCreateModal}
             onClose={() => setIsTestCreateModal(false)}
