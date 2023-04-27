@@ -81,13 +81,26 @@ const ExamListScreen: React.FC<
 > = ({ navigation }) => {
   const config = useConfig();
 
+  const isTeacher = config.activeStaticRole === StaticRole.teacher;
+  const isStudent = config.activeStaticRole === StaticRole.student;
+
+  const studentQuery = trpc.school.exam.fetchExamsAndTestsForStudent.useQuery(
+    {},
+    { enabled: isStudent },
+  );
+  const teacherQuery = trpc.school.exam.fetchExamsAndTestsForTeacher.useQuery(
+    {},
+    { enabled: isTeacher },
+  );
+
   const query =
     config.activeStaticRole === StaticRole.student
-      ? trpc.school.exam.fetchExamsAndTestsForStudent.useQuery({})
-      : trpc.school.exam.fetchExamsAndTestsForTeacher.useQuery({});
+      ? studentQuery
+      : isTeacher
+      ? teacherQuery
+      : null;
 
-  const isTeacher = config.activeStaticRole === StaticRole.teacher;
-
+  if (!query) return <></>;
   if (query.isLoading) return <Spinner visible />;
   if (query.isError)
     return <Banner text="Failed to fetch exams!" type="error" />;
