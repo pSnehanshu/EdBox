@@ -6,11 +6,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMessages } from "../utils/messages-repository";
 import { useCurrentUser } from "../utils/auth";
 import { format, isThisYear, isToday, isYesterday } from "date-fns";
-import {
-  getDisplayName,
-  hasUserStaticRoles,
-  StaticRole,
-} from "schooltalk-shared/misc";
+import { getDisplayName, StaticRole } from "schooltalk-shared/misc";
 import { useNavigation } from "@react-navigation/native";
 import { getSchoolGroupIdentifier } from "schooltalk-shared/group-identifier";
 import MIMEType from "whatwg-mimetype";
@@ -156,16 +152,10 @@ export default function Announcements() {
   const color = scheme === "dark" ? "white" : "black";
 
   const school = useSchool();
-  const { user } = useCurrentUser();
-  const isPrincipal = useMemo(
-    () =>
-      hasUserStaticRoles(
-        user,
-        [StaticRole.principal, StaticRole.vice_principal],
-        "some",
-      ),
-    [user],
-  );
+  const isPrincipal = [
+    StaticRole.principal,
+    StaticRole.vice_principal,
+  ].includes(config.activeStaticRole);
 
   return (
     <View>

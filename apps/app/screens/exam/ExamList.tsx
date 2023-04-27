@@ -4,22 +4,18 @@ import Spinner from "react-native-loading-spinner-overlay";
 import type { ExamItem } from "schooltalk-shared/types";
 import _ from "lodash";
 import { format, parseISO } from "date-fns";
-import { ListItem, Divider } from "@rneui/themed";
+import { ListItem, Divider, FAB } from "@rneui/themed";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { List, View } from "../../components/Themed";
 import { trpc } from "../../utils/trpc";
 import useColorScheme from "../../utils/useColorScheme";
 import { TestComp } from "../../components/TestComp";
-import { useCurrentUser } from "../../utils/auth";
-import {
-  getUserRoleHierarchical,
-  hasUserStaticRoles,
-  StaticRole,
-} from "schooltalk-shared/misc";
+import { StaticRole } from "schooltalk-shared/misc";
 import { Banner } from "../../components/Banner";
 import { LottieAnimation } from "../../components/LottieAnimation";
-import { FAB } from "@rneui/themed";
-import { useNavigation } from "@react-navigation/native";
+import { useConfig } from "../../utils/config";
+import { RootStackParamList } from "../../utils/types/common";
 
 const ExamComp: React.FC<{
   exam: Extract<ExamItem, { type: "exam" }>["item"];
@@ -80,17 +76,17 @@ const ExamComp: React.FC<{
   );
 };
 
-const ExamListScreen: React.FC = () => {
-  const { user } = useCurrentUser();
-  const hierarchicalRole = getUserRoleHierarchical(user);
+const ExamListScreen: React.FC<
+  NativeStackScreenProps<RootStackParamList, "ExamsScreen">
+> = ({ navigation }) => {
+  const config = useConfig();
 
   const query =
-    hierarchicalRole === StaticRole.student
+    config.activeStaticRole === StaticRole.student
       ? trpc.school.exam.fetchExamsAndTestsForStudent.useQuery({})
       : trpc.school.exam.fetchExamsAndTestsForTeacher.useQuery({});
 
-  const isTeacher = hasUserStaticRoles(user, [StaticRole.teacher], "all");
-  const navigation = useNavigation();
+  const isTeacher = config.activeStaticRole === StaticRole.teacher;
 
   if (query.isLoading) return <Spinner visible />;
   if (query.isError)
