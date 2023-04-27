@@ -53,7 +53,7 @@ export function StaticRoleSelector({ onChange }: StaticRoleSelector) {
             <ListItem>
               <ListItem.Content>
                 <ListItem.Title>
-                  {StaticRole[role].toUpperCase()}
+                  {StaticRole[role].split("_").join(" ").toUpperCase()}
                 </ListItem.Title>
               </ListItem.Content>
 
