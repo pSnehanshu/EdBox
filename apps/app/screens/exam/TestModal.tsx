@@ -21,6 +21,7 @@ import { format, parseISO } from "date-fns";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import type { ExamTestSchema } from "schooltalk-shared/misc";
 import { Toast } from "react-native-toast-message/lib/src/Toast";
+import { Slider } from "@miblanchard/react-native-slider";
 
 interface TestModalProps {
   isTestCreateModal: boolean;
@@ -44,7 +45,7 @@ export default function ({
   );
   const [name, setName] = useState<string>("");
   const [mark, setMark] = useState<string>();
-  const [duration, setDuration] = useState<string>();
+  const [duration, setDuration] = useState<number>(0);
   const [isTextModalOpenName, setIsTextModalOpenName] = useState(false);
   const [isTextModalOpenMark, setIsTextModalOpenMark] = useState(false);
   const [selectedClass, setSelectedClass] = useState<ClassWithSections>();
@@ -227,11 +228,19 @@ export default function ({
         <View style={{ width: "50%" }}>
           <Text style={styles.text_input_font}>Duration(min)</Text>
           <View style={{ flexDirection: "row", marginTop: 5 }}>
-            <TextInput
+            {/* <TextInput
               style={styles.text_input}
               onChangeText={setDuration}
               value={duration}
               keyboardType="numeric"
+            /> */}
+            <Slider
+              value={duration}
+              minimumValue={1}
+              maximumValue={5}
+              step={1}
+              trackClickable={true}
+              onValueChange={(value) => console.log(value)}
             />
             {/* <Text>Minutes</Text> */}
           </View>
