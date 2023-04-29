@@ -22,6 +22,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import type { ExamTestSchema } from "schooltalk-shared/misc";
 import { Toast } from "react-native-toast-message/lib/src/Toast";
 import { Slider } from "@miblanchard/react-native-slider";
+import { CustomSlider } from "../../components/CustomSlider";
 
 interface TestModalProps {
   isTestCreateModal: boolean;
@@ -45,7 +46,7 @@ export default function ({
   );
   const [name, setName] = useState<string>("");
   const [mark, setMark] = useState<string>();
-  const [duration, setDuration] = useState<number>(0);
+  const [duration, setDuration] = useState<number>(8);
   const [isTextModalOpenName, setIsTextModalOpenName] = useState(false);
   const [isTextModalOpenMark, setIsTextModalOpenMark] = useState(false);
   const [selectedClass, setSelectedClass] = useState<ClassWithSections>();
@@ -234,14 +235,18 @@ export default function ({
               value={duration}
               keyboardType="numeric"
             /> */}
-            <Slider
-              value={duration}
-              minimumValue={1}
-              maximumValue={5}
-              step={1}
-              trackClickable={true}
-              onValueChange={(value) => console.log(value)}
-            />
+            {/* <View style={styles.slider_container}>
+              <Slider
+                value={duration}
+                minimumValue={1}
+                maximumValue={10}
+                step={1}
+                trackClickable={true}
+                onValueChange={(value) => console.log(value)}
+              />
+            </View> */}
+            <CustomSlider title={"Duration"} />
+
             {/* <Text>Minutes</Text> */}
           </View>
         </View>
@@ -318,5 +323,12 @@ const styles = StyleSheet.create({
   },
   text_input_font: {
     fontSize: 16,
+  },
+  slider_container: {
+    flex: 1,
+    marginLeft: 10,
+    marginRight: 10,
+    alignItems: "stretch",
+    justifyContent: "center",
   },
 });
