@@ -48,7 +48,6 @@ export default function CreateExamScreen({
         onPress={() => setIsTextModalOpen(true)}
         style={({ pressed }) => ({
           opacity: pressed ? 0.2 : 1,
-          borderBottomWidth: 1,
         })}
       >
         <ListItem>

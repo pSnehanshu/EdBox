@@ -219,23 +219,13 @@ export default function ({
         </ListItem>
       </Pressable>
 
-      <View
-        style={{
-          marginHorizontal: 16,
-          flexDirection: "row",
-          justifyContent: "space-between",
-        }}
-      >
-        <View style={{ width: "50%" }}>
-          <Text style={styles.text_input_font}>Duration(min)</Text>
-          <View style={{ flexDirection: "row", marginTop: 5 }}>
-            {/* <TextInput
+      {/* <TextInput
               style={styles.text_input}
               onChangeText={setDuration}
               value={duration}
               keyboardType="numeric"
             /> */}
-            {/* <View style={styles.slider_container}>
+      {/* <View style={styles.slider_container}>
               <Slider
                 value={duration}
                 minimumValue={1}
@@ -245,12 +235,11 @@ export default function ({
                 onValueChange={(value) => console.log(value)}
               />
             </View> */}
-            <CustomSlider title={"Duration"} />
+      <CustomSlider title={"Duration(min)"} />
+      <CustomSlider title={"Total Marks"} />
 
-            {/* <Text>Minutes</Text> */}
-          </View>
-        </View>
-        <View style={{ width: "50%" }}>
+      {/* <Text>Minutes</Text> */}
+      {/* <View style={{ width: "50%" }}>
           <Text style={styles.text_input_font}>Total Marks</Text>
           <View style={{ flexDirection: "row", marginTop: 5 }}>
             <TextInput
@@ -260,8 +249,7 @@ export default function ({
               keyboardType="numeric"
             />
           </View>
-        </View>
-      </View>
+        </View> */}
       <View style={styles.button_container}>
         <Pressable
           style={styles.button}

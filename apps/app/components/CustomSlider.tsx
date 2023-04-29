@@ -10,7 +10,8 @@ import {
 } from "react-native";
 import type { ListRenderItem } from "@shopify/flash-list";
 import type { ArrayElement } from "schooltalk-shared/types";
-import { ListItem } from "@rneui/themed";
+import { Dialog, ListItem } from "@rneui/themed";
+import { Slider } from "@miblanchard/react-native-slider";
 import { List, Text, View } from "./Themed";
 import useColorScheme from "../utils/useColorScheme";
 
@@ -54,7 +55,7 @@ export function CustomSlider<T>(
           <ListItem>
             <ListItem.Content>
               <ListItem.Title>{props.title}</ListItem.Title>
-              <ListItem.Subtitle>{}</ListItem.Subtitle>
+              <ListItem.Subtitle>{"Slide value"}</ListItem.Subtitle>
             </ListItem.Content>
             <ListItem.Chevron />
           </ListItem>
@@ -82,74 +83,46 @@ function ModalSelect<T>(
   const color = scheme === "dark" ? "white" : "black";
 
   return (
-    <Modal
-      transparent
+    <Dialog
+      isVisible={props.isVisible}
+      onBackdropPress={props.onClose}
       animationType="fade"
-      role="list"
-      visible={props.isVisible}
-      onRequestClose={props.onClose}
-      style={styles.container}
     >
-      <View style={styles.header}>
-        <Pressable
-          onPress={props.onClose}
-          style={({ pressed }) => [
-            styles.cancel_btn,
-            { opacity: pressed ? 0.5 : 1 },
-          ]}
-        >
-          <MaterialIcons
-            name="arrow-back-ios"
-            size={24}
-            color={color}
-            backgroundColor="transparent"
-          />
-          <Text>Cancel</Text>
-        </Pressable>
+      {props.title && <Dialog.Title title={props.title} />}
 
-        {
-          <MaterialIcons.Button
-            name="check"
-            size={24}
-            onPress={() => {
-              // props.onSubmit?.(selectedItems);
-              props.onClose?.();
-            }}
-          >
-            Done
-          </MaterialIcons.Button>
-        }
+      <View style={styles.slider_container}>
+        {/* test */}
+        <Slider
+          value={2}
+          minimumValue={1}
+          maximumValue={10}
+          step={1}
+          trackClickable={true}
+          onValueChange={(value) => console.log(value)}
+        />
       </View>
-      <View style={styles.list}>
-        {props.isLoading ? (
-          <ActivityIndicator size={56} style={{ height: "100%" }} />
-        ) : (
-          <Text>duration test</Text>
-        )}
-      </View>
-    </Modal>
+
+      <Dialog.Actions>
+        <Dialog.Button
+          title="Done"
+          onPress={() => {
+            // props.onChange?.(value);
+            props.onClose?.();
+          }}
+          type="solid"
+        />
+      </Dialog.Actions>
+    </Dialog>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    borderColor: "red",
-    borderWidth: 1,
-  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     padding: 8,
     borderBottomColor: "gray",
     borderBottomWidth: 0.5,
-  },
-  cancel_btn: {
-    padding: 8,
-    flexDirection: "row",
-    alignItems: "center",
-    borderColor: "gray",
-    borderWidth: 1,
-    borderRadius: 5,
   },
   list: {
     flex: 1,
@@ -162,5 +135,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     flexDirection: "row",
     alignItems: "center",
+  },
+  slider_container: {
+    flex: 1,
+    marginTop: 20,
+    marginLeft: 10,
+    marginRight: 10,
+    alignItems: "stretch",
+    justifyContent: "center",
   },
 });
