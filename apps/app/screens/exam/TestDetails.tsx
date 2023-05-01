@@ -56,7 +56,7 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
     if (testQuery.isFetched && testQuery.data) {
       const subjectsCount = testQuery.data.Subjects.length;
 
-      const firstSubject = testQuery.data.Subjects.at(0)!;
+      const firstSubject = testQuery.data.Subjects.at(0);
       const firstSubjectName = firstSubject
         ? firstSubject.Subject.name
         : testQuery.data?.subject_name ?? "N/A";
@@ -164,21 +164,23 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
         </Text>
       </Card>
 
-      {test.Exam && (
+      {test.Exam ? (
         <Card>
           <Card.Title>Exam: {test.Exam.name}</Card.Title>
           <Card.Divider />
           <Button
-            onPress={() =>
-              navigation.navigate("ExamDetails", {
-                examId: test.Exam?.id!,
-              })
-            }
+            onPress={() => {
+              if (test.Exam) {
+                navigation.navigate("ExamDetails", {
+                  examId: test.Exam.id,
+                });
+              }
+            }}
           >
             View full schedule
           </Button>
         </Card>
-      )}
+      ) : null}
     </ScrollView>
   );
 };

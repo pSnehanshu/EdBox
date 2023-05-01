@@ -3,40 +3,52 @@ import { z } from "zod";
 const cuid = z.string().cuid();
 const int = z.number().int();
 
+export enum GroupDefinition {
+  custom = "c",
+  auto = "a",
+}
+
+export enum AutoGroupType {
+  batch = "ba",
+  section = "se",
+  school = "sc",
+  subject = "su",
+}
+
 export const CustomGroupIdentifier = z.object({
-  gd: z.literal("c"),
+  gd: z.literal(GroupDefinition.custom),
   sc: cuid,
   id: cuid,
 });
 
 const AutoGroupIdentifierBase = z.object({
-  gd: z.literal("a"),
+  gd: z.literal(GroupDefinition.auto),
   sc: cuid,
 });
 
-export const ClassGroupIdentifier = AutoGroupIdentifierBase.extend({
-  ty: z.literal("cl"),
-  cl: int,
+export const BatchGroupIdentifier = AutoGroupIdentifierBase.extend({
+  ty: z.literal(AutoGroupType.batch),
+  ba: int,
 });
 
 export const SectionGroupIdentifier = AutoGroupIdentifierBase.extend({
-  ty: z.literal("se"),
-  cl: int,
+  ty: z.literal(AutoGroupType.section),
+  ba: int,
   se: int,
 });
 
 export const SchoolGroupIdentifier = AutoGroupIdentifierBase.extend({
-  ty: z.literal("sc"),
+  ty: z.literal(AutoGroupType.school),
 });
 
 export const SubjectGroupIdentifier = AutoGroupIdentifierBase.extend({
-  ty: z.literal("su"),
+  ty: z.literal(AutoGroupType.subject),
   su: cuid,
-  cl: int,
+  ba: int,
 });
 
 export const AutoGroupIdentifier = z.discriminatedUnion("ty", [
-  ClassGroupIdentifier,
+  BatchGroupIdentifier,
   SectionGroupIdentifier,
   SchoolGroupIdentifier,
   SubjectGroupIdentifier,
@@ -105,7 +117,7 @@ export function getCustomGroupIdentifier(
   groupId: string,
 ): string {
   const id: z.infer<typeof CustomGroupIdentifier> = {
-    gd: "c",
+    gd: GroupDefinition.custom,
     id: groupId,
     sc: schoolId,
   };
@@ -114,36 +126,36 @@ export function getCustomGroupIdentifier(
 
 export function getSchoolGroupIdentifier(schoolId: string): string {
   const id: z.infer<typeof SchoolGroupIdentifier> = {
-    gd: "a",
-    ty: "sc",
+    gd: GroupDefinition.auto,
+    ty: AutoGroupType.school,
     sc: schoolId,
   };
   return convertObjectToOrderedQueryString(id);
 }
 
-export function getClassGroupIdentifier(
+export function getBatchGroupIdentifier(
   schoolId: string,
-  classNum: number,
+  batchNum: number,
 ): string {
-  const id: z.infer<typeof ClassGroupIdentifier> = {
-    gd: "a",
-    ty: "cl",
+  const id: z.infer<typeof BatchGroupIdentifier> = {
+    gd: GroupDefinition.auto,
+    ty: AutoGroupType.batch,
     sc: schoolId,
-    cl: classNum,
+    ba: batchNum,
   };
   return convertObjectToOrderedQueryString(id);
 }
 
 export function getSectionGroupIdentifier(
   schoolId: string,
-  classNum: number,
+  batchNum: number,
   sectionNum: number,
 ) {
   const id: z.infer<typeof SectionGroupIdentifier> = {
-    gd: "a",
-    ty: "se",
+    gd: GroupDefinition.auto,
+    ty: AutoGroupType.section,
     sc: schoolId,
-    cl: classNum,
+    ba: batchNum,
     se: sectionNum,
   };
   return convertObjectToOrderedQueryString(id);
@@ -152,14 +164,14 @@ export function getSectionGroupIdentifier(
 export function getSubjectGroupIdentifier(
   schoolId: string,
   subjectId: string,
-  classNum: number,
+  batchNum: number,
 ) {
   const id: z.infer<typeof SubjectGroupIdentifier> = {
-    gd: "a",
-    ty: "su",
+    gd: GroupDefinition.auto,
+    ty: AutoGroupType.subject,
     sc: schoolId,
     su: subjectId,
-    cl: classNum,
+    ba: batchNum,
   };
   return convertObjectToOrderedQueryString(id);
 }
@@ -168,13 +180,13 @@ export function getGroupIdentifier(idf: GroupIdentifier) {
   if (idf.gd === "c") return getCustomGroupIdentifier(idf.sc, idf.id);
 
   switch (idf.ty) {
-    case "sc":
+    case AutoGroupType.school:
       return getSchoolGroupIdentifier(idf.sc);
-    case "cl":
-      return getClassGroupIdentifier(idf.sc, idf.cl);
-    case "se":
-      return getSectionGroupIdentifier(idf.sc, idf.cl, idf.se);
-    case "su":
-      return getSubjectGroupIdentifier(idf.sc, idf.su, idf.cl);
+    case AutoGroupType.batch:
+      return getBatchGroupIdentifier(idf.sc, idf.ba);
+    case AutoGroupType.section:
+      return getSectionGroupIdentifier(idf.sc, idf.ba, idf.se);
+    case AutoGroupType.subject:
+      return getSubjectGroupIdentifier(idf.sc, idf.su, idf.ba);
   }
 }

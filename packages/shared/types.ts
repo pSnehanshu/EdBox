@@ -1,4 +1,8 @@
-import type { School as DBSchool, User as DBUser } from "@prisma/client";
+import type {
+  School as DBSchool,
+  User as DBUser,
+  SchoolStaff,
+} from "@prisma/client";
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "../../apps/backend/trpc";
 import type { Context } from "../../apps/backend/trpc/context";
@@ -94,6 +98,6 @@ export interface ClientToServerEvents {
 export interface InterServerEvents {}
 
 export interface SocketData {
-  user: DBUser;
+  user: DBUser & { Staff: SchoolStaff | null };
   school: DBSchool;
 }

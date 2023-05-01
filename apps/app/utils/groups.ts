@@ -1,11 +1,11 @@
-import { inferRouterInputs } from "@trpc/server";
 import { ResultSet, WebSQLDatabase } from "expo-sqlite";
 import _ from "lodash";
-import { useEffect, useMemo, useState } from "react";
-import type { Group } from "schooltalk-shared/types";
-import { AppRouter } from "../../backend/trpc";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { Group, RouterInput } from "schooltalk-shared/types";
 import { useDB, useReadDB } from "./db";
 import { trpc } from "./trpc";
+
+type FetchGroupsInput = RouterInput["school"]["messaging"]["fetchGroups"];
 
 /**
  * Fetch info about one single group. It will first fetch from SQLite, then from server.
@@ -47,24 +47,27 @@ export function useGroupInfo(groupIdentifier: string) {
 /**
  * Hook for fetching groups from SQLite and Server combined
  */
-export function useGetUserGroups(
-  input: inferRouterInputs<AppRouter>["school"]["messaging"]["fetchGroups"],
-) {
+export function useGetUserGroups(input: FetchGroupsInput) {
   const db = useDB();
   const utils = trpc.useContext();
   const [isLoading, setIsLoading] = useState(false);
   const [groups, setGroups] = useState<Group[]>([]);
 
-  const appendGroups = (newGroups: Group[]) => {
-    setGroups((existingGroups) => {
-      return _.uniqBy(existingGroups.concat(newGroups), (g) => g.identifier);
-    });
-  };
+  const appendGroups = useCallback(
+    (newGroups: Group[]) => {
+      setGroups((existingGroups) => {
+        return _.uniqBy(existingGroups.concat(newGroups), (g) => g.identifier);
+      });
+    },
+    [setGroups],
+  );
 
-  useEffect(() => {
-    (async () => {
+  const fetchGroups = useCallback(
+    async (data: FetchGroupsInput, clear = true) => {
       try {
         setIsLoading(true);
+
+        if (clear) setGroups([]);
 
         // 1. Fetch from SQLite, and return
         const dbGroups = await fetchUserGroupsFromSQLite(db);
@@ -74,29 +77,37 @@ export function useGetUserGroups(
 
         // 3. Fetch from server
         const serverGroups =
-          await utils.client.school.messaging.fetchGroups.query(input);
+          await utils.client.school.messaging.fetchGroups.query(data);
 
-        // 4. Return these values
+        // 4. Clear existing groups
+        await clearGroups(db);
+
+        // 5. Return these values
         appendGroups(serverGroups);
 
-        // 5. Save unseen groups
-        const unseenGroups = await fetchUnseenGroupsInfo(
-          db,
-          serverGroups.map((g) => g.identifier),
-          utils,
-        );
-
-        await insertGroups(db, Object.values(unseenGroups));
+        // 6. Save the groups
+        await insertGroups(db, serverGroups);
       } catch (error) {
         console.error(error);
       }
       setIsLoading(false);
-    })();
-  }, [input.limit, input.page]);
+    },
+    [appendGroups],
+  );
+
+  const refetch = useCallback(
+    (clear?: boolean) => fetchGroups(input, clear),
+    [fetchGroups],
+  );
+
+  useEffect(() => {
+    fetchGroups(input, false);
+  }, [input.limit, input.page, fetchGroups]);
 
   return {
     isLoading,
     groups,
+    refetch,
   };
 }
 
@@ -227,6 +238,18 @@ export async function insertGroups(db: WebSQLDatabase, groups: Group[]) {
     db.transaction(
       (tx) => {
         tx.executeSql(sql, args);
+      },
+      reject,
+      resolve,
+    );
+  });
+}
+
+async function clearGroups(db: WebSQLDatabase) {
+  return new Promise<void>((resolve, reject) => {
+    db.transaction(
+      (tx) => {
+        tx.executeSql("DELETE FROM groups");
       },
       reject,
       resolve,
