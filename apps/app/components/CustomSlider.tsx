@@ -12,7 +12,7 @@ import type { ListRenderItem } from "@shopify/flash-list";
 import type { ArrayElement } from "schooltalk-shared/types";
 import { Dialog, ListItem } from "@rneui/themed";
 import { Slider } from "@miblanchard/react-native-slider";
-import { List, Text, View } from "./Themed";
+import { List, Text, TextInput, View } from "./Themed";
 import useColorScheme from "../utils/useColorScheme";
 
 interface SelectProps<T = unknown> {
@@ -96,7 +96,12 @@ function ModalSelect<T>(
           onValueChange={(value) => props.onChange?.(value)}
         />
       </View>
-      <Text>{props.defaultValue}</Text>
+      <TextInput
+        style={{ marginTop: 10, borderWidth: 1, width: "30%" }}
+        value={props.defaultValue.toString()}
+        keyboardType="numeric"
+        onChangeText={(value) => props.onChange?.([Number(value)])}
+      />
 
       <Dialog.Actions>
         <Dialog.Button
