@@ -141,10 +141,13 @@ function TestItem({ test }: TestItemInterface) {
         <Text style={styles.homework_description} numberOfLines={1}>
           {test.subjectIds}
         </Text>
+        <Text style={styles.homework_description} numberOfLines={1}>
+          Total Marks: {test.total_marks}
+        </Text>
       </View>
       <View style={styles.homework_right}>
-        <Text style={[styles.homework_description]}>
-          Due date: {"\n" + test.date}
+        <Text style={styles.homework_description} numberOfLines={1}>
+          Duration: {test.duration_minutes}
         </Text>
       </View>
     </Pressable>
