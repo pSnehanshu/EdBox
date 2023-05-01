@@ -76,17 +76,14 @@ export function useGetUserGroups(
         const serverGroups =
           await utils.client.school.messaging.fetchGroups.query(input);
 
-        // 4. Return these values
+        // 4. Clear existing groups
+        await clearGroups(db);
+
+        // 5. Return these values
         appendGroups(serverGroups);
 
-        // 5. Save unseen groups
-        const unseenGroups = await fetchUnseenGroupsInfo(
-          db,
-          serverGroups.map((g) => g.identifier),
-          utils,
-        );
-
-        await insertGroups(db, Object.values(unseenGroups));
+        // 6. Save the groups
+        await insertGroups(db, serverGroups);
       } catch (error) {
         console.error(error);
       }
@@ -227,6 +224,18 @@ export async function insertGroups(db: WebSQLDatabase, groups: Group[]) {
     db.transaction(
       (tx) => {
         tx.executeSql(sql, args);
+      },
+      reject,
+      resolve,
+    );
+  });
+}
+
+async function clearGroups(db: WebSQLDatabase) {
+  return new Promise<void>((resolve, reject) => {
+    db.transaction(
+      (tx) => {
+        tx.executeSql("DELETE FROM groups");
       },
       reject,
       resolve,
