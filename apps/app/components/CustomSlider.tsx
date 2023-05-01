@@ -31,7 +31,6 @@ export function CustomSlider<T>(
   props: CustomSelectProps<T> & { children?: React.ReactNode },
 ) {
   const [isVisible, setIsVisible] = useState(false);
-  const [value, setValue] = useState([props.defaultValue] ?? []);
   return (
     <>
       <View style={[{}, props.style]}>
@@ -42,7 +41,7 @@ export function CustomSlider<T>(
           <ListItem>
             <ListItem.Content>
               <ListItem.Title>{props.title}</ListItem.Title>
-              <ListItem.Subtitle>{value}</ListItem.Subtitle>
+              <ListItem.Subtitle>{props.defaultValue}</ListItem.Subtitle>
             </ListItem.Content>
             <ListItem.Chevron />
           </ListItem>
@@ -97,7 +96,7 @@ function ModalSelect<T>(
         />
       </View>
       <TextInput
-        style={{ marginTop: 10, borderWidth: 1, width: "30%" }}
+        style={styles.slider_input}
         value={props.defaultValue.toString()}
         keyboardType="numeric"
         onChangeText={(value) => props.onChange?.([Number(value)])}
@@ -107,7 +106,6 @@ function ModalSelect<T>(
         <Dialog.Button
           title="Done"
           onPress={() => {
-            // props.onChange?.(value);
             props.onClose?.();
           }}
           type="solid"
@@ -144,5 +142,13 @@ const styles = StyleSheet.create({
     marginRight: 10,
     alignItems: "stretch",
     justifyContent: "center",
+  },
+  slider_input: {
+    marginTop: 15,
+    marginLeft: 10,
+    borderWidth: 1,
+    width: "20%",
+    textAlign: "center",
+    borderRadius: 4,
   },
 });

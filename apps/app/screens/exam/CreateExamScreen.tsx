@@ -133,8 +133,56 @@ interface TestItemInterface {
 }
 function TestItem({ test }: TestItemInterface) {
   return (
-    <Pressable style={({ pressed }) => [{ opacity: pressed ? 0.5 : 1 }]}>
-      <Text>{test.name}</Text>
+    <Pressable
+      style={({ pressed }) => [styles.homework, { opacity: pressed ? 0.7 : 1 }]}
+    >
+      <View style={styles.homework_middle}>
+        <Text style={styles.homework_name}>{test.name}</Text>
+        <Text style={styles.homework_description} numberOfLines={1}>
+          {test.subjectIds}
+        </Text>
+      </View>
+      <View style={styles.homework_right}>
+        <Text style={[styles.homework_description]}>
+          Due date: {"\n" + test.date}
+        </Text>
+      </View>
     </Pressable>
   );
 }
+
+const styles = StyleSheet.create({
+  list: {},
+  homework: {
+    paddingVertical: 16,
+    borderBottomColor: "gray",
+    borderBottomWidth: 0.5,
+    flex: 1,
+    flexDirection: "row",
+    height: 80,
+    overflow: "hidden",
+  },
+  homework_middle: {
+    backgroundColor: undefined,
+    flexGrow: 1,
+    paddingLeft: 16,
+    maxWidth: "80%",
+  },
+  homework_name: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  homework_right: {
+    backgroundColor: undefined,
+    paddingRight: 8,
+    marginLeft: "auto",
+  },
+  homework_description: {
+    fontSize: 12,
+    color: "gray",
+  },
+  empty: {
+    height: "100%",
+    justifyContent: "center",
+  },
+});
