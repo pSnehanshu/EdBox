@@ -170,7 +170,7 @@ export default function ({
         style={{
           marginHorizontal: 16,
           flexDirection: "row",
-          justifyContent: "flex-start",
+          justifyContent: "space-between",
         }}
       >
         <Text style={{ textAlignVertical: "center", textAlign: "center" }}>
@@ -218,23 +218,6 @@ export default function ({
           {ChevronIcon}
         </ListItem>
       </Pressable>
-
-      {/* <TextInput
-              style={styles.text_input}
-              onChangeText={setDuration}
-              value={duration}
-              keyboardType="numeric"
-            /> */}
-      {/* <View style={styles.slider_container}>
-              <Slider
-                value={duration}
-                minimumValue={1}
-                maximumValue={10}
-                step={1}
-                trackClickable={true}
-                onValueChange={(value) => console.log(value)}
-              />
-            </View> */}
       <CustomSlider
         title={"Duration(min)"}
         defaultValue={duration}
@@ -245,20 +228,6 @@ export default function ({
         defaultValue={mark}
         onSetValue={setMark}
       />
-      <Text>{duration}</Text>
-
-      {/* <Text>Minutes</Text> */}
-      {/* <View style={{ width: "50%" }}>
-          <Text style={styles.text_input_font}>Total Marks</Text>
-          <View style={{ flexDirection: "row", marginTop: 5 }}>
-            <TextInput
-              style={styles.text_input}
-              onChangeText={setMark}
-              value={mark}
-              keyboardType="numeric"
-            />
-          </View>
-        </View> */}
       <View style={styles.button_container}>
         <Pressable
           style={styles.button}

@@ -81,13 +81,13 @@ export default function CreateExamScreen({
         renderItem={({ item }) => <TestItem test={item} />}
         estimatedItemSize={200}
       />
-      <View style={{ width: "10%" }}>
+      <View style={{ width: "100%" }}>
         {/* new test modal */}
         <Dialog
           isVisible={isTestCreateModal}
           onBackdropPress={() => setIsTestCreateModal(false)}
           animationType="fade"
-          style={{ width: "100%" }}
+          overlayStyle={{ width: "95%" }}
         >
           <Dialog.Title title={"Create Test"} />
           <View style={{ borderBottomWidth: 2 }}></View>
