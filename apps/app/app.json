@@ -1,0 +1,37 @@
+{
+  "expo": {
+    "name": "EdBox",
+    "slug": "SchoolTalk",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "edbox",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/967f9a25-6a24-476d-8d3c-1dc7db20ec80"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.indorhino.edbox.common"
+    },
+    "android": {
+      "package": "com.indorhino.edbox.common",
+      "googleServicesFile": "./google-services.json"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "967f9a25-6a24-476d-8d3c-1dc7db20ec80"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "nativeVersion"
+    }
+  }
+}

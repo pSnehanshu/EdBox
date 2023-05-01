@@ -1,18 +1,22 @@
 {
   "cli": {
-    "version": ">= 3.3.2"
+    "version": ">= 3.8.1"
   },
   "build": {
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "credentialsSource": "local"
+      "credentialsSource": "local",
+      "channel": "development"
     },
     "preview": {
       "distribution": "internal",
-      "credentialsSource": "local"
+      "credentialsSource": "local",
+      "channel": "preview"
     },
-    "production": {}
+    "production": {
+      "channel": "production"
+    }
   },
   "submit": {
     "production": {}

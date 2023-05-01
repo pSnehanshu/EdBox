@@ -1,25 +1,21 @@
 // This screen shows a time line with the exams and class tests
 
 import React, { useMemo, useState } from "react";
-import {
-  Pressable,
-  SafeAreaView,
-  StyleProp,
-  StyleSheet,
-  ViewStyle,
-} from "react-native";
+import { SafeAreaView, StyleSheet } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
 import type { ExamItem } from "schooltalk-shared/types";
 import _ from "lodash";
 import { format, parseISO } from "date-fns";
 import { ListItem, Divider } from "@rneui/themed";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { List, Text, View } from "../../components/Themed";
+import { List, View } from "../../components/Themed";
 import { trpc } from "../../utils/trpc";
 import useColorScheme from "../../utils/useColorScheme";
 import { TestComp } from "../../components/TestComp";
-import { useCurrentUser } from "../../utils/auth";
-import { getUserRoleHierarchical, StaticRole } from "schooltalk-shared/misc";
+import { StaticRole } from "schooltalk-shared/misc";
+import { Banner } from "../../components/Banner";
+import { LottieAnimation } from "../../components/LottieAnimation";
+import { useConfig } from "../../utils/config";
 
 const ExamComp: React.FC<{
   exam: Extract<ExamItem, { type: "exam" }>["item"];
@@ -81,33 +77,42 @@ const ExamComp: React.FC<{
 };
 
 const ExamListScreen: React.FC = () => {
-  const { user } = useCurrentUser();
-  const hierarchicalRole = getUserRoleHierarchical(user);
+  const config = useConfig();
 
   const query =
-    hierarchicalRole === StaticRole.student
+    config.activeStaticRole === StaticRole.student
       ? trpc.school.exam.fetchExamsAndTestsForStudent.useQuery({})
       : trpc.school.exam.fetchExamsAndTestsForTeacher.useQuery({});
 
   if (query.isLoading) return <Spinner visible />;
+  if (query.isError)
+    return <Banner text="Failed to fetch exams!" type="error" />;
 
   return (
     <SafeAreaView style={styles.container}>
-      <List
-        onRefresh={() => query.refetch()}
-        refreshing={query.isFetching}
-        data={query.data}
-        estimatedItemSize={77}
-        keyExtractor={({ item, type }) => `${type}-${item.id}`}
-        ItemSeparatorComponent={Divider}
-        renderItem={({ item }) =>
-          item.type === "exam" ? (
-            <ExamComp exam={item.item} />
-          ) : (
-            <TestComp test={item.item} />
-          )
-        }
-      />
+      {query.data.length > 0 ? (
+        <List
+          onRefresh={() => query.refetch()}
+          refreshing={query.isFetching}
+          data={query.data}
+          estimatedItemSize={77}
+          keyExtractor={({ item, type }) => `${type}-${item.id}`}
+          ItemSeparatorComponent={Divider}
+          renderItem={({ item }) =>
+            item.type === "exam" ? (
+              <ExamComp exam={item.item} />
+            ) : (
+              <TestComp test={item.item} />
+            )
+          }
+        />
+      ) : (
+        <LottieAnimation
+          src={require("../../assets/lotties/person-floating.json")}
+          caption="No upcoming exams"
+          style={styles.no_exam_animation}
+        />
+      )}
     </SafeAreaView>
   );
 };
@@ -120,5 +125,9 @@ const styles = StyleSheet.create({
   },
   examHeading: {
     width: "90%",
+  },
+  no_exam_animation: {
+    height: "100%",
+    justifyContent: "center",
   },
 });

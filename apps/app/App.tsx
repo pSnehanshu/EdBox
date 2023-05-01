@@ -2,7 +2,7 @@ import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, Suspense } from "react";
 import { ThemeProvider } from "@rneui/themed";
 import { trpc } from "./utils/trpc";
 import useCachedResources from "./utils/useCachedResources";
@@ -13,12 +13,13 @@ import useColorScheme, {
 import Navigation from "./navigation";
 import { useSchool } from "./utils/useSchool";
 import { getAuthToken } from "./utils/auth";
-import config from "./config";
+import { useConfig } from "./utils/config";
 import { DBProvider } from "./utils/db";
 import Toast from "react-native-toast-message";
 import SchoolNotFound from "./screens/SchoolNotFound";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { COLOR_SCHEME } from "./utils/async-storage-keys";
+import SchoolSelector from "./components/SchoolSelector";
 
 function AppWithSchool() {
   const colorScheme = useColorScheme();
@@ -32,9 +33,11 @@ function AppWithSchool() {
   );
 }
 
-export default function App() {
+function AppWithConfig() {
   const isLoadingComplete = useCachedResources();
   const [colorScheme, setColorScheme] = useState<"light" | "dark">("light");
+  const config = useConfig();
+  const isSchoolSelected = !!config.schoolId;
 
   useEffect(() => {
     AsyncStorage.getItem(COLOR_SCHEME).then((scheme) => {
@@ -74,12 +77,20 @@ export default function App() {
             <ColorSchemeContext.Provider
               value={{ scheme: colorScheme, change: setAndSaveColorScheme }}
             >
-              <AppWithSchool />
+              {isSchoolSelected ? <AppWithSchool /> : <SchoolSelector />}
             </ColorSchemeContext.Provider>
           </ThemeProvider>
         </QueryClientProvider>
       </trpc.Provider>
       <Toast />
     </DBProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <Suspense fallback={<></>}>
+      <AppWithConfig />
+    </Suspense>
   );
 }

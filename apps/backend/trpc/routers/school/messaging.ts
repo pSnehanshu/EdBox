@@ -5,9 +5,11 @@ import { Group } from "schooltalk-shared/types";
 import prisma from "../../../prisma";
 import { getUserGroups } from "../../../utils/groups";
 import {
+  AutoGroupType,
   convertObjectToOrderedQueryString,
+  GroupDefinition,
   groupIdentifierSchema,
-} from "../../../utils/group-identifier";
+} from "schooltalk-shared/group-identifier";
 import { t, authMiddleware } from "../../trpc";
 
 const messagingRouter = t.router({
@@ -146,7 +148,6 @@ const messagingRouter = t.router({
         where: { id: input.userId },
         select: {
           id: true,
-          is_active: true,
           school_id: true,
         },
       });
@@ -233,7 +234,6 @@ const messagingRouter = t.router({
         where: { id: input.userId },
         select: {
           id: true,
-          is_active: true,
           school_id: true,
         },
       });
@@ -437,19 +437,18 @@ const messagingRouter = t.router({
         });
       }
 
-      if (input.groupIdentifier.gd === "c") {
-        const group = await prisma.customGroup.findFirst({
+      if (input.groupIdentifier.gd === GroupDefinition.custom) {
+        const group = await prisma.customGroup.findUnique({
           where: {
             id: input.groupIdentifier.id,
-            school_id: input.groupIdentifier.sc,
-            is_active: true,
           },
           select: {
             name: true,
+            school_id: true,
           },
         });
 
-        if (!group) {
+        if (!group || group.school_id !== input.groupIdentifier.sc) {
           throw new TRPCError({
             code: "NOT_FOUND",
           });
@@ -460,105 +459,126 @@ const messagingRouter = t.router({
 
       const groupType = input.groupIdentifier.ty;
 
-      if (groupType === "sc") {
-        const school = await prisma.school.findFirst({
+      if (groupType === AutoGroupType.school) {
+        const school = await prisma.school.findUnique({
           where: {
             id: input.groupIdentifier.sc,
-            is_active: true,
           },
           select: {
             name: true,
+            is_active: true,
           },
         });
 
-        if (!school) {
+        if (!school || !school.is_active) {
           throw new TRPCError({
             code: "NOT_FOUND",
           });
         }
 
         return { name: school.name, identifier };
-      } else if (groupType === "cl") {
-        const Class = await prisma.classStd.findUnique({
+      } else if (groupType === AutoGroupType.batch) {
+        const Batch = await prisma.studentsBatch.findUnique({
           where: {
             numeric_id_school_id: {
-              numeric_id: input.groupIdentifier.cl,
+              numeric_id: input.groupIdentifier.ba,
               school_id: input.groupIdentifier.sc,
             },
           },
           select: {
-            name: true,
-            is_active: true,
-          },
-        });
-
-        if (!Class || !Class.is_active) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-          });
-        }
-
-        return {
-          name: `Class ${
-            Class.name ?? input.groupIdentifier.cl
-          } (all sections)`,
-          identifier,
-        };
-      } else if (groupType === "se") {
-        const section = await prisma.classSection.findUnique({
-          where: {
-            numeric_id_class_id_school_id: {
-              class_id: input.groupIdentifier.cl,
-              numeric_id: input.groupIdentifier.se,
-              school_id: input.groupIdentifier.sc,
-            },
-          },
-          include: {
             Class: {
               select: {
                 name: true,
                 numeric_id: true,
-                is_active: true,
               },
             },
           },
         });
 
-        if (!section || !section.Class.is_active) {
+        const Class = Batch?.Class;
+        if (!Class) {
           throw new TRPCError({
             code: "NOT_FOUND",
           });
         }
 
         return {
-          name: `Class ${section.Class.name ?? section.Class.numeric_id} (${
-            section.name ?? input.groupIdentifier.se
+          name: `Class ${Class.name ?? Class.numeric_id} (all sections)`,
+          identifier,
+        };
+      } else if (groupType === AutoGroupType.section) {
+        const Batch = await prisma.studentsBatch.findUnique({
+          where: {
+            numeric_id_school_id: {
+              numeric_id: input.groupIdentifier.ba,
+              school_id: input.groupIdentifier.sc,
+            },
+          },
+          select: {
+            Class: {
+              select: {
+                name: true,
+                numeric_id: true,
+                Sections: {
+                  select: { name: true, numeric_id: true },
+                  where: { numeric_id: input.groupIdentifier.se },
+                },
+              },
+            },
+          },
+        });
+
+        const Class = Batch?.Class;
+        const Section = Class?.Sections?.at(0);
+
+        if (!Section || !Class) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+          });
+        }
+
+        return {
+          name: `Class ${Class.name ?? Class.numeric_id} (${
+            Section.name ?? Section.numeric_id
           })`,
           identifier,
         };
       } else {
-        const [subject, Class] = await Promise.all([
-          prisma.subject.findFirst({
+        const [subject, Batch] = await Promise.all([
+          prisma.subject.findUnique({
             where: {
               id: input.groupIdentifier.su,
-              school_id: input.groupIdentifier.sc,
-              is_active: true,
             },
             select: {
               name: true,
+              school_id: true,
             },
           }),
-          prisma.classStd.findUnique({
+          prisma.studentsBatch.findUnique({
             where: {
               numeric_id_school_id: {
-                numeric_id: input.groupIdentifier.cl,
+                numeric_id: input.groupIdentifier.ba,
                 school_id: input.groupIdentifier.sc,
+              },
+            },
+            select: {
+              Class: {
+                select: {
+                  name: true,
+                  numeric_id: true,
+                },
               },
             },
           }),
         ]);
 
-        if (!subject || !Class) {
+        const Class = Batch?.Class;
+
+        if (
+          !subject ||
+          subject.school_id !== input.groupIdentifier.sc ||
+          !Class
+        ) {
           throw new TRPCError({
             code: "NOT_FOUND",
           });
@@ -607,6 +627,11 @@ const messagingRouter = t.router({
                 Teacher: true,
                 Parent: true,
                 Staff: true,
+              },
+            },
+            Attachments: {
+              include: {
+                File: true,
               },
             },
           },

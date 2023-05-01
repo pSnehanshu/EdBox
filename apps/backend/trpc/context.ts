@@ -46,11 +46,6 @@ export async function createContext({ req, res }: CreateExpressContextOptions) {
     return { session: null };
   }
 
-  // User is inactive, session invalid
-  if (!session.User.is_active) {
-    return { session: null };
-  }
-
   // User is active, but school inactive, session invalid
   if (!session.User.School.is_active) {
     return { session: null };

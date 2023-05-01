@@ -1,11 +1,11 @@
+import _ from "lodash";
 import { useNavigation } from "@react-navigation/native";
 import { format, isToday, isYesterday, isThisYear } from "date-fns";
-import _ from "lodash";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { SafeAreaView, StyleSheet, Pressable, Image } from "react-native";
 import { getDisplayName } from "schooltalk-shared/misc";
-import { Group } from "schooltalk-shared/types";
-import { Message } from "schooltalk-shared/types";
+import type { Group, Message } from "schooltalk-shared/types";
+import type { ListRenderItem } from "@shopify/flash-list";
 import { List, Text, View } from "../../components/Themed";
 import { useGetUserGroups } from "../../utils/groups";
 import { useMessages } from "../../utils/messages-repository";
@@ -48,12 +48,10 @@ function GroupItem(props: GroupItemProps) {
 
   return (
     <Pressable
-      style={({ pressed }) => {
-        return {
-          ...styles.chatGroup,
-          opacity: pressed ? 0.5 : 1,
-        };
-      }}
+      style={({ pressed }) => [
+        styles.chatGroup,
+        { opacity: pressed ? 0.5 : 1 },
+      ]}
       onPress={props.onClick}
     >
       <Image
@@ -65,7 +63,11 @@ function GroupItem(props: GroupItemProps) {
         <Text style={styles.chatGroupLastMessage}>
           {lastMessage
             ? _.truncate(
-                `${getDisplayName(lastMessage.Sender)}: ${lastMessage.text}`,
+                `${
+                  lastMessage.Sender
+                    ? getDisplayName(lastMessage.Sender)
+                    : "User"
+                }: ${lastMessage.text}`,
                 {
                   length: 45,
                 },
@@ -82,7 +84,7 @@ function GroupItem(props: GroupItemProps) {
 
 export default function ChatsListScreen() {
   const navigation = useNavigation();
-  const { isLoading, groups } = useGetUserGroups({
+  const { isLoading, groups, refetch } = useGetUserGroups({
     page: 1,
   });
   const [groupTimeMapping, setGroupTimeMapping] = useState<
@@ -98,24 +100,31 @@ export default function ChatsListScreen() {
     }).reverse();
   }, [groupTimeMapping, groups?.length]);
 
+  const renderItem = useCallback<ListRenderItem<Group>>(
+    ({ item: group }) => (
+      <GroupItem
+        group={group}
+        onClick={() => navigation.navigate("ChatWindow", group)}
+        onMessage={(date) => {
+          setGroupTimeMapping((mapping) => ({
+            ...mapping,
+            [group.identifier]: date,
+          }));
+        }}
+      />
+    ),
+    [],
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <List
         data={sortedGroups}
         keyExtractor={(g) => g.identifier}
-        estimatedItemSize={styles.chatGroup.minHeight}
-        renderItem={({ item: group }) => (
-          <GroupItem
-            group={group}
-            onClick={() => navigation.navigate("ChatWindow", group)}
-            onMessage={(date) => {
-              setGroupTimeMapping((mapping) => ({
-                ...mapping,
-                [group.identifier]: date,
-              }));
-            }}
-          />
-        )}
+        estimatedItemSize={styles.chatGroup.height}
+        renderItem={renderItem}
+        refreshing={isLoading}
+        onRefresh={refetch}
       />
     </SafeAreaView>
   );
@@ -132,7 +141,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.5,
     flex: 1,
     flexDirection: "row",
-    minHeight: 80,
+    height: 80,
+    overflow: "hidden",
   },
   chatGroupIcon: {
     width: 48,
@@ -147,6 +157,7 @@ const styles = StyleSheet.create({
     backgroundColor: undefined,
     flexGrow: 1,
     paddingLeft: 16,
+    maxWidth: "80%",
   },
   chatGroupName: {
     fontSize: 16,
@@ -155,6 +166,7 @@ const styles = StyleSheet.create({
   chatGroupRight: {
     backgroundColor: undefined,
     paddingRight: 8,
+    marginLeft: "auto",
   },
   chatGroupLastMessage: {
     fontSize: 12,

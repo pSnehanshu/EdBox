@@ -1,0 +1,12 @@
+diff --git a/index.d.ts b/index.d.ts
+index 31a5259f0fe14dc1434c57629eb1ef3614b786e5..75ef8fda906f2498b118a00eddebe8c9f564e928 100644
+--- a/index.d.ts
++++ b/index.d.ts
+@@ -20,6 +20,7 @@ declare module "react-native-raw-bottom-sheet" {
+       draggableIcon?: StyleProp<ViewStyle>;
+     };
+     keyboardAvoidingViewEnabled?: boolean;
++    children?: React.ReactNode
+   };
+ 
+   export default class RBSheet extends Component<RBSheetProps> {

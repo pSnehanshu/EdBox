@@ -6,6 +6,7 @@ import { ComponentPropsWithRef } from "react";
 import {
   Text as DefaultText,
   View as DefaultView,
+  ScrollView as DefaultScrollView,
   TextInput as DefaultTextInput,
 } from "react-native";
 import Colors from "../constants/Colors";
@@ -38,6 +39,10 @@ export type ListProps<ItemT> = ThemeProps &
   Omit<FlashList<ItemT>["props"], "style"> & {
     innerRef?: ComponentPropsWithRef<typeof FlashList<ItemT>>["ref"];
   };
+export type ScrollViewProps = ThemeProps &
+  DefaultScrollView["props"] & {
+    innerRef?: ComponentPropsWithRef<typeof DefaultScrollView>["ref"];
+  };
 
 export function Text(props: TextProps) {
   const { style, lightColor, darkColor, ...otherProps } = props;
@@ -54,6 +59,22 @@ export function View(props: ViewProps) {
   );
 
   return <DefaultView style={[{ backgroundColor }, style]} {...otherProps} />;
+}
+
+export function ScrollView(props: ScrollViewProps) {
+  const { style, lightColor, darkColor, ...otherProps } = props;
+  const backgroundColor = useThemeColor(
+    { light: lightColor, dark: darkColor },
+    "background",
+  );
+
+  return (
+    <DefaultScrollView
+      style={[{ backgroundColor }, style]}
+      {...otherProps}
+      ref={props.innerRef}
+    />
+  );
 }
 
 export function List<ItemT = any>(props: ListProps<ItemT>) {

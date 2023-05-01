@@ -32,6 +32,7 @@ export type GapPeriod = {
   start_min: number;
   end_hour: number;
   end_min: number;
+  time: string;
 };
 
 /** Copied from https://github.com/Eugnis/react-native-timeline-flatlist/blob/9f08aaaf50fcd95398e1b47d0d39f063e7d2825f/lib/index.d.ts#L5-L17 */

@@ -20,6 +20,7 @@ import { trpc } from "../../utils/trpc";
 import useColorScheme from "../../utils/useColorScheme";
 import { format, getDate, getMonth, getYear } from "date-fns";
 import { NumberMonthMapping } from "schooltalk-shared/misc";
+import { LottieAnimation } from "../../components/LottieAnimation";
 
 /** Height of a student row */
 const STUDENT_ITEM_HEIGHT: number = 200;
@@ -473,32 +474,42 @@ export default function AttendanceTakerScreen({
           </View>
         }
         ListEmptyComponent={
-          studentsQuery.isFetched ? <Text>No students here!</Text> : null
+          studentsQuery.isFetched ? (
+            <LottieAnimation
+              src={require("../../assets/lotties/tumbleweed-rolling.json")}
+              caption="This class is empty like a desert!"
+              style={styles.empty_animation}
+            />
+          ) : null
         }
         onEndReached={fetchNextPage}
         onEndReachedThreshold={0.5}
         innerRef={studentsList}
       />
 
-      <View style={styles.submitPanel}>
-        <View style={styles.submitPanelStats}>
-          <Text style={{ color: "green" }}>Present: {totalPresent}</Text>
-          <Text style={{ color: "red" }}>Absent: {totalAbsent}</Text>
-          {isAttendanceTaken ? null : <Text>Remaining: {totalRemaining}</Text>}
+      {students.length > 0 && (
+        <View style={styles.submitPanel}>
+          <View style={styles.submitPanelStats}>
+            <Text style={{ color: "green" }}>Present: {totalPresent}</Text>
+            <Text style={{ color: "red" }}>Absent: {totalAbsent}</Text>
+            {isAttendanceTaken ? null : (
+              <Text>Remaining: {totalRemaining}</Text>
+            )}
+          </View>
+          <View style={styles.submitPanelBtn}>
+            {isAttendanceTaken ? null : (
+              <MaterialCommunityIcons.Button
+                name="cloud-upload"
+                size={30}
+                onPress={submitAttendance}
+                style={{ height: "100%" }}
+              >
+                Submit attendance
+              </MaterialCommunityIcons.Button>
+            )}
+          </View>
         </View>
-        <View style={styles.submitPanelBtn}>
-          {isAttendanceTaken ? null : (
-            <MaterialCommunityIcons.Button
-              name="cloud-upload"
-              size={30}
-              onPress={submitAttendance}
-              style={{ height: "100%" }}
-            >
-              Submit attendance
-            </MaterialCommunityIcons.Button>
-          )}
-        </View>
-      </View>
+      )}
     </View>
   );
 }
@@ -570,5 +581,10 @@ const styles = StyleSheet.create({
   studentStatusButton: {
     backgroundColor: "white",
     flexBasis: "50%",
+  },
+  empty_animation: {
+    height: "100%",
+    justifyContent: "center",
+    marginHorizontal: 16,
   },
 });

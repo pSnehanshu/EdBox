@@ -1,38 +1,4 @@
-FROM node:16
-RUN node -v
-
-# Install OpenJDK
-
-RUN apt-get update && \
-    apt-get install default-jre default-jdk -y
-
-# Download and setup Android SDK, and set $ANDROID_HOME var
-
-WORKDIR /tmp
-RUN curl -o cmdline-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-9123335_latest.zip && \
-    unzip cmdline-tools.zip
-
-WORKDIR /home/ubuntu
-
-ENV ANDROID_HOME=/home/ubuntu/android_sdk
-ENV PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
-
-RUN mkdir -p android_sdk/cmdline-tools/latest && \
-    mv /tmp/cmdline-tools/* android_sdk/cmdline-tools/latest && \
-    rm /tmp/cmdline-tools.zip
-
-# Accept all licensed
-RUN yes | sdkmanager --licenses
-
-# Pre-install necessary packages
-RUN sdkmanager --install "patcher;v4" 
-RUN sdkmanager --install "ndk;21.4.7075529" 
-RUN sdkmanager --install "cmake;3.18.1" 
-RUN sdkmanager --install "emulator" 
-RUN sdkmanager --install "platform-tools" 
-RUN sdkmanager --install "tools" 
-RUN sdkmanager --install "build-tools;30.0.3" 
-RUN sdkmanager --install "platforms;android-31"
+FROM ghcr.io/psnehanshu/expo-android-build-docker:main
 
 # Set up project
 
@@ -44,7 +10,7 @@ COPY apps/app/package.json ./apps/app/
 COPY apps/backend/package.json ./apps/backend/
 COPY packages/shared/package.json ./packages/shared/
 
-RUN corepack enable && yarn && npm install -g eas-cli
+RUN corepack enable && yarn
 
 COPY . .
 RUN cd apps/backend && npx prisma generate
@@ -57,7 +23,9 @@ RUN eas whoami
 # Try to build android app
 ARG profile=preview
 ENV PROFILE=$profile
+
 WORKDIR /home/ubuntu/schooltalk/apps/app
 
 CMD export $(grep -v '^#' .env | xargs) && \
+    npx ts-node ./scripts/prepare-build.ts && \
     eas build --platform android --profile $PROFILE --local

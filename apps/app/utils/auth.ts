@@ -7,12 +7,18 @@ import type { User } from "schooltalk-shared/types";
 import { trpc } from "./trpc";
 import { AUTH_TOKEN, AUTH_TOKEN_EXPIRY, USER } from "./async-storage-keys";
 import { useDB } from "./db";
+import { getPushToken } from "./push-notifications";
 
 /**
  * Get the current token
  */
 export async function getAuthToken() {
-  const expiry = await SecureStore.getItemAsync(AUTH_TOKEN_EXPIRY);
+  const expiry = await SecureStore.getItemAsync(AUTH_TOKEN_EXPIRY).catch(
+    (err) => {
+      console.error(err);
+      return null;
+    },
+  );
   if (!expiry) return null;
 
   const expiryDate = parseISO(expiry);
@@ -21,7 +27,10 @@ export async function getAuthToken() {
   // Expired tokens are invalid
   if (isPast(expiryDate)) return null;
 
-  return SecureStore.getItemAsync(AUTH_TOKEN);
+  return SecureStore.getItemAsync(AUTH_TOKEN).catch((err) => {
+    console.error(err);
+    return null;
+  });
 }
 
 export async function setAuthToken(token: string, expiry: Date): Promise<void> {
@@ -41,13 +50,10 @@ export async function setAuthToken(token: string, expiry: Date): Promise<void> {
 export function useSetAuthToken() {
   const utils = trpc.useContext();
 
-  return useCallback<typeof setAuthToken>(
-    async (token: string, expiry: Date) => {
-      await setAuthToken(token, expiry);
-      utils.auth.whoami.invalidate();
-    },
-    [],
-  );
+  return useCallback(async (token: string, expiry: Date) => {
+    await setAuthToken(token, expiry);
+    utils.auth.whoami.invalidate();
+  }, []);
 }
 
 export function useLogout() {
@@ -91,7 +97,22 @@ export function useLogout() {
     },
   });
 
-  return useCallback(() => logoutMutation.mutate(), []);
+  return useCallback(
+    async () =>
+      logoutMutation.mutate({
+        // Submit token to get it removed if possible
+        pushToken: await getPushToken()
+          .then((token) => ({
+            token,
+            type: "expo" as const,
+          }))
+          .catch((err) => {
+            console.error(err);
+            return undefined;
+          }),
+      }),
+    [],
+  );
 }
 
 /**

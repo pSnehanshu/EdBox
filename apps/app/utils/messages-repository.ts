@@ -17,6 +17,7 @@ import { trpc } from "./trpc";
 import _ from "lodash";
 import BigInt from "big-integer";
 import Toast from "react-native-toast-message";
+import type { FilePermissionsInput } from "schooltalk-shared/misc";
 import { navigationRef } from "../navigation/navRef";
 import { fetchUnseenGroupsInfo, insertGroups } from "./groups";
 
@@ -30,6 +31,7 @@ export class MessagesRepository {
   readonly composerObservable = new Subject<{
     groupIdentifier: string;
     text: string;
+    files?: FilePermissionsInput[];
   }>();
 
   constructor(private db: WebSQLDatabase, private socket: SocketClient) {
@@ -37,12 +39,14 @@ export class MessagesRepository {
 
     // Forward group messages to group observers
     this.allMessagesObservable.subscribe((message) => {
-      const groupObservable = this.groupMessagesObservableMap.get(
-        message.group_identifier,
-      );
+      if (message.group_identifier) {
+        const groupObservable = this.groupMessagesObservableMap.get(
+          message.group_identifier,
+        );
 
-      if (groupObservable) {
-        groupObservable.next(message);
+        if (groupObservable) {
+          groupObservable.next(message);
+        }
       }
     });
 
@@ -52,6 +56,7 @@ export class MessagesRepository {
         "messageCreate",
         message.groupIdentifier,
         message.text,
+        message.files ?? [],
         (createdMessage) => {
           this.getGroupMessageObservable(message.groupIdentifier).next(
             createdMessage,
@@ -65,13 +70,15 @@ export class MessagesRepository {
       // TODO: Show group info
       Toast.show({
         type: "info",
-        text1: `Message from ${message.Sender.name}`,
+        text1: `Message from ${message.Sender?.name}`,
         text2: message.text,
         onPress() {
-          navigationRef.navigate("ChatWindow", {
-            identifier: message.group_identifier,
-            name: "",
-          });
+          if (message.group_identifier) {
+            navigationRef.navigate("ChatWindow", {
+              identifier: message.group_identifier,
+              name: "",
+            });
+          }
 
           Toast.hide();
         },
@@ -151,7 +158,9 @@ export class MessagesRepository {
           // TODO: Optimize (read above)
           // Give more preference to `messages` because it is likely fresher
           return _.chain(messages.concat(existingMessages))
-            .sortBy((m) => BigInt(m.sort_key))
+            .sortBy((m) =>
+              BigInt(m.sort_key ?? Math.round(Math.random()).toString()),
+            )
             .sortedUniqBy((m) => m.sort_key)
             .reverse()
             .value();
@@ -225,7 +234,7 @@ export class MessagesRepository {
     }, [groupIdentifier]);
 
     this.useGroupMessageReceived(groupIdentifier, (newMessage) => {
-      setFinalMessages((m) => [newMessage, ...m]);
+      setFinalMessages((m) => [newMessage].concat(m));
     });
 
     return {
@@ -305,7 +314,9 @@ export class MessagesRepository {
         // Fetch all unseen groups, groups that don't exist in the local SQLite
         const groupsToInsert = await fetchUnseenGroupsInfo(
           this.db,
-          messages.map((m) => m.group_identifier),
+          messages
+            .map((m) => m.group_identifier)
+            .filter((iden) => !!iden) as string[],
           trpcUtils,
         );
         // Insert those groups
@@ -318,11 +329,13 @@ export class MessagesRepository {
       const insertMessagesSQL = `INSERT OR REPLACE INTO messages (id, obj, created_at, group_identifier, sort_key) VALUES ${messages
         .map((m) => {
           insertMessagesArgs.push(
-            m.id,
+            // These props will probably never be undefined, but this ?? is here
+            // for safety and/or to satisfy TypeScript.
+            m.id ?? Math.random().toString(),
             JSON.stringify(m),
-            m.created_at,
-            m.group_identifier,
-            m.sort_key,
+            m.created_at ?? new Date().toISOString(),
+            m.group_identifier ?? "",
+            m.sort_key ?? Math.round(Math.random()),
           );
           return "(?,?,?,?,?)";
         })
@@ -343,10 +356,15 @@ export class MessagesRepository {
    * @param groupIdentifier
    * @param text
    */
-  sendMessage(groupIdentifier: string, text: string) {
+  sendMessage(
+    groupIdentifier: string,
+    text: string,
+    files?: FilePermissionsInput[],
+  ) {
     this.composerObservable.next({
       groupIdentifier,
       text,
+      files,
     });
   }
 }

@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { PushTokenType, User } from "@prisma/client";
 import { t, authMiddleware } from "../trpc";
 import { z } from "zod";
 import prisma from "../../prisma";
@@ -11,8 +11,8 @@ import { sendSMS } from "../../utils/sms.service";
 function generateUserOTP(user: Pick<User, "otp" | "otp_expiry">) {
   // Generate OTP
   let otp = (
-    Math.floor(Math.random() * 9 * 10 ** (CONFIG.otpLength - 1)) +
-    10 ** (CONFIG.otpLength - 1)
+    Math.floor(Math.random() * 9 * 10 ** (CONFIG.OTP_LENGTH - 1)) +
+    10 ** (CONFIG.OTP_LENGTH - 1)
   ).toString();
 
   if (user.otp && user.otp_expiry && isFuture(user.otp_expiry)) {
@@ -34,7 +34,7 @@ const authRouter = t.router({
       }),
     )
     .mutation(async ({ input }) => {
-      const user = await prisma.user.findUnique({
+      const user = await prisma.user.findUniqueOrThrow({
         where: {
           email_school_id: {
             email: input.email,
@@ -43,17 +43,10 @@ const authRouter = t.router({
         },
         select: {
           id: true,
-          is_active: true,
           otp: true,
           otp_expiry: true,
         },
       });
-
-      if (!user || !user.is_active) {
-        return;
-      }
-
-      // User exists, and is active
 
       // Generate OTP
       const { otp, expiry } = generateUserOTP(user);
@@ -79,7 +72,7 @@ const authRouter = t.router({
       }),
     )
     .mutation(async ({ input }) => {
-      const user = await prisma.user.findUnique({
+      const user = await prisma.user.findUniqueOrThrow({
         where: {
           phone_isd_code_phone_school_id: {
             phone: input.phoneNumber,
@@ -89,7 +82,6 @@ const authRouter = t.router({
         },
         select: {
           id: true,
-          is_active: true,
           otp: true,
           otp_expiry: true,
           School: {
@@ -99,12 +91,6 @@ const authRouter = t.router({
           },
         },
       });
-
-      if (!user || !user.is_active) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-        });
-      }
 
       // User exists, and is active
 
@@ -129,9 +115,15 @@ const authRouter = t.router({
   submitLoginOTP: t.procedure
     .input(
       z.object({
-        otp: z.string().regex(/^\d+$/).length(CONFIG.otpLength),
+        otp: z.string().regex(/^\d+$/).length(CONFIG.OTP_LENGTH),
         userId: z.string().cuid(),
         schoolId: z.string().cuid(),
+        pushToken: z
+          .object({
+            token: z.string(),
+            type: z.nativeEnum(PushTokenType),
+          })
+          .optional(),
       }),
     )
     .mutation(async ({ input }) => {
@@ -142,14 +134,13 @@ const authRouter = t.router({
         },
         select: {
           id: true,
-          is_active: true,
           otp: true,
           otp_expiry: true,
           school_id: true,
         },
       });
 
-      if (!user || !user.is_active || user.school_id !== input.schoolId) {
+      if (!user || user.school_id !== input.schoolId) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
@@ -162,21 +153,44 @@ const authRouter = t.router({
       }
 
       // OTP correct, create session and remove otp
-      const [session] = await prisma.$transaction([
-        prisma.loginSession.create({
+      const session = await prisma.$transaction(async (tx) => {
+        // Create the session
+        const s = await tx.loginSession.create({
           data: {
             expiry_date: addMonths(new Date(), 2),
             user_id: user.id,
           },
-        }),
-        prisma.user.update({
+        });
+
+        // Remove OTP
+        await tx.user.update({
           where: { id: user.id },
           data: {
             otp: null,
             otp_expiry: null,
           },
-        }),
-      ]);
+        });
+
+        if (input.pushToken) {
+          // Delete existing records of the same token
+          await tx.pushToken.deleteMany({
+            where: {
+              token: input.pushToken.token,
+            },
+          });
+
+          // Create new record
+          await tx.pushToken.create({
+            data: {
+              token: input.pushToken.token,
+              type: input.pushToken.type,
+              user_id: user.id,
+            },
+          });
+        }
+
+        return s;
+      });
 
       return {
         token: session.id,
@@ -188,23 +202,49 @@ const authRouter = t.router({
     .query(({ ctx }) =>
       _.omit(ctx.user, ["password", "otp", "otp_expiry", "School"]),
     ),
-  logout: t.procedure.use(authMiddleware).mutation(async ({ ctx }) => {
-    try {
-      await prisma.loginSession.delete({
-        where: {
-          id: ctx.session.id,
-        },
-      });
+  logout: t.procedure
+    .use(authMiddleware)
+    .input(
+      z.object({
+        pushToken: z
+          .object({
+            token: z.string(),
+            type: z.nativeEnum(PushTokenType),
+          })
+          .optional(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      try {
+        await prisma.$transaction(async (tx) => {
+          // Remove the session
+          await tx.loginSession.delete({
+            where: {
+              id: ctx.session.id,
+            },
+          });
 
-      return null;
-    } catch (error) {
-      console.error("Logout failed", error);
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: (error as any)?.message ?? "Something went wrong",
-      });
-    }
-  }),
+          // Remove push token
+          if (input.pushToken) {
+            await tx.pushToken.deleteMany({
+              where: {
+                token: input.pushToken.token,
+                user_id: ctx.user.id,
+                type: input.pushToken.type,
+              },
+            });
+          }
+        });
+
+        return null;
+      } catch (error) {
+        console.error("Logout failed", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: (error as any)?.message ?? "Something went wrong",
+        });
+      }
+    }),
   rollNumberLoginRequestOTP: t.procedure
     .input(
       z.object({
@@ -222,10 +262,8 @@ const authRouter = t.router({
           roll_num: input.rollnum,
           section: input.section_id,
           CurrentBatch: {
-            is_active: true,
             class_id: input.class_id,
             Class: {
-              is_active: true,
               Sections: {
                 some: {
                   numeric_id: input.section_id,
@@ -233,19 +271,10 @@ const authRouter = t.router({
               },
             },
           },
-          User: {
-            is_active: true,
-          },
+          User: {},
         },
         include: {
           Parents: {
-            where: {
-              Parent: {
-                User: {
-                  is_active: true,
-                },
-              },
-            },
             include: {
               Parent: {
                 include: {

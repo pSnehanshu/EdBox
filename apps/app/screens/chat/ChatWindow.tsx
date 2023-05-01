@@ -1,14 +1,21 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Button, StyleSheet } from "react-native";
+import { useEffect, useMemo, useCallback } from "react";
+import {
+  ActivityIndicator,
+  Button,
+  StyleSheet,
+  ImageBackground,
+} from "react-native";
 import type { ListRenderItem } from "@shopify/flash-list";
-import { List, Text, TextInput, View } from "../../components/Themed";
+import type { FilePermissionsInput } from "schooltalk-shared/misc";
+import { List, Text, View } from "../../components/Themed";
 import { RootStackParamList } from "../../utils/types/common";
-import ChatMessage from "../../components/ChatMessage";
-import { Ionicons } from "@expo/vector-icons";
+import { ChatMessage } from "../../components/ChatMessage";
 import { useMessages } from "../../utils/messages-repository";
 import { Message } from "schooltalk-shared/types";
 import { useGroupInfo } from "../../utils/groups";
+import { MsgComposer } from "../../components/ChatComposer";
+import { useFileUpload } from "../../utils/file-upload";
 
 const renderItem: ListRenderItem<Message> = ({ item }) => (
   <ChatMessage message={item} />
@@ -18,7 +25,6 @@ export default function ChatWindowScreen({
   route: { params: groupInfo },
   navigation,
 }: NativeStackScreenProps<RootStackParamList, "ChatWindow">) {
-  const [messageText, setMessageText] = useState("");
   const messages = useMessages();
   const groupMessages = messages.useFetchGroupMessages(
     groupInfo.identifier,
@@ -67,66 +73,66 @@ export default function ChatWindowScreen({
     }
   }, [groupInfoQuery.data?.name, groupInfo.identifier]);
 
+  const handleMsgSend = useCallback(
+    (msg: string, files?: FilePermissionsInput[]) => {
+      messages.sendMessage(groupInfo.identifier, msg, files);
+    },
+    [groupInfo.identifier, messages.sendMessage],
+  );
+
+  // The handler for attachments
+  const fileUploadHandler = useFileUpload();
+
+  // Effect to delete pending uploads before exiting
+  useEffect(
+    () =>
+      navigation.addListener("beforeRemove", () => {
+        Promise.allSettled(
+          fileUploadHandler.uploadTasks.map((task) => task.cancel()),
+        );
+      }),
+    [navigation, fileUploadHandler.uploadTasks],
+  );
+
   return (
     <View style={styles.container}>
-      {/* TODO: Add a manual load more button to the top of the chat list.
-      this is because sometimes onEndReached is not triggered */}
-      <List
-        inverted
-        data={groupMessages.messages}
-        renderItem={renderItem}
-        onEndReached={groupMessages.fetchNextPage}
-        onEndReachedThreshold={1}
-        estimatedItemSize={80}
-        ListFooterComponent={chatEndElement}
-        ListHeaderComponent={<View style={styles.messagesHeadElement} />}
-      />
-
-      <View style={styles.composer}>
-        <TextInput
-          value={messageText}
-          placeholder="Message"
-          onChangeText={setMessageText}
-          style={styles.composerText}
+      <ImageBackground
+        source={require("../../assets/images/chat-bg.jpg")}
+        style={styles.image}
+      >
+        {/* TODO: Add a manual load more button to the top of the chat list. this is because sometimes onEndReached is not triggered */}
+        <List
+          inverted
+          data={groupMessages.messages}
+          renderItem={renderItem}
+          onEndReached={groupMessages.fetchNextPage}
+          onEndReachedThreshold={1}
+          estimatedItemSize={170}
+          ListFooterComponent={chatEndElement}
+          ListHeaderComponent={<View style={styles.messagesHeadElement} />}
+          contentContainerStyle={{ backgroundColor: "transparent" }}
         />
 
-        <Ionicons.Button
-          name="send"
-          style={styles.composerSendBtn}
-          onPress={() => {
-            if (!messageText.trim()) return;
-            messages.sendMessage(groupInfo.identifier, messageText.trim());
-            setMessageText("");
-          }}
-        >
-          Send
-        </Ionicons.Button>
-      </View>
+        <MsgComposer
+          onSend={handleMsgSend}
+          fileUploadHandler={fileUploadHandler}
+        />
+      </ImageBackground>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  image: {
+    flex: 1,
+    justifyContent: "center",
+  },
   container: {
     flex: 1,
   },
   messagesHeadElement: {
-    height: 16,
-  },
-  composer: {
-    flex: 0,
-    flexDirection: "row",
-    width: "100%",
-    padding: 8,
-    borderTopColor: "gray",
-    borderTopWidth: 0.5,
-  },
-  composerText: {
-    width: "80%",
-    padding: 2,
-  },
-  composerSendBtn: {
-    padding: 8,
+    height: 24,
+    backgroundColor: "transparent",
   },
   chatLoading: {
     padding: 16,
@@ -136,7 +142,13 @@ const styles = StyleSheet.create({
   },
   endOfChat: {
     textAlign: "center",
-    padding: 16,
-    opacity: 0.7,
+    padding: 8,
+    marginBottom: 32,
+    marginHorizontal: 48,
+    marginTop: 8,
+    borderRadius: 8,
+    fontSize: 16,
+    color: "white",
+    backgroundColor: "#1f2c34aa",
   },
 });

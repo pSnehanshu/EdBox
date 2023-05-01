@@ -1,17 +1,20 @@
-name: build-and-push-backend-image
+name: build-deploy-backend
 
 on:
   push:
+    tags:
+      - 'v*'
     branches:
-      - "main"
+      - main
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}_backend
 
 jobs:
-  build-image:
+  build-deploy-image:
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v') && github.ref_type == 'tag'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -37,3 +40,15 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           file: Dockerfile.backend
+
+      - name: Deploy to ElasticBeanstalk
+        uses: einaregilsson/beanstalk-deploy@v21
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: ${{ vars.AWS_EB_APPLICATION_NAME }}
+          environment_name: ${{ vars.AWS_EB_ENVIRONMENT_NAME }}
+          version_label: ${{ github.ref_name }}
+          region: ${{ vars.AWS_REGION }}
+          deployment_package: Dockerrun.aws.json
+          version_description: ${{github.SHA}}

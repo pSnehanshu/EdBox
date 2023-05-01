@@ -44,19 +44,19 @@ const routineRouter = t.router({
     }),
   fetchForTeacher: t.procedure
     .use(teacherMiddleware)
-    .input(z.object({ dateOfAttendance }))
+    .input(
+      z.object({
+        dateOfAttendance,
+        daysOfWeek: z.nativeEnum(DayOfWeek).array().default([]),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       const periods = await prisma.routinePeriod.findMany({
         where: {
           teacher_id: ctx.teacher.id,
           school_id: ctx.user.school_id,
-          is_active: true,
-          Class: {
-            is_active: true,
-          },
-          Subject: {
-            is_active: true,
-          },
+          day_of_week:
+            input.daysOfWeek.length > 0 ? { in: input.daysOfWeek } : undefined,
         },
         include: {
           Class: {
@@ -97,7 +97,12 @@ const routineRouter = t.router({
     }),
   fetchForStudent: t.procedure
     .use(studentMiddleware)
-    .input(z.object({ dateOfAttendance }))
+    .input(
+      z.object({
+        dateOfAttendance,
+        daysOfWeek: z.nativeEnum(DayOfWeek).array().default([]),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       if (typeof ctx.student.section !== "number") {
         throw new TRPCError({
@@ -110,15 +115,6 @@ const routineRouter = t.router({
       const student = await prisma.student.findFirst({
         where: {
           id: ctx.student.id,
-          CurrentBatch: {
-            is_active: true,
-            Class: {
-              is_active: true,
-            },
-          },
-          User: {
-            is_active: true,
-          },
         },
         select: {
           CurrentBatch: {
@@ -129,10 +125,10 @@ const routineRouter = t.router({
                     where: {
                       section_id: ctx.student.section,
                       school_id: ctx.user.school_id,
-                      is_active: true,
-                      Subject: {
-                        is_active: true,
-                      },
+                      day_of_week:
+                        input.daysOfWeek.length > 0
+                          ? { in: input.daysOfWeek }
+                          : undefined,
                     },
                     include: {
                       Subject: {
@@ -211,13 +207,12 @@ const routineRouter = t.router({
           },
         },
         select: {
-          is_active: true,
           class_id: true,
           section_id: true,
         },
       });
 
-      if (!period || !period.is_active) {
+      if (!period) {
         throw new TRPCError({
           code: "NOT_FOUND",
         });

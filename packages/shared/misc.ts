@@ -84,12 +84,17 @@ export function getUserRoleHierarchical(
   return StaticRole.none;
 }
 
+type BareMinimumUser = Pick<
+  UnserializedUser | User,
+  "id" | "teacher_id" | "student_id" | "parent_id" | "staff_id" | "Staff"
+>;
+
 /**
  * Get all the static roles a use poses.
  * @param user
  */
 export function getUserStaticRoles(
-  user: UnserializedUser | User | null | undefined,
+  user: BareMinimumUser | null | undefined,
 ): StaticRole[] {
   if (!user) return [];
 
@@ -123,13 +128,14 @@ export function getUserStaticRoles(
  * Check if the user has the static roles.
  * @param user
  * @param requiredRoles
- * @param mode all: The user must have all the roles; some: The user must have at least one of the roles.
+ * @param mode **all**: The user must have all the roles; **some**: The user must have at least one of the roles.
  */
 export function hasUserStaticRoles(
-  user: UnserializedUser | User | null | undefined,
+  user: BareMinimumUser | null | undefined,
   requiredRoles: StaticRole[],
   mode: "all" | "some",
 ): boolean {
+  if (!user) return false;
   const roles = getUserStaticRoles(user);
 
   if (mode === "all") {
@@ -211,12 +217,18 @@ export function getUserColor(userId: string) {
   for (let i = 0; i < userId.length; i++) {
     hash = userId.charCodeAt(i) + ((hash << 5) - hash);
   }
-  let colour = "#";
+  let color = "#";
   for (let i = 0; i < 3; i++) {
     let value = (hash >> (i * 8)) & 0xff;
-    colour += ("00" + value.toString(16)).slice(-2);
+    color += ("00" + value.toString(16)).slice(-2);
   }
-  return colour;
+
+  // If dark color
+  if (getColorBrightness(color) < 125) {
+    return getNegativeColor(color);
+  }
+
+  return color;
 }
 
 /**
@@ -235,6 +247,32 @@ function hexToRgb(hexColor: string) {
 }
 
 /**
+ * Get brightness value of a color
+ * @param hexColor
+ */
+export function getColorBrightness(hexColor: string) {
+  const rgb = hexToRgb(hexColor);
+  if (!rgb) return 0;
+
+  const { r, g, b } = rgb;
+  // src: http://jsfiddle.net/alex_ball/PXJ2C/
+  const brightness = Math.round((r * 299 + g * 587 + b * 114) / 1000);
+
+  return brightness;
+}
+
+/**
+ * Get negative color of a color (See: https://stackoverflow.com/a/54569758/9990365)
+ * @param hexColor
+ */
+export function getNegativeColor(hexColor: string) {
+  return (
+    "#" +
+    (Number(`0x1${hexColor.slice(1)}`) ^ 0xffffff).toString(16).substring(1)
+  );
+}
+
+/**
  * Given a hex color, returns a color with good contrast
  * @param hexColor Only long form (6 digit) is supported
  * @param defaultColor The color to use, in case invalid hex value is given
@@ -243,15 +281,16 @@ export function getTextColorForGivenBG(
   hexColor: string,
   defaultColor: "black" | "white" = "black",
 ) {
-  const rgb = hexToRgb(hexColor);
-  if (!rgb) return defaultColor;
-
-  const { r, g, b } = rgb;
-
-  // src: http://jsfiddle.net/alex_ball/PXJ2C/
-  const brightness = Math.round((r * 299 + g * 587 + b * 114) / 1000);
+  const brightness = getColorBrightness(hexColor);
   if (brightness > 125) {
     return "black";
   }
   return "white";
 }
+
+export const FilePermissionsInputSchema = z.object({
+  permission_id: z.string().cuid(),
+  file_name: z.string().optional(),
+});
+
+export type FilePermissionsInput = z.infer<typeof FilePermissionsInputSchema>;

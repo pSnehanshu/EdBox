@@ -8,8 +8,8 @@ import { trpc } from "../../utils/trpc";
 import { View } from "../../components/Themed";
 import { addMinutes, format, parseISO } from "date-fns";
 import { ArrayElement } from "schooltalk-shared/types";
-import { hasUserStaticRoles, StaticRole } from "schooltalk-shared/misc";
-import { useCurrentUser } from "../../utils/auth";
+import { StaticRole } from "schooltalk-shared/misc";
+import { useConfig } from "../../utils/config";
 
 const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
   route: {
@@ -17,7 +17,7 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
   },
   navigation,
 }) => {
-  const { user } = useCurrentUser();
+  const config = useConfig();
 
   // Fetch the class and section the user belongs to
   const classAndSectionQuery = trpc.school.people.getStudentClass.useQuery(
@@ -38,12 +38,13 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
     {
       testId,
       periodsFilter:
-        hasUserStaticRoles(user, [StaticRole.student], "all") &&
-        typeof classAndSectionQuery.data?.class_id === "number"
+        config.activeStaticRole === StaticRole.student &&
+        classAndSectionQuery.data?.Class
           ? {
               // Filter out periods (and teachers) if the user is a student
-              class_id: classAndSectionQuery.data.class_id,
-              section_id: classAndSectionQuery.data.section_id ?? undefined,
+              class_id: classAndSectionQuery.data.Class.numeric_id,
+              section_id:
+                classAndSectionQuery.data?.Section?.numeric_id ?? undefined,
             }
           : undefined,
     },
@@ -55,7 +56,7 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
     if (testQuery.isFetched && testQuery.data) {
       const subjectsCount = testQuery.data.Subjects.length;
 
-      const firstSubject = testQuery.data.Subjects.at(0)!;
+      const firstSubject = testQuery.data.Subjects.at(0);
       const firstSubjectName = firstSubject
         ? firstSubject.Subject.name
         : testQuery.data?.subject_name ?? "N/A";
@@ -163,21 +164,23 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
         </Text>
       </Card>
 
-      {test.Exam && (
+      {test.Exam ? (
         <Card>
           <Card.Title>Exam: {test.Exam.name}</Card.Title>
           <Card.Divider />
           <Button
-            onPress={() =>
-              navigation.navigate("ExamDetails", {
-                examId: test.Exam?.id!,
-              })
-            }
+            onPress={() => {
+              if (test.Exam) {
+                navigation.navigate("ExamDetails", {
+                  examId: test.Exam.id,
+                });
+              }
+            }}
           >
             View full schedule
           </Button>
         </Card>
-      )}
+      ) : null}
     </ScrollView>
   );
 };
