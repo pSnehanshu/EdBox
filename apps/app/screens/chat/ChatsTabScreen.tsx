@@ -84,7 +84,7 @@ function GroupItem(props: GroupItemProps) {
 
 export default function ChatsListScreen() {
   const navigation = useNavigation();
-  const { isLoading, groups } = useGetUserGroups({
+  const { isLoading, groups, refetch } = useGetUserGroups({
     page: 1,
   });
   const [groupTimeMapping, setGroupTimeMapping] = useState<
@@ -124,6 +124,7 @@ export default function ChatsListScreen() {
         estimatedItemSize={styles.chatGroup.height}
         renderItem={renderItem}
         refreshing={isLoading}
+        onRefresh={refetch}
       />
     </SafeAreaView>
   );
