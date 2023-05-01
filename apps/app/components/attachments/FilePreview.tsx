@@ -226,11 +226,11 @@ export function FilePreview({
   return (
     <View style={[styles.container, style]}>
       {isIdPassed ? (
-        fileQuery.isLoading ? (
+        fileQuery.isLoading || !fileQuery.data ? (
           <ActivityIndicator />
         ) : (
           <FilePreviewObject
-            file={fileQuery.data!}
+            file={fileQuery.data}
             style={innerStyle}
             actions={actions}
             onPress={(file) => onPress?.(file, index)}
