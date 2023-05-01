@@ -1,12 +1,13 @@
 import { Button, Card } from "@rneui/themed";
 import { ScrollView, StyleSheet } from "react-native";
 import { Text, View } from "../../components/Themed";
-import config from "../../config";
+import { useConfig } from "../../utils/config";
 import { useUpdates } from "../../utils/updates";
 
 const AboutAppScreen: React.FC = () => {
   const { isChecking, isUpdateAvailable, check, update, Updates, logs } =
     useUpdates();
+  const config = useConfig();
 
   return (
     <ScrollView>
