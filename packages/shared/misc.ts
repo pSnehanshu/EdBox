@@ -84,12 +84,17 @@ export function getUserRoleHierarchical(
   return StaticRole.none;
 }
 
+type BareMinimumUser = Pick<
+  UnserializedUser | User,
+  "id" | "teacher_id" | "student_id" | "parent_id" | "staff_id" | "Staff"
+>;
+
 /**
  * Get all the static roles a use poses.
  * @param user
  */
 export function getUserStaticRoles(
-  user: UnserializedUser | User | null | undefined,
+  user: BareMinimumUser | null | undefined,
 ): StaticRole[] {
   if (!user) return [];
 
@@ -126,10 +131,11 @@ export function getUserStaticRoles(
  * @param mode **all**: The user must have all the roles; **some**: The user must have at least one of the roles.
  */
 export function hasUserStaticRoles(
-  user: UnserializedUser | User | null | undefined,
+  user: BareMinimumUser | null | undefined,
   requiredRoles: StaticRole[],
   mode: "all" | "some",
 ): boolean {
+  if (!user) return false;
   const roles = getUserStaticRoles(user);
 
   if (mode === "all") {

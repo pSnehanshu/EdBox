@@ -1,27 +1,39 @@
-import { User } from "@prisma/client";
+import type { User, SchoolStaff } from "@prisma/client";
 import prisma from "../prisma";
 import {
+  AutoGroupType,
   convertObjectToOrderedQueryString,
-  getClassGroupIdentifier,
+  getBatchGroupIdentifier,
   getCustomGroupIdentifier,
   getSchoolGroupIdentifier,
   getSectionGroupIdentifier,
   getSubjectGroupIdentifier,
+  GroupDefinition,
   GroupIdentifier,
 } from "schooltalk-shared/group-identifier";
 import _ from "lodash";
-import { Group } from "schooltalk-shared/types";
+import type { Group } from "schooltalk-shared/types";
+import { hasUserStaticRoles, StaticRole } from "schooltalk-shared/misc";
+
+type UserWithStaff = User & { Staff: SchoolStaff | null };
+type BareMinimumUser = Pick<
+  UserWithStaff,
+  | "id"
+  | "school_id"
+  | "teacher_id"
+  | "student_id"
+  | "parent_id"
+  | "staff_id"
+  | "Staff"
+>;
+
+// The groups membership scheme: https://excalidraw.com/#json=cRlgjemEuBwGZjLrvQJh0,eAzxIdbAY7j98nrgfUPn0g
 
 /**
  * Get list of all automatic groups a user is part of
  * @param user
  */
-async function getAutoGroups(
-  user: Pick<
-    User,
-    "school_id" | "teacher_id" | "student_id" | "parent_id" | "staff_id"
-  >,
-): Promise<Group[]> {
+async function getAutoGroups(user: BareMinimumUser): Promise<Group[]> {
   const school = await prisma.school.findUnique({
     where: { id: user.school_id },
   });
@@ -36,9 +48,16 @@ async function getAutoGroups(
     name: school.name,
   };
 
-  const classGroups: Group[] = [];
+  const bacthGroups: Group[] = [];
   const sectionGroups: Group[] = [];
   const subjectGroups: Group[] = [];
+
+  const isPrincipal = hasUserStaticRoles(
+    user,
+    [StaticRole.principal, StaticRole.vice_principal],
+    "some",
+  );
+  const isStaff = hasUserStaticRoles(user, [StaticRole.staff], "all");
 
   if (user.teacher_id) {
     // Fetch necessary info about the teacher
@@ -47,9 +66,11 @@ async function getAutoGroups(
       include: {
         Periods: {
           include: {
-            Class: true,
-            Subject: true,
+            Class: {
+              include: { Batch: true },
+            },
             Section: true,
+            Subject: true,
           },
         },
       },
@@ -57,33 +78,61 @@ async function getAutoGroups(
 
     if (teacher && teacher.school_id === school.id) {
       // Subject groups
-      _.uniqBy(teacher.Periods, (p) => p.subject_id).forEach(
-        ({ Subject, Class, Section }) => {
-          const className = Class.name ?? Class.numeric_id;
-          const sectionName = Section.name ?? Section.numeric_id;
-
-          // Subject group
-          subjectGroups.push({
-            identifier: getSubjectGroupIdentifier(
-              school.id,
-              Subject.id,
-              Class.numeric_id,
-            ),
-            name: `${Subject.name} - Class ${className}`,
-          });
+      _.uniqBy(teacher.Periods, (p) => `${p.class_id}/${p.subject_id}`).forEach(
+        ({ Subject, Class }) => {
+          // If class doesn't have batch, that means it's empty
+          // Hence no group
+          if (Class.Batch) {
+            // Subject group
+            subjectGroups.push({
+              identifier: getSubjectGroupIdentifier(
+                school.id,
+                Subject.id,
+                Class.Batch.numeric_id,
+              ),
+              name: `${Subject.name} - Class ${Class.name ?? Class.numeric_id}`,
+            });
+          }
         },
       );
 
-      // Class groups
-      _.uniqBy(teacher.Periods, (p) => p.class_id).forEach(({ Class }) => {
-        const className = Class.name ?? Class.numeric_id;
+      // Class groups (batch groups)
+      _.uniqBy(teacher.Periods, (p) => p.Class.Batch?.numeric_id).forEach(
+        ({ Class }) => {
+          // If class doesn't have batch, that means it's empty
+          // Hence no group
+          if (Class.Batch) {
+            // Class group
+            bacthGroups.push({
+              identifier: getBatchGroupIdentifier(
+                school.id,
+                Class.Batch.numeric_id,
+              ),
+              name: `Class ${Class.name ?? Class.numeric_id} (all sections)`,
+            });
+          }
+        },
+      );
 
-        // Class group
-        classGroups.push({
-          identifier: getClassGroupIdentifier(school.id, Class.numeric_id),
-          name: `Class ${className} (all sections)`,
-        });
-      });
+      // Section groups
+      _.uniqBy(teacher.Periods, (p) => `${p.class_id}/${p.section_id}`).forEach(
+        ({ Class, Section }) => {
+          // If class doesn't have batch, that means it's empty
+          // Hence no group
+          if (Class.Batch) {
+            sectionGroups.push({
+              identifier: getSectionGroupIdentifier(
+                school.id,
+                Class.Batch.numeric_id,
+                Section.numeric_id,
+              ),
+              name: `Class ${Class.name ?? Class.numeric_id} (${
+                Section.name ?? Section.numeric_id
+              })`,
+            });
+          }
+        },
+      );
     }
   }
   if (user.student_id) {
@@ -98,22 +147,20 @@ async function getAutoGroups(
       },
     });
 
+    const Batch = student?.CurrentBatch;
+    const Class = Batch?.Class;
+
     // Check if they belong to any class
-    if (
-      student &&
-      student.school_id === school.id &&
-      student.CurrentBatch?.Class
-    ) {
-      // Class group (A student can belong to only one class)
-      const Class = student.CurrentBatch.Class;
+    if (student && student.school_id === school.id && Batch && Class) {
+      // Batch group (A student can belong to only one batch/class)
       const className = Class.name ?? Class.numeric_id;
 
-      classGroups.push({
-        identifier: getClassGroupIdentifier(school.id, Class.numeric_id),
+      bacthGroups.push({
+        identifier: getBatchGroupIdentifier(school.id, Batch.numeric_id),
         name: `Class ${className} (all sections)`,
       });
 
-      // Class group (A student can belong to only one section)
+      // Section group (A student can belong to only one section)
       if (typeof student.section === "number") {
         const section = await prisma.classSection.findUnique({
           where: {
@@ -133,15 +180,13 @@ async function getAutoGroups(
         });
 
         if (section) {
-          const sectionName = section.name ?? section.numeric_id;
-
           sectionGroups.push({
             identifier: getSectionGroupIdentifier(
               school.id,
-              Class.numeric_id,
+              Batch.numeric_id,
               section.numeric_id,
             ),
-            name: `Class ${className} (${sectionName})`,
+            name: `Class ${className} (${section.name ?? section.numeric_id})`,
           });
 
           // Fetch all the subject groups
@@ -152,7 +197,7 @@ async function getAutoGroups(
                 identifier: getSubjectGroupIdentifier(
                   school.id,
                   Subject.id,
-                  Class.numeric_id,
+                  Batch.numeric_id,
                 ),
               });
             },
@@ -162,13 +207,16 @@ async function getAutoGroups(
     }
   }
   if (user.parent_id) {
-    // Fetch the class where their children study
+    // TODO: Fetch the class where their children study
   }
-  if (user.staff_id) {
-    // Fetch staff specific groups
+  if (isPrincipal) {
+    // TODO: Fetch staff specific groups
+  }
+  if (isStaff && user.staff_id) {
+    // TODO: Fetch staff specific groups
   }
 
-  return [schoolGroup, ...classGroups, ...sectionGroups, ...subjectGroups];
+  return [schoolGroup, ...bacthGroups, ...sectionGroups, ...subjectGroups];
 }
 
 /**
@@ -178,10 +226,7 @@ async function getAutoGroups(
  * @returns
  */
 export async function getUserGroups(
-  user: Pick<
-    User,
-    "id" | "school_id" | "teacher_id" | "student_id" | "parent_id" | "staff_id"
-  >,
+  user: BareMinimumUser,
   pagination?: { page: number; limit: number },
 ): Promise<Group[]> {
   // Fetch all custom groups
@@ -239,7 +284,7 @@ export async function getGroupMembers(
   const groupIdentifierString =
     convertObjectToOrderedQueryString(groupIdentifier);
 
-  if (groupIdentifier.gd === "c") {
+  if (groupIdentifier.gd === GroupDefinition.custom) {
     // Fetch all custom groups
     const customGroupMembers = await prisma.customGroupMembers.findMany({
       where: {
@@ -265,7 +310,7 @@ export async function getGroupMembers(
   }
 
   // Fetch auto group members
-  if (groupIdentifier.ty === "sc") {
+  if (groupIdentifier.ty === AutoGroupType.school) {
     // All users are member of school group
     const users = await prisma.user.findMany({
       where: {
@@ -294,11 +339,11 @@ export async function getGroupMembers(
       isAdmin:
         u.Staff?.role === "principal" || u.Staff?.role === "vice_principal",
     }));
-  } else if (groupIdentifier.ty === "cl") {
+  } else if (groupIdentifier.ty === AutoGroupType.batch) {
     // TODO
-  } else if (groupIdentifier.ty === "se") {
+  } else if (groupIdentifier.ty === AutoGroupType.section) {
     // TODO
-  } else if (groupIdentifier.ty === "su") {
+  } else if (groupIdentifier.ty === AutoGroupType.subject) {
     // TODO
   }
 

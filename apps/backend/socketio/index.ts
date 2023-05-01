@@ -1,4 +1,4 @@
-import { Server } from "socket.io";
+import { Server, type Socket } from "socket.io";
 import { Server as HTTPServer } from "http";
 import prisma from "../prisma";
 import { isPast } from "date-fns";
@@ -60,6 +60,7 @@ export default function initSocketIo(server: HTTPServer) {
           User: {
             include: {
               School: true,
+              Staff: true,
             },
           },
         },
@@ -87,22 +88,13 @@ export default function initSocketIo(server: HTTPServer) {
       next();
     })
     .on("connection", async (socket) => {
-      const user = socket.data.user!;
-      const school = socket.data.school!;
-
-      async function joinGroupRooms() {
-        // Join the user to all the group rooms
-        const groups = await getUserGroups(user);
-        const groupIds = groups.map((g) => g.identifier);
-
-        // Join  groups
-        socket.join(groupIds);
-
-        // Finally get all the group identifiers
-        return groupIds;
+      const { user, school } = socket.data;
+      if (!user || !school) {
+        socket.disconnect();
+        return;
       }
 
-      const myGroups = await joinGroupRooms();
+      const myGroups = await joinGroupRooms(user, socket);
 
       socket.on(
         "messageCreate",
@@ -185,4 +177,16 @@ export default function initSocketIo(server: HTTPServer) {
         },
       );
     });
+}
+
+async function joinGroupRooms(user: SocketData["user"], socket: Socket) {
+  // Join the user to all the group rooms
+  const groups = await getUserGroups(user);
+  const groupIds = groups.map((g) => g.identifier);
+
+  // Join  groups
+  socket.join(groupIds);
+
+  // Finally get all the group identifiers
+  return groupIds;
 }
