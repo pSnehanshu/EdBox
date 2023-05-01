@@ -31,7 +31,7 @@ function uploadFileToS3(file: FileUploadTask["file"], s3url: string) {
     (progress) => {
       // Calculate the percentage
       const percentage = Math.ceil(
-        (progress.totalByteSent / progress.totalBytesExpectedToSend) * 100,
+        (progress.totalBytesSent / progress.totalBytesExpectedToSend) * 100,
       );
 
       // Notify the observer about the value

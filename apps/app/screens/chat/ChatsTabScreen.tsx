@@ -1,11 +1,11 @@
+import _ from "lodash";
 import { useNavigation } from "@react-navigation/native";
 import { format, isToday, isYesterday, isThisYear } from "date-fns";
-import _ from "lodash";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { SafeAreaView, StyleSheet, Pressable, Image } from "react-native";
 import { getDisplayName } from "schooltalk-shared/misc";
-import { Group } from "schooltalk-shared/types";
-import { Message } from "schooltalk-shared/types";
+import type { Group, Message } from "schooltalk-shared/types";
+import type { ListRenderItem } from "@shopify/flash-list";
 import { List, Text, View } from "../../components/Themed";
 import { useGetUserGroups } from "../../utils/groups";
 import { useMessages } from "../../utils/messages-repository";
@@ -100,24 +100,30 @@ export default function ChatsListScreen() {
     }).reverse();
   }, [groupTimeMapping, groups?.length]);
 
+  const renderItem = useCallback<ListRenderItem<Group>>(
+    ({ item: group }) => (
+      <GroupItem
+        group={group}
+        onClick={() => navigation.navigate("ChatWindow", group)}
+        onMessage={(date) => {
+          setGroupTimeMapping((mapping) => ({
+            ...mapping,
+            [group.identifier]: date,
+          }));
+        }}
+      />
+    ),
+    [],
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <List
         data={sortedGroups}
         keyExtractor={(g) => g.identifier}
         estimatedItemSize={styles.chatGroup.height}
-        renderItem={({ item: group }) => (
-          <GroupItem
-            group={group}
-            onClick={() => navigation.navigate("ChatWindow", group)}
-            onMessage={(date) => {
-              setGroupTimeMapping((mapping) => ({
-                ...mapping,
-                [group.identifier]: date,
-              }));
-            }}
-          />
-        )}
+        renderItem={renderItem}
+        refreshing={isLoading}
       />
     </SafeAreaView>
   );
