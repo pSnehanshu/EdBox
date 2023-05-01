@@ -45,8 +45,8 @@ export default function ({
     <MaterialCommunityIcons name="chevron-right" color={iconColor} size={16} />
   );
   const [name, setName] = useState<string>("");
-  const [mark, setMark] = useState<string>();
-  const [duration, setDuration] = useState<number>(8);
+  const [mark, setMark] = useState<number>(25);
+  const [duration, setDuration] = useState<number>(30);
   const [isTextModalOpenName, setIsTextModalOpenName] = useState(false);
   const [isTextModalOpenMark, setIsTextModalOpenMark] = useState(false);
   const [selectedClass, setSelectedClass] = useState<ClassWithSections>();
@@ -235,8 +235,17 @@ export default function ({
                 onValueChange={(value) => console.log(value)}
               />
             </View> */}
-      <CustomSlider title={"Duration(min)"} />
-      <CustomSlider title={"Total Marks"} />
+      <CustomSlider
+        title={"Duration(min)"}
+        defaultValue={duration}
+        onSetValue={setDuration}
+      />
+      <CustomSlider
+        title={"Total Marks"}
+        defaultValue={mark}
+        onSetValue={setMark}
+      />
+      <Text>{duration}</Text>
 
       {/* <Text>Minutes</Text> */}
       {/* <View style={{ width: "50%" }}>

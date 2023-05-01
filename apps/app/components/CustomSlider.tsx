@@ -15,36 +15,23 @@ import { Slider } from "@miblanchard/react-native-slider";
 import { List, Text, View } from "./Themed";
 import useColorScheme from "../utils/useColorScheme";
 
-type ItemComponent<T = unknown> = (
-  item: T,
-  isSelected: boolean,
-  index: number,
-) => React.ReactNode;
-
 interface SelectProps<T = unknown> {
   title: string;
-  //   itemComponent?: ItemComponent<T>;
   style?: StyleProp<ViewStyle>;
   isLoading?: boolean;
 }
-
-interface MultiSelectProps<T = unknown> extends SelectProps<T> {
-  // selected?: T[];
-  // onSubmit?: (selected: T[]) => void;
-}
-
 interface SingleSelectProps<T = unknown> extends SelectProps<T> {
-  // selected?: T;
-  // onSubmit?: (selected: T) => void;
+  onSetValue: (value: number) => void;
+  defaultValue: number;
 }
 
-type CustomSelectProps<T> = SingleSelectProps<T> | MultiSelectProps<T>;
+type CustomSelectProps<T> = SingleSelectProps<T>;
 
 export function CustomSlider<T>(
   props: CustomSelectProps<T> & { children?: React.ReactNode },
 ) {
   const [isVisible, setIsVisible] = useState(false);
-
+  const [value, setValue] = useState([props.defaultValue] ?? []);
   return (
     <>
       <View style={[{}, props.style]}>
@@ -55,7 +42,7 @@ export function CustomSlider<T>(
           <ListItem>
             <ListItem.Content>
               <ListItem.Title>{props.title}</ListItem.Title>
-              <ListItem.Subtitle>{"Slide value"}</ListItem.Subtitle>
+              <ListItem.Subtitle>{value}</ListItem.Subtitle>
             </ListItem.Content>
             <ListItem.Chevron />
           </ListItem>
@@ -67,6 +54,8 @@ export function CustomSlider<T>(
           {...props}
           isVisible={isVisible}
           onClose={() => setIsVisible(false)}
+          defaultValue={props.defaultValue ? props.defaultValue : 0}
+          onChange={(value: number[]) => props.onSetValue(value[0])}
         />
       )}
     </>
@@ -76,7 +65,9 @@ export function CustomSlider<T>(
 function ModalSelect<T>(
   props: CustomSelectProps<T> & {
     isVisible: boolean;
+    defaultValue: number;
     onClose?: () => void;
+    onChange?: (value: number[]) => void;
   },
 ) {
   const scheme = useColorScheme();
@@ -93,14 +84,19 @@ function ModalSelect<T>(
       <View style={styles.slider_container}>
         {/* test */}
         <Slider
-          value={2}
+          animateTransitions
+          maximumTrackTintColor="#d3d3d3"
+          minimumTrackTintColor="#1fb28a"
+          thumbTintColor="#1a9274"
+          value={props.defaultValue}
           minimumValue={1}
-          maximumValue={10}
+          maximumValue={70}
           step={1}
           trackClickable={true}
-          onValueChange={(value) => console.log(value)}
+          onValueChange={(value) => props.onChange?.(value)}
         />
       </View>
+      <Text>{props.defaultValue}</Text>
 
       <Dialog.Actions>
         <Dialog.Button
