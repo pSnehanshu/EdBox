@@ -51,21 +51,11 @@ export default function ({
   const [isTextModalOpenMark, setIsTextModalOpenMark] = useState(false);
   const [selectedClass, setSelectedClass] = useState<ClassWithSections>();
   const [selectedSection, setSelectedSection] = useState<Section>();
-  const [dueDate, setDueDate] = useState<any>();
+  const [dueDate, setDueDate] = useState<Date>();
   const [datePickerVisible, setDatePickerVisible] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>();
 
   const subjectsQuery = trpc.school.subject.fetchSubjects.useQuery({});
-
-  // const createTest = trpc.school.exam.createTest.useMutation({
-  //   onSuccess(data) {
-  //     navigation.navigate("CreateExamScreen");
-  //     // set tests
-  //   },
-  //   onError(error, variables, context) {
-  //     console.log(error, variables, context);
-  //   },
-  // });
 
   const classesAndSectionsData =
     trpc.school.class.fetchClassesAndSections.useQuery(
@@ -81,7 +71,7 @@ export default function ({
         },
       },
     );
-  // working as a form
+
   return (
     <View>
       <ModalTextInput
@@ -219,14 +209,18 @@ export default function ({
         </ListItem>
       </Pressable>
       <CustomSlider
-        title={"Duration(min)"}
-        defaultValue={duration}
-        onSetValue={setDuration}
-      />
-      <CustomSlider
         title={"Total Marks"}
         defaultValue={mark}
         onSetValue={setMark}
+        minValue={0}
+        maxValue={100}
+      />
+      <CustomSlider
+        title={"Duration(min)"}
+        defaultValue={duration}
+        onSetValue={setDuration}
+        minValue={0}
+        maxValue={180}
       />
       <View style={styles.button_container}>
         <Pressable
@@ -245,9 +239,8 @@ export default function ({
                 name: name,
                 class_id: selectedClass?.numeric_id,
                 section_id: selectedSection?.numeric_id,
-                date: parseISO(dueDate),
+                date: dueDate,
                 duration_minutes: Number(duration),
-                // for muliple subject make a arry outside
                 subjectIds: [selectedSubject.id],
                 total_marks: Number(mark),
               });

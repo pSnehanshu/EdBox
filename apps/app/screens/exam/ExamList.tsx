@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from "react";
-import { SafeAreaView, StyleSheet } from "react-native";
+import { Alert, SafeAreaView, StyleSheet } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
 import type { ExamItem } from "schooltalk-shared/types";
 import _ from "lodash";
 import { format, parseISO } from "date-fns";
-import { ListItem, Divider, FAB } from "@rneui/themed";
+import { ListItem, Divider, FAB, SpeedDial } from "@rneui/themed";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { List, View } from "../../components/Themed";
@@ -80,6 +80,7 @@ const ExamListScreen: React.FC<
   NativeStackScreenProps<RootStackParamList, "ExamsScreen">
 > = ({ navigation }) => {
   const config = useConfig();
+  const [isActionOpen, setActionOpen] = useState(false);
 
   const isTeacher = config.activeStaticRole === StaticRole.teacher;
   const isStudent = config.activeStaticRole === StaticRole.student;
@@ -131,12 +132,37 @@ const ExamListScreen: React.FC<
         />
       )}
       {isTeacher && (
-        <FAB
-          icon={<Ionicons name="add" size={24} color="white" />}
+        <SpeedDial
+          isOpen={isActionOpen}
+          icon={{ name: "menu", color: "white" }}
+          openIcon={{ name: "close", color: "white" }}
+          onOpen={() => setActionOpen(true)}
+          onClose={() => setActionOpen(false)}
           buttonStyle={{ backgroundColor: "#4E48B2" }}
-          onPress={() => navigation.navigate("CreateExamScreen")}
-          placement="right"
-        />
+        >
+          {[
+            <SpeedDial.Action
+              icon={{ name: "edit", color: "white" }}
+              title="Create Exam"
+              onPress={() => navigation.navigate("CreateExamScreen")}
+              buttonStyle={{ backgroundColor: "#4E48B2" }}
+              key={1}
+            />,
+            <SpeedDial.Action
+              icon={{ name: "edit", color: "white" }}
+              title="Create Test"
+              onPress={() => navigation.navigate("CreateTestScreen")}
+              buttonStyle={{ backgroundColor: "#4E48B2" }}
+              key={3}
+            />,
+          ]}
+        </SpeedDial>
+        // <FAB
+        //   icon={<Ionicons name="add" size={24} color="white" />}
+        //   buttonStyle={{ backgroundColor: "#4E48B2" }}
+        //   onPress={() => navigation.navigate("CreateExamScreen")}
+        //   placement="right"
+        // />
       )}
     </SafeAreaView>
   );

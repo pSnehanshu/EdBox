@@ -38,6 +38,7 @@ import CreateHomeworkScreen from "../screens/homework/CreateHomeworkScreen";
 import DisplayHomeworkScreen from "../screens/homework/DisplayHomeworkScreen";
 import UpdateHomeworkScreen from "../screens/homework/UpdateHomeworkScreen";
 import CreateExamScreen from "../screens/exam/CreateExamScreen";
+import CreateTestScreen from "../screens/exam/CreateTestScreen";
 
 export default function Navigation({
   colorScheme,
@@ -139,6 +140,14 @@ function RootNavigator() {
               <Stack.Screen
                 name="CreateExamScreen"
                 component={CreateExamScreen}
+                options={{
+                  headerShown: true,
+                  title: "Create New Exam",
+                }}
+              />
+              <Stack.Screen
+                name="CreateTestScreen"
+                component={CreateTestScreen}
                 options={{
                   headerShown: true,
                   title: "Create New Exam",
