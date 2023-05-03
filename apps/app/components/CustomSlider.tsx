@@ -23,6 +23,8 @@ interface SelectProps<T = unknown> {
 interface SingleSelectProps<T = unknown> extends SelectProps<T> {
   onSetValue: (value: number) => void;
   defaultValue: number;
+  minValue: number;
+  maxValue: number;
 }
 
 type CustomSelectProps<T> = SingleSelectProps<T>;
@@ -55,6 +57,8 @@ export function CustomSlider<T>(
           onClose={() => setIsVisible(false)}
           defaultValue={props.defaultValue ? props.defaultValue : 0}
           onChange={(value: number[]) => props.onSetValue(value[0])}
+          minValue={props.minValue}
+          maxValue={props.maxValue}
         />
       )}
     </>
@@ -67,6 +71,8 @@ function ModalSelect<T>(
     defaultValue: number;
     onClose?: () => void;
     onChange?: (value: number[]) => void;
+    minValue: number;
+    maxValue: number;
   },
 ) {
   const scheme = useColorScheme();
@@ -81,15 +87,14 @@ function ModalSelect<T>(
       {props.title && <Dialog.Title title={props.title} />}
 
       <View style={styles.slider_container}>
-        {/* test */}
         <Slider
           animateTransitions
           maximumTrackTintColor="#d3d3d3"
           minimumTrackTintColor="#1fb28a"
           thumbTintColor="#1a9274"
           value={props.defaultValue}
-          minimumValue={1}
-          maximumValue={70}
+          minimumValue={props.minValue}
+          maximumValue={props.maxValue}
           step={1}
           trackClickable={true}
           onValueChange={(value) => props.onChange?.(value)}

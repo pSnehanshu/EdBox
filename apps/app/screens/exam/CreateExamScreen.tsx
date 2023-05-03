@@ -66,23 +66,21 @@ export default function CreateExamScreen({
       {/* tests */}
       <View style={{ alignItems: "flex-end", margin: 5 }}>
         <Pressable
-          style={{ borderWidth: 1, padding: 10 }}
+          style={styles.add_button}
           onPress={() => {
             setIsTestCreateModal(true);
           }}
         >
-          <Text>Add Test</Text>
+          <Text>Add Tests</Text>
         </Pressable>
       </View>
 
-      {/* test list */}
       <List
         data={selectedTests}
         renderItem={({ item }) => <TestItem test={item} />}
         estimatedItemSize={200}
       />
       <View style={{ width: "100%" }}>
-        {/* new test modal */}
         <Dialog
           isVisible={isTestCreateModal}
           onBackdropPress={() => setIsTestCreateModal(false)}
@@ -95,13 +93,9 @@ export default function CreateExamScreen({
             isTestCreateModal={isTestCreateModal}
             onClose={() => setIsTestCreateModal(false)}
             onSubmit={(test) => {
-              // TODO: Push `test` to an array
               setTest((tests) => tests.concat(test));
             }}
           />
-          {/* <Dialog.Actions>
-            <Dialog.Button title="Done" onPress={() => {}} type="solid" />
-          </Dialog.Actions> */}
         </Dialog>
       </View>
 
@@ -112,7 +106,8 @@ export default function CreateExamScreen({
             createExam.mutate({
               name: examName,
               tests: [],
-              // type error
+              // tests: selectedTests,
+              //TODO type error
             });
           } else {
             Toast.show({
@@ -129,7 +124,6 @@ export default function CreateExamScreen({
 }
 interface TestItemInterface {
   test: ExamTestSchema;
-  // onRemove?:()=>void;
 }
 function TestItem({ test }: TestItemInterface) {
   return (
@@ -188,4 +182,5 @@ const styles = StyleSheet.create({
     height: "100%",
     justifyContent: "center",
   },
+  add_button: { borderWidth: 1, padding: 10, borderRadius: 5 },
 });
