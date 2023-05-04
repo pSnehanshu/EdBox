@@ -63,7 +63,6 @@ export default function CreateExamScreen({
         </ListItem>
       </Pressable>
 
-      {/* tests */}
       <View style={{ alignItems: "flex-end", margin: 5 }}>
         <Pressable
           style={styles.add_button}
@@ -105,9 +104,7 @@ export default function CreateExamScreen({
           if (examName && selectedTests) {
             createExam.mutate({
               name: examName,
-              tests: [],
-              // tests: selectedTests,
-              //TODO type error
+              tests: selectedTests,
             });
           } else {
             Toast.show({

@@ -308,4 +308,4 @@ export const examTestSchema = z.object({
   total_marks: z.number().int(),
 });
 
-export type ExamTestSchema = z.infer<typeof examTestSchema>;
+export type ExamTestSchema = z.input<typeof examTestSchema>;

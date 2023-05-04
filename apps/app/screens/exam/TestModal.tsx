@@ -44,16 +44,17 @@ export default function ({
   const ChevronIcon = (
     <MaterialCommunityIcons name="chevron-right" color={iconColor} size={16} />
   );
-  const [name, setName] = useState<string>("");
   const [mark, setMark] = useState<number>(25);
   const [duration, setDuration] = useState<number>(30);
   const [isTextModalOpenName, setIsTextModalOpenName] = useState(false);
   const [isTextModalOpenMark, setIsTextModalOpenMark] = useState(false);
   const [selectedClass, setSelectedClass] = useState<ClassWithSections>();
-  const [selectedSection, setSelectedSection] = useState<Section>();
+  const [selectedSection, setSelectedSection] = useState<Section | string>(
+    "All sections",
+  );
   const [dueDate, setDueDate] = useState<Date>();
   const [datePickerVisible, setDatePickerVisible] = useState(false);
-  const [selectedSubject, setSelectedSubject] = useState<Subject | null>();
+  const [selectedSubjects, setSelectedSubjects] = useState<Subject[]>([]);
 
   const subjectsQuery = trpc.school.subject.fetchSubjects.useQuery({});
 
@@ -72,37 +73,10 @@ export default function ({
       },
     );
 
+  const sectionsOptions = ["All sections", ...(selectedClass?.Sections ?? [])];
+
   return (
     <View>
-      <ModalTextInput
-        isVisible={isTextModalOpenName}
-        onClose={() => setIsTextModalOpenName(false)}
-        onChange={setName}
-        defaultValue={name}
-        title="Name"
-      />
-      <Pressable
-        onPress={() => setIsTextModalOpenName(true)}
-        style={({ pressed }) => ({
-          opacity: pressed ? 0.2 : 1,
-        })}
-      >
-        <ListItem>
-          <ListItem.Content>
-            <ListItem.Subtitle style={styles.text_input_font}>
-              Name
-            </ListItem.Subtitle>
-            <ListItem.Title style={{ fontSize: 14 }}>
-              {name || "Empty"}
-            </ListItem.Title>
-          </ListItem.Content>
-          <MaterialCommunityIcons
-            name="chevron-right"
-            color={iconColor}
-            size={16}
-          />
-        </ListItem>
-      </Pressable>
       <CustomSelect
         isSingle
         title="Class"
@@ -119,43 +93,46 @@ export default function ({
       <CustomSelect
         isSingle
         title="Section"
-        items={selectedClass?.Sections}
+        items={sectionsOptions}
         selected={selectedSection}
-        onSubmit={(item) => setSelectedSection(item)}
-        idExtractor={(item) => item.numeric_id}
-        labelExtractor={(item) => `Section ${item.name ?? item.numeric_id}`}
+        onSubmit={setSelectedSection}
+        idExtractor={(item) =>
+          typeof item === "string" ? item : item.numeric_id
+        }
+        labelExtractor={(item) =>
+          typeof item === "string"
+            ? item
+            : `Section ${item.name ?? item.numeric_id}`
+        }
         style={{ flexGrow: 1 }}
       />
 
-      {!multiselectSub ? (
-        <CustomSelect
-          isSingle
+      {multiselectSub ? (
+        <CustomSelect<Subject>
+          isSingle={false}
           title="Subject"
           items={subjectsQuery.data}
-          selected={selectedSubject}
-          onSubmit={(item) => {
-            if (item) setSelectedSubject(item);
-          }}
-          idExtractor={(item) => item?.id ?? 0}
-          labelExtractor={(item) => `${item?.name}`}
+          selected={selectedSubjects}
+          onSubmit={(items) => setSelectedSubjects(items)}
+          idExtractor={(item) => item.id}
+          labelExtractor={(item) => `${item.name}`}
           style={{ flexGrow: 1 }}
           isLoading={subjectsQuery.isLoading}
         />
       ) : (
         <CustomSelect
-          isSingle={false}
+          isSingle
           title="Subject"
           items={subjectsQuery.data}
-          selected={selectedSubject ? [selectedSubject] : []}
-          onSubmit={([item]) => {
-            setSelectedSubject(item);
-          }}
+          selected={selectedSubjects.at(0)}
+          onSubmit={(item) => setSelectedSubjects([item])}
           idExtractor={(item) => item.id}
           labelExtractor={(item) => `${item.name}`}
           style={{ flexGrow: 1 }}
           isLoading={subjectsQuery.isLoading}
         />
       )}
+
       <View
         style={{
           marginHorizontal: 16,
@@ -171,7 +148,7 @@ export default function ({
           // change
           thumbColor="#FFF"
           value={multiselectSub}
-          onValueChange={(value) => setMultiselectSub(value)}
+          onValueChange={setMultiselectSub}
         />
       </View>
       <DatePicker
@@ -227,21 +204,22 @@ export default function ({
           style={styles.button}
           onPress={() => {
             if (
-              name &&
               selectedClass &&
               selectedSection &&
-              selectedSubject &&
+              selectedSubjects &&
               mark &&
               dueDate &&
               duration
             ) {
               onSubmit({
-                name: name,
                 class_id: selectedClass?.numeric_id,
-                section_id: selectedSection?.numeric_id,
-                date: dueDate,
+                section_id:
+                  typeof selectedSection === "string"
+                    ? undefined
+                    : selectedSection?.numeric_id,
+                date: dueDate.toISOString(),
                 duration_minutes: Number(duration),
-                subjectIds: [selectedSubject.id],
+                subjectIds: selectedSubjects.map((s) => s.id),
                 total_marks: Number(mark),
               });
               onClose?.();

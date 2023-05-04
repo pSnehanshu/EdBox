@@ -56,7 +56,7 @@ export function CustomSlider<T>(
           isVisible={isVisible}
           onClose={() => setIsVisible(false)}
           defaultValue={props.defaultValue ? props.defaultValue : 0}
-          onChange={(value: number[]) => props.onSetValue(value[0])}
+          onChange={(value) => props.onSetValue(value[0])}
           minValue={props.minValue}
           maxValue={props.maxValue}
         />
