@@ -3,7 +3,6 @@ import { useCallback, useState } from "react";
 import { List, Text, View } from "../../components/Themed";
 import { trpc } from "../../utils/trpc";
 import { RootStackParamList } from "../../utils/types/common";
-import HomeworkForm from "../../components/HomeworkForm";
 import { Dialog, FAB, ListItem } from "@rneui/themed";
 import { Pressable, StyleProp, StyleSheet } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -11,10 +10,9 @@ import useColorScheme from "../../utils/useColorScheme";
 import { ModalTextInput } from "../../components/ModalTextInput";
 import { Toast } from "react-native-toast-message/lib/src/Toast";
 import TestModal from "./TestModal";
-import { ArrayElement, Subject } from "schooltalk-shared/types";
 import { AnyKindOfDictionary } from "lodash";
 import type { ExamTestSchema } from "schooltalk-shared/misc";
-import { ListRenderItem } from "@shopify/flash-list";
+import { format, compareAsc } from "date-fns";
 
 export default function CreateExamScreen({
   navigation,
@@ -123,23 +121,35 @@ interface TestItemInterface {
   test: ExamTestSchema;
 }
 function TestItem({ test }: TestItemInterface) {
+  const subjectsQuery = trpc.school.subject.fetchSubjects.useQuery({});
+  const selectedSubjects = subjectsQuery.data
+    ?.filter((obj) => test.subjectIds.includes(obj.id))
+    .map((obj) => obj.name);
+
+  console.log(JSON.stringify(selectedSubjects, null, 2));
+
   return (
     <Pressable
-      style={({ pressed }) => [styles.homework, { opacity: pressed ? 0.7 : 1 }]}
+      style={({ pressed }) => ({
+        opacity: pressed ? 0.5 : 1,
+        width: "100%",
+        borderBottomWidth: 1,
+      })}
+      // onPress={() => navigation.push("TestDetails", { testId: test.id })}
     >
-      <View style={styles.homework_middle}>
-        <Text style={styles.homework_name}>{test.name}</Text>
-        <Text style={styles.homework_description} numberOfLines={1}>
-          {test.subjectIds}
-        </Text>
-        <Text style={styles.homework_description} numberOfLines={1}>
-          Total Marks: {test.total_marks}
-        </Text>
-      </View>
-      <View style={styles.homework_right}>
-        <Text style={styles.homework_description} numberOfLines={1}>
-          Duration: {test.duration_minutes}
-        </Text>
+      <View style={styles.testContainer}>
+        <View style={styles.testContainerMain}>
+          <Text style={styles.testName}>
+            {selectedSubjects?.at(0)}
+            {selectedSubjects && selectedSubjects?.length > 1
+              ? ` & ${selectedSubjects?.length - 1} more`
+              : ""}
+          </Text>
+          <Text>{format(new Date(test.date), "MMM dd, yyyy hh:mm aaa")}</Text>
+        </View>
+        <View style={styles.testContainerRight}>
+          <Text>{test.duration_minutes}</Text>
+        </View>
       </View>
     </Pressable>
   );
@@ -180,4 +190,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   add_button: { borderWidth: 1, padding: 10, borderRadius: 5 },
+  testContainer: {
+    padding: 16,
+    flexDirection: "row",
+    flex: 1,
+  },
+  testContainerMain: {
+    flexGrow: 1,
+  },
+  testContainerRight: {},
+  testName: {
+    fontWeight: "bold",
+  },
 });
