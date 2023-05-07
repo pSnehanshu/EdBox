@@ -63,7 +63,12 @@ export default function CreateExamScreen({
 
       <View style={{ alignItems: "flex-end", margin: 5 }}>
         <Pressable
-          style={styles.add_button}
+          style={({ pressed }) => [
+            styles.add_button,
+            {
+              opacity: pressed ? 0.5 : 1,
+            },
+          ]}
           onPress={() => {
             setIsTestCreateModal(true);
           }}
@@ -135,7 +140,6 @@ function TestItem({ test }: TestItemInterface) {
         width: "100%",
         borderBottomWidth: 1,
       })}
-      // onPress={() => navigation.push("TestDetails", { testId: test.id })}
     >
       <View style={styles.testContainer}>
         <View style={styles.testContainerMain}>
