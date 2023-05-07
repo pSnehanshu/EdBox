@@ -179,7 +179,7 @@ export default function ({
             <ListItem.Subtitle>
               {dueDate
                 ? format(dueDate, "MMM dd, yyyy hh:mm aaa")
-                : "No due date"}
+                : "No exam date"}
             </ListItem.Subtitle>
           </ListItem.Content>
           {ChevronIcon}

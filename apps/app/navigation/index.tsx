@@ -150,7 +150,7 @@ function RootNavigator() {
                 component={CreateTestScreen}
                 options={{
                   headerShown: true,
-                  title: "Create New Exam",
+                  title: "Create New Test",
                 }}
               />
             </>

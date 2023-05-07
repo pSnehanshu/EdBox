@@ -30,10 +30,8 @@ export default function CreateTestScreen({
       console.log(error, variables, context);
     },
   });
-  const [isTextModalOpen, setIsTextModalOpen] = useState(false);
-  const [examName, setExamName] = useState("");
+
   const [isTestCreateModal, setIsTestCreateModal] = useState(false);
-  const [selectedTests, setTest] = useState<ExamTestSchema[]>([]);
 
   return (
     <View style={{ height: "100%" }}>
@@ -42,8 +40,7 @@ export default function CreateTestScreen({
           isTestCreateModal={isTestCreateModal}
           onClose={() => setIsTestCreateModal(false)}
           onSubmit={(test) => {
-            // createTest.mutate(test);
-            // todo date type
+            createTest.mutate(test);
           }}
         />
       </View>
