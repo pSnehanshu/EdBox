@@ -131,8 +131,6 @@ function TestItem({ test }: TestItemInterface) {
     ?.filter((obj) => test.subjectIds.includes(obj.id))
     .map((obj) => obj.name);
 
-  console.log(JSON.stringify(selectedSubjects, null, 2));
-
   return (
     <Pressable
       style={({ pressed }) => ({
