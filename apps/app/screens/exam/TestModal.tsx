@@ -28,12 +28,14 @@ interface TestModalProps {
   isTestCreateModal: boolean;
   onClose: () => void;
   onSubmit: (test: ExamTestSchema) => void;
+  testData?: any | null;
 }
 
 export default function ({
   isTestCreateModal,
   onClose,
   onSubmit,
+  testData,
 }: TestModalProps) {
   const navigation = useNavigation();
   const config = useConfig();
@@ -65,10 +67,10 @@ export default function ({
         cacheTime: 0,
         onSuccess(data) {
           // Initialize selected class and section
-          // setSelectedClass((c) => {
-          //   if (c) return c;
-          //   return data.find((d) => d.numeric_id === ?.class_id);
-          // });
+          setSelectedClass((c) => {
+            if (c) return c;
+            return data.find((d) => d.numeric_id === testData?.class_id);
+          });
         },
       },
     );

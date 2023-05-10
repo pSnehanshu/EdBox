@@ -202,6 +202,7 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
               isTestCreateModal={isTestCreateModal}
               onClose={() => setIsTestCreateModal(false)}
               onSubmit={(test) => {}}
+              testData={testQuery.data ?? null}
             />
           </Dialog>
         </View>
