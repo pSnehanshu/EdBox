@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Dialog, ListItem } from "@rneui/themed";
 import React from "react";
 import { Text, TextInput, View } from "../../components/Themed";
@@ -6,6 +6,7 @@ import useColorScheme from "../../utils/useColorScheme";
 import {
   ArrayElement,
   ClassWithSections,
+  ExamTest,
   Section,
   Subject,
 } from "schooltalk-shared/types";
@@ -28,10 +29,10 @@ interface TestModalProps {
   isTestCreateModal: boolean;
   onClose: () => void;
   onSubmit: (test: ExamTestSchema) => void;
-  testData?: any | null;
+  testData?: ExamTest | null;
 }
 
-export default function ({
+export default function TestModal({
   isTestCreateModal,
   onClose,
   onSubmit,
@@ -46,15 +47,17 @@ export default function ({
   const ChevronIcon = (
     <MaterialCommunityIcons name="chevron-right" color={iconColor} size={16} />
   );
-  const [mark, setMark] = useState<number>(25);
-  const [duration, setDuration] = useState<number>(30);
+  const [mark, setMark] = useState(testData?.total_marks);
+  const [duration, setDuration] = useState(testData?.duration_minutes);
   const [isTextModalOpenName, setIsTextModalOpenName] = useState(false);
   const [isTextModalOpenMark, setIsTextModalOpenMark] = useState(false);
   const [selectedClass, setSelectedClass] = useState<ClassWithSections>();
-  const [selectedSection, setSelectedSection] = useState<Section | string>(
-    "All sections",
+  const [selectedSection, setSelectedSection] = useState<
+    Section | string | undefined
+  >("All sections");
+  const [dueDate, setDueDate] = useState(
+    testData?.date_of_exam ? parseISO(testData.date_of_exam) : undefined,
   );
-  const [dueDate, setDueDate] = useState<Date>();
   const [datePickerVisible, setDatePickerVisible] = useState(false);
   const [selectedSubjects, setSelectedSubjects] = useState<Subject[]>([]);
 
@@ -189,14 +192,14 @@ export default function ({
       </Pressable>
       <CustomSlider
         title={"Total Marks"}
-        defaultValue={mark}
+        defaultValue={mark ?? 25}
         onSetValue={setMark}
         minValue={0}
         maxValue={100}
       />
       <CustomSlider
         title={"Duration(min)"}
-        defaultValue={duration}
+        defaultValue={duration ?? 30}
         onSetValue={setDuration}
         minValue={0}
         maxValue={180}

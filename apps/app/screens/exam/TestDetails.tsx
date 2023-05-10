@@ -55,6 +55,16 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
     { enabled: classAndSectionQuery.isFetched },
   );
 
+  const updateTest = trpc.school.exam.updateTest.useMutation({
+    onSuccess(data) {
+      //  close pop up
+      alert("updated");
+    },
+    onError(error, variables, context) {
+      alert(error.message);
+    },
+  });
+
   // Set screen title
   useEffect(() => {
     if (testQuery.isFetched && testQuery.data) {
@@ -201,7 +211,12 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
             <TestModal
               isTestCreateModal={isTestCreateModal}
               onClose={() => setIsTestCreateModal(false)}
-              onSubmit={(test) => {}}
+              onSubmit={(test) => {
+                updateTest.mutate({
+                  id: testQuery.data.id,
+                  data: { ...test },
+                });
+              }}
               testData={testQuery.data ?? null}
             />
           </Dialog>
