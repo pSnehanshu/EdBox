@@ -1,26 +1,16 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useCallback, useState } from "react";
-import { List, Text, View } from "../../components/Themed";
+import { useState } from "react";
+import { View } from "../../components/Themed";
 import { trpc } from "../../utils/trpc";
 import { RootStackParamList } from "../../utils/types/common";
-import HomeworkForm from "../../components/HomeworkForm";
-import { Dialog, FAB, ListItem } from "@rneui/themed";
-import { Pressable, StyleProp, StyleSheet } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { StyleSheet } from "react-native";
 import useColorScheme from "../../utils/useColorScheme";
-import { ModalTextInput } from "../../components/ModalTextInput";
-import { Toast } from "react-native-toast-message/lib/src/Toast";
 import TestModal from "./TestModal";
-import { ArrayElement, Subject } from "schooltalk-shared/types";
-import { AnyKindOfDictionary } from "lodash";
-import type { ExamTestSchema } from "schooltalk-shared/misc";
-import { ListRenderItem } from "@shopify/flash-list";
 
 export default function CreateTestScreen({
   navigation,
 }: NativeStackScreenProps<RootStackParamList, "CreateTestScreen">) {
   const scheme = useColorScheme();
-  const iconColor = scheme === "dark" ? "white" : "black";
 
   const createTest = trpc.school.exam.createTest.useMutation({
     onSuccess(data) {

@@ -1,18 +1,17 @@
+import { format } from "date-fns";
+import { useState } from "react";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useCallback, useState } from "react";
 import { List, Text, View } from "../../components/Themed";
 import { trpc } from "../../utils/trpc";
 import { RootStackParamList } from "../../utils/types/common";
 import { Dialog, FAB, ListItem } from "@rneui/themed";
-import { Pressable, StyleProp, StyleSheet } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import useColorScheme from "../../utils/useColorScheme";
 import { ModalTextInput } from "../../components/ModalTextInput";
 import { Toast } from "react-native-toast-message/lib/src/Toast";
 import TestModal from "./TestModal";
-import { AnyKindOfDictionary } from "lodash";
 import type { ExamTestSchema } from "schooltalk-shared/misc";
-import { format, compareAsc } from "date-fns";
 
 export default function CreateExamScreen({
   navigation,
