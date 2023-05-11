@@ -88,6 +88,7 @@ const examRouter = t.router({
                           User: true,
                         },
                       },
+                      Class: true,
                     },
                   },
                 },
