@@ -63,6 +63,15 @@ export default function TestModal({
 
   const subjectsQuery = trpc.school.subject.fetchSubjects.useQuery({});
 
+  useEffect(() => {
+    if (testData?.section_id)
+      setSelectedSection(
+        selectedClass?.Sections.find(
+          (d) => d.numeric_id === testData?.section_id,
+        ),
+      );
+  }, [selectedClass, testData?.section_id]);
+
   const classesAndSectionsData =
     trpc.school.class.fetchClassesAndSections.useQuery(
       { schoolId: config.schoolId },
