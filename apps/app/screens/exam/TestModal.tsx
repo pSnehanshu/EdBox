@@ -47,8 +47,8 @@ export default function TestModal({
   const ChevronIcon = (
     <MaterialCommunityIcons name="chevron-right" color={iconColor} size={16} />
   );
-  const [mark, setMark] = useState(testData?.total_marks);
-  const [duration, setDuration] = useState(testData?.duration_minutes);
+  const [mark, setMark] = useState(testData?.total_marks ?? 25);
+  const [duration, setDuration] = useState(testData?.duration_minutes ?? 30);
   const [isTextModalOpenName, setIsTextModalOpenName] = useState(false);
   const [isTextModalOpenMark, setIsTextModalOpenMark] = useState(false);
   const [selectedClass, setSelectedClass] = useState<ClassWithSections>();
@@ -61,7 +61,7 @@ export default function TestModal({
   const [datePickerVisible, setDatePickerVisible] = useState(false);
   const [selectedSubjects, setSelectedSubjects] = useState<Subject[]>([]);
 
-  const subjectsQuery = trpc.school.subject.fetchSubjects.useQuery({});
+  const subjectsQuery = trpc.school.subject.fetchSubjects.useQuery({}, {});
 
   useEffect(() => {
     if (testData?.section_id)
@@ -71,6 +71,16 @@ export default function TestModal({
         ),
       );
   }, [selectedClass, testData?.section_id]);
+
+  useEffect(() => {
+    let tempSubjectArray = testData?.Subjects.map((e) => {
+      return e.Subject.id;
+    });
+    if (subjectsQuery.data)
+      setSelectedSubjects(
+        subjectsQuery?.data.filter((obj) => tempSubjectArray?.includes(obj.id)),
+      );
+  }, [subjectsQuery.data]);
 
   const classesAndSectionsData =
     trpc.school.class.fetchClassesAndSections.useQuery(
@@ -215,7 +225,12 @@ export default function TestModal({
       />
       <View style={styles.button_container}>
         <Pressable
-          style={styles.button}
+          style={({ pressed }) => [
+            styles.button,
+            {
+              opacity: pressed ? 0.5 : 1,
+            },
+          ]}
           onPress={() => {
             if (
               selectedClass &&

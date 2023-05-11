@@ -57,8 +57,7 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
 
   const updateTest = trpc.school.exam.updateTest.useMutation({
     onSuccess(data) {
-      //  close pop up
-      alert("updated");
+      navigation.replace("ExamsScreen");
     },
     onError(error, variables, context) {
       alert(error.message);
