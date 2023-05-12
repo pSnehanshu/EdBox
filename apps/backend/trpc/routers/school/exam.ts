@@ -197,18 +197,14 @@ const examRouter = t.router({
           (s) => !input.data.subjectIds?.includes(s.subject_id),
         );
 
-        await Promise.all(
-          subjectsToRemove.map((s) =>
-            tx.testSubjectMapping.delete({
-              where: {
-                test_id_subject_id: {
-                  subject_id: s.subject_id,
-                  test_id: test.id,
-                },
-              },
-            }),
-          ),
-        );
+        await tx.testSubjectMapping.deleteMany({
+          where: {
+            test_id: test.id,
+            subject_id: {
+              in: subjectsToRemove.map((s) => s.subject_id),
+            },
+          },
+        });
 
         // Attach the subjects not attached already
         const subjectsToAdd = input.data.subjectIds.filter(
