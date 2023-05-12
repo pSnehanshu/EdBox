@@ -159,12 +159,25 @@ const examRouter = t.router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      // First fetch all subjects
+      const test = await prisma.examTest.findFirst({
+        where: {
+          id: input.id,
+          school_id: ctx.user.school_id,
+        },
+        include: {
+          Subjects: true,
+        },
+      });
+
+      if (!test || test.school_id !== ctx.user.school_id)
+        throw new TRPCError({ code: "NOT_FOUND" });
+
+      // Perform update inside a transaction
       await prisma.$transaction(async (tx) => {
-        await tx.examTest.updateMany({
-          where: {
-            id: input.id,
-            school_id: ctx.user.school_id,
-          },
+        // Update general details
+        await tx.examTest.update({
+          where: { id: test.id },
           data: {
             subject_name: input.data.name,
             date_of_exam: input.data.date,
@@ -172,25 +185,8 @@ const examRouter = t.router({
           },
         });
 
-        if (!input.data.subjectIds) return;
-
-        // First fetch all subjects
-        const test = await tx.examTest.findFirst({
-          where: {
-            id: input.id,
-            school_id: ctx.user.school_id,
-          },
-          include: {
-            Subjects: true,
-          },
-        });
-
-        if (!test) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Test not found",
-          });
-        }
+        // If no updates to subjects, skip
+        if (!input.data.subjectIds || input.data.subjectIds.length < 1) return;
 
         // Remove subjects that are not included in input
         const subjectsToRemove = test.Subjects.filter(
