@@ -212,7 +212,7 @@ const examRouter = t.router({
 
         // Attach the subjects not attached already
         const subjectsToAdd = input.data.subjectIds.filter(
-          (id) => test.Subjects.findIndex((s) => s.subject_id === id) >= 0,
+          (id) => test.Subjects.findIndex((s) => s.subject_id === id) < 0,
         );
 
         await tx.testSubjectMapping.createMany({
