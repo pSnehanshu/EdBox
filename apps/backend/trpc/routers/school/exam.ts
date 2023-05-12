@@ -220,6 +220,7 @@ const examRouter = t.router({
             subject_id,
             test_id: test.id,
           })),
+          skipDuplicates: true,
         });
       });
     }),
