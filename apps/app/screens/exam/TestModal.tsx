@@ -73,6 +73,9 @@ export default function TestModal({
     let tempSubjectArray = testData?.Subjects.map((e) => {
       return e.Subject.id;
     });
+    if (tempSubjectArray && tempSubjectArray?.length > 1) {
+      setMultiselectSub(true);
+    }
     if (subjectsQuery.data)
       setSelectedSubjects(
         subjectsQuery?.data.filter((obj) => tempSubjectArray?.includes(obj.id)),
