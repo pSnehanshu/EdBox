@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Alert, SafeAreaView, StyleSheet } from "react-native";
+import { Alert, Pressable, SafeAreaView, StyleSheet } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
 import type { ExamItem } from "schooltalk-shared/types";
 import _ from "lodash";
@@ -7,7 +7,7 @@ import { format, parseISO } from "date-fns";
 import { ListItem, Divider, FAB, SpeedDial } from "@rneui/themed";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { List, View } from "../../components/Themed";
+import { List, Text, View } from "../../components/Themed";
 import { trpc } from "../../utils/trpc";
 import useColorScheme from "../../utils/useColorScheme";
 import { TestComp } from "../../components/TestComp";
@@ -65,6 +65,30 @@ const ExamComp: React.FC<{
         />
       }
     >
+      <ListItem bottomDivider>
+        <ListItem.Content style={styles.edit_delete_container}>
+          <Pressable
+            style={({ pressed }) => [
+              styles.edit_delete_button,
+              {
+                opacity: pressed ? 0.5 : 1,
+              },
+            ]}
+          >
+            <Text style={{ textAlign: "center" }}>Delete</Text>
+          </Pressable>
+          <Pressable
+            style={({ pressed }) => [
+              styles.edit_delete_button,
+              {
+                opacity: pressed ? 0.5 : 1,
+              },
+            ]}
+          >
+            <Text style={{ textAlign: "center" }}>Edit</Text>
+          </Pressable>
+        </ListItem.Content>
+      </ListItem>
       {Tests.map((test) => (
         <ListItem key={test.id} bottomDivider>
           <ListItem.Content>
@@ -181,4 +205,11 @@ const styles = StyleSheet.create({
     height: "100%",
     justifyContent: "center",
   },
+  edit_delete_container: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    textAlign: "center",
+  },
+  edit_delete_button: { borderWidth: 1, width: "50%", paddingVertical: 10 },
 });
