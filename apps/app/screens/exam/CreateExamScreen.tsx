@@ -6,7 +6,7 @@ import { trpc } from "../../utils/trpc";
 import { RootStackParamList } from "../../utils/types/common";
 import { Dialog, FAB, ListItem } from "@rneui/themed";
 import { Pressable, StyleSheet } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import useColorScheme from "../../utils/useColorScheme";
 import { ModalTextInput } from "../../components/ModalTextInput";
 import { Toast } from "react-native-toast-message/lib/src/Toast";
@@ -72,10 +72,16 @@ export default function CreateExamScreen({
             setIsTestCreateModal(true);
           }}
         >
-          <Text>Add Tests</Text>
+          <Text
+            style={{
+              color: "white",
+            }}
+          >
+            Add Test
+          </Text>
         </Pressable>
       </View>
-
+      <Text style={styles.text}>Test List</Text>
       <List
         data={selectedTests}
         renderItem={({ item }) => <TestItem test={item} />}
@@ -115,7 +121,13 @@ export default function CreateExamScreen({
             });
           }
         }}
-        icon={<MaterialCommunityIcons name="check" size={24} color={"white"} />}
+        icon={
+          <MaterialIcons
+            name={examName ? "check" : "block"}
+            size={24}
+            color={"white"}
+          />
+        }
         placement="right"
       />
     </View>
@@ -190,7 +202,12 @@ const styles = StyleSheet.create({
     height: "100%",
     justifyContent: "center",
   },
-  add_button: { borderWidth: 1, padding: 10, borderRadius: 5 },
+  add_button: {
+    marginHorizontal: 18,
+    padding: 10,
+    borderRadius: 5,
+    backgroundColor: "#4E48B2",
+  },
   testContainer: {
     padding: 16,
     flexDirection: "row",
@@ -202,5 +219,10 @@ const styles = StyleSheet.create({
   testContainerRight: {},
   testName: {
     fontWeight: "bold",
+  },
+  text: {
+    marginHorizontal: 18,
+    paddingBottom: 6,
+    borderBottomWidth: 1,
   },
 });
