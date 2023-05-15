@@ -64,6 +64,15 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
     },
   });
 
+  const deleteTest = trpc.school.exam.deleteTest.useMutation({
+    onSuccess(data) {
+      navigation.replace("ExamsScreen");
+    },
+    onError(error, variables, context) {
+      alert(error.message);
+    },
+  });
+
   // Set screen title
   useEffect(() => {
     if (testQuery.isFetched && testQuery.data) {
@@ -134,6 +143,7 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
 
   return (
     <View style={styles.container}>
+      <Spinner visible={updateTest.isLoading || deleteTest.isLoading} />
       <ScrollView>
         <Card>
           <Card.Title>Subject{test.Subjects.length > 1 ? "s" : ""}</Card.Title>
@@ -250,7 +260,7 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
                   text: "Delete",
                   style: "destructive",
                   onPress(value) {
-                    // Delete
+                    deleteTest.mutate({ id: testId });
                   },
                 },
                 {
