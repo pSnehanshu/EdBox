@@ -4,7 +4,7 @@ import Spinner from "react-native-loading-spinner-overlay";
 import type { ExamItem } from "schooltalk-shared/types";
 import _ from "lodash";
 import { format, parseISO } from "date-fns";
-import { ListItem, Divider, FAB, SpeedDial } from "@rneui/themed";
+import { ListItem, Divider, FAB, SpeedDial, Dialog } from "@rneui/themed";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { List, Text, View } from "../../components/Themed";
@@ -16,10 +16,13 @@ import { Banner } from "../../components/Banner";
 import { LottieAnimation } from "../../components/LottieAnimation";
 import { useConfig } from "../../utils/config";
 import { RootStackParamList } from "../../utils/types/common";
+import ExamModal from "./ExamModal";
 
 const ExamComp: React.FC<{
   exam: Extract<ExamItem, { type: "exam" }>["item"];
-}> = ({ exam }) => {
+  setIsExamUpdateModal?: (value: boolean) => void;
+  setExamId?: (value: string) => void;
+}> = ({ exam, setIsExamUpdateModal, setExamId }) => {
   const { Tests } = exam;
   const [isExpanded, setExpanded] = useState(false);
   const scheme = useColorScheme();
@@ -84,6 +87,10 @@ const ExamComp: React.FC<{
                 opacity: pressed ? 0.5 : 1,
               },
             ]}
+            onPress={() => {
+              setIsExamUpdateModal && setIsExamUpdateModal(true);
+              setExamId && setExamId(exam.id);
+            }}
           >
             <Text style={{ textAlign: "center" }}>Edit</Text>
           </Pressable>
@@ -105,9 +112,21 @@ const ExamListScreen: React.FC<
 > = ({ navigation }) => {
   const config = useConfig();
   const [isActionOpen, setActionOpen] = useState(false);
+  const [isExamUpdateModal, setIsExamUpdateModal] = useState(false);
+  const [examId, setExamId] = useState<string | null>();
 
   const isTeacher = config.activeStaticRole === StaticRole.teacher;
   const isStudent = config.activeStaticRole === StaticRole.student;
+
+  const updateExam = trpc.school.exam.updateExam.useMutation({
+    onSuccess(data) {
+      setIsExamUpdateModal(false);
+      // reloade
+    },
+    onError(error, variables, context) {
+      alert(error.message);
+    },
+  });
 
   const studentQuery = trpc.school.exam.fetchExamsAndTestsForStudent.useQuery(
     {},
@@ -142,7 +161,11 @@ const ExamListScreen: React.FC<
           ItemSeparatorComponent={Divider}
           renderItem={({ item }) =>
             item.type === "exam" ? (
-              <ExamComp exam={item.item} />
+              <ExamComp
+                exam={item.item}
+                setIsExamUpdateModal={setIsExamUpdateModal}
+                setExamId={setExamId}
+              />
             ) : (
               <TestComp test={item.item} />
             )
@@ -181,13 +204,27 @@ const ExamListScreen: React.FC<
             />,
           ]}
         </SpeedDial>
-        // <FAB
-        //   icon={<Ionicons name="add" size={24} color="white" />}
-        //   buttonStyle={{ backgroundColor: "#4E48B2" }}
-        //   onPress={() => navigation.navigate("CreateExamScreen")}
-        //   placement="right"
-        // />
       )}
+      <Dialog
+        isVisible={true}
+        onBackdropPress={() => setIsExamUpdateModal(false)}
+        animationType="fade"
+        overlayStyle={{ width: "95%", height: "80%" }}
+      >
+        <Dialog.Title title={"Update Exam"} />
+        <View style={{ borderBottomWidth: 2 }}></View>
+        <View style={{ height: "95%" }}>
+          <ExamModal
+            onSubmit={(examName, tests) => {
+              if (examId)
+                updateExam.mutate({
+                  id: examId,
+                  name: examName,
+                });
+            }}
+          />
+        </View>
+      </Dialog>
     </SafeAreaView>
   );
 };
