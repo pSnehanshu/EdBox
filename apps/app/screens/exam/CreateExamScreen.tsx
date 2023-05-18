@@ -36,6 +36,7 @@ export default function CreateExamScreen({
   return (
     <View style={{ height: "100%" }}>
       <ExamModal
+        displayAddButton={true}
         onSubmit={(examName, tests) => {
           createExam.mutate({
             name: examName,

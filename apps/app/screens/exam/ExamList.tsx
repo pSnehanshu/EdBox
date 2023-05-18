@@ -21,8 +21,8 @@ import ExamModal from "./ExamModal";
 const ExamComp: React.FC<{
   exam: Extract<ExamItem, { type: "exam" }>["item"];
   setIsExamUpdateModal?: (value: boolean) => void;
-  setExamId?: (value: string) => void;
-}> = ({ exam, setIsExamUpdateModal, setExamId }) => {
+  setExam?: (value: Extract<ExamItem, { type: "exam" }>["item"]) => void;
+}> = ({ exam, setIsExamUpdateModal, setExam }) => {
   const { Tests } = exam;
   const [isExpanded, setExpanded] = useState(false);
   const scheme = useColorScheme();
@@ -89,7 +89,7 @@ const ExamComp: React.FC<{
             ]}
             onPress={() => {
               setIsExamUpdateModal && setIsExamUpdateModal(true);
-              setExamId && setExamId(exam.id);
+              setExam && setExam(exam);
             }}
           >
             <Text style={{ textAlign: "center" }}>Edit</Text>
@@ -113,7 +113,8 @@ const ExamListScreen: React.FC<
   const config = useConfig();
   const [isActionOpen, setActionOpen] = useState(false);
   const [isExamUpdateModal, setIsExamUpdateModal] = useState(false);
-  const [examId, setExamId] = useState<string | null>();
+  const [exam, setExam] =
+    useState<Extract<ExamItem, { type: "exam" }>["item"]>();
 
   const isTeacher = config.activeStaticRole === StaticRole.teacher;
   const isStudent = config.activeStaticRole === StaticRole.student;
@@ -164,7 +165,7 @@ const ExamListScreen: React.FC<
               <ExamComp
                 exam={item.item}
                 setIsExamUpdateModal={setIsExamUpdateModal}
-                setExamId={setExamId}
+                setExam={setExam}
               />
             ) : (
               <TestComp test={item.item} />
@@ -215,13 +216,15 @@ const ExamListScreen: React.FC<
         <View style={{ borderBottomWidth: 2 }}></View>
         <View style={{ height: "95%" }}>
           <ExamModal
+            displayAddButton={false}
             onSubmit={(examName, tests) => {
-              if (examId)
+              if (exam)
                 updateExam.mutate({
-                  id: examId,
+                  id: exam.id,
                   name: examName,
                 });
             }}
+            examData={exam}
           />
         </View>
       </Dialog>

@@ -23,20 +23,26 @@ import { Toast } from "react-native-toast-message/lib/src/Toast";
 import { CustomSlider } from "../../components/CustomSlider";
 import { ModalTextInput } from "../../components/ModalTextInput";
 import TestModal from "./TestModal";
+import type { ExamItem } from "schooltalk-shared/types";
 
 interface ExamModalProps {
+  displayAddButton: boolean;
   onSubmit: (name: string, tests: ExamTestSchema[]) => void;
-  testData?: ExamTest | null;
+  examData?: Extract<ExamItem, { type: "exam" }>["item"];
 }
 
-export default function ExamModal({ onSubmit, testData }: ExamModalProps) {
+export default function ExamModal({
+  displayAddButton,
+  onSubmit,
+  examData,
+}: ExamModalProps) {
   const navigation = useNavigation();
   const config = useConfig();
   const scheme = useColorScheme();
   const iconColor = scheme === "dark" ? "white" : "black";
 
   const [isTextModalOpen, setIsTextModalOpen] = useState(false);
-  const [examName, setExamName] = useState("");
+  const [examName, setExamName] = useState(examData?.name ?? "");
   const [isTestCreateModal, setIsTestCreateModal] = useState(false);
   const [selectedTests, setTest] = useState<ExamTestSchema[]>([]);
 
@@ -68,52 +74,59 @@ export default function ExamModal({ onSubmit, testData }: ExamModalProps) {
         </ListItem>
       </Pressable>
 
-      <View style={{ alignItems: "flex-end", margin: 5 }}>
-        <Pressable
-          style={({ pressed }) => [
-            styles.add_button,
-            {
-              opacity: pressed ? 0.5 : 1,
-            },
-          ]}
-          onPress={() => {
-            setIsTestCreateModal(true);
-          }}
-        >
-          <Text
-            style={{
-              color: "white",
-            }}
-          >
-            Add Test
-          </Text>
-        </Pressable>
-      </View>
-      <Text style={styles.text}>Test List</Text>
-      <View style={{ borderTopWidth: 1 }}></View>
-      <List
-        data={selectedTests}
-        renderItem={({ item }) => <TestItem test={item} />}
-        estimatedItemSize={200}
-      />
-      <View style={{ width: "100%" }}>
-        <Dialog
-          isVisible={isTestCreateModal}
-          onBackdropPress={() => setIsTestCreateModal(false)}
-          animationType="fade"
-          overlayStyle={{ width: "95%" }}
-        >
-          <Dialog.Title title={"Create Test"} />
-          <View style={{ borderBottomWidth: 2 }}></View>
-          <TestModal
-            isTestCreateModal={isTestCreateModal}
-            onClose={() => setIsTestCreateModal(false)}
-            onSubmit={(test) => {
-              setTest((tests) => tests.concat(test));
-            }}
-          />
-        </Dialog>
-      </View>
+      {displayAddButton && (
+        <View>
+          <View style={{ alignItems: "flex-end", margin: 5 }}>
+            <Pressable
+              style={({ pressed }) => [
+                styles.add_button,
+                {
+                  opacity: pressed ? 0.5 : 1,
+                },
+              ]}
+              onPress={() => {
+                setIsTestCreateModal(true);
+              }}
+            >
+              <Text
+                style={{
+                  color: "white",
+                }}
+              >
+                Add Test
+              </Text>
+            </Pressable>
+          </View>
+
+          <View>
+            <Text style={styles.text}>Test List</Text>
+            <View style={{ borderTopWidth: 1 }}></View>
+            <List
+              data={selectedTests}
+              renderItem={({ item }) => <TestItem test={item} />}
+              estimatedItemSize={200}
+            />
+            <View style={{ width: "100%" }}>
+              <Dialog
+                isVisible={isTestCreateModal}
+                onBackdropPress={() => setIsTestCreateModal(false)}
+                animationType="fade"
+                overlayStyle={{ width: "95%" }}
+              >
+                <Dialog.Title title={"Create Test"} />
+                <View style={{ borderBottomWidth: 2 }}></View>
+                <TestModal
+                  isTestCreateModal={isTestCreateModal}
+                  onClose={() => setIsTestCreateModal(false)}
+                  onSubmit={(test) => {
+                    setTest((tests) => tests.concat(test));
+                  }}
+                />
+              </Dialog>
+            </View>
+          </View>
+        </View>
+      )}
       <FAB
         buttonStyle={{ backgroundColor: "#4E48B2" }}
         onPress={() => {
