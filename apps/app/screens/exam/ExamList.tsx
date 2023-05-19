@@ -77,16 +77,6 @@ const ExamComp: React.FC<{
                 opacity: pressed ? 0.5 : 1,
               },
             ]}
-          >
-            <Text style={{ textAlign: "center" }}>Delete</Text>
-          </Pressable>
-          <Pressable
-            style={({ pressed }) => [
-              styles.edit_delete_button,
-              {
-                opacity: pressed ? 0.5 : 1,
-              },
-            ]}
             onPress={() => {
               setIsExamUpdateModal && setIsExamUpdateModal(true);
               setExam && setExam(exam);
@@ -119,16 +109,6 @@ const ExamListScreen: React.FC<
   const isTeacher = config.activeStaticRole === StaticRole.teacher;
   const isStudent = config.activeStaticRole === StaticRole.student;
 
-  const updateExam = trpc.school.exam.updateExam.useMutation({
-    onSuccess(data) {
-      setIsExamUpdateModal(false);
-      // reloade
-    },
-    onError(error, variables, context) {
-      alert(error.message);
-    },
-  });
-
   const studentQuery = trpc.school.exam.fetchExamsAndTestsForStudent.useQuery(
     {},
     { enabled: isStudent },
@@ -145,8 +125,17 @@ const ExamListScreen: React.FC<
       ? teacherQuery
       : null;
 
+  const updateExam = trpc.school.exam.updateExam.useMutation({
+    onSuccess(data) {
+      query?.refetch();
+    },
+    onError(error, variables, context) {
+      alert(error.message);
+    },
+  });
+
   if (!query) return <></>;
-  if (query.isLoading) return <Spinner visible />;
+  if (query.isLoading || updateExam.isLoading) return <Spinner visible />;
   if (query.isError)
     return <Banner text="Failed to fetch exams!" type="error" />;
 
@@ -207,14 +196,14 @@ const ExamListScreen: React.FC<
         </SpeedDial>
       )}
       <Dialog
-        isVisible={true}
+        isVisible={isExamUpdateModal || true}
         onBackdropPress={() => setIsExamUpdateModal(false)}
         animationType="fade"
-        overlayStyle={{ width: "95%", height: "80%" }}
+        overlayStyle={{ width: "95%", height: "30%" }}
       >
         <Dialog.Title title={"Update Exam"} />
         <View style={{ borderBottomWidth: 2 }}></View>
-        <View style={{ height: "95%" }}>
+        <View style={{ height: "90%" }}>
           <ExamModal
             displayAddButton={false}
             onSubmit={(examName, tests) => {
@@ -223,6 +212,7 @@ const ExamListScreen: React.FC<
                   id: exam.id,
                   name: examName,
                 });
+              setIsExamUpdateModal(false);
             }}
             examData={exam}
           />
@@ -246,9 +236,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   edit_delete_container: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
     textAlign: "center",
   },
   edit_delete_button: { borderWidth: 1, width: "50%", paddingVertical: 10 },
