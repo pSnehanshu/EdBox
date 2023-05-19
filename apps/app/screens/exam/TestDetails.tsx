@@ -10,7 +10,6 @@ import { addMinutes, format, parseISO } from "date-fns";
 import { ArrayElement } from "schooltalk-shared/types";
 import { StaticRole } from "schooltalk-shared/misc";
 import { useConfig } from "../../utils/config";
-import { useCurrentUser } from "../../utils/auth";
 import TestModal from "./TestModal";
 
 const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
@@ -56,10 +55,10 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
   );
 
   const updateTest = trpc.school.exam.updateTest.useMutation({
-    onSuccess(data) {
+    onSuccess() {
       navigation.replace("ExamsScreen");
     },
-    onError(error, variables, context) {
+    onError(error) {
       alert(error.message);
     },
   });
@@ -218,12 +217,11 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
             <Dialog.Title title={"Update Test"} />
             <View style={{ borderBottomWidth: 2 }}></View>
             <TestModal
-              isTestCreateModal={isTestCreateModal}
               onClose={() => setIsTestCreateModal(false)}
               onSubmit={(test) => {
                 updateTest.mutate({
                   id: testQuery.data.id,
-                  data: { ...test },
+                  data: test,
                 });
               }}
               testData={testQuery.data ?? null}

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { ListItem } from "@rneui/themed";
 import React from "react";
 import { Text, View } from "../../components/Themed";
@@ -12,42 +12,33 @@ import {
 import { trpc } from "../../utils/trpc";
 import { Switch } from "@rneui/themed";
 import { CustomSelect } from "../../components/CustomSelect";
-import { useNavigation } from "@react-navigation/native";
 import { Pressable, StyleSheet } from "react-native";
 import { useConfig } from "../../utils/config";
 import DatePicker from "react-native-date-picker";
 import { format, parseISO } from "date-fns";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import type { ExamTestSchema } from "schooltalk-shared/misc";
 import { Toast } from "react-native-toast-message/lib/src/Toast";
 import { CustomSlider } from "../../components/CustomSlider";
 
 interface TestModalProps {
-  isTestCreateModal: boolean;
-  onClose: () => void;
+  onClose?: () => void;
   onSubmit: (test: ExamTestSchema) => void;
   testData?: ExamTest | null;
 }
 
 export default function TestModal({
-  isTestCreateModal,
   onClose,
   onSubmit,
   testData,
 }: TestModalProps) {
-  const navigation = useNavigation();
   const config = useConfig();
 
   const [multiselectSub, setMultiselectSub] = useState(false);
   const scheme = useColorScheme();
   const iconColor = scheme === "dark" ? "white" : "black";
-  const ChevronIcon = (
-    <MaterialCommunityIcons name="chevron-right" color={iconColor} size={16} />
-  );
+
   const [mark, setMark] = useState(testData?.total_marks ?? 25);
   const [duration, setDuration] = useState(testData?.duration_minutes ?? 30);
-  const [isTextModalOpenName, setIsTextModalOpenName] = useState(false);
-  const [isTextModalOpenMark, setIsTextModalOpenMark] = useState(false);
   const [selectedClass, setSelectedClass] = useState<ClassWithSections>();
   const [selectedSection, setSelectedSection] = useState<
     Section | string | undefined
@@ -205,7 +196,7 @@ export default function TestModal({
                 : "No exam date"}
             </ListItem.Subtitle>
           </ListItem.Content>
-          {ChevronIcon}
+          <ListItem.Chevron />
         </ListItem>
       </Pressable>
       <CustomSlider

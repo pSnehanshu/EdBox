@@ -1,11 +1,11 @@
 import React, { useMemo, useState } from "react";
-import { Alert, Pressable, SafeAreaView, StyleSheet } from "react-native";
+import { Pressable, SafeAreaView, StyleSheet } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
 import type { ExamItem } from "schooltalk-shared/types";
 import _ from "lodash";
 import { format, parseISO } from "date-fns";
-import { ListItem, Divider, FAB, SpeedDial, Dialog } from "@rneui/themed";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { ListItem, Divider, SpeedDial, Dialog } from "@rneui/themed";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { List, Text, View } from "../../components/Themed";
 import { trpc } from "../../utils/trpc";
@@ -238,5 +238,9 @@ const styles = StyleSheet.create({
   edit_delete_container: {
     textAlign: "center",
   },
-  edit_delete_button: { borderWidth: 1, width: "50%", paddingVertical: 10 },
+  edit_delete_button: {
+    borderWidth: 1,
+    width: "50%",
+    paddingVertical: 10,
+  },
 });

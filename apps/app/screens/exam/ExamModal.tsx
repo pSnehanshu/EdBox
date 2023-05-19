@@ -1,26 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import { Dialog, FAB, ListItem } from "@rneui/themed";
 import React from "react";
 import { List, Text, View } from "../../components/Themed";
 import useColorScheme from "../../utils/useColorScheme";
-import {
-  ClassWithSections,
-  ExamTest,
-  Section,
-  Subject,
-} from "schooltalk-shared/types";
 import { trpc } from "../../utils/trpc";
-import { Switch } from "@rneui/themed";
-import { CustomSelect } from "../../components/CustomSelect";
-import { useNavigation } from "@react-navigation/native";
 import { Pressable, StyleSheet } from "react-native";
-import { useConfig } from "../../utils/config";
-import DatePicker from "react-native-date-picker";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import type { ExamTestSchema } from "schooltalk-shared/misc";
 import { Toast } from "react-native-toast-message/lib/src/Toast";
-import { CustomSlider } from "../../components/CustomSlider";
 import { ModalTextInput } from "../../components/ModalTextInput";
 import TestModal from "./TestModal";
 import type { ExamItem } from "schooltalk-shared/types";
@@ -36,8 +24,6 @@ export default function ExamModal({
   onSubmit,
   examData,
 }: ExamModalProps) {
-  const navigation = useNavigation();
-  const config = useConfig();
   const scheme = useColorScheme();
   const iconColor = scheme === "dark" ? "white" : "black";
 
@@ -116,7 +102,6 @@ export default function ExamModal({
                 <Dialog.Title title={"Create Test"} />
                 <View style={{ borderBottomWidth: 2 }}></View>
                 <TestModal
-                  isTestCreateModal={isTestCreateModal}
                   onClose={() => setIsTestCreateModal(false)}
                   onSubmit={(test) => {
                     setTest((tests) => tests.concat(test));
@@ -187,39 +172,6 @@ function TestItem({ test }: TestItemInterface) {
 }
 
 const styles = StyleSheet.create({
-  list: {},
-  homework: {
-    paddingVertical: 16,
-    borderBottomColor: "gray",
-    borderBottomWidth: 0.5,
-    flex: 1,
-    flexDirection: "row",
-    height: 80,
-    overflow: "hidden",
-  },
-  homework_middle: {
-    backgroundColor: undefined,
-    flexGrow: 1,
-    paddingLeft: 16,
-    maxWidth: "80%",
-  },
-  homework_name: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  homework_right: {
-    backgroundColor: undefined,
-    paddingRight: 8,
-    marginLeft: "auto",
-  },
-  homework_description: {
-    fontSize: 12,
-    color: "gray",
-  },
-  empty: {
-    height: "100%",
-    justifyContent: "center",
-  },
   add_button: {
     marginHorizontal: 18,
     padding: 10,
