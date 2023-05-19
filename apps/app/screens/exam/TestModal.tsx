@@ -234,11 +234,17 @@ export default function TestModal({
             if (
               selectedClass &&
               selectedSection &&
-              selectedSubjects &&
+              selectedSubjects.length > 0 &&
               mark &&
               dueDate &&
               duration
             ) {
+              // If multiple subjects not selected, then only send the first
+              let subjectIds = selectedSubjects.map((s) => s.id);
+              if (!multiselectSub && subjectIds.length > 1) {
+                subjectIds = [subjectIds[0]];
+              }
+
               onSubmit({
                 class_id: selectedClass?.numeric_id,
                 section_id:
@@ -247,7 +253,7 @@ export default function TestModal({
                     : selectedSection?.numeric_id,
                 date: dueDate.toISOString(),
                 duration_minutes: Number(duration),
-                subjectIds: selectedSubjects.map((s) => s.id),
+                subjectIds,
                 total_marks: Number(mark),
               });
               onClose?.();
