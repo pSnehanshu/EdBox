@@ -196,7 +196,7 @@ const ExamListScreen: React.FC<
         </SpeedDial>
       )}
       <Dialog
-        isVisible={isExamUpdateModal || true}
+        isVisible={isExamUpdateModal}
         onBackdropPress={() => setIsExamUpdateModal(false)}
         animationType="fade"
         overlayStyle={{ width: "95%", height: "30%" }}
