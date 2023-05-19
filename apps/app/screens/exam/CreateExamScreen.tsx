@@ -2,7 +2,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { View } from "../../components/Themed";
 import { trpc } from "../../utils/trpc";
 import { RootStackParamList } from "../../utils/types/common";
-import ExamModal from "./ExamModal";
+import ExamModal from "../../components/ExamModal";
 
 export default function CreateExamScreen({
   navigation,

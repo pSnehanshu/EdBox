@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { Dialog, FAB, ListItem } from "@rneui/themed";
 import React from "react";
-import { List, Text, View } from "../../components/Themed";
-import useColorScheme from "../../utils/useColorScheme";
-import { trpc } from "../../utils/trpc";
+import { List, Text, View } from "./Themed";
+import useColorScheme from "../utils/useColorScheme";
+import { trpc } from "../utils/trpc";
 import { Pressable, StyleSheet } from "react-native";
 import { format } from "date-fns";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import type { ExamTestSchema } from "schooltalk-shared/misc";
 import { Toast } from "react-native-toast-message/lib/src/Toast";
-import { ModalTextInput } from "../../components/ModalTextInput";
-import TestModal from "./TestModal";
+import { ModalTextInput } from "./ModalTextInput";
+import TestModal from "../screens/exam/TestModal";
 import type { ExamItem } from "schooltalk-shared/types";
 
 interface ExamModalProps {

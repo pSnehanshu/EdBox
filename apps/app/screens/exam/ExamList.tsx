@@ -16,7 +16,7 @@ import { Banner } from "../../components/Banner";
 import { LottieAnimation } from "../../components/LottieAnimation";
 import { useConfig } from "../../utils/config";
 import { RootStackParamList } from "../../utils/types/common";
-import ExamModal from "./ExamModal";
+import ExamModal from "../../components/ExamModal";
 
 const ExamComp: React.FC<{
   exam: Extract<ExamItem, { type: "exam" }>["item"];
