@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ListItem } from "@rneui/themed";
+import { FAB, ListItem } from "@rneui/themed";
 import React from "react";
 import { Text, View } from "../../components/Themed";
 import useColorScheme from "../../utils/useColorScheme";
@@ -19,6 +19,7 @@ import { format, parseISO } from "date-fns";
 import type { ExamTestSchema } from "schooltalk-shared/misc";
 import { Toast } from "react-native-toast-message/lib/src/Toast";
 import { CustomSlider } from "../../components/CustomSlider";
+import { MaterialIcons } from "@expo/vector-icons";
 
 interface TestModalProps {
   onClose?: () => void;
@@ -90,7 +91,7 @@ export default function TestModal({
   const sectionsOptions = ["All sections", ...(selectedClass?.Sections ?? [])];
 
   return (
-    <View>
+    <View style={{ height: "95%" }}>
       <CustomSelect
         isSingle
         title="Class"
@@ -149,7 +150,7 @@ export default function TestModal({
 
       <View
         style={{
-          marginHorizontal: 16,
+          marginLeft: 16,
           flexDirection: "row",
           justifyContent: "space-between",
         }}
@@ -157,9 +158,9 @@ export default function TestModal({
         <Text style={{ textAlignVertical: "center", textAlign: "center" }}>
           Select Multiple Subjects
         </Text>
+
         <Switch
           trackColor={{ true: "#3bde50", false: "#f5f6fc" }}
-          // change
           thumbColor="#FFF"
           value={multiselectSub}
           onValueChange={setMultiselectSub}
@@ -213,7 +214,7 @@ export default function TestModal({
         minValue={0}
         maxValue={180}
       />
-      <View style={styles.button_container}>
+      {/* <View style={styles.button_container}>
         <Pressable
           style={({ pressed }) => [
             styles.button,
@@ -258,7 +259,46 @@ export default function TestModal({
         >
           <Text style={{ color: "white", fontSize: 18 }}>Done</Text>
         </Pressable>
-      </View>
+      </View> */}
+      <FAB
+        buttonStyle={{ backgroundColor: "#4E48B2" }}
+        onPress={() => {
+          if (
+            selectedClass &&
+            selectedSection &&
+            selectedSubjects.length > 0 &&
+            mark &&
+            dueDate &&
+            duration
+          ) {
+            // If multiple subjects not selected, then only send the first
+            let subjectIds = selectedSubjects.map((s) => s.id);
+            if (!multiselectSub && subjectIds.length > 1) {
+              subjectIds = [subjectIds[0]];
+            }
+
+            onSubmit({
+              class_id: selectedClass?.numeric_id,
+              section_id:
+                typeof selectedSection === "string"
+                  ? undefined
+                  : selectedSection?.numeric_id,
+              date: dueDate.toISOString(),
+              duration_minutes: Number(duration),
+              subjectIds,
+              total_marks: Number(mark),
+            });
+            onClose?.();
+          } else {
+            Toast.show({
+              type: "error",
+              text1: "Insufficient Data",
+            });
+          }
+        }}
+        icon={<MaterialIcons name={"check"} size={24} color={"white"} />}
+        placement="right"
+      />
     </View>
   );
 }

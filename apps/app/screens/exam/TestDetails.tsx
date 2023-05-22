@@ -188,6 +188,11 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
             {startTime} - {endTime} ({duration})
           </Text>
         </Card>
+        <Card>
+          <Card.Title>Total Marks</Card.Title>
+          <Card.Divider />
+          <Text>{test.total_marks}</Text>
+        </Card>
 
         {test.Exam ? (
           <Card>
@@ -212,10 +217,10 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
             isVisible={isTestCreateModal}
             onBackdropPress={() => setIsTestCreateModal(false)}
             animationType="fade"
-            overlayStyle={{ width: "95%" }}
+            overlayStyle={{ width: "95%", height: "85%" }}
           >
             <Dialog.Title title={"Update Test"} />
-            <View style={{ borderBottomWidth: 2 }}></View>
+            <View style={{ borderBottomWidth: 1, marginTop: 10 }}></View>
             <TestModal
               onClose={() => setIsTestCreateModal(false)}
               onSubmit={(test) => {

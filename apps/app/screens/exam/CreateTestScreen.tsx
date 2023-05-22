@@ -3,6 +3,7 @@ import { View } from "../../components/Themed";
 import { trpc } from "../../utils/trpc";
 import { RootStackParamList } from "../../utils/types/common";
 import TestModal from "./TestModal";
+import Spinner from "react-native-loading-spinner-overlay";
 
 export default function CreateTestScreen({
   navigation,
@@ -18,6 +19,7 @@ export default function CreateTestScreen({
 
   return (
     <View style={{ height: "100%", width: "100%" }}>
+      <Spinner visible={createTest.isLoading} />
       <TestModal onSubmit={createTest.mutate} />
     </View>
   );

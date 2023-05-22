@@ -73,7 +73,7 @@ export function CustomSelect<T>(
 
   return (
     <>
-      <View style={[{}, props.style]}>
+      <View style={[{ maxHeight: 70 }, props.style]}>
         <Pressable
           onPress={() => setIsVisible(true)}
           style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}

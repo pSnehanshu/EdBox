@@ -5,7 +5,7 @@ import type { ExamItem } from "schooltalk-shared/types";
 import _ from "lodash";
 import { format, parseISO } from "date-fns";
 import { ListItem, Divider, SpeedDial, Dialog } from "@rneui/themed";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { List, Text, View } from "../../components/Themed";
 import { trpc } from "../../utils/trpc";
@@ -74,6 +74,7 @@ const ExamComp: React.FC<{
             style={({ pressed }) => [
               styles.edit_delete_button,
               {
+                borderColor: `${scheme === "dark" ? "white" : "black"}`,
                 opacity: pressed ? 0.5 : 1,
               },
             ]}
@@ -82,7 +83,20 @@ const ExamComp: React.FC<{
               setExam && setExam(exam);
             }}
           >
-            <Text style={{ textAlign: "center" }}>Edit</Text>
+            <MaterialIcons
+              name="edit"
+              size={18}
+              color={scheme === "dark" ? "white" : "black"}
+            />
+            <Text
+              style={{
+                textAlign: "center",
+                fontWeight: "500",
+                marginHorizontal: 4,
+              }}
+            >
+              Edit
+            </Text>
           </Pressable>
         </ListItem.Content>
       </ListItem>
@@ -239,8 +253,10 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   edit_delete_button: {
+    flexDirection: "row",
+    justifyContent: "center",
     borderWidth: 1,
-    width: "50%",
+    width: "100%",
     paddingVertical: 10,
   },
 });

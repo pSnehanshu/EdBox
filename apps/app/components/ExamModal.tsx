@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, FAB, ListItem } from "@rneui/themed";
+import { FAB, ListItem, Dialog } from "@rneui/themed";
 import React from "react";
 import { List, Text, View } from "./Themed";
 import useColorScheme from "../utils/useColorScheme";
@@ -12,6 +12,8 @@ import { Toast } from "react-native-toast-message/lib/src/Toast";
 import { ModalTextInput } from "./ModalTextInput";
 import TestModal from "../screens/exam/TestModal";
 import type { ExamItem } from "schooltalk-shared/types";
+import { LottieAnimation } from "./LottieAnimation";
+// create a dialog themed for dark mode
 
 interface ExamModalProps {
   displayAddButton: boolean;
@@ -32,6 +34,7 @@ export default function ExamModal({
   const [isTestCreateModal, setIsTestCreateModal] = useState(false);
   const [selectedTests, setTest] = useState<ExamTestSchema[]>([]);
 
+  console.log(JSON.stringify(selectedTests, null, 2));
   return (
     <View style={{ height: "100%" }}>
       <ModalTextInput
@@ -60,7 +63,7 @@ export default function ExamModal({
         </ListItem>
       </Pressable>
 
-      {displayAddButton && (
+      {displayAddButton && selectedTests.length > 0 ? (
         <View>
           <View style={{ alignItems: "flex-end", margin: 5 }}>
             <Pressable
@@ -83,8 +86,7 @@ export default function ExamModal({
               </Text>
             </Pressable>
           </View>
-
-          <View>
+          <View style={{ height: "100%" }}>
             <Text style={styles.text}>Test List</Text>
             <View style={{ borderTopWidth: 1 }}></View>
             <List
@@ -92,26 +94,57 @@ export default function ExamModal({
               renderItem={({ item }) => <TestItem test={item} />}
               estimatedItemSize={200}
             />
-            <View style={{ width: "100%" }}>
-              <Dialog
-                isVisible={isTestCreateModal}
-                onBackdropPress={() => setIsTestCreateModal(false)}
-                animationType="fade"
-                overlayStyle={{ width: "95%" }}
+          </View>
+        </View>
+      ) : (
+        <View>
+          <LottieAnimation
+            src={require("../assets/lotties/shake-a-empty-box.json")}
+            caption="No Tests to show. It's quite empty!"
+            style={styles.no_tests}
+          />
+          <View style={{ alignItems: "center", margin: 5 }}>
+            <Pressable
+              style={({ pressed }) => [
+                styles.add_button,
+                {
+                  opacity: pressed ? 0.5 : 1,
+                  width: "75%",
+                },
+              ]}
+              onPress={() => {
+                setIsTestCreateModal(true);
+              }}
+            >
+              <Text
+                style={{
+                  color: "white",
+                  textAlign: "center",
+                }}
               >
-                <Dialog.Title title={"Create Test"} />
-                <View style={{ borderBottomWidth: 2 }}></View>
-                <TestModal
-                  onClose={() => setIsTestCreateModal(false)}
-                  onSubmit={(test) => {
-                    setTest((tests) => tests.concat(test));
-                  }}
-                />
-              </Dialog>
-            </View>
+                Add Test
+              </Text>
+            </Pressable>
           </View>
         </View>
       )}
+      <View style={{ width: "100%" }}>
+        <Dialog
+          isVisible={isTestCreateModal}
+          onBackdropPress={() => setIsTestCreateModal(false)}
+          animationType="fade"
+          overlayStyle={{ width: "95%", height: "85%" }}
+        >
+          <Dialog.Title title={"Create Test"} />
+          <View style={{ borderBottomWidth: 1, marginTop: 10 }}></View>
+          <TestModal
+            onClose={() => setIsTestCreateModal(false)}
+            onSubmit={(test) => {
+              setTest((tests) => tests.concat(test));
+            }}
+          />
+        </Dialog>
+      </View>
       <FAB
         buttonStyle={{ backgroundColor: "#4E48B2" }}
         onPress={() => {
@@ -146,12 +179,11 @@ function TestItem({ test }: TestItemInterface) {
     .map((obj) => obj.name);
 
   return (
-    <Pressable
-      style={({ pressed }) => ({
-        opacity: pressed ? 0.5 : 1,
+    <View
+      style={{
         width: "100%",
         borderBottomWidth: 1,
-      })}
+      }}
     >
       <View style={styles.testContainer}>
         <View style={styles.testContainerMain}>
@@ -167,7 +199,7 @@ function TestItem({ test }: TestItemInterface) {
           <Text>{test.duration_minutes} minutes</Text>
         </View>
       </View>
-    </Pressable>
+    </View>
   );
 }
 
@@ -195,5 +227,9 @@ const styles = StyleSheet.create({
     paddingBottom: 6,
     fontWeight: "500",
     fontSize: 16,
+  },
+  no_tests: {
+    marginTop: 24,
+    marginBottom: 16,
   },
 });
