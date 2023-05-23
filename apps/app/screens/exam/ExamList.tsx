@@ -193,7 +193,7 @@ const ExamListScreen: React.FC<
         >
           {[
             <SpeedDial.Action
-              icon={{ name: "edit", color: "white" }}
+              icon={{ name: "add", color: "white" }}
               title="Create Exam"
               onPress={() => navigation.navigate("CreateExamScreen")}
               buttonStyle={{ backgroundColor: "#4E48B2" }}
