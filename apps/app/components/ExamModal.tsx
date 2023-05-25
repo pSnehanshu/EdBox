@@ -61,71 +61,73 @@ export default function ExamModal({
         </ListItem>
       </Pressable>
 
-      {displayAddButton && selectedTests.length > 0 ? (
-        <View>
-          <View style={{ alignItems: "flex-end", margin: 5 }}>
-            <Pressable
-              style={({ pressed }) => [
-                styles.add_button,
-                {
-                  opacity: pressed ? 0.5 : 1,
-                },
-              ]}
-              onPress={() => {
-                setIsTestCreateModal(true);
-              }}
-            >
-              <Text
-                style={{
-                  color: "white",
+      {displayAddButton &&
+        (selectedTests.length > 0 ? (
+          <View>
+            <View style={{ alignItems: "flex-end", margin: 5 }}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.add_button,
+                  {
+                    opacity: pressed ? 0.5 : 1,
+                  },
+                ]}
+                onPress={() => {
+                  setIsTestCreateModal(true);
                 }}
               >
-                Add Test
-              </Text>
-            </Pressable>
+                <Text
+                  style={{
+                    color: "white",
+                  }}
+                >
+                  Add Test
+                </Text>
+              </Pressable>
+            </View>
+            <View style={{ height: "100%" }}>
+              <Text style={styles.text}>Test List</Text>
+              <View style={{ borderTopWidth: 1 }}></View>
+              <List
+                data={selectedTests}
+                renderItem={({ item }) => <TestItem test={item} />}
+                estimatedItemSize={200}
+              />
+            </View>
           </View>
-          <View style={{ height: "100%" }}>
-            <Text style={styles.text}>Test List</Text>
-            <View style={{ borderTopWidth: 1 }}></View>
-            <List
-              data={selectedTests}
-              renderItem={({ item }) => <TestItem test={item} />}
-              estimatedItemSize={200}
+        ) : (
+          <View>
+            <LottieAnimation
+              src={require("../assets/lotties/shake-a-empty-box.json")}
+              caption="No Tests to show. It's quite empty!"
+              style={styles.no_tests}
             />
-          </View>
-        </View>
-      ) : (
-        <View>
-          <LottieAnimation
-            src={require("../assets/lotties/shake-a-empty-box.json")}
-            caption="No Tests to show. It's quite empty!"
-            style={styles.no_tests}
-          />
-          <View style={{ alignItems: "center", margin: 5 }}>
-            <Pressable
-              style={({ pressed }) => [
-                styles.add_button,
-                {
-                  opacity: pressed ? 0.5 : 1,
-                  width: "75%",
-                },
-              ]}
-              onPress={() => {
-                setIsTestCreateModal(true);
-              }}
-            >
-              <Text
-                style={{
-                  color: "white",
-                  textAlign: "center",
+            <View style={{ alignItems: "center", margin: 5 }}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.add_button,
+                  {
+                    opacity: pressed ? 0.5 : 1,
+                    width: "75%",
+                  },
+                ]}
+                onPress={() => {
+                  setIsTestCreateModal(true);
                 }}
               >
-                Add Test
-              </Text>
-            </Pressable>
+                <Text
+                  style={{
+                    color: "white",
+                    textAlign: "center",
+                  }}
+                >
+                  Add Test
+                </Text>
+              </Pressable>
+            </View>
           </View>
-        </View>
-      )}
+        ))}
+
       <View style={{ width: "100%" }}>
         <Dialog
           isVisible={isTestCreateModal}
@@ -146,6 +148,7 @@ export default function ExamModal({
           />
         </Dialog>
       </View>
+
       <FAB
         buttonStyle={{ backgroundColor: "#4E48B2" }}
         onPress={() => {

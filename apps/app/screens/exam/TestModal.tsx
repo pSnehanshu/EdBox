@@ -214,52 +214,6 @@ export default function TestModal({
         minValue={0}
         maxValue={180}
       />
-      {/* <View style={styles.button_container}>
-        <Pressable
-          style={({ pressed }) => [
-            styles.button,
-            {
-              opacity: pressed ? 0.5 : 1,
-            },
-          ]}
-          onPress={() => {
-            if (
-              selectedClass &&
-              selectedSection &&
-              selectedSubjects.length > 0 &&
-              mark &&
-              dueDate &&
-              duration
-            ) {
-              // If multiple subjects not selected, then only send the first
-              let subjectIds = selectedSubjects.map((s) => s.id);
-              if (!multiselectSub && subjectIds.length > 1) {
-                subjectIds = [subjectIds[0]];
-              }
-
-              onSubmit({
-                class_id: selectedClass?.numeric_id,
-                section_id:
-                  typeof selectedSection === "string"
-                    ? undefined
-                    : selectedSection?.numeric_id,
-                date: dueDate.toISOString(),
-                duration_minutes: Number(duration),
-                subjectIds,
-                total_marks: Number(mark),
-              });
-              onClose?.();
-            } else {
-              Toast.show({
-                type: "error",
-                text1: "Insufficient Data",
-              });
-            }
-          }}
-        >
-          <Text style={{ color: "white", fontSize: 18 }}>Done</Text>
-        </Pressable>
-      </View> */}
       <FAB
         buttonStyle={{ backgroundColor: "#4E48B2" }}
         onPress={() => {

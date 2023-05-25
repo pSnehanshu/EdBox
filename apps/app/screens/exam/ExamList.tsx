@@ -215,8 +215,10 @@ const ExamListScreen: React.FC<
         animationType="fade"
         overlayStyle={{ width: "95%", height: "30%" }}
       >
-        <Dialog.Title title={"Update Exam"} />
-        <View style={{ borderBottomWidth: 2 }}></View>
+        <Dialog.Title
+          title={"Update Exam"}
+          titleStyle={{ textAlign: "center" }}
+        />
         <View style={{ height: "90%" }}>
           <ExamModal
             displayAddButton={false}
