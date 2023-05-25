@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FAB, ListItem, Dialog } from "@rneui/themed";
+import { FAB, ListItem, Dialog, Button, Icon } from "@rneui/themed";
 import React from "react";
 import { List, Text, View } from "./Themed";
 import useColorScheme from "../utils/useColorScheme";
@@ -13,6 +13,7 @@ import { ModalTextInput } from "./ModalTextInput";
 import TestModal from "../screens/exam/TestModal";
 import type { ExamItem } from "schooltalk-shared/types";
 import { LottieAnimation } from "./LottieAnimation";
+import { number } from "prop-types";
 
 interface ExamModalProps {
   displayAddButton: boolean;
@@ -32,6 +33,8 @@ export default function ExamModal({
   const [examName, setExamName] = useState(examData?.name ?? "");
   const [isTestCreateModal, setIsTestCreateModal] = useState(false);
   const [selectedTests, setTest] = useState<ExamTestSchema[]>([]);
+  const [currentTest, setCurrentTest] = useState<ExamTestSchema | null>(null);
+  const [currentTestIndex, setCurrentTestIndex] = useState<number | null>(null);
 
   return (
     <View style={{ height: "100%" }}>
@@ -87,10 +90,22 @@ export default function ExamModal({
             </View>
             <View style={{ height: "100%" }}>
               <Text style={styles.text}>Test List</Text>
-              <View style={{ borderTopWidth: 1 }}></View>
+              <View style={{ borderTopWidth: 1, borderColor: "gray" }}></View>
               <List
                 data={selectedTests}
-                renderItem={({ item }) => <TestItem test={item} />}
+                renderItem={({ item, index }) => (
+                  <TestItem
+                    test={item}
+                    onDelete={() => {
+                      setTest((tests) => tests.filter((e, i) => i !== index));
+                    }}
+                    onEdit={() => {
+                      setIsTestCreateModal(true);
+                      setCurrentTest(item);
+                      setCurrentTestIndex(index);
+                    }}
+                  />
+                )}
                 estimatedItemSize={200}
               />
             </View>
@@ -136,15 +151,26 @@ export default function ExamModal({
           overlayStyle={{ width: "95%", height: "85%" }}
         >
           <Dialog.Title
-            title={"Create Test"}
+            title={currentTest ? "Update Test" : "Create Test"}
             titleStyle={{ textAlign: "center" }}
           />
           <View style={{ marginTop: 4 }}></View>
           <TestModal
             onClose={() => setIsTestCreateModal(false)}
             onSubmit={(test) => {
-              setTest((tests) => tests.concat(test));
+              if (currentTest && typeof currentTestIndex === "number") {
+                setTest((tests) => {
+                  tests.splice(currentTestIndex, 1, test);
+                  return tests;
+                });
+              } else {
+                setTest((tests) => tests.concat(test));
+              }
+
+              setCurrentTest(null);
+              setCurrentTestIndex(null);
             }}
+            testData={currentTest}
           />
         </Dialog>
       </View>
@@ -175,18 +201,24 @@ export default function ExamModal({
 }
 interface TestItemInterface {
   test: ExamTestSchema;
+  onDelete: () => void;
+  onEdit: () => void;
 }
-function TestItem({ test }: TestItemInterface) {
+function TestItem({ test, onDelete, onEdit }: TestItemInterface) {
   const subjectsQuery = trpc.school.subject.fetchSubjects.useQuery({});
   const selectedSubjects = subjectsQuery.data
     ?.filter((obj) => test.subjectIds.includes(obj.id))
     .map((obj) => obj.name);
+
+  const scheme = useColorScheme();
+  const iconColor = scheme === "dark" ? "white" : "black";
 
   return (
     <View
       style={{
         width: "100%",
         borderBottomWidth: 1,
+        borderColor: "gray",
       }}
     >
       <View style={styles.testContainer}>
@@ -197,11 +229,49 @@ function TestItem({ test }: TestItemInterface) {
               ? ` & ${selectedSubjects?.length - 1} more`
               : ""}
           </Text>
-          <Text>{format(new Date(test.date), "MMM dd, yyyy hh:mm aaa")}</Text>
+
+          <Text>
+            {format(new Date(test.date_of_exam), "MMM dd, yyyy hh:mm aaa")}
+          </Text>
         </View>
         <View style={styles.testContainerRight}>
           <Text>{test.duration_minutes} minutes</Text>
+          <Text>{test.total_marks} marks</Text>
         </View>
+      </View>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          paddingHorizontal: 16,
+          marginBottom: 8,
+        }}
+      >
+        <Button radius={"sm"} type="outline" onPress={onEdit}>
+          <MaterialCommunityIcons
+            name="lead-pencil"
+            size={16}
+            color={iconColor}
+            style={{ marginRight: 8 }}
+          />
+          <Text>Edit</Text>
+        </Button>
+        <Button
+          radius={"sm"}
+          type="outline"
+          buttonStyle={{
+            borderColor: "red",
+          }}
+          onPress={onDelete}
+        >
+          <MaterialCommunityIcons
+            name="delete"
+            size={16}
+            color="red"
+            style={{ marginRight: 8 }}
+          />
+          <Text style={{ color: "red" }}>Delete</Text>
+        </Button>
       </View>
     </View>
   );
@@ -222,7 +292,9 @@ const styles = StyleSheet.create({
   testContainerMain: {
     flexGrow: 1,
   },
-  testContainerRight: {},
+  testContainerRight: {
+    flexDirection: "column",
+  },
   testName: {
     fontWeight: "bold",
   },

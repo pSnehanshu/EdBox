@@ -299,7 +299,7 @@ export const examTestSchema = z.object({
   name: z.string().max(100).trim().optional(),
   class_id: z.number().int(),
   section_id: z.number().int().optional(),
-  date: z
+  date_of_exam: z
     .string()
     .datetime()
     .transform((d) => parseISO(d)),

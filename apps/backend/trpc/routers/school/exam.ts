@@ -122,7 +122,7 @@ const examRouter = t.router({
           subject_name: input.name,
           class_id: input.class_id,
           section_id: input.section_id,
-          date_of_exam: input.date,
+          date_of_exam: input.date_of_exam,
           total_marks: input.total_marks,
           duration_minutes: input.duration_minutes,
           school_id: ctx.user.school_id,
@@ -150,7 +150,7 @@ const examRouter = t.router({
         id: z.string().cuid(),
         data: examTestSchema
           .pick({
-            date: true,
+            date_of_exam: true,
             name: true,
             duration_minutes: true,
             subjectIds: true,
@@ -181,7 +181,7 @@ const examRouter = t.router({
           where: { id: test.id },
           data: {
             subject_name: input.data.name,
-            date_of_exam: input.data.date,
+            date_of_exam: input.data.date_of_exam,
             duration_minutes: input.data.duration_minutes,
             total_marks: input.data.total_marks,
           },
@@ -301,7 +301,7 @@ const examRouter = t.router({
               subject_name: test.name,
               class_id: test.class_id,
               section_id: test.section_id,
-              date_of_exam: test.date,
+              date_of_exam: test.date_of_exam,
               duration_minutes: test.duration_minutes,
               total_marks: test.total_marks,
               school_id: ctx.user.school_id,

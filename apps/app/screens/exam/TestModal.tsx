@@ -24,7 +24,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 interface TestModalProps {
   onClose?: () => void;
   onSubmit: (test: ExamTestSchema) => void;
-  testData?: ExamTest | null;
+  testData?: ExamTest | ExamTestSchema | null;
 }
 
 export default function TestModal({
@@ -62,9 +62,14 @@ export default function TestModal({
   }, [selectedClass, testData?.section_id]);
 
   useEffect(() => {
-    let tempSubjectArray = testData?.Subjects.map((e) => {
-      return e.Subject.id;
-    });
+    let tempSubjectArray: string[] = [];
+    if (testData && "Subjects" in testData) {
+      tempSubjectArray = testData?.Subjects.map((e) => {
+        return e.Subject.id;
+      });
+    } else {
+      tempSubjectArray = testData?.subjectIds ?? [];
+    }
     if (tempSubjectArray && tempSubjectArray?.length > 1) {
       setMultiselectSub(true);
     }
@@ -237,7 +242,7 @@ export default function TestModal({
                 typeof selectedSection === "string"
                   ? undefined
                   : selectedSection?.numeric_id,
-              date: dueDate.toISOString(),
+              date_of_exam: dueDate.toISOString(),
               duration_minutes: duration,
               subjectIds,
               total_marks: mark,
