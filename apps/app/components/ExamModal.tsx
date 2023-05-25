@@ -33,7 +33,6 @@ export default function ExamModal({
   const [isTestCreateModal, setIsTestCreateModal] = useState(false);
   const [selectedTests, setTest] = useState<ExamTestSchema[]>([]);
 
-  console.log(JSON.stringify(selectedTests, null, 2));
   return (
     <View style={{ height: "100%" }}>
       <ModalTextInput
