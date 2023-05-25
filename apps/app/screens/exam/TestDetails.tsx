@@ -219,8 +219,11 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
             animationType="fade"
             overlayStyle={{ width: "95%", height: "85%" }}
           >
-            <Dialog.Title title={"Update Test"} />
-            <View style={{ borderBottomWidth: 1, marginTop: 10 }}></View>
+            <Dialog.Title
+              title={"Update Test"}
+              titleStyle={{ textAlign: "center" }}
+            />
+            <View style={{ marginTop: 4 }}></View>
             <TestModal
               onClose={() => setIsTestCreateModal(false)}
               onSubmit={(test) => {
@@ -275,7 +278,7 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
                 },
               ]);
             }}
-            buttonStyle={{ backgroundColor: "#4E48B2" }}
+            buttonStyle={{ backgroundColor: "red" }}
             key={2}
           />,
         ]}

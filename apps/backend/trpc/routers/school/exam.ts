@@ -154,6 +154,7 @@ const examRouter = t.router({
             name: true,
             duration_minutes: true,
             subjectIds: true,
+            total_marks: true,
           })
           .partial(),
       }),
@@ -182,6 +183,7 @@ const examRouter = t.router({
             subject_name: input.data.name,
             date_of_exam: input.data.date,
             duration_minutes: input.data.duration_minutes,
+            total_marks: input.data.total_marks,
           },
         });
 

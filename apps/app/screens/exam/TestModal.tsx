@@ -284,9 +284,9 @@ export default function TestModal({
                   ? undefined
                   : selectedSection?.numeric_id,
               date: dueDate.toISOString(),
-              duration_minutes: Number(duration),
+              duration_minutes: duration,
               subjectIds,
-              total_marks: Number(mark),
+              total_marks: mark,
             });
             onClose?.();
           } else {

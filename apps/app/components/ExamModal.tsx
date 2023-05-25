@@ -13,7 +13,6 @@ import { ModalTextInput } from "./ModalTextInput";
 import TestModal from "../screens/exam/TestModal";
 import type { ExamItem } from "schooltalk-shared/types";
 import { LottieAnimation } from "./LottieAnimation";
-// create a dialog themed for dark mode
 
 interface ExamModalProps {
   displayAddButton: boolean;
@@ -135,8 +134,11 @@ export default function ExamModal({
           animationType="fade"
           overlayStyle={{ width: "95%", height: "85%" }}
         >
-          <Dialog.Title title={"Create Test"} />
-          <View style={{ borderBottomWidth: 1, marginTop: 10 }}></View>
+          <Dialog.Title
+            title={"Create Test"}
+            titleStyle={{ textAlign: "center" }}
+          />
+          <View style={{ marginTop: 4 }}></View>
           <TestModal
             onClose={() => setIsTestCreateModal(false)}
             onSubmit={(test) => {
