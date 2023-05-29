@@ -1,24 +1,24 @@
 import { useEffect, useState } from "react";
 import { FAB, ListItem } from "@rneui/themed";
 import React from "react";
-import { Text, View } from "../../components/Themed";
-import useColorScheme from "../../utils/useColorScheme";
+import { Text, View } from "./Themed";
+import useColorScheme from "../utils/useColorScheme";
 import {
   ClassWithSections,
   ExamTest,
   Section,
   Subject,
 } from "schooltalk-shared/types";
-import { trpc } from "../../utils/trpc";
+import { trpc } from "../utils/trpc";
 import { Switch } from "@rneui/themed";
-import { CustomSelect } from "../../components/CustomSelect";
+import { CustomSelect } from "./CustomSelect";
 import { Pressable, StyleSheet } from "react-native";
-import { useConfig } from "../../utils/config";
+import { useConfig } from "../utils/config";
 import DatePicker from "react-native-date-picker";
 import { format, parseISO } from "date-fns";
 import type { ExamTestSchema } from "schooltalk-shared/misc";
 import { Toast } from "react-native-toast-message/lib/src/Toast";
-import { CustomSlider } from "../../components/CustomSlider";
+import { CustomSlider } from "./CustomSlider";
 import { MaterialIcons } from "@expo/vector-icons";
 
 interface TestModalProps {

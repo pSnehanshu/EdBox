@@ -10,7 +10,7 @@ import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import type { ExamTestSchema } from "schooltalk-shared/misc";
 import { Toast } from "react-native-toast-message/lib/src/Toast";
 import { ModalTextInput } from "./ModalTextInput";
-import TestModal from "../screens/exam/TestModal";
+import TestModal from "../components/TestModal";
 import type { ExamItem } from "schooltalk-shared/types";
 import { LottieAnimation } from "./LottieAnimation";
 import { number } from "prop-types";

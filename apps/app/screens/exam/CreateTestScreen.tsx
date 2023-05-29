@@ -2,7 +2,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { View } from "../../components/Themed";
 import { trpc } from "../../utils/trpc";
 import { RootStackParamList } from "../../utils/types/common";
-import TestModal from "./TestModal";
+import TestModal from "../../components/TestModal";
 import Spinner from "react-native-loading-spinner-overlay";
 
 export default function CreateTestScreen({

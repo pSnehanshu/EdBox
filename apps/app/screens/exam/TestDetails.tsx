@@ -10,7 +10,7 @@ import { addMinutes, format, parseISO } from "date-fns";
 import { ArrayElement } from "schooltalk-shared/types";
 import { StaticRole } from "schooltalk-shared/misc";
 import { useConfig } from "../../utils/config";
-import TestModal from "./TestModal";
+import TestModal from "../../components/TestModal";
 
 const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
   route: {
