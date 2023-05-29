@@ -97,7 +97,8 @@ export interface ClientToServerEvents {
   ) => void;
 }
 
-export type InterServerEvents = Record<string, never>;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface InterServerEvents {}
 
 export interface SocketData {
   user: DBUser & { Staff: SchoolStaff | null };
