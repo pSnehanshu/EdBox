@@ -1,10 +1,9 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Pressable, StyleSheet } from "react-native";
 import { StaticRole } from "schooltalk-shared/misc";
 import { Dialog } from "@rneui/themed";
 import { Entypo } from "@expo/vector-icons";
 import { Text, View, ScrollView } from "../components/Themed";
-import { RootTabScreenProps } from "../utils/types/common";
 import { useCurrentUser } from "../utils/auth";
 import { useSchool } from "../utils/useSchool";
 import { RoutineSlider } from "../components/RoutineSlider";
@@ -31,7 +30,7 @@ function greeting(date: Date): string {
   return "Hello";
 }
 
-export default function HomeTabScreen(props: RootTabScreenProps<"HomeTab">) {
+export default function HomeTabScreen() {
   const { user } = useCurrentUser();
   const school = useSchool();
   const scheme = useColorScheme();
@@ -39,17 +38,6 @@ export default function HomeTabScreen(props: RootTabScreenProps<"HomeTab">) {
   const config = useConfig();
 
   const [isVisible, setIsVisible] = useState(false);
-
-  const initials = useMemo(() => {
-    if (user?.name) {
-      return user.name
-        .split(" ")
-        .map((s) => s.charAt(0))
-        .join("")
-        .toUpperCase();
-    }
-    return "";
-  }, [user?.name]);
 
   return (
     <View style={styles.container}>

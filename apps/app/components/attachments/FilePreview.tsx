@@ -269,7 +269,7 @@ export function FullScreenFilePreview({
   >([]);
 
   const handleFileFetched = useCallback(
-    (file: UploadedFile, index: number, uri: string, expiry: Date) => {
+    (file: UploadedFile, index: number, uri: string) => {
       setFiles((existingFiles) => {
         // Filter out non-group items
         const groupFiles = existingFiles.filter(

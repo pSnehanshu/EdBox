@@ -12,7 +12,7 @@ export default function CreateHomeworkScreen({
     onSuccess(data) {
       navigation.replace("DisplayHomeworkScreen", { homeworkId: data.id });
     },
-    onError(error, variables, context) {
+    onError(error) {
       alert(error);
     },
   });

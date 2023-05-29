@@ -275,12 +275,8 @@ export function getNegativeColor(hexColor: string) {
 /**
  * Given a hex color, returns a color with good contrast
  * @param hexColor Only long form (6 digit) is supported
- * @param defaultColor The color to use, in case invalid hex value is given
  */
-export function getTextColorForGivenBG(
-  hexColor: string,
-  defaultColor: "black" | "white" = "black",
-) {
+export function getTextColorForGivenBG(hexColor: string) {
   const brightness = getColorBrightness(hexColor);
   if (brightness > 125) {
     return "black";

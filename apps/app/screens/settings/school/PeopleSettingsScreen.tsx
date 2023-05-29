@@ -9,7 +9,6 @@ import { trpc } from "../../../utils/trpc";
 import useColorScheme from "../../../utils/useColorScheme";
 
 type TabRoute = { key: keyof typeof StaticRole; title: string };
-type RenderSceneProp = ComponentProps<typeof TabView<TabRoute>>["renderScene"];
 type RenderTabBarProp = NonNullable<
   ComponentProps<typeof TabView<TabRoute>>["renderTabBar"]
 >;
@@ -45,7 +44,7 @@ interface PeopleListProps {
   role: StaticRole;
 }
 function PeopleList({ role }: PeopleListProps) {
-  const [page, setPage] = useState(1);
+  const [page] = useState(1);
   const peopleQuery = trpc.school.people.fetchPeople.useQuery({
     role,
     page,

@@ -1,6 +1,5 @@
 import { useCallback, useState, memo } from "react";
 import { RefreshControl, StyleSheet, useWindowDimensions } from "react-native";
-import _ from "lodash";
 import { format } from "date-fns";
 import { TabView, TabBar } from "react-native-tab-view";
 import Spinner from "react-native-loading-spinner-overlay";

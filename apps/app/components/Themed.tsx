@@ -77,7 +77,7 @@ export function ScrollView(props: ScrollViewProps) {
   );
 }
 
-export function List<ItemT = any>(props: ListProps<ItemT>) {
+export function List<ItemT = unknown>(props: ListProps<ItemT>) {
   const { lightColor, darkColor, ...otherProps } = props;
   const backgroundColor = useThemeColor(
     { light: lightColor, dark: darkColor },

@@ -16,12 +16,12 @@ export default function UpdateHomeworkScreen({
   });
 
   const updateHomework = trpc.school.homework.update.useMutation({
-    onSuccess(data) {
+    onSuccess() {
       navigation.replace("DisplayHomeworkScreen", {
         homeworkId,
       });
     },
-    onError(error, variables, context) {
+    onError(error) {
       alert(error.message);
     },
   });

@@ -241,7 +241,7 @@ const authRouter = t.router({
         console.error("Logout failed", error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: (error as any)?.message ?? "Something went wrong",
+          message: "Something went wrong",
         });
       }
     }),

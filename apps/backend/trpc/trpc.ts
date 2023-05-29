@@ -25,7 +25,7 @@ export const authMiddleware = t.middleware(({ ctx, next }) => {
 /** Verify that the user is a teacher */
 export const teacherMiddleware = authMiddleware.unstable_pipe(
   ({ ctx, next }) => {
-    if (!hasUserStaticRoles(ctx.user, [StaticRole.teacher], "all")) {
+    if (!ctx.session.User.Teacher) {
       throw new TRPCError({
         code: "FORBIDDEN",
         message: "Not a teacher",
@@ -35,7 +35,7 @@ export const teacherMiddleware = authMiddleware.unstable_pipe(
     return next({
       ctx: {
         ...ctx,
-        teacher: ctx.session.User.Teacher!,
+        teacher: ctx.session.User.Teacher,
       },
     });
   },
@@ -44,7 +44,7 @@ export const teacherMiddleware = authMiddleware.unstable_pipe(
 /** Verify that the user is a student */
 export const studentMiddleware = authMiddleware.unstable_pipe(
   ({ ctx, next }) => {
-    if (!hasUserStaticRoles(ctx.user, [StaticRole.student], "all")) {
+    if (!ctx.session.User.Student) {
       throw new TRPCError({
         code: "FORBIDDEN",
         message: "Not a student",
@@ -54,7 +54,7 @@ export const studentMiddleware = authMiddleware.unstable_pipe(
     return next({
       ctx: {
         ...ctx,
-        student: ctx.session.User.Student!,
+        student: ctx.session.User.Student,
       },
     });
   },
@@ -67,7 +67,8 @@ export const principalMiddleware = authMiddleware.unstable_pipe(
         ctx.user,
         [StaticRole.principal, StaticRole.vice_principal],
         "some",
-      )
+      ) ||
+      !ctx.session.User.Staff
     ) {
       throw new TRPCError({
         code: "FORBIDDEN",
@@ -78,7 +79,7 @@ export const principalMiddleware = authMiddleware.unstable_pipe(
     return next({
       ctx: {
         ...ctx,
-        principal: ctx.session.User.Staff!,
+        principal: ctx.session.User.Staff,
       },
     });
   },

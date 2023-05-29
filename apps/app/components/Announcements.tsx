@@ -62,7 +62,7 @@ function SingleAnnouncement({ message }: AnnouncementProps) {
   }, [senderDisplayName, message.text, shouldCollapse]);
 
   const [pressedFileId, setPressedFileId] = useState<string | null>(null);
-  const handleFilePress = (file: UploadedFile, index: number) => {
+  const handleFilePress = (file: UploadedFile) => {
     const mime = file.mime ? MIMEType.parse(file.mime) : null;
 
     if (mime?.type === "image") {

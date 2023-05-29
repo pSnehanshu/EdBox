@@ -302,7 +302,7 @@ export default function AttendanceTakerScreen({
         animated: true,
       });
     },
-    onError(error, variables, context) {
+    onError(error) {
       console.error(error);
       Toast.show({
         position: "bottom",

@@ -64,10 +64,10 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
   });
 
   const deleteTest = trpc.school.exam.deleteTest.useMutation({
-    onSuccess(data) {
+    onSuccess() {
       navigation.replace("ExamsScreen");
     },
-    onError(error, variables, context) {
+    onError(error) {
       alert(error.message);
     },
   });
@@ -137,8 +137,6 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
     return <Spinner visible />;
 
   const { data: test } = testQuery;
-
-  const isTeacher = config.activeStaticRole === StaticRole.teacher;
 
   return (
     <View style={styles.container}>
@@ -265,14 +263,14 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
                 {
                   text: "Delete",
                   style: "destructive",
-                  onPress(value) {
+                  onPress() {
                     deleteTest.mutate({ id: testId });
                   },
                 },
                 {
                   text: "Cancel",
                   style: "cancel",
-                  onPress(value) {
+                  onPress() {
                     setActionOpen(false);
                   },
                 },

@@ -3,14 +3,13 @@ import { StyleSheet, Pressable, Alert } from "react-native";
 import type { ClassWithSections, Section } from "schooltalk-shared/types";
 import Spinner from "react-native-loading-spinner-overlay";
 import { View, Text, TextInput } from "../../components/Themed";
-import { RootStackScreenProps } from "../../utils/types/common";
 import { trpc } from "../../utils/trpc";
 import { useConfig } from "../../utils/config";
 import OtpPopup from "../../components/OtpPopup";
 import useColorScheme from "../../utils/useColorScheme";
 import { CustomSelect } from "../../components/CustomSelect";
 
-export default function LoginScreen(props: RootStackScreenProps<"Login">) {
+export default function LoginScreen() {
   const config = useConfig();
 
   // Form States
@@ -38,7 +37,7 @@ export default function LoginScreen(props: RootStackScreenProps<"Login">) {
       setUserId(data.userId);
       setStep("submitOTP");
     },
-    onError(error, variables, context) {
+    onError(error) {
       console.error(error);
       Alert.alert("Error", "Phone number isn't registered");
       setPhone("");
@@ -49,7 +48,7 @@ export default function LoginScreen(props: RootStackScreenProps<"Login">) {
       setUserId(data.userId);
       setStep("submitOTP");
     },
-    onError(error, variables, context) {
+    onError(error) {
       console.error(error);
       Alert.alert(
         "Invalid data",
