@@ -219,7 +219,7 @@ export function getUserColor(userId: string) {
   }
   let color = "#";
   for (let i = 0; i < 3; i++) {
-    let value = (hash >> (i * 8)) & 0xff;
+    const value = (hash >> (i * 8)) & 0xff;
     color += ("00" + value.toString(16)).slice(-2);
   }
 

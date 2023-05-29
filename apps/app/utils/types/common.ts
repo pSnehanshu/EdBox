@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-namespace */
+/* eslint-disable @typescript-eslint/no-empty-interface */
+
 import type { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import type {
   CompositeScreenProps,
@@ -8,7 +11,6 @@ import type { Socket } from "socket.io-client";
 import type {
   ClientToServerEvents,
   Group,
-  Homework,
   ServerToClientEvents,
   UploadPermission,
 } from "schooltalk-shared/types";
