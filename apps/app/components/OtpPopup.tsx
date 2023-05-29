@@ -84,11 +84,20 @@ export default function OtpPopup({
               keyboardType="number-pad"
               maxLength={6}
             />
-            <Pressable style={styles.button} onPress={onSubmit}>
+            <Pressable
+              style={({ pressed }) => [
+                styles.button,
+                { opacity: pressed ? 0.5 : 1 },
+              ]}
+              onPress={onSubmit}
+            >
               <Text style={styles.textStyle}>Submit</Text>
             </Pressable>
             {onClose && (
-              <Pressable onPress={onClose}>
+              <Pressable
+                onPress={onClose}
+                style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
+              >
                 <Text>Cancel</Text>
               </Pressable>
             )}

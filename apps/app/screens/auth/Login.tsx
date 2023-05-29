@@ -1,15 +1,14 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { StyleSheet, Pressable, Alert } from "react-native";
 import type { ClassWithSections, Section } from "schooltalk-shared/types";
 import Spinner from "react-native-loading-spinner-overlay";
-import SelectDropdown from "react-native-select-dropdown";
 import { View, Text, TextInput } from "../../components/Themed";
 import { RootStackScreenProps } from "../../utils/types/common";
 import { trpc } from "../../utils/trpc";
 import { useConfig } from "../../utils/config";
 import OtpPopup from "../../components/OtpPopup";
 import useColorScheme from "../../utils/useColorScheme";
-import { FontAwesome } from "@expo/vector-icons";
+import { CustomSelect } from "../../components/CustomSelect";
 
 export default function LoginScreen({}: RootStackScreenProps<"Login">) {
   const config = useConfig();
@@ -32,23 +31,6 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
   const [step, setStep] = useState<"requestOTP" | "submitOTP">("requestOTP");
   const [selectedClass, setSelectedClass] = useState<ClassWithSections>();
   const [selectedSection, setSelectedSection] = useState<Section>();
-
-  // Derived data
-  const allClassesNames = useMemo(
-    () =>
-      classesAndSectionsData.data?.map(
-        (a) => `Class ${a.name ?? a.numeric_id}`,
-      ) ?? [],
-    [classesAndSectionsData.isFetching],
-  );
-  const allSections = useMemo(() => {
-    if (selectedClass) {
-      return selectedClass.Sections.map(
-        (section) => `Section ${section.name ?? section.numeric_id}`,
-      );
-    }
-    return [];
-  }, [selectedClass?.numeric_id]);
 
   // Mutations
   const requestOtp = trpc.auth.requestPhoneNumberOTP.useMutation({
@@ -92,10 +74,10 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
       {/* login */}
       <View style={styles.container}>
         <View
-          style={{
-            ...styles.buttonContainer,
-            backgroundColor: color === "dark" ? "white" : "black",
-          }}
+          style={[
+            styles.buttonContainer,
+            { backgroundColor: color === "dark" ? "white" : "black" },
+          ]}
         >
           <Pressable
             style={
@@ -160,18 +142,21 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
         <>
           {/* others */}
           <View style={{ height: "100%" }}>
-            <Text style={styles.text}>Phone number:</Text>
             <TextInput
               style={styles.input}
               value={phone}
               onChangeText={setPhone}
-              placeholder="Phone"
+              placeholder="Phone number"
               autoFocus
               keyboardType="phone-pad"
               autoComplete="tel"
             />
+
             <Pressable
-              style={styles.main_button}
+              style={({ pressed }) => [
+                styles.main_button,
+                { opacity: pressed ? 0.5 : 1 },
+              ]}
               onPress={() => {
                 if (phone)
                   requestOtp.mutate({
@@ -188,96 +173,59 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
         <>
           {/* student */}
           <View>
-            <View
-              style={{
-                flexDirection: "row",
-                marginLeft: 24,
-                marginRight: 24,
-              }}
-            >
-              <View style={{ width: "45%" }}>
-                <Text style={styles.text_class}>Class</Text>
-                <SelectDropdown
-                  data={allClassesNames}
-                  onSelect={(item, index) => {
-                    const Class = classesAndSectionsData?.data?.at(index);
-                    setSelectedClass(Class);
-                  }}
-                  defaultButtonText={"Select Class"}
-                  buttonTextAfterSelection={(selectedItem, index) => {
-                    return selectedItem;
-                  }}
-                  rowTextForSelection={(item, index) => {
-                    return item;
-                  }}
-                  buttonStyle={styles.dropdown1BtnStyle}
-                  buttonTextStyle={styles.dropdown1BtnTxtStyle}
-                  dropdownIconPosition={"right"}
-                  renderDropdownIcon={(isOpened) => {
-                    return (
-                      <FontAwesome
-                        name={isOpened ? "chevron-up" : "chevron-down"}
-                        color={"#444"}
-                        size={18}
-                      />
-                    );
-                  }}
-                  dropdownStyle={styles.dropdown1DropdownStyle}
-                  rowStyle={styles.dropdown1RowStyle}
-                  rowTextStyle={styles.dropdown1RowTxtStyle}
-                />
-              </View>
-              <View style={{ width: "45%", marginLeft: 10 }}>
-                <Text style={styles.text_class}>Section</Text>
-                <SelectDropdown
-                  data={allSections}
-                  disabled={allSections.length === 0}
-                  onSelect={(item, index) => {
-                    const section = selectedClass?.Sections.at(index);
-                    setSelectedSection(section);
-                  }}
-                  defaultButtonText={"Select Sections"}
-                  buttonTextAfterSelection={(selectedItem, index) => {
-                    return selectedItem;
-                  }}
-                  rowTextForSelection={(item, index) => {
-                    return item;
-                  }}
-                  dropdownIconPosition={"right"}
-                  renderDropdownIcon={(isOpened) => {
-                    return (
-                      <FontAwesome
-                        name={isOpened ? "chevron-up" : "chevron-down"}
-                        color={"#444"}
-                        size={18}
-                      />
-                    );
-                  }}
-                  buttonStyle={styles.dropdown1BtnStyle}
-                  buttonTextStyle={styles.dropdown1BtnTxtStyle}
-                  dropdownStyle={styles.dropdown1DropdownStyle}
-                  rowStyle={styles.dropdown1RowStyle}
-                  rowTextStyle={styles.dropdown1RowTxtStyle}
-                />
-              </View>
+            <View style={{ flexDirection: "row" }}>
+              <CustomSelect
+                isSingle
+                title="Class"
+                items={classesAndSectionsData.data}
+                selected={selectedClass}
+                onSubmit={(item) => {
+                  setSelectedClass(item);
+                  setSelectedSection(undefined);
+                }}
+                idExtractor={(item) => item.numeric_id}
+                labelExtractor={(item) =>
+                  `Class ${item.name ?? item.numeric_id}`
+                }
+                style={{ flexGrow: 1 }}
+              />
+
+              <CustomSelect
+                isSingle
+                title="Section"
+                items={selectedClass?.Sections}
+                selected={selectedSection}
+                onSubmit={(item) => setSelectedSection(item)}
+                idExtractor={(item) => item.numeric_id}
+                labelExtractor={(item) =>
+                  `Section ${item.name ?? item.numeric_id}`
+                }
+                style={{ flexGrow: 1 }}
+              />
             </View>
-            <View style={{}}>
-              <Text style={styles.text}>Roll number:</Text>
+            <View>
               <TextInput
                 style={styles.input}
                 value={rollnum?.toString()}
-                onChangeText={(r) => setRollNo(parseInt(r, 10))}
+                onChangeText={(r) => {
+                  const parsed = parseInt(r, 10);
+                  setRollNo(Number.isNaN(parsed) ? undefined : parsed);
+                }}
                 placeholder="Roll number"
-                autoFocus
                 keyboardType="number-pad"
               />
+
               {insufficientData && (
-                <Text style={[styles.text, { color: "red" }]}>
+                <Text style={{ color: "red", textAlign: "center", margin: 16 }}>
                   Please fill all the values
                 </Text>
               )}
+
               <Pressable
-                style={styles.main_button}
+                style={({ pressed }) => [
+                  styles.main_button,
+                  { opacity: pressed ? 0.5 : 1 },
+                ]}
                 onPress={() => {
                   if (
                     typeof rollnum === "number" &&
@@ -325,23 +273,16 @@ export default function LoginScreen({}: RootStackScreenProps<"Login">) {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    padding: 16,
     flexDirection: "row",
   },
   main_button: {
     backgroundColor: "#4E48B2",
-    padding: 10,
-    paddingBottom: 16,
-    margin: 10,
-    marginHorizontal: 20,
-    borderWidth: 1,
-    borderRadius: 15,
+    padding: 16,
+    margin: 16,
+    borderRadius: 8,
   },
-  class_Section: {
-    flexGrow: 1,
-    flexDirection: "row",
-    paddingHorizontal: 20,
-  },
+
   buttonContainer: {
     flex: 1,
     flexDirection: "row",
@@ -362,16 +303,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: "white",
   },
-  text: {
-    paddingTop: 6,
-    paddingLeft: 24,
-    fontSize: 18,
-  },
-  text_class: {
-    paddingTop: 6,
-    paddingBottom: 8,
-    fontSize: 18,
-  },
   default_button_text: {
     paddingHorizontal: 4,
     paddingTop: 6,
@@ -380,7 +311,6 @@ const styles = StyleSheet.create({
   },
   button_text: {
     color: "white",
-    paddingTop: 6,
     textAlign: "center",
     fontSize: 18,
   },
@@ -391,39 +321,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   input: {
-    width: "90%",
-    padding: 10,
-    paddingLeft: 16,
-    marginHorizontal: 20,
-    marginTop: 8,
-    borderWidth: 1,
-    borderRadius: 15,
-  },
-  dropdown1BtnStyle: {
-    width: "100%",
-    height: 50,
-    backgroundColor: "#FFF",
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "#444",
-  },
-  dropdown1BtnTxtStyle: {
-    color: "#858585",
-    textAlign: "left",
-    fontSize: 14,
-  },
-  dropdown1DropdownStyle: {
-    backgroundColor: "#EFEFEF",
-    marginTop: -30,
-    borderRadius: 15,
-  },
-  dropdown1RowStyle: {
-    backgroundColor: "white",
-    borderBottomColor: "#C5C5C5",
-    height: 40,
-  },
-  dropdown1RowTxtStyle: {
-    color: "#2A2A2A",
-    textAlign: "center",
+    paddingVertical: 10,
+    borderBottomWidth: 0.5,
+    marginHorizontal: 16,
   },
 });

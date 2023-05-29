@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, Pressable, ScrollView, StyleSheet } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
-import { Text, Card, Button } from "@rneui/themed";
+import { Text, Card, Button, SpeedDial, Dialog } from "@rneui/themed";
 import _ from "lodash";
 import { RootStackScreenProps } from "../../utils/types/common";
 import { trpc } from "../../utils/trpc";
@@ -10,6 +10,7 @@ import { addMinutes, format, parseISO } from "date-fns";
 import { ArrayElement } from "schooltalk-shared/types";
 import { StaticRole } from "schooltalk-shared/misc";
 import { useConfig } from "../../utils/config";
+import TestModal from "../../components/TestModal";
 
 const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
   route: {
@@ -18,6 +19,8 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
   navigation,
 }) => {
   const config = useConfig();
+  const [isActionOpen, setActionOpen] = useState(false);
+  const [isTestCreateModal, setIsTestCreateModal] = useState(false);
 
   // Fetch the class and section the user belongs to
   const classAndSectionQuery = trpc.school.people.getStudentClass.useQuery(
@@ -50,6 +53,24 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
     },
     { enabled: classAndSectionQuery.isFetched },
   );
+
+  const updateTest = trpc.school.exam.updateTest.useMutation({
+    onSuccess() {
+      navigation.replace("ExamsScreen");
+    },
+    onError(error) {
+      alert(error.message);
+    },
+  });
+
+  const deleteTest = trpc.school.exam.deleteTest.useMutation({
+    onSuccess(data) {
+      navigation.replace("ExamsScreen");
+    },
+    onError(error, variables, context) {
+      alert(error.message);
+    },
+  });
 
   // Set screen title
   useEffect(() => {
@@ -117,71 +138,152 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
 
   const { data: test } = testQuery;
 
+  const isTeacher = config.activeStaticRole === StaticRole.teacher;
+
   return (
-    <ScrollView>
-      <Card>
-        <Card.Title>Subject{test.Subjects.length > 1 ? "s" : ""}</Card.Title>
-        <Card.Divider />
-        {test.Subjects.map(({ Subject }) => {
-          const teachers = getSubjectTeachers(Subject);
-          return (
-            <View key={Subject.id} style={styles.singleSubject}>
-              <Text>{Subject.name}</Text>
-
-              <Pressable
-                style={({ pressed }) => [
-                  styles.subjectTeacher,
-                  { opacity: pressed ? 0.5 : 1 },
-                ]}
-                onPress={() => {
-                  Alert.alert(
-                    "List of teachers",
-                    `${teachers
-                      .map((t, i) => `${i + 1}. ${t.User?.name}`)
-                      .join("\n")}`,
-                  );
-                }}
-              >
-                <Text>({teachers.length} teachers)</Text>
-              </Pressable>
-            </View>
-          );
-        })}
-
-        {test.subject_name && (
-          <View>
-            <Text>{test.subject_name}</Text>
-          </View>
-        )}
-      </Card>
-
-      <Card>
-        <Card.Title>Date and time</Card.Title>
-        <Card.Divider />
-        <Text>{date}</Text>
-        <Text>
-          {startTime} - {endTime} ({duration})
-        </Text>
-      </Card>
-
-      {test.Exam ? (
+    <View style={styles.container}>
+      <Spinner visible={updateTest.isLoading || deleteTest.isLoading} />
+      <ScrollView>
         <Card>
-          <Card.Title>Exam: {test.Exam.name}</Card.Title>
+          <Card.Title>Subject{test.Subjects.length > 1 ? "s" : ""}</Card.Title>
           <Card.Divider />
-          <Button
-            onPress={() => {
-              if (test.Exam) {
-                navigation.navigate("ExamDetails", {
-                  examId: test.Exam.id,
-                });
-              }
-            }}
-          >
-            View full schedule
-          </Button>
+          {test.Subjects.map(({ Subject }) => {
+            const teachers = getSubjectTeachers(Subject);
+            return (
+              <View key={Subject.id} style={styles.singleSubject}>
+                <Text>{Subject.name}</Text>
+
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.subjectTeacher,
+                    { opacity: pressed ? 0.5 : 1 },
+                  ]}
+                  onPress={() => {
+                    Alert.alert(
+                      "List of teachers",
+                      `${teachers
+                        .map((t, i) => `${i + 1}. ${t.User?.name}`)
+                        .join("\n")}`,
+                    );
+                  }}
+                >
+                  <Text>({teachers.length} teachers)</Text>
+                </Pressable>
+              </View>
+            );
+          })}
+
+          {test.subject_name && (
+            <View>
+              <Text>{test.subject_name}</Text>
+            </View>
+          )}
         </Card>
-      ) : null}
-    </ScrollView>
+
+        <Card>
+          <Card.Title>Date and time</Card.Title>
+          <Card.Divider />
+          <Text>{date}</Text>
+          <Text>
+            {startTime} - {endTime} ({duration})
+          </Text>
+        </Card>
+        <Card>
+          <Card.Title>Total Marks</Card.Title>
+          <Card.Divider />
+          <Text>{test.total_marks}</Text>
+        </Card>
+
+        {test.Exam ? (
+          <Card>
+            <Card.Title>Exam: {test.Exam.name}</Card.Title>
+            <Card.Divider />
+            <Button
+              onPress={() => {
+                if (test.Exam) {
+                  navigation.navigate("ExamDetails", {
+                    examId: test.Exam.id,
+                  });
+                }
+              }}
+            >
+              View full schedule
+            </Button>
+          </Card>
+        ) : null}
+        {/* update test */}
+        <View style={{ width: "100%" }}>
+          <Dialog
+            isVisible={isTestCreateModal}
+            onBackdropPress={() => setIsTestCreateModal(false)}
+            animationType="fade"
+            overlayStyle={{ width: "95%", height: "85%" }}
+          >
+            <Dialog.Title
+              title={"Update Test"}
+              titleStyle={{ textAlign: "center" }}
+            />
+            <View style={{ marginTop: 4 }}></View>
+            <TestModal
+              onClose={() => setIsTestCreateModal(false)}
+              onSubmit={(test) => {
+                updateTest.mutate({
+                  id: testQuery.data.id,
+                  data: test,
+                });
+              }}
+              testData={testQuery.data ?? null}
+            />
+          </Dialog>
+        </View>
+
+        <View style={styles.gap} />
+      </ScrollView>
+      <SpeedDial
+        isOpen={isActionOpen}
+        icon={{ name: "menu", color: "white" }}
+        openIcon={{ name: "close", color: "white" }}
+        onOpen={() => setActionOpen(true)}
+        onClose={() => setActionOpen(false)}
+        buttonStyle={{ backgroundColor: "#4E48B2" }}
+      >
+        {[
+          <SpeedDial.Action
+            icon={{ name: "edit", color: "white" }}
+            title="Edit"
+            onPress={() => {
+              setIsTestCreateModal(true);
+            }}
+            buttonStyle={{ backgroundColor: "#4E48B2" }}
+            key={1}
+          />,
+          <SpeedDial.Action
+            icon={{ name: "delete", color: "white" }}
+            title="Delete"
+            onPress={() => {
+              Alert.alert("Delete", "Do you want to delete this homework?", [
+                {
+                  text: "Delete",
+                  style: "destructive",
+                  onPress(value) {
+                    deleteTest.mutate({ id: testId });
+                  },
+                },
+                {
+                  text: "Cancel",
+                  style: "cancel",
+                  onPress(value) {
+                    setActionOpen(false);
+                  },
+                },
+              ]);
+            }}
+            buttonStyle={{ backgroundColor: "red" }}
+            key={2}
+          />,
+        ]}
+      </SpeedDial>
+    </View>
   );
 };
 
@@ -193,5 +295,11 @@ const styles = StyleSheet.create({
   },
   subjectTeacher: {
     marginLeft: 8,
+  },
+  container: {
+    height: "100%",
+  },
+  gap: {
+    height: 100,
   },
 });

@@ -2,11 +2,13 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native"]
+  provider        = "prisma-client-js"
+  binaryTargets   = ["native"]
   // Error: Segmentation fault (core dumped).
   // Fix: https://github.com/prisma/prisma/issues/10649#issuecomment-1003642803
-  engineType    = "binary"
+  // Edit: Looks like this has been fixed, hence commented temporarily: https://github.com/prisma/prisma/issues/10649#issuecomment-1511410731
+  // engineType    = "binary"
+  previewFeatures = ["jsonProtocol"] // https://github.com/prisma/prisma/issues/18095
 }
 
 datasource db {
@@ -405,6 +407,7 @@ model ExamTest {
   Section          ClassSection?        @relation(fields: [section_id, class_id, school_id], references: [numeric_id, class_id, school_id], onDelete: Cascade, onUpdate: Cascade)
   date_of_exam     DateTime
   duration_minutes Int                  @default(0) @db.SmallInt
+  total_marks      Int
   creator_user_id  String?              @db.VarChar(32)
   CreatorUser      User?                @relation(fields: [creator_user_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
   created_at       DateTime             @default(now())
@@ -425,6 +428,7 @@ model TestSubjectMapping {
 model ExamTestResult {
   id                   String          @id @default(cuid()) @db.VarChar(32)
   test_id              String          @db.VarChar(32)
+  obtained_marks       Int
   Test                 ExamTest        @relation(fields: [test_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   student_id           String          @db.VarChar(32)
   Student              Student         @relation(fields: [student_id], references: [id], onDelete: Cascade, onUpdate: Cascade)

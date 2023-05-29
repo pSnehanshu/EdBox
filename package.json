@@ -13,21 +13,22 @@
     "expo": "yarn workspace schooltalk-app expo",
     "eas": "yarn workspace schooltalk-app eas",
     "prisma": "yarn workspace schooltalk-backend prisma",
-    "pretty": "prettier . -w"
+    "pretty": "prettier . -w",
+    "postinstall": "yarn prisma generate"
   },
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
   "dependencies": {
-    "core-js": "^3.30.1"
+    "core-js": "^3.30.1",
+    "prop-types": "^15.8.1"
   },
   "packageManager": "yarn@3.3.1",
   "devDependencies": {
     "prettier": "^2.8.7"
   },
   "resolutions": {
-    "react-native-raw-bottom-sheet@^2.2.0": "patch:react-native-raw-bottom-sheet@npm%3A2.2.0#./.yarn/patches/react-native-raw-bottom-sheet-npm-2.2.0-e9dc8fb4b8.patch",
-    "react-native-select-dropdown@^3.3.0": "patch:react-native-select-dropdown@npm%3A3.3.2#./.yarn/patches/react-native-select-dropdown-npm-3.3.2-cff73d7920.patch"
+    "react-native-raw-bottom-sheet@^2.2.0": "patch:react-native-raw-bottom-sheet@npm%3A2.2.0#./.yarn/patches/react-native-raw-bottom-sheet-npm-2.2.0-e9dc8fb4b8.patch"
   }
 }

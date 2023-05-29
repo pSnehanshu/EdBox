@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { parseISO } from "date-fns";
 import _ from "lodash";
-import { StaticRole } from "schooltalk-shared/misc";
+import { StaticRole, examTestSchema } from "schooltalk-shared/misc";
 import { z } from "zod";
 import prisma from "../../../prisma";
 import { authMiddleware, roleMiddleware, t } from "../../trpc";
@@ -11,18 +11,6 @@ const dateStringSchema = z
   .datetime()
   .default(() => new Date().toISOString())
   .transform((d) => parseISO(d));
-
-const examTestSchema = z.object({
-  name: z.string().max(100).trim().optional(),
-  class_id: z.number().int(),
-  section_id: z.number().int().optional(),
-  date: z
-    .string()
-    .datetime()
-    .transform((d) => parseISO(d)),
-  duration_minutes: z.number().int().min(0).default(0),
-  subjectIds: z.string().cuid().array(),
-});
 
 type ExamTest = NonNullable<
   Awaited<
@@ -100,6 +88,7 @@ const examRouter = t.router({
                           User: true,
                         },
                       },
+                      Class: true,
                     },
                   },
                 },
@@ -133,7 +122,8 @@ const examRouter = t.router({
           subject_name: input.name,
           class_id: input.class_id,
           section_id: input.section_id,
-          date_of_exam: input.date,
+          date_of_exam: input.date_of_exam,
+          total_marks: input.total_marks,
           duration_minutes: input.duration_minutes,
           school_id: ctx.user.school_id,
           creator_user_id: ctx.user.id,
@@ -160,69 +150,63 @@ const examRouter = t.router({
         id: z.string().cuid(),
         data: examTestSchema
           .pick({
-            date: true,
+            date_of_exam: true,
             name: true,
             duration_minutes: true,
             subjectIds: true,
+            total_marks: true,
           })
           .partial(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      // First fetch all subjects
+      const test = await prisma.examTest.findFirst({
+        where: {
+          id: input.id,
+          school_id: ctx.user.school_id,
+        },
+        include: {
+          Subjects: true,
+        },
+      });
+
+      if (!test || test.school_id !== ctx.user.school_id)
+        throw new TRPCError({ code: "NOT_FOUND" });
+
+      // Perform update inside a transaction
       await prisma.$transaction(async (tx) => {
-        await tx.examTest.updateMany({
-          where: {
-            id: input.id,
-            school_id: ctx.user.school_id,
-          },
+        // Update general details
+        await tx.examTest.update({
+          where: { id: test.id },
           data: {
             subject_name: input.data.name,
-            date_of_exam: input.data.date,
+            date_of_exam: input.data.date_of_exam,
             duration_minutes: input.data.duration_minutes,
+            total_marks: input.data.total_marks,
           },
         });
 
-        if (!input.data.subjectIds) return;
-
-        // First fetch all subjects
-        const test = await tx.examTest.findFirst({
-          where: {
-            id: input.id,
-            school_id: ctx.user.school_id,
-          },
-          include: {
-            Subjects: true,
-          },
-        });
-
-        if (!test) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Test not found",
-          });
-        }
+        // If no updates to subjects, skip
+        if (!input.data.subjectIds || input.data.subjectIds.length < 1) return;
 
         // Remove subjects that are not included in input
         const subjectsToRemove = test.Subjects.filter(
           (s) => !input.data.subjectIds?.includes(s.subject_id),
         );
 
-        await Promise.all(
-          subjectsToRemove.map((s) =>
-            tx.testSubjectMapping.delete({
-              where: {
-                test_id_subject_id: {
-                  subject_id: s.subject_id,
-                  test_id: test.id,
-                },
-              },
-            }),
-          ),
-        );
+        await tx.testSubjectMapping.deleteMany({
+          where: {
+            test_id: test.id,
+            subject_id: {
+              in: subjectsToRemove.map((s) => s.subject_id),
+            },
+          },
+        });
 
         // Attach the subjects not attached already
         const subjectsToAdd = input.data.subjectIds.filter(
-          (id) => test.Subjects.findIndex((s) => s.subject_id === id) >= 0,
+          (id) => test.Subjects.findIndex((s) => s.subject_id === id) < 0,
         );
 
         await tx.testSubjectMapping.createMany({
@@ -230,6 +214,7 @@ const examRouter = t.router({
             subject_id,
             test_id: test.id,
           })),
+          skipDuplicates: true,
         });
       });
     }),
@@ -316,8 +301,9 @@ const examRouter = t.router({
               subject_name: test.name,
               class_id: test.class_id,
               section_id: test.section_id,
-              date_of_exam: test.date,
+              date_of_exam: test.date_of_exam,
               duration_minutes: test.duration_minutes,
+              total_marks: test.total_marks,
               school_id: ctx.user.school_id,
               creator_user_id: ctx.user.id,
               Subjects: {

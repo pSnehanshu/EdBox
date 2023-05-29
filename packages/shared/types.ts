@@ -63,6 +63,8 @@ export type ExamItem = ArrayElement<
   RouterOutput["school"]["exam"]["fetchExamsAndTestsForStudent"]
 >;
 
+export type ExamTest = RouterOutput["school"]["exam"]["getTestInfo"];
+
 export type ClassWithSections = ArrayElement<
   RouterOutput["school"]["class"]["fetchClassesAndSections"]
 >;

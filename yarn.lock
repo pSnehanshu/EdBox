@@ -3407,6 +3407,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@expo/prebuild-config@npm:6.0.1":
+  version: 6.0.1
+  resolution: "@expo/prebuild-config@npm:6.0.1"
+  dependencies:
+    "@expo/config": ~8.0.0
+    "@expo/config-plugins": ~6.0.0
+    "@expo/config-types": ^48.0.0
+    "@expo/image-utils": 0.3.22
+    "@expo/json-file": ^8.2.37
+    debug: ^4.3.1
+    fs-extra: ^9.0.0
+    resolve-from: ^5.0.0
+    semver: 7.3.2
+    xml2js: 0.4.23
+  peerDependencies:
+    expo-modules-autolinking: ">=0.8.1"
+  checksum: 81ea222fe64ba18e958535c9ee36682ffc533daf1567910311fae19f4a6ded4712b1c0db997658e34911868d66bf911a6af02c5a7d8a8a942ef3b98b34c2986a
+  languageName: node
+  linkType: hard
+
 "@expo/rudder-sdk-node@npm:1.1.1":
   version: 1.1.1
   resolution: "@expo/rudder-sdk-node@npm:1.1.1"
@@ -3956,6 +3976,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@miblanchard/react-native-slider@npm:^2.3.1":
+  version: 2.3.1
+  resolution: "@miblanchard/react-native-slider@npm:2.3.1"
+  peerDependencies:
+    react: ">=16.8"
+    react-native: ">=0.59"
+  checksum: 0f66becdd3ef9dc238b6c816b143fc36927d140ff453e46033451a5799177a30f864f91d5d307b7424b49d07e3dac3ca2517e16777c1b34fd99d140cc56e16bc
+  languageName: node
+  linkType: hard
+
 "@nodelib/fs.scandir@npm:2.1.5":
   version: 2.1.5
   resolution: "@nodelib/fs.scandir@npm:2.1.5"
@@ -4023,31 +4053,31 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@prisma/client@npm:^4.12.0":
-  version: 4.12.0
-  resolution: "@prisma/client@npm:4.12.0"
+"@prisma/client@npm:^4.13.0":
+  version: 4.13.0
+  resolution: "@prisma/client@npm:4.13.0"
   dependencies:
-    "@prisma/engines-version": 4.12.0-67.659ef412370fa3b41cd7bf6e94587c1dfb7f67e7
+    "@prisma/engines-version": 4.13.0-50.1e7af066ee9cb95cf3a403c78d9aab3e6b04f37a
   peerDependencies:
     prisma: "*"
   peerDependenciesMeta:
     prisma:
       optional: true
-  checksum: bbd17500ee218a71e765a75b649c56bc0da1903e63d69d716b6a0e6995c8e1cc5265423ba1518a789c3e71b91d93e7937180db2d107e426bd4ad2f51998240f0
+  checksum: 74e2ede6308d6f70dc6244c34d13cf5f6c8da4f1a1ffe42a26192675ecac02733cb5482518d2a37fa057f160873fe8d42f5e3a08fc45d52b1eb386522bdbec0b
   languageName: node
   linkType: hard
 
-"@prisma/engines-version@npm:4.12.0-67.659ef412370fa3b41cd7bf6e94587c1dfb7f67e7":
-  version: 4.12.0-67.659ef412370fa3b41cd7bf6e94587c1dfb7f67e7
-  resolution: "@prisma/engines-version@npm:4.12.0-67.659ef412370fa3b41cd7bf6e94587c1dfb7f67e7"
-  checksum: 54615d6982db9c50eed6132ad7ab3f32ef93f64d36b7f932b0d6109cd54028ea459293833e48b849a5dd968d934bb3cfb275b9a9172934032f95355d6f663dcf
+"@prisma/engines-version@npm:4.13.0-50.1e7af066ee9cb95cf3a403c78d9aab3e6b04f37a":
+  version: 4.13.0-50.1e7af066ee9cb95cf3a403c78d9aab3e6b04f37a
+  resolution: "@prisma/engines-version@npm:4.13.0-50.1e7af066ee9cb95cf3a403c78d9aab3e6b04f37a"
+  checksum: cc583fe956b65fd4548082917f14ccf1c3c54d6b26623583f5e63298a8b4b5a492ba90597123af1fc272115621cb7340e2d708d5b5e252f59139b35f0df00abe
   languageName: node
   linkType: hard
 
-"@prisma/engines@npm:4.12.0":
-  version: 4.12.0
-  resolution: "@prisma/engines@npm:4.12.0"
-  checksum: 5d226a2c86bee5bc6fa34910ec9ba9a68a1c0248977d0da47964372edcfe773ee6c4bb00e244258f535570f018d883f0ab9e2677cf06471869bb8857f79880f6
+"@prisma/engines@npm:4.13.0":
+  version: 4.13.0
+  resolution: "@prisma/engines@npm:4.13.0"
+  checksum: 6c2315dc1e1a8a07f02a074ee6898a66a96a3bbbb4341224cb1dc966da3959c2ee7557131a2ce37fd559c53d210b904b72c4559474e017438e6753d480c3cfe1
   languageName: node
   linkType: hard
 
@@ -7505,15 +7535,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-splash-screen@npm:~0.18.1":
-  version: 0.18.1
-  resolution: "expo-splash-screen@npm:0.18.1"
+"expo-splash-screen@npm:~0.18.2":
+  version: 0.18.2
+  resolution: "expo-splash-screen@npm:0.18.2"
   dependencies:
     "@expo/configure-splash-screen": ^0.6.0
-    "@expo/prebuild-config": 6.0.0
+    "@expo/prebuild-config": 6.0.1
   peerDependencies:
     expo: "*"
-  checksum: 39a43bd3f779432721e845f171c51b0a64d713029ec14202e65a84434b09b9184dd6b173d13331321766854cf400186b3ae4aa8736d6fda40f380aae756d6673
+  checksum: 2c62d2989bf8945efb41056eb93b711cec260d24eed96a58789c961ab86fa3552466d221f1d3e2d926134136aa95337cdba94035d328a28c92793c31de95e718
   languageName: node
   linkType: hard
 
@@ -11899,15 +11929,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prisma@npm:^4.12.0":
-  version: 4.12.0
-  resolution: "prisma@npm:4.12.0"
+"prisma@npm:^4.13.0":
+  version: 4.13.0
+  resolution: "prisma@npm:4.13.0"
   dependencies:
-    "@prisma/engines": 4.12.0
+    "@prisma/engines": 4.13.0
   bin:
     prisma: build/index.js
     prisma2: build/index.js
-  checksum: 826b90901391eead0aa2e1ab4539474c308f8a956b480e87594b241bfaba423ebd781b8082fc329f4e7e780f3a7162a09ac61c367d3f43382e93d506e4a66c7c
+  checksum: b735dd19842da1dfe5b3411551665db5f2a419ee5e67136dfc2c8cae3c7fe0f885b472b0f9decb3adb4af83260c51a605ecca8f2194805804e020c382096a75a
   languageName: node
   linkType: hard
 
@@ -11977,7 +12007,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:*, prop-types@npm:15.8.1, prop-types@npm:^15.5.10, prop-types@npm:^15.8.1":
+"prop-types@npm:*, prop-types@npm:15.8.1, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -12278,15 +12308,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-modal-selector@npm:^2.1.2":
-  version: 2.1.2
-  resolution: "react-native-modal-selector@npm:2.1.2"
-  dependencies:
-    prop-types: ^15.5.10
-  checksum: c7b00ebceb6fe15e025ef1655483bc98fdb150453fb27e71d17a282a87317c5b1e242a1108f5247fac99594e6778470513d19c21e02eb2ce81f80688dd616419
-  languageName: node
-  linkType: hard
-
 "react-native-pager-view@npm:6.1.2":
   version: 6.1.2
   resolution: "react-native-pager-view@npm:6.1.2"
@@ -12354,20 +12375,6 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 94ab21378ee82765d329ccb8c92f5ca7cb15df916496fac7ce9a03c45e22579715000dae9c16f0a7d734a8fc1c2d0569fd82ecb71119a0b56046b5ea7533e7c2
-  languageName: node
-  linkType: hard
-
-"react-native-select-dropdown@npm:3.3.2":
-  version: 3.3.2
-  resolution: "react-native-select-dropdown@npm:3.3.2"
-  checksum: ba38e7189d3e53ca9ce615344d52235d2c306ca91de8b52da309f3e7c4cb1a6b6b30b34c27796bc3520cb7fb2a2c10ce3e4a4c56f08ad6054ef374878d44000f
-  languageName: node
-  linkType: hard
-
-"react-native-select-dropdown@patch:react-native-select-dropdown@npm%3A3.3.2#./.yarn/patches/react-native-select-dropdown-npm-3.3.2-cff73d7920.patch::locator=schooltalk%40workspace%3A.":
-  version: 3.3.2
-  resolution: "react-native-select-dropdown@patch:react-native-select-dropdown@npm%3A3.3.2#./.yarn/patches/react-native-select-dropdown-npm-3.3.2-cff73d7920.patch::version=3.3.2&hash=de7d8f&locator=schooltalk%40workspace%3A."
-  checksum: b705732549a01af2b7d53e0121e205891c4279190bff4179a3b90d3e56160ce33b5c3f9904f1af29a35f299ab274b413def796bff33851037c9b7bf24f54e879
   languageName: node
   linkType: hard
 
@@ -12443,9 +12450,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native@npm:0.71.6":
-  version: 0.71.6
-  resolution: "react-native@npm:0.71.6"
+"react-native@npm:0.71.7":
+  version: 0.71.7
+  resolution: "react-native@npm:0.71.7"
   dependencies:
     "@jest/create-cache-key-function": ^29.2.1
     "@react-native-community/cli": 10.2.2
@@ -12485,7 +12492,7 @@ __metadata:
     react: 18.2.0
   bin:
     react-native: cli.js
-  checksum: aadbd9b57dd9b10a41b60337ea1a4103e2fb2320784bf148100e807bd0a77929bdb310ea68d054165cd3c00647a3d020eecb0efb864cc7a93733b2d580e1e675
+  checksum: efd91d5560290b883e0d3d3482cc4657268c2e480171b63a0c6b7dc8f6b1331298feac7d9966e1831d95d9fee893dfa831252052561232843e4982880238f09e
   languageName: node
   linkType: hard
 
@@ -13072,6 +13079,7 @@ __metadata:
   dependencies:
     "@babel/core": ^7.21.4
     "@expo/vector-icons": ^13.0.0
+    "@miblanchard/react-native-slider": ^2.3.1
     "@react-native-async-storage/async-storage": 1.17.11
     "@react-navigation/bottom-tabs": ^6.5.7
     "@react-navigation/native": ^6.1.6
@@ -13105,7 +13113,7 @@ __metadata:
     expo-linking: ~4.0.1
     expo-notifications: ~0.18.1
     expo-secure-store: ~12.1.1
-    expo-splash-screen: ~0.18.1
+    expo-splash-screen: ~0.18.2
     expo-sqlite: ~11.1.1
     expo-status-bar: ~1.4.4
     expo-system-ui: ~2.2.1
@@ -13119,17 +13127,15 @@ __metadata:
     lottie-react-native: 5.1.4
     react: 18.2.0
     react-dom: 18.2.0
-    react-native: 0.71.6
+    react-native: 0.71.7
     react-native-date-picker: ^4.2.10
     react-native-hyperlink: ^0.0.22
     react-native-image-viewing: ^0.2.2
     react-native-loading-spinner-overlay: ^3.0.1
-    react-native-modal-selector: ^2.1.2
     react-native-pager-view: 6.1.2
     react-native-raw-bottom-sheet: ^2.2.0
     react-native-safe-area-context: 4.5.0
     react-native-screens: ~3.20.0
-    react-native-select-dropdown: ^3.3.0
     react-native-snap-carousel: 4.0.0-beta.6
     react-native-tab-view: ^3.5.1
     react-native-timeline-flatlist: ^0.8.0
@@ -13152,7 +13158,7 @@ __metadata:
   dependencies:
     "@aws-sdk/client-s3": ^3.312.0
     "@aws-sdk/s3-request-presigner": ^3.312.0
-    "@prisma/client": ^4.12.0
+    "@prisma/client": ^4.13.0
     "@trpc/server": ^10.20.0
     "@types/async": ^3.2.18
     "@types/express": ^4.17.17
@@ -13170,7 +13176,7 @@ __metadata:
     lodash: ^4.17.21
     nodemon: ^2.0.22
     parse-data-url: ^5.0.0
-    prisma: ^4.12.0
+    prisma: ^4.13.0
     schooltalk-shared: "*"
     socket.io: ^4.6.1
     ts-node: ^10.9.1
@@ -13195,6 +13201,7 @@ __metadata:
   dependencies:
     core-js: ^3.30.1
     prettier: ^2.8.7
+    prop-types: ^15.8.1
   languageName: unknown
   linkType: soft
 

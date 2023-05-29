@@ -3,7 +3,7 @@ name: build-deploy-backend
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
     branches:
       - main
 
@@ -41,14 +41,14 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           file: Dockerfile.backend
 
-      - name: Deploy to ElasticBeanstalk
-        uses: einaregilsson/beanstalk-deploy@v21
-        with:
-          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          application_name: ${{ vars.AWS_EB_APPLICATION_NAME }}
-          environment_name: ${{ vars.AWS_EB_ENVIRONMENT_NAME }}
-          version_label: ${{ github.ref_name }}
-          region: ${{ vars.AWS_REGION }}
-          deployment_package: Dockerrun.aws.json
-          version_description: ${{github.SHA}}
+      # - name: Deploy to ElasticBeanstalk
+      #   uses: einaregilsson/beanstalk-deploy@v21
+      #   with:
+      #     aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     application_name: ${{ vars.AWS_EB_APPLICATION_NAME }}
+      #     environment_name: ${{ vars.AWS_EB_ENVIRONMENT_NAME }}
+      #     version_label: ${{ github.ref_name }}
+      #     region: ${{ vars.AWS_REGION }}
+      #     deployment_package: Dockerrun.aws.json
+      #     version_description: ${{github.SHA}}

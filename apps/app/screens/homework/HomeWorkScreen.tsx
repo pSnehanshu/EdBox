@@ -2,14 +2,15 @@ import { useMemo } from "react";
 import { ActivityIndicator, Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { StaticRole } from "schooltalk-shared/misc";
-import { RootStackParamList } from "../../utils/types/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { List, Text, View } from "../../components/Themed";
 import { FAB } from "@rneui/themed";
 import { Homework } from "schooltalk-shared/types";
 import { format, parseISO, isPast } from "date-fns";
+import { RootStackParamList } from "../../utils/types/common";
+import { List, Text, View } from "../../components/Themed";
 import { trpc } from "../../utils/trpc";
 import { useConfig } from "../../utils/config";
+import { LottieAnimation } from "../../components/LottieAnimation";
 
 const pageLimit = 10;
 
@@ -94,6 +95,13 @@ export default function HomeWorkScreen({
           ) : null
         }
         contentContainerStyle={styles.list}
+        ListEmptyComponent={
+          <LottieAnimation
+            src={require("../../assets/lotties/person-floating.json")}
+            caption="No homeworks"
+            style={styles.empty}
+          />
+        }
       />
 
       {isTeacher && (
@@ -206,5 +214,9 @@ const styles = StyleSheet.create({
   homework_description: {
     fontSize: 12,
     color: "gray",
+  },
+  empty: {
+    height: "100%",
+    justifyContent: "center",
   },
 });

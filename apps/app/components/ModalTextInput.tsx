@@ -1,6 +1,6 @@
 import { Dialog } from "@rneui/themed";
 import { useEffect, useState } from "react";
-import { TextStyle, StyleProp } from "react-native";
+import { TextStyle, StyleProp, StyleSheet } from "react-native";
 import { TextInput } from "./Themed";
 
 interface ModalTextInputProps {
@@ -9,6 +9,7 @@ interface ModalTextInputProps {
   onChange?: (text: string) => void;
   title?: string;
   defaultValue?: string;
+  multiline?: boolean;
   style?: StyleProp<TextStyle>;
 }
 
@@ -31,18 +32,12 @@ export function ModalTextInput(props: ModalTextInputProps) {
       {props.title && <Dialog.Title title={props.title} />}
       <TextInput
         style={[
-          {
-            borderWidth: 0.5,
-            borderRadius: 4,
-            textAlignVertical: "top",
-            padding: 4,
-            maxHeight: 200,
-          },
+          props.multiline ? styles.input_multiline : styles.input_singleline,
           props.style,
         ]}
         autoFocus
-        multiline
-        numberOfLines={10}
+        multiline={!!props.multiline}
+        numberOfLines={props.multiline ? 10 : 1}
         value={value}
         onChangeText={setValue}
       />
@@ -60,3 +55,16 @@ export function ModalTextInput(props: ModalTextInputProps) {
     </Dialog>
   );
 }
+
+const styles = StyleSheet.create({
+  input_multiline: {
+    borderWidth: 0.5,
+    borderRadius: 4,
+    textAlignVertical: "top",
+    padding: 4,
+    maxHeight: 200,
+  },
+  input_singleline: {
+    borderBottomWidth: 0.5,
+  },
+});
