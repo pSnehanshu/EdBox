@@ -30,7 +30,7 @@ export async function sendSMS<T extends keyof AuthKeyTemplateInputs>(
     if (typeof value === "string") {
       const processedVal = value.trim().slice(0, 30);
 
-      // @ts-ignore
+      // @ts-expect-error It won't error, we are just populating the params here
       params[key] = processedVal;
     }
   }

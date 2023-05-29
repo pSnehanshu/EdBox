@@ -45,7 +45,7 @@ const classStdRouter = t.router({
       }
 
       // Now fetch students via batch
-      const batchId = section.Class.Batch?.numeric_id!;
+      const batchId = section.Class.Batch?.numeric_id;
 
       const where: Prisma.StudentWhereInput = {
         school_id: ctx.user.school_id,
@@ -61,7 +61,7 @@ const classStdRouter = t.router({
           },
           take: input.limit + 1,
           cursor:
-            typeof input.cursor === "number"
+            typeof input.cursor === "number" && typeof batchId === "number"
               ? {
                   roll_num_section_current_batch_num: {
                     current_batch_num: batchId,

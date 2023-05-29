@@ -10,7 +10,7 @@ import OtpPopup from "../../components/OtpPopup";
 import useColorScheme from "../../utils/useColorScheme";
 import { CustomSelect } from "../../components/CustomSelect";
 
-export default function LoginScreen({}: RootStackScreenProps<"Login">) {
+export default function LoginScreen(props: RootStackScreenProps<"Login">) {
   const config = useConfig();
 
   // Form States

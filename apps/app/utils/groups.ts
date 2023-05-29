@@ -176,7 +176,7 @@ export async function fetchUnseenGroupsInfo(
         if (err) {
           reject(err);
         } else if (resultSet && resultSet.length > 0) {
-          // @ts-ignore
+          // @ts-expect-error It is the problem of the typings of `WebSQLDatabase` that `error` is not defined
           if (!resultSet[0].error) {
             const result = resultSet[0] as ResultSet;
 

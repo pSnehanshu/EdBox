@@ -14,7 +14,8 @@
     "eas": "yarn workspace schooltalk-app eas",
     "prisma": "yarn workspace schooltalk-backend prisma",
     "pretty": "prettier . -w",
-    "postinstall": "yarn prisma generate"
+    "postinstall": "yarn prisma generate",
+    "lint": "eslint ."
   },
   "workspaces": [
     "apps/*",

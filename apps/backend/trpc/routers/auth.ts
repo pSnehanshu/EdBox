@@ -311,7 +311,7 @@ const authRouter = t.router({
       // Send the SMS with the OTP
       await Promise.allSettled(
         parentsPhoneNumbers.map((phone) =>
-          phone.number
+          phone.number && typeof student.User?.name === "string"
             ? // TODO: Add a limit or budget will be exhausted
               sendSMS(
                 {
@@ -321,7 +321,7 @@ const authRouter = t.router({
                 "login_otp_student",
                 {
                   otp,
-                  student: student.User?.name!,
+                  student: student.User?.name,
                   school: student.School.name,
                 },
               )

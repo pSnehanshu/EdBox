@@ -70,7 +70,7 @@ const attachmentsRouter = t.router({
       });
 
       // Attempt delete, but ignore when it fails
-      await s3client.send(deleteCommand).catch((err) => {});
+      await s3client.send(deleteCommand).catch(() => null);
     }),
   fetchFile: t.procedure
     .use(authMiddleware)

@@ -14,7 +14,12 @@ export const theme = createTheme({
 export const ColorSchemeContext = createContext<{
   scheme: ColorScheme;
   change: (scheme: ColorScheme) => void;
-}>({ scheme: "light", change: () => {} });
+}>({
+  scheme: "light",
+  change: () => {
+    //
+  },
+});
 
 // The useColorScheme value is always either light or dark, but the built-in
 // type suggests that it can be null. This will not happen in practice, so this

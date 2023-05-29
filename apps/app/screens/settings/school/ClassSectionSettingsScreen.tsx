@@ -219,7 +219,7 @@ function SectionsManager({
           <Dialog.Actions>
             <Dialog.Button
               title="SAVE"
-              onPress={() => {}}
+              onPress={() => null}
               buttonStyle={{
                 backgroundColor: "#09c",
                 borderRadius: 3,
@@ -372,7 +372,7 @@ export default function ClassSectionSettingsScreen() {
           setManageSections(false);
           setManageClass(null);
         }}
-        onSubmit={(sections) => {}}
+        onSubmit={(sections) => null}
       />
 
       <BottomSheet

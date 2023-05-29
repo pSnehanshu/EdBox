@@ -31,7 +31,7 @@ function greeting(date: Date): string {
   return "Hello";
 }
 
-export default function HomeTabScreen({}: RootTabScreenProps<"HomeTab">) {
+export default function HomeTabScreen(props: RootTabScreenProps<"HomeTab">) {
   const { user } = useCurrentUser();
   const school = useSchool();
   const scheme = useColorScheme();

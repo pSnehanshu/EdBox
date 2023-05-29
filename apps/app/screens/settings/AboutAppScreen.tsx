@@ -3,7 +3,7 @@ import { Text } from "../../components/Themed";
 // import * as Updates from "expo-updates";
 // import { Text } from "../../components/Themed";
 
-// @ts-ignore
+// @ts-expect-error Due to my laziness, I haven't declared `HermesInternal`, but I know it exists
 const isHermes = () => !!global.HermesInternal;
 
 export default function AboutAppScreen() {

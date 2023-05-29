@@ -97,7 +97,7 @@ export interface ClientToServerEvents {
   ) => void;
 }
 
-export interface InterServerEvents {}
+export type InterServerEvents = Record<string, never>;
 
 export interface SocketData {
   user: DBUser & { Staff: SchoolStaff | null };
