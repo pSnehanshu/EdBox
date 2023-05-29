@@ -1,10 +1,12 @@
 import { ScrollView } from "react-native";
 import { View, Text } from "../../components/Themed";
 import { Image, StyleSheet } from "react-native";
-import { Button } from "@rneui/themed";
+import { Button, Dialog } from "@rneui/themed";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useState } from "react";
 
 export default function ProfileScreen() {
+  const [isUpdateProfileModal, setIsUpdateProfileModal] = useState(false);
   return (
     <View style={{ flex: 1 }}>
       <View style={styles.container}>
@@ -20,11 +22,31 @@ export default function ProfileScreen() {
           <Text style={styles.value}>johndoe@gmail.com</Text>
           <Text style={styles.value}>Goalpara, Assam</Text>
           <View style={{ marginTop: 8 }}>
-            <Button radius={"sm"} type="outline">
+            <Button
+              radius={"sm"}
+              type="outline"
+              onPress={() => {
+                setIsUpdateProfileModal(true);
+              }}
+            >
               <Text style={styles.button_text}>Update</Text>
             </Button>
           </View>
         </View>
+      </View>
+      <View style={{ width: "100%" }}>
+        <Dialog
+          isVisible={isUpdateProfileModal}
+          onBackdropPress={() => setIsUpdateProfileModal(false)}
+          animationType="fade"
+          //   overlayStyle={{ width: "95%", height: "85%" }}
+        >
+          <Dialog.Title
+            title={"Update Profile"}
+            titleStyle={{ textAlign: "center" }}
+          />
+          <View style={{ marginTop: 4 }}></View>
+        </Dialog>
       </View>
     </View>
   );
