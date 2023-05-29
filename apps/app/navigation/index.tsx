@@ -39,6 +39,7 @@ import DisplayHomeworkScreen from "../screens/homework/DisplayHomeworkScreen";
 import UpdateHomeworkScreen from "../screens/homework/UpdateHomeworkScreen";
 import CreateExamScreen from "../screens/exam/CreateExamScreen";
 import CreateTestScreen from "../screens/exam/CreateTestScreen";
+import ProfileScreen from "../screens/settings/ProfileScreen";
 
 export default function Navigation({
   colorScheme,
@@ -257,6 +258,14 @@ function RootNavigator() {
             options={{
               headerShown: true,
               title: "About this app",
+            }}
+          />
+          <Stack.Screen
+            name="ProfileScreen"
+            component={ProfileScreen}
+            options={{
+              headerShown: true,
+              title: "My Account",
             }}
           />
         </Stack.Navigator>

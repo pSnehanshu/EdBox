@@ -36,7 +36,8 @@ export default function SettingsScreen() {
         />
       ),
       onPress() {
-        alert("Account Settings");
+        // alert("Account Settings");
+        navigation.navigate("ProfileScreen");
       },
     });
 
