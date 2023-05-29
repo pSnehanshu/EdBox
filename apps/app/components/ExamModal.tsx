@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FAB, ListItem, Dialog, Button, Icon } from "@rneui/themed";
+import { FAB, ListItem, Dialog, Button } from "@rneui/themed";
 import React from "react";
 import { List, Text, View } from "./Themed";
 import useColorScheme from "../utils/useColorScheme";
@@ -13,7 +13,6 @@ import { ModalTextInput } from "./ModalTextInput";
 import TestModal from "../components/TestModal";
 import type { ExamItem } from "schooltalk-shared/types";
 import { LottieAnimation } from "./LottieAnimation";
-import { number } from "prop-types";
 
 interface ExamModalProps {
   displayAddButton: boolean;

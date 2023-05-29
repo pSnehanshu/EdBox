@@ -89,7 +89,7 @@ const peopleRouter = t.router({
   getStudentClass: t.procedure.use(studentMiddleware).query(async ({ ctx }) => {
     const student = await prisma.student.findFirst({
       where: {
-        id: ctx.user.student_id!,
+        id: ctx.user.Student?.id,
         school_id: ctx.user.school_id,
       },
       select: {

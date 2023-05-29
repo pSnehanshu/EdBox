@@ -23,7 +23,7 @@ import { NumberMonthMapping } from "schooltalk-shared/misc";
 import { LottieAnimation } from "../../components/LottieAnimation";
 
 /** Height of a student row */
-const STUDENT_ITEM_HEIGHT: number = 200;
+const STUDENT_ITEM_HEIGHT = 200;
 
 interface StudentItemProps {
   student: Student;
@@ -302,7 +302,7 @@ export default function AttendanceTakerScreen({
         animated: true,
       });
     },
-    onError(error, variables, context) {
+    onError(error) {
       console.error(error);
       Toast.show({
         position: "bottom",

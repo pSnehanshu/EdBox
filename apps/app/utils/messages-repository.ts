@@ -303,44 +303,44 @@ export class MessagesRepository {
    * Insert messages (and groups) to SQLite.
    * @param messages
    */
-  insertMessagesToDB(
+  async insertMessagesToDB(
     messages: Message[],
     trpcUtils: ReturnType<typeof trpc.useContext>,
   ): Promise<void> {
-    return new Promise<void>(async (resolve, reject) => {
-      if (messages.length < 1) return resolve();
+    if (messages.length < 1) return;
 
-      try {
-        // Fetch all unseen groups, groups that don't exist in the local SQLite
-        const groupsToInsert = await fetchUnseenGroupsInfo(
-          this.db,
-          messages
-            .map((m) => m.group_identifier)
-            .filter((iden) => !!iden) as string[],
-          trpcUtils,
+    try {
+      // Fetch all unseen groups, groups that don't exist in the local SQLite
+      const groupsToInsert = await fetchUnseenGroupsInfo(
+        this.db,
+        messages
+          .map((m) => m.group_identifier)
+          .filter((iden) => !!iden) as string[],
+        trpcUtils,
+      );
+      // Insert those groups
+      insertGroups(this.db, Object.values(groupsToInsert));
+    } catch (error) {
+      console.error("Failed to fetch or save unseen groups", error);
+    }
+
+    const insertMessagesArgs: Array<string | number | null> = [];
+    const insertMessagesSQL = `INSERT OR REPLACE INTO messages (id, obj, created_at, group_identifier, sort_key) VALUES ${messages
+      .map((m) => {
+        insertMessagesArgs.push(
+          // These props will probably never be undefined, but this ?? is here
+          // for safety and/or to satisfy TypeScript.
+          m.id ?? Math.random().toString(),
+          JSON.stringify(m),
+          m.created_at ?? new Date().toISOString(),
+          m.group_identifier ?? "",
+          m.sort_key ?? Math.round(Math.random()),
         );
-        // Insert those groups
-        insertGroups(this.db, Object.values(groupsToInsert));
-      } catch (error) {
-        console.error("Failed to fetch or save unseen groups", error);
-      }
+        return "(?,?,?,?,?)";
+      })
+      .join(",")}`;
 
-      const insertMessagesArgs: Array<string | number | null> = [];
-      const insertMessagesSQL = `INSERT OR REPLACE INTO messages (id, obj, created_at, group_identifier, sort_key) VALUES ${messages
-        .map((m) => {
-          insertMessagesArgs.push(
-            // These props will probably never be undefined, but this ?? is here
-            // for safety and/or to satisfy TypeScript.
-            m.id ?? Math.random().toString(),
-            JSON.stringify(m),
-            m.created_at ?? new Date().toISOString(),
-            m.group_identifier ?? "",
-            m.sort_key ?? Math.round(Math.random()),
-          );
-          return "(?,?,?,?,?)";
-        })
-        .join(",")}`;
-
+    return new Promise<void>((resolve, reject) => {
       this.db.transaction(
         (tx) => {
           tx.executeSql(insertMessagesSQL, insertMessagesArgs);

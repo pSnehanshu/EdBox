@@ -87,7 +87,7 @@ export function useLogout() {
         },
       );
     },
-    onError(error, variables, context) {
+    onError() {
       Toast.show({
         type: "error",
         text1: "Failed to logout",

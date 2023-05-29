@@ -44,7 +44,7 @@ export default function DisplayHomeworkScreen({
 
   // Delete
   const deleteMutation = trpc.school.homework.delete.useMutation({
-    async onSuccess(data, variables, context) {
+    async onSuccess() {
       await utils.school.homework.fetchForSection.invalidate();
       await utils.school.homework.fetchForTeacher.invalidate();
 
@@ -54,7 +54,7 @@ export default function DisplayHomeworkScreen({
         navigation.replace("HomeWorkScreen");
       }
     },
-    onError(error, variables, context) {
+    onError() {
       //
     },
   });
@@ -75,7 +75,7 @@ export default function DisplayHomeworkScreen({
   const isEditable = isTeacher && user?.teacher_id === homework?.teacher_id;
 
   const [pressedFileId, setPressedFileId] = useState<string | null>(null);
-  const handleFilePress = (file: UploadedFile, index: number) => {
+  const handleFilePress = (file: UploadedFile) => {
     const mime = file.mime ? MIMEType.parse(file.mime) : null;
 
     if (mime?.type === "image") {
@@ -250,14 +250,14 @@ export default function DisplayHomeworkScreen({
                   {
                     text: "Delete",
                     style: "destructive",
-                    onPress(value) {
+                    onPress() {
                       deleteMutation.mutate({ homework_id: homeworkId });
                     },
                   },
                   {
                     text: "Cancel",
                     style: "cancel",
-                    onPress(value) {
+                    onPress() {
                       setActionOpen(false);
                     },
                   },

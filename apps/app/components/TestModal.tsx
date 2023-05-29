@@ -12,7 +12,7 @@ import {
 import { trpc } from "../utils/trpc";
 import { Switch } from "@rneui/themed";
 import { CustomSelect } from "./CustomSelect";
-import { Pressable, StyleSheet } from "react-native";
+import { Pressable } from "react-native";
 import { useConfig } from "../utils/config";
 import DatePicker from "react-native-date-picker";
 import { format, parseISO } from "date-fns";
@@ -36,7 +36,6 @@ export default function TestModal({
 
   const [multiselectSub, setMultiselectSub] = useState(false);
   const scheme = useColorScheme();
-  const iconColor = scheme === "dark" ? "white" : "black";
 
   const [mark, setMark] = useState(testData?.total_marks ?? 25);
   const [duration, setDuration] = useState(testData?.duration_minutes ?? 30);
@@ -261,35 +260,3 @@ export default function TestModal({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  button_container: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    marginHorizontal: 16,
-    marginVertical: 10,
-  },
-  button: {
-    marginTop: 10,
-    backgroundColor: "#4E48B2",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 3,
-  },
-  text_input: {
-    borderWidth: 1,
-    width: "80%",
-    borderRadius: 3,
-    paddingHorizontal: 10,
-  },
-  text_input_font: {
-    fontSize: 16,
-  },
-  slider_container: {
-    flex: 1,
-    marginLeft: 10,
-    marginRight: 10,
-    alignItems: "stretch",
-    justifyContent: "center",
-  },
-});

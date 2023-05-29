@@ -3,7 +3,7 @@ import { CreateExpressContextOptions } from "@trpc/server/adapters/express";
 import { isPast } from "date-fns";
 import prisma from "../prisma";
 
-export async function createContext({ req, res }: CreateExpressContextOptions) {
+export async function createContext({ req }: CreateExpressContextOptions) {
   const sessionId = req.headers["x-session-id"];
 
   // Session ID not submitted

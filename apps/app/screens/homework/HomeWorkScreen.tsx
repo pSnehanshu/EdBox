@@ -43,7 +43,9 @@ export default function HomeWorkScreen({
     trpc.school.homework.fetchForSection.useInfiniteQuery(
       {
         limit: pageLimit,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
         class_id: classAndSectionQuery.data?.Class.numeric_id!,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
         section_id: classAndSectionQuery.data?.Section?.numeric_id!,
       },
       {

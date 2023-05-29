@@ -66,7 +66,9 @@ export type GroupIdentifier = z.infer<typeof GroupIdentifier>;
  * @param obj
  * @returns
  */
-export function convertObjectToOrderedQueryString(obj: { [k: string]: any }) {
+export function convertObjectToOrderedQueryString(obj: {
+  [k: string]: string | number;
+}) {
   const finalString: string[] = [];
 
   Object.keys(obj)

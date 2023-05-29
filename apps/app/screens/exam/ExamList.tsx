@@ -2,7 +2,6 @@ import React, { useMemo, useState } from "react";
 import { Pressable, SafeAreaView, StyleSheet } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
 import type { ExamItem } from "schooltalk-shared/types";
-import _ from "lodash";
 import { format, parseISO } from "date-fns";
 import { ListItem, Divider, SpeedDial, Dialog } from "@rneui/themed";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
@@ -140,10 +139,10 @@ const ExamListScreen: React.FC<
       : null;
 
   const updateExam = trpc.school.exam.updateExam.useMutation({
-    onSuccess(data) {
+    onSuccess() {
       query?.refetch();
     },
-    onError(error, variables, context) {
+    onError(error) {
       alert(error.message);
     },
   });
@@ -222,7 +221,7 @@ const ExamListScreen: React.FC<
         <View style={{ height: "90%" }}>
           <ExamModal
             displayAddButton={false}
-            onSubmit={(examName, tests) => {
+            onSubmit={(examName) => {
               if (exam)
                 updateExam.mutate({
                   id: exam.id,

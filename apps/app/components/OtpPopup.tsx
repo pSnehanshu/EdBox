@@ -29,7 +29,7 @@ export default function OtpPopup({
     async onSuccess(data) {
       setAuthToken(data.token, new Date(data.expiry_date));
     },
-    onError(error, variables, context) {
+    onError(error) {
       console.error(error);
       Alert.alert("Invalid OTP", "Looks like the OTP you entered is incorrect");
       setOtp(null);

@@ -88,11 +88,7 @@ interface SectionsManagerProps {
   onClose: () => void;
   onSubmit: (sections: ClassStd["Sections"]) => void;
 }
-function SectionsManager({
-  classStd,
-  onClose,
-  onSubmit,
-}: SectionsManagerProps) {
+function SectionsManager({ classStd, onClose }: SectionsManagerProps) {
   const color = useColorScheme();
   const givenSections: Section[] = classStd?.Sections ?? [];
   const [isAddNew, setAddNew] = useState(false);
@@ -219,7 +215,7 @@ function SectionsManager({
           <Dialog.Actions>
             <Dialog.Button
               title="SAVE"
-              onPress={() => {}}
+              onPress={() => null}
               buttonStyle={{
                 backgroundColor: "#09c",
                 borderRadius: 3,
@@ -372,7 +368,7 @@ export default function ClassSectionSettingsScreen() {
           setManageSections(false);
           setManageClass(null);
         }}
-        onSubmit={(sections) => {}}
+        onSubmit={() => null}
       />
 
       <BottomSheet

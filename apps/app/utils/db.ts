@@ -143,7 +143,7 @@ function migrate(db: SQLite.WebSQLDatabase) {
             pendingMigrations.map((m) => m.name),
           );
         },
-        (tx, err) => {
+        () => {
           return true;
         },
       );

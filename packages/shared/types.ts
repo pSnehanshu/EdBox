@@ -97,6 +97,7 @@ export interface ClientToServerEvents {
   ) => void;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface InterServerEvents {}
 
 export interface SocketData {

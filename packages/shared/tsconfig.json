@@ -11,5 +11,6 @@
   },
   "ts-node": {
     "files": true
-  }
+  },
+  "include": ["*/**/*.ts", "*.ts"]
 }

@@ -1,36 +1,23 @@
-import { MaterialIcons } from "@expo/vector-icons";
-import { useCallback, useMemo, useState } from "react";
-import {
-  Modal,
-  Pressable,
-  StyleSheet,
-  ViewStyle,
-  StyleProp,
-  ActivityIndicator,
-} from "react-native";
-import type { ListRenderItem } from "@shopify/flash-list";
-import type { ArrayElement } from "schooltalk-shared/types";
+import { useState } from "react";
+import { Pressable, StyleSheet, ViewStyle, StyleProp } from "react-native";
 import { Dialog, ListItem } from "@rneui/themed";
 import { Slider } from "@miblanchard/react-native-slider";
-import { List, Text, TextInput, View } from "./Themed";
-import useColorScheme from "../utils/useColorScheme";
+import { TextInput, View } from "./Themed";
 
-interface SelectProps<T = unknown> {
+interface SelectProps {
   title: string;
   style?: StyleProp<ViewStyle>;
   isLoading?: boolean;
 }
-interface SingleSelectProps<T = unknown> extends SelectProps<T> {
+interface SingleSelectProps extends SelectProps {
   onSetValue: (value: number) => void;
   defaultValue: number;
   minValue: number;
   maxValue: number;
 }
 
-type CustomSelectProps<T> = SingleSelectProps<T>;
-
-export function CustomSlider<T>(
-  props: CustomSelectProps<T> & { children?: React.ReactNode },
+export function CustomSlider(
+  props: SingleSelectProps & { children?: React.ReactNode },
 ) {
   const [isVisible, setIsVisible] = useState(false);
   return (
@@ -65,8 +52,8 @@ export function CustomSlider<T>(
   );
 }
 
-function ModalSelect<T>(
-  props: CustomSelectProps<T> & {
+function ModalSelect(
+  props: SingleSelectProps & {
     isVisible: boolean;
     defaultValue: number;
     onClose?: () => void;
@@ -75,9 +62,6 @@ function ModalSelect<T>(
     maxValue: number;
   },
 ) {
-  const scheme = useColorScheme();
-  const color = scheme === "dark" ? "white" : "black";
-
   return (
     <Dialog
       isVisible={props.isVisible}

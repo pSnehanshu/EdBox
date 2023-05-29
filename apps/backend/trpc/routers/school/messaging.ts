@@ -654,7 +654,7 @@ const messagingRouter = t.router({
       let nextCursor: string | undefined = undefined;
       if (messages.length > input.limit) {
         const nextItem = messages.pop();
-        nextCursor = nextItem!.sort_key;
+        if (nextItem) nextCursor = nextItem.sort_key;
       }
 
       return { messages, cursor: nextCursor };

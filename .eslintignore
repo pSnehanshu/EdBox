@@ -1,0 +1,6 @@
+.eslintrc.cjs
+apps/app/metro.config.js
+apps/app/babel.config.js
+apps/app/app.config.js
+apps/app/*/**/__tests__/*.js
+reset.d.ts
