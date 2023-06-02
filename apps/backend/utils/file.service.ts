@@ -177,3 +177,11 @@ export async function consumeMultiplePermissions(
   //
   return files;
 }
+
+export async function deleteFile(fileId: string) {
+  // TODO: Delete from s3
+
+  await prisma.uploadedFile.delete({
+    where: { id: fileId },
+  });
+}
