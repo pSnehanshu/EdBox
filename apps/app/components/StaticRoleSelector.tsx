@@ -15,28 +15,30 @@ export function StaticRoleSelector({ onChange }: StaticRoleSelector) {
   const scheme = useColorScheme();
   const color = scheme === "dark" ? "white" : "black";
 
-  const { user } = useCurrentUser();
+  const { isLoggedIn, user } = useCurrentUser();
   const config = useConfig();
   const setConfig = useConfigUpdate();
 
   const availableRoles = useMemo<StaticRole[]>(() => {
+    if (!isLoggedIn) return [];
+
     const roles: StaticRole[] = [];
-    if (user?.Teacher?.id) roles.push(StaticRole.teacher);
-    if (user?.Student?.id) roles.push(StaticRole.student);
-    if (user?.Parent?.id) roles.push(StaticRole.parent);
-    if (user?.Staff?.role === "principal") roles.push(StaticRole.principal);
-    if (user?.Staff?.role === "vice_principal")
+    if (user.Teacher?.id) roles.push(StaticRole.teacher);
+    if (user.Student?.id) roles.push(StaticRole.student);
+    if (user.Parent?.id) roles.push(StaticRole.parent);
+    if (user.Staff?.role === "principal") roles.push(StaticRole.principal);
+    if (user.Staff?.role === "vice_principal")
       roles.push(StaticRole.vice_principal);
-    if (user?.Staff?.role === "others") roles.push(StaticRole.staff);
+    if (user.Staff?.role === "others") roles.push(StaticRole.staff);
 
     return roles;
-  }, [user]);
+  }, [user, isLoggedIn]);
 
   useEffect(() => {
-    if (config.activeStaticRole === StaticRole.none && user) {
+    if (config.activeStaticRole === StaticRole.none && isLoggedIn) {
       setConfig({ activeStaticRole: getUserRoleHierarchical(user) });
     }
-  }, [config.activeStaticRole, user]);
+  }, [config.activeStaticRole, user, isLoggedIn]);
 
   return (
     <View>

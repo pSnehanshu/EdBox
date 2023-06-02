@@ -38,10 +38,8 @@ function _ChatMessage({ message }: ChatMessageProps) {
     return `${format(date, "dd/MM/yy")} ${time}`;
   }, [message.created_at]);
 
-  if (!user) return null;
-
   const sender = message.Sender;
-  const isSentByMe = user.id === sender?.id;
+  const isSentByMe = user?.id === sender?.id;
 
   const bgColor = useMemo(
     () => (isSentByMe ? "#005d4b" : "#1f2c34"),

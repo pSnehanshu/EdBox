@@ -118,10 +118,20 @@ export function useLogout() {
 /**
  * Cache user object to avoid fetching from AsyncStorage over and over
  */
-let globalUser: User | undefined = undefined;
+let globalUser: User | null = null;
 
-export function useCurrentUser() {
-  const [user, setUser] = useState<User | undefined>(globalUser);
+type LoggedIn = {
+  isLoggedIn: true;
+  user: User;
+};
+
+type NotLoggedIn = {
+  isLoggedIn: false;
+  user: null;
+};
+
+export function useCurrentUser(): LoggedIn | NotLoggedIn {
+  const [user, setUser] = useState<User | null>(globalUser);
   const whoami = trpc.auth.whoami.useQuery(undefined, {
     retry: false,
     staleTime: 60 * 60 * 1000,
@@ -154,22 +164,31 @@ export function useCurrentUser() {
           const error = whoami.error;
           if (error.data?.code === "UNAUTHORIZED") {
             // Session is invalid
-            setUser(undefined);
+            setUser(null);
             await AsyncStorage.removeItem(USER);
-            globalUser = undefined;
+            globalUser = null;
           }
         } else {
           // Save locally
-          setUser(whoami.data);
+          setUser(whoami.data ?? null);
           await AsyncStorage.setItem(USER, JSON.stringify(whoami.data));
-          globalUser = whoami.data;
+          globalUser = whoami.data ?? null;
         }
       }
     })();
   }, [whoami.isFetching]);
 
+  const isLoggedIn = !!user;
+
+  if (isLoggedIn) {
+    return {
+      isLoggedIn,
+      user,
+    };
+  }
+
   return {
-    isLoggedIn: !!user,
-    user,
+    isLoggedIn,
+    user: null,
   };
 }

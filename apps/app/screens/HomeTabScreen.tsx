@@ -31,13 +31,15 @@ function greeting(date: Date): string {
 }
 
 export default function HomeTabScreen() {
-  const { user } = useCurrentUser();
+  const { isLoggedIn, user } = useCurrentUser();
   const school = useSchool();
   const scheme = useColorScheme();
   const color = scheme === "dark" ? "black" : "white";
   const config = useConfig();
 
   const [isVisible, setIsVisible] = useState(false);
+
+  if (!isLoggedIn) return null;
 
   return (
     <View style={styles.container}>
@@ -47,7 +49,7 @@ export default function HomeTabScreen() {
           <View style={[styles.header_container, { backgroundColor: color }]}>
             <View style={styles.greeting}>
               <Text style={styles.text_head}>
-                {greeting(new Date())}, {user?.name.split(" ")[0]}
+                {greeting(new Date())}, {user.name.split(" ")[0]}
               </Text>
               <Text style={styles.text}>
                 Welcome to {school?.name ?? "your school"}
