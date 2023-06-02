@@ -5,7 +5,7 @@ import { dateOfAttendance, NumberMonthMapping } from "schooltalk-shared/misc";
 import {
   router,
   procedure,
-  authMiddleware,
+  protectedProcedure,
   teacherMiddleware,
 } from "../../trpc";
 import prisma from "../../../prisma";
@@ -151,8 +151,7 @@ const attendanceRouter = router({
 
       return id;
     }),
-  fetchForPeriod: procedure
-    .use(authMiddleware)
+  fetchForPeriod: protectedProcedure
     .input(
       z.object({
         periodId: z.string().cuid(),

@@ -1,5 +1,5 @@
 import { PushTokenType, User } from "@prisma/client";
-import { router, procedure, authMiddleware } from "../trpc";
+import { router, procedure, protectedProcedure } from "../trpc";
 import { z } from "zod";
 import prisma from "../../prisma";
 import { TRPCError } from "@trpc/server";
@@ -197,13 +197,10 @@ const authRouter = router({
         expiry_date: session.expiry_date,
       };
     }),
-  whoami: procedure
-    .use(authMiddleware)
-    .query(({ ctx }) =>
-      _.omit(ctx.user, ["password", "otp", "otp_expiry", "School"]),
-    ),
-  logout: procedure
-    .use(authMiddleware)
+  whoami: protectedProcedure.query(({ ctx }) =>
+    _.omit(ctx.user, ["password", "otp", "otp_expiry", "School"]),
+  ),
+  logout: protectedProcedure
     .input(
       z.object({
         pushToken: z

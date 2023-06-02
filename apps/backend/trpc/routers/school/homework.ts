@@ -8,7 +8,7 @@ import { consumeMultiplePermissions } from "../../../utils/file.service";
 import {
   router,
   procedure,
-  authMiddleware,
+  protectedProcedure,
   teacherMiddleware,
   studentMiddleware,
 } from "../../trpc";
@@ -19,8 +19,7 @@ const DateSchema = z
   .transform((d) => parseISO(d));
 
 const homeworkRouter = router({
-  fetchForSection: procedure
-    .use(authMiddleware)
+  fetchForSection: protectedProcedure
     .input(
       z.object({
         section_id: z.number().int(),
@@ -152,8 +151,7 @@ const homeworkRouter = router({
 
       return { data: homeworks, total, nextCursor };
     }),
-  fetchHomework: procedure
-    .use(authMiddleware)
+  fetchHomework: protectedProcedure
     .input(
       z.object({
         homework_id: z.string().cuid(),

@@ -5,7 +5,7 @@ import { dateOfAttendance } from "schooltalk-shared/misc";
 import { z } from "zod";
 import prisma from "../../../prisma";
 import {
-  authMiddleware,
+  protectedProcedure,
   principalMiddleware,
   studentMiddleware,
   router,
@@ -187,8 +187,7 @@ const routineRouter = router({
         typeof periods | undefined
       >;
     }),
-  fetchPeriodStudents: procedure
-    .use(authMiddleware)
+  fetchPeriodStudents: protectedProcedure
     .input(
       z.object({
         periodId: z.string().cuid(),

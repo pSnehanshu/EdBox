@@ -1,11 +1,10 @@
 import { z } from "zod";
 import type { Prisma } from "@prisma/client";
 import prisma from "../../../prisma";
-import { authMiddleware, router, procedure } from "../../trpc";
+import { protectedProcedure, router, procedure } from "../../trpc";
 
 const classStdRouter = router({
-  fetchSectionStudents: procedure
-    .use(authMiddleware)
+  fetchSectionStudents: protectedProcedure
     .input(
       z.object({
         sectionId: z.number().int(),

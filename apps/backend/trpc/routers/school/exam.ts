@@ -4,7 +4,12 @@ import _ from "lodash";
 import { StaticRole, examTestSchema } from "schooltalk-shared/misc";
 import { z } from "zod";
 import prisma from "../../../prisma";
-import { authMiddleware, roleMiddleware, router, procedure } from "../../trpc";
+import {
+  protectedProcedure,
+  roleMiddleware,
+  router,
+  procedure,
+} from "../../trpc";
 
 const dateStringSchema = z
   .string()
@@ -54,8 +59,7 @@ type ExamItem =
     };
 
 const examRouter = router({
-  getTestInfo: procedure
-    .use(authMiddleware)
+  getTestInfo: protectedProcedure
     .input(
       z.object({
         testId: z.string().cuid(),
@@ -240,8 +244,7 @@ const examRouter = router({
         },
       });
     }),
-  getExamInfo: procedure
-    .use(authMiddleware)
+  getExamInfo: protectedProcedure
     .input(
       z.object({
         examId: z.string().cuid(),

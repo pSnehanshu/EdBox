@@ -9,7 +9,7 @@ const t = initTRPC.context<Context>().create();
 export const router = t.router;
 export const procedure = t.procedure;
 
-export const authMiddleware = t.middleware(({ ctx, next }) => {
+const authMiddleware = t.middleware(({ ctx, next }) => {
   if (!ctx.session) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
@@ -24,6 +24,8 @@ export const authMiddleware = t.middleware(({ ctx, next }) => {
     },
   });
 });
+
+export const protectedProcedure = procedure.use(authMiddleware);
 
 /** Verify that the user is a teacher */
 export const teacherMiddleware = authMiddleware.unstable_pipe(
