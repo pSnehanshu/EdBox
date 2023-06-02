@@ -10,10 +10,10 @@ import {
   GroupDefinition,
   groupIdentifierSchema,
 } from "schooltalk-shared/group-identifier";
-import { t, authMiddleware } from "../../trpc";
+import { router, procedure, authMiddleware } from "../../trpc";
 
-const messagingRouter = t.router({
-  fetchGroups: t.procedure
+const messagingRouter = router({
+  fetchGroups: procedure
     .use(authMiddleware)
     .input(
       z.object({
@@ -28,7 +28,7 @@ const messagingRouter = t.router({
         page: input.page,
       }),
     ),
-  createGroup: t.procedure
+  createGroup: procedure
     .use(authMiddleware)
     .input(
       z.object({
@@ -52,7 +52,7 @@ const messagingRouter = t.router({
 
       return group;
     }),
-  addMemberToGroup: t.procedure
+  addMemberToGroup: procedure
     .use(authMiddleware)
     .input(
       z.object({
@@ -134,7 +134,7 @@ const messagingRouter = t.router({
 
       return member;
     }),
-  removeMemberFromGroup: t.procedure
+  removeMemberFromGroup: procedure
     .use(authMiddleware)
     .input(
       z.object({
@@ -220,7 +220,7 @@ const messagingRouter = t.router({
         },
       });
     }),
-  makeMemberAdmin: t.procedure
+  makeMemberAdmin: procedure
     .use(authMiddleware)
     .input(
       z.object({
@@ -305,7 +305,7 @@ const messagingRouter = t.router({
         });
       }
     }),
-  giveUpAdminRole: t.procedure
+  giveUpAdminRole: procedure
     .use(authMiddleware)
     .input(
       z.object({
@@ -356,7 +356,7 @@ const messagingRouter = t.router({
         data: { is_admin: false },
       });
     }),
-  updateGroupDetails: t.procedure
+  updateGroupDetails: procedure
     .use(authMiddleware)
     .input(
       z.object({
@@ -418,7 +418,7 @@ const messagingRouter = t.router({
 
       return updatedGroup;
     }),
-  fetchGroupInfo: t.procedure
+  fetchGroupInfo: procedure
     .use(authMiddleware)
     .input(
       z.object({
@@ -590,7 +590,7 @@ const messagingRouter = t.router({
         };
       }
     }),
-  fetchGroupMessages: t.procedure
+  fetchGroupMessages: procedure
     .use(authMiddleware)
     .input(
       z.object({

@@ -8,41 +8,40 @@ import {
   authMiddleware,
   principalMiddleware,
   studentMiddleware,
-  t,
+  router,
+  procedure,
   teacherMiddleware,
 } from "../../trpc";
 import classStdRouter from "./class-std";
 
-const routineRouter = t.router({
-  fetchForSchool: t.procedure
-    .use(principalMiddleware)
-    .query(async ({ ctx }) => {
-      const school = await prisma.school.findUnique({
-        where: {
-          id: ctx.user.school_id,
-        },
-        select: {
-          is_active: true,
-          Periods: {
-            include: {
-              Teacher: true,
-              Class: true,
-              Section: true,
-              Subject: true,
-            },
+const routineRouter = router({
+  fetchForSchool: procedure.use(principalMiddleware).query(async ({ ctx }) => {
+    const school = await prisma.school.findUnique({
+      where: {
+        id: ctx.user.school_id,
+      },
+      select: {
+        is_active: true,
+        Periods: {
+          include: {
+            Teacher: true,
+            Class: true,
+            Section: true,
+            Subject: true,
           },
         },
+      },
+    });
+
+    if (!school || !school.is_active) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
       });
+    }
 
-      if (!school || !school.is_active) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-        });
-      }
-
-      return school.Periods;
-    }),
-  fetchForTeacher: t.procedure
+    return school.Periods;
+  }),
+  fetchForTeacher: procedure
     .use(teacherMiddleware)
     .input(
       z.object({
@@ -95,7 +94,7 @@ const routineRouter = t.router({
         typeof periods | undefined
       >;
     }),
-  fetchForStudent: t.procedure
+  fetchForStudent: procedure
     .use(studentMiddleware)
     .input(
       z.object({
@@ -188,7 +187,7 @@ const routineRouter = t.router({
         typeof periods | undefined
       >;
     }),
-  fetchPeriodStudents: t.procedure
+  fetchPeriodStudents: procedure
     .use(authMiddleware)
     .input(
       z.object({

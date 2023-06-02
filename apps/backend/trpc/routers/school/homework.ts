@@ -6,7 +6,8 @@ import { FilePermissionsInputSchema } from "schooltalk-shared/misc";
 import prisma from "../../../prisma";
 import { consumeMultiplePermissions } from "../../../utils/file.service";
 import {
-  t,
+  router,
+  procedure,
   authMiddleware,
   teacherMiddleware,
   studentMiddleware,
@@ -17,8 +18,8 @@ const DateSchema = z
   .datetime()
   .transform((d) => parseISO(d));
 
-const homeworkRouter = t.router({
-  fetchForSection: t.procedure
+const homeworkRouter = router({
+  fetchForSection: procedure
     .use(authMiddleware)
     .input(
       z.object({
@@ -86,7 +87,7 @@ const homeworkRouter = t.router({
 
       return { data: homeworks, total, nextCursor };
     }),
-  fetchForTeacher: t.procedure
+  fetchForTeacher: procedure
     .use(teacherMiddleware)
     .input(
       z.object({
@@ -151,7 +152,7 @@ const homeworkRouter = t.router({
 
       return { data: homeworks, total, nextCursor };
     }),
-  fetchHomework: t.procedure
+  fetchHomework: procedure
     .use(authMiddleware)
     .input(
       z.object({
@@ -185,7 +186,7 @@ const homeworkRouter = t.router({
         },
       });
     }),
-  create: t.procedure
+  create: procedure
     .use(teacherMiddleware)
     .input(
       z.object({
@@ -228,7 +229,7 @@ const homeworkRouter = t.router({
 
       return { id };
     }),
-  update: t.procedure
+  update: procedure
     .use(teacherMiddleware)
     .input(
       z.object({
@@ -295,7 +296,7 @@ const homeworkRouter = t.router({
           },
         });
     }),
-  delete: t.procedure
+  delete: procedure
     .use(teacherMiddleware)
     .input(
       z.object({
@@ -311,7 +312,7 @@ const homeworkRouter = t.router({
         },
       });
     }),
-  fetchSubmissions: t.procedure
+  fetchSubmissions: procedure
     .use(teacherMiddleware)
     .input(
       z.object({
@@ -360,7 +361,7 @@ const homeworkRouter = t.router({
 
       return { data: submissions, total };
     }),
-  createSubmission: t.procedure
+  createSubmission: procedure
     .use(studentMiddleware)
     .input(
       z.object({
@@ -446,7 +447,7 @@ const homeworkRouter = t.router({
 
       return id;
     }),
-  updateSubmission: t.procedure
+  updateSubmission: procedure
     .use(studentMiddleware)
     .input(
       z.object({

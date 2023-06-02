@@ -4,7 +4,7 @@ import _ from "lodash";
 import { StaticRole, examTestSchema } from "schooltalk-shared/misc";
 import { z } from "zod";
 import prisma from "../../../prisma";
-import { authMiddleware, roleMiddleware, t } from "../../trpc";
+import { authMiddleware, roleMiddleware, router, procedure } from "../../trpc";
 
 const dateStringSchema = z
   .string()
@@ -53,8 +53,8 @@ type ExamItem =
       item: IndependentTest;
     };
 
-const examRouter = t.router({
-  getTestInfo: t.procedure
+const examRouter = router({
+  getTestInfo: procedure
     .use(authMiddleware)
     .input(
       z.object({
@@ -105,7 +105,7 @@ const examRouter = t.router({
 
       return test;
     }),
-  createTest: t.procedure
+  createTest: procedure
     .use(
       roleMiddleware([
         StaticRole.principal,
@@ -136,7 +136,7 @@ const examRouter = t.router({
 
       return test;
     }),
-  updateTest: t.procedure
+  updateTest: procedure
     .use(
       roleMiddleware([
         StaticRole.principal,
@@ -218,7 +218,7 @@ const examRouter = t.router({
         });
       });
     }),
-  deleteTest: t.procedure
+  deleteTest: procedure
     .use(
       roleMiddleware([
         StaticRole.principal,
@@ -240,7 +240,7 @@ const examRouter = t.router({
         },
       });
     }),
-  getExamInfo: t.procedure
+  getExamInfo: procedure
     .use(authMiddleware)
     .input(
       z.object({
@@ -276,7 +276,7 @@ const examRouter = t.router({
 
       return exam;
     }),
-  createExam: t.procedure
+  createExam: procedure
     .use(
       roleMiddleware([
         StaticRole.principal,
@@ -322,7 +322,7 @@ const examRouter = t.router({
 
       return exam;
     }),
-  updateExam: t.procedure
+  updateExam: procedure
     .use(
       roleMiddleware([
         StaticRole.principal,
@@ -348,7 +348,7 @@ const examRouter = t.router({
         },
       });
     }),
-  fetchExamsAndTestsForStudent: t.procedure
+  fetchExamsAndTestsForStudent: procedure
     .use(roleMiddleware([StaticRole.student]))
     .input(
       z.object({
@@ -452,7 +452,7 @@ const examRouter = t.router({
         }
       });
     }),
-  fetchExamsAndTestsForTeacher: t.procedure
+  fetchExamsAndTestsForTeacher: procedure
     .use(roleMiddleware([StaticRole.teacher]))
     .input(
       z.object({

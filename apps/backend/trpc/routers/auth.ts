@@ -1,5 +1,5 @@
 import { PushTokenType, User } from "@prisma/client";
-import { t, authMiddleware } from "../trpc";
+import { router, procedure, authMiddleware } from "../trpc";
 import { z } from "zod";
 import prisma from "../../prisma";
 import { TRPCError } from "@trpc/server";
@@ -25,8 +25,8 @@ function generateUserOTP(user: Pick<User, "otp" | "otp_expiry">) {
   return { otp, expiry };
 }
 
-const authRouter = t.router({
-  requestEmailLoginOTP: t.procedure
+const authRouter = router({
+  requestEmailLoginOTP: procedure
     .input(
       z.object({
         email: z.string().email(),
@@ -61,7 +61,7 @@ const authRouter = t.router({
 
       return { userId: user.id };
     }),
-  requestPhoneNumberOTP: t.procedure
+  requestPhoneNumberOTP: procedure
     .input(
       z.object({
         isd: z.number().int().default(91),
@@ -112,7 +112,7 @@ const authRouter = t.router({
 
       return { userId: user.id };
     }),
-  submitLoginOTP: t.procedure
+  submitLoginOTP: procedure
     .input(
       z.object({
         otp: z.string().regex(/^\d+$/).length(CONFIG.OTP_LENGTH),
@@ -197,12 +197,12 @@ const authRouter = t.router({
         expiry_date: session.expiry_date,
       };
     }),
-  whoami: t.procedure
+  whoami: procedure
     .use(authMiddleware)
     .query(({ ctx }) =>
       _.omit(ctx.user, ["password", "otp", "otp_expiry", "School"]),
     ),
-  logout: t.procedure
+  logout: procedure
     .use(authMiddleware)
     .input(
       z.object({
@@ -245,7 +245,7 @@ const authRouter = t.router({
         });
       }
     }),
-  rollNumberLoginRequestOTP: t.procedure
+  rollNumberLoginRequestOTP: procedure
     .input(
       z.object({
         class_id: z.number().int(),

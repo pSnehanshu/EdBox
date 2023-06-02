@@ -1,9 +1,9 @@
 import { z } from "zod";
 import prisma from "../../../prisma";
-import { t, authMiddleware } from "../../trpc";
+import { router, procedure, authMiddleware } from "../../trpc";
 
-const subjectRouter = t.router({
-  fetchSubjects: t.procedure
+const subjectRouter = router({
+  fetchSubjects: procedure
     .use(authMiddleware)
     .input(
       z.object({
