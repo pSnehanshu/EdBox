@@ -73,6 +73,8 @@ model User {
   Parent                Parent?                @relation(fields: [parent_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
   staff_id              String?                @unique @db.VarChar(32)
   Staff                 SchoolStaff?           @relation(fields: [staff_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  avatar_id             String?                @unique @db.VarChar(32)
+  Avatar                UploadedFile?          @relation("avatar", fields: [avatar_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
   created_at            DateTime               @default(now())
   updated_at            DateTime               @updatedAt
   Sessions              LoginSession[]
@@ -82,7 +84,7 @@ model User {
   TestsCreated          ExamTest[]
   DynamicRoles          RoleUserMapping[]
   FileUploadPermissions FileUploadPermission[]
-  UploadedFiles         UploadedFile[]
+  UploadedFiles         UploadedFile[]         @relation("uploader")
   PushTokens            PushToken[]
 
   @@unique([email, school_id])
@@ -481,7 +483,7 @@ model UploadedFile {
   school_id                 String                               @db.VarChar(32)
   School                    School                               @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   uploader_user_id          String?                              @db.VarChar(32)
-  UploaderUser              User?                                @relation(fields: [uploader_user_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  UploaderUser              User?                                @relation("uploader", fields: [uploader_user_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
   preview_type              PreviewType?
   preview_value             String?                              @db.Text
   created_at                DateTime                             @default(now())
@@ -489,6 +491,7 @@ model UploadedFile {
   HomeworkSubmissions       HomeworkSubmissionAttachment[]
   HomeworkSubmissionRemarks HomeworkSubmissionRemarkAttachment[]
   Messages                  MessageAttachment[]
+  AvatarUser                User?                                @relation("avatar")
 }
 
 enum PreviewType {
