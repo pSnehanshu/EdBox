@@ -1,7 +1,7 @@
 import { z } from "zod";
 import type { Prisma } from "@prisma/client";
 import prisma from "../../../prisma";
-import { protectedProcedure, router, procedure } from "../../trpc";
+import { protectedProcedure, router, publicProcedure } from "../../trpc";
 
 const classStdRouter = router({
   fetchSectionStudents: protectedProcedure
@@ -87,7 +87,7 @@ const classStdRouter = router({
 
       return { students, total, cursor };
     }),
-  fetchClassesAndSections: procedure
+  fetchClassesAndSections: publicProcedure
     .input(
       z.object({
         schoolId: z.string().cuid(),

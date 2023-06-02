@@ -118,25 +118,25 @@ const dynamicRoleMiddleware = (permissions: Permissions[], mode: RoleMode) =>
 // PROCEDURES //
 ///////////////
 
-export const procedure = t.procedure;
+export const publicProcedure = t.procedure;
 
-export const principalProcedure = procedure.use(principalMiddleware);
+export const principalProcedure = publicProcedure.use(principalMiddleware);
 
-export const studentProcedure = procedure.use(studentMiddleware);
+export const studentProcedure = publicProcedure.use(studentMiddleware);
 
-export const teacherProcedure = procedure.use(teacherMiddleware);
+export const teacherProcedure = publicProcedure.use(teacherMiddleware);
 
-export const protectedProcedure = procedure.use(authMiddleware);
+export const protectedProcedure = publicProcedure.use(authMiddleware);
 
 export const getDynamicRoleProcedure = (
   permissions: Permissions[],
   mode: RoleMode = "some",
-) => procedure.use(dynamicRoleMiddleware(permissions, mode));
+) => publicProcedure.use(dynamicRoleMiddleware(permissions, mode));
 
 export const getRoleProcedure = (
   allowedRoles: StaticRole[],
   mode: RoleMode = "some",
-) => procedure.use(roleMiddleware(allowedRoles, mode));
+) => publicProcedure.use(roleMiddleware(allowedRoles, mode));
 
 /////////////
 // ROUTER //

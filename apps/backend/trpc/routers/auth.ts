@@ -1,5 +1,5 @@
 import { PushTokenType, User } from "@prisma/client";
-import { router, procedure, protectedProcedure } from "../trpc";
+import { router, publicProcedure, protectedProcedure } from "../trpc";
 import { z } from "zod";
 import prisma from "../../prisma";
 import { TRPCError } from "@trpc/server";
@@ -26,7 +26,7 @@ function generateUserOTP(user: Pick<User, "otp" | "otp_expiry">) {
 }
 
 const authRouter = router({
-  requestEmailLoginOTP: procedure
+  requestEmailLoginOTP: publicProcedure
     .input(
       z.object({
         email: z.string().email(),
@@ -61,7 +61,7 @@ const authRouter = router({
 
       return { userId: user.id };
     }),
-  requestPhoneNumberOTP: procedure
+  requestPhoneNumberOTP: publicProcedure
     .input(
       z.object({
         isd: z.number().int().default(91),
@@ -112,7 +112,7 @@ const authRouter = router({
 
       return { userId: user.id };
     }),
-  submitLoginOTP: procedure
+  submitLoginOTP: publicProcedure
     .input(
       z.object({
         otp: z.string().regex(/^\d+$/).length(CONFIG.OTP_LENGTH),
@@ -242,7 +242,7 @@ const authRouter = router({
         });
       }
     }),
-  rollNumberLoginRequestOTP: procedure
+  rollNumberLoginRequestOTP: publicProcedure
     .input(
       z.object({
         class_id: z.number().int(),
