@@ -2,19 +2,13 @@ import { z } from "zod";
 import { AttendanceStatus } from "@prisma/client";
 import { everyLimit } from "schooltalk-shared/async";
 import { dateOfAttendance, NumberMonthMapping } from "schooltalk-shared/misc";
-import {
-  router,
-  procedure,
-  protectedProcedure,
-  teacherMiddleware,
-} from "../../trpc";
+import { router, protectedProcedure, teacherProcedure } from "../../trpc";
 import prisma from "../../../prisma";
 import { TRPCError } from "@trpc/server";
 import { getDate, getMonth, getYear } from "date-fns";
 
 const attendanceRouter = router({
-  create: procedure
-    .use(teacherMiddleware)
+  create: teacherProcedure
     .input(
       z.object({
         periodId: z.string().cuid(),

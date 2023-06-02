@@ -7,10 +7,9 @@ import prisma from "../../../prisma";
 import { consumeMultiplePermissions } from "../../../utils/file.service";
 import {
   router,
-  procedure,
   protectedProcedure,
-  teacherMiddleware,
-  studentMiddleware,
+  teacherProcedure,
+  studentProcedure,
 } from "../../trpc";
 
 const DateSchema = z
@@ -86,8 +85,7 @@ const homeworkRouter = router({
 
       return { data: homeworks, total, nextCursor };
     }),
-  fetchForTeacher: procedure
-    .use(teacherMiddleware)
+  fetchForTeacher: teacherProcedure
     .input(
       z.object({
         limit: z.number().int().min(1).max(20).default(10),
@@ -184,8 +182,7 @@ const homeworkRouter = router({
         },
       });
     }),
-  create: procedure
-    .use(teacherMiddleware)
+  create: teacherProcedure
     .input(
       z.object({
         text: z.string().optional(),
@@ -227,8 +224,7 @@ const homeworkRouter = router({
 
       return { id };
     }),
-  update: procedure
-    .use(teacherMiddleware)
+  update: teacherProcedure
     .input(
       z.object({
         homework_id: z.string().cuid(),
@@ -294,8 +290,7 @@ const homeworkRouter = router({
           },
         });
     }),
-  delete: procedure
-    .use(teacherMiddleware)
+  delete: teacherProcedure
     .input(
       z.object({
         homework_id: z.string().cuid(),
@@ -310,8 +305,7 @@ const homeworkRouter = router({
         },
       });
     }),
-  fetchSubmissions: procedure
-    .use(teacherMiddleware)
+  fetchSubmissions: teacherProcedure
     .input(
       z.object({
         homework_id: z.string().cuid(),
@@ -359,8 +353,7 @@ const homeworkRouter = router({
 
       return { data: submissions, total };
     }),
-  createSubmission: procedure
-    .use(studentMiddleware)
+  createSubmission: studentProcedure
     .input(
       z.object({
         homework_id: z.string().cuid(),
@@ -445,8 +438,7 @@ const homeworkRouter = router({
 
       return id;
     }),
-  updateSubmission: procedure
-    .use(studentMiddleware)
+  updateSubmission: studentProcedure
     .input(
       z.object({
         submission_id: z.string().cuid(),

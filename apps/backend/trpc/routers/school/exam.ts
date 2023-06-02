@@ -4,12 +4,7 @@ import _ from "lodash";
 import { StaticRole, examTestSchema } from "schooltalk-shared/misc";
 import { z } from "zod";
 import prisma from "../../../prisma";
-import {
-  protectedProcedure,
-  roleMiddleware,
-  router,
-  procedure,
-} from "../../trpc";
+import { protectedProcedure, getRoleProcedure, router } from "../../trpc";
 
 const dateStringSchema = z
   .string()
@@ -109,15 +104,12 @@ const examRouter = router({
 
       return test;
     }),
-  createTest: procedure
-    .use(
-      roleMiddleware([
-        StaticRole.principal,
-        StaticRole.vice_principal,
-        StaticRole.teacher,
-        StaticRole.staff,
-      ]),
-    )
+  createTest: getRoleProcedure([
+    StaticRole.principal,
+    StaticRole.vice_principal,
+    StaticRole.teacher,
+    StaticRole.staff,
+  ])
     .input(examTestSchema.extend({ exam_id: z.string().cuid().optional() }))
     .mutation(async ({ input, ctx }) => {
       const test = await prisma.examTest.create({
@@ -140,15 +132,12 @@ const examRouter = router({
 
       return test;
     }),
-  updateTest: procedure
-    .use(
-      roleMiddleware([
-        StaticRole.principal,
-        StaticRole.vice_principal,
-        StaticRole.teacher,
-        StaticRole.staff,
-      ]),
-    )
+  updateTest: getRoleProcedure([
+    StaticRole.principal,
+    StaticRole.vice_principal,
+    StaticRole.teacher,
+    StaticRole.staff,
+  ])
     .input(
       z.object({
         id: z.string().cuid(),
@@ -222,15 +211,12 @@ const examRouter = router({
         });
       });
     }),
-  deleteTest: procedure
-    .use(
-      roleMiddleware([
-        StaticRole.principal,
-        StaticRole.vice_principal,
-        StaticRole.teacher,
-        StaticRole.staff,
-      ]),
-    )
+  deleteTest: getRoleProcedure([
+    StaticRole.principal,
+    StaticRole.vice_principal,
+    StaticRole.teacher,
+    StaticRole.staff,
+  ])
     .input(
       z.object({
         id: z.string().cuid(),
@@ -279,15 +265,12 @@ const examRouter = router({
 
       return exam;
     }),
-  createExam: procedure
-    .use(
-      roleMiddleware([
-        StaticRole.principal,
-        StaticRole.vice_principal,
-        StaticRole.teacher,
-        StaticRole.staff,
-      ]),
-    )
+  createExam: getRoleProcedure([
+    StaticRole.principal,
+    StaticRole.vice_principal,
+    StaticRole.teacher,
+    StaticRole.staff,
+  ])
     .input(
       z.object({
         name: z.string().max(100),
@@ -325,15 +308,12 @@ const examRouter = router({
 
       return exam;
     }),
-  updateExam: procedure
-    .use(
-      roleMiddleware([
-        StaticRole.principal,
-        StaticRole.vice_principal,
-        StaticRole.teacher,
-        StaticRole.staff,
-      ]),
-    )
+  updateExam: getRoleProcedure([
+    StaticRole.principal,
+    StaticRole.vice_principal,
+    StaticRole.teacher,
+    StaticRole.staff,
+  ])
     .input(
       z.object({
         id: z.string().cuid(),
@@ -351,8 +331,7 @@ const examRouter = router({
         },
       });
     }),
-  fetchExamsAndTestsForStudent: procedure
-    .use(roleMiddleware([StaticRole.student]))
+  fetchExamsAndTestsForStudent: getRoleProcedure([StaticRole.student])
     .input(
       z.object({
         after_date: dateStringSchema,
@@ -455,8 +434,7 @@ const examRouter = router({
         }
       });
     }),
-  fetchExamsAndTestsForTeacher: procedure
-    .use(roleMiddleware([StaticRole.teacher]))
+  fetchExamsAndTestsForTeacher: getRoleProcedure([StaticRole.teacher])
     .input(
       z.object({
         after_date: dateStringSchema,

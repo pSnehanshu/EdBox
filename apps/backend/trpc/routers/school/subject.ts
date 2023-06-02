@@ -1,6 +1,6 @@
 import { z } from "zod";
 import prisma from "../../../prisma";
-import { router, procedure, protectedProcedure } from "../../trpc";
+import { router, protectedProcedure } from "../../trpc";
 
 const subjectRouter = router({
   fetchSubjects: protectedProcedure

@@ -6,16 +6,15 @@ import { z } from "zod";
 import prisma from "../../../prisma";
 import {
   protectedProcedure,
-  principalMiddleware,
-  studentMiddleware,
+  principalProcedure,
+  studentProcedure,
   router,
-  procedure,
-  teacherMiddleware,
+  teacherProcedure,
 } from "../../trpc";
 import classStdRouter from "./class-std";
 
 const routineRouter = router({
-  fetchForSchool: procedure.use(principalMiddleware).query(async ({ ctx }) => {
+  fetchForSchool: principalProcedure.query(async ({ ctx }) => {
     const school = await prisma.school.findUnique({
       where: {
         id: ctx.user.school_id,
@@ -41,8 +40,7 @@ const routineRouter = router({
 
     return school.Periods;
   }),
-  fetchForTeacher: procedure
-    .use(teacherMiddleware)
+  fetchForTeacher: teacherProcedure
     .input(
       z.object({
         dateOfAttendance,
@@ -94,8 +92,7 @@ const routineRouter = router({
         typeof periods | undefined
       >;
     }),
-  fetchForStudent: procedure
-    .use(studentMiddleware)
+  fetchForStudent: studentProcedure
     .input(
       z.object({
         dateOfAttendance,

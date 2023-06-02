@@ -10,7 +10,7 @@ import {
   GroupDefinition,
   groupIdentifierSchema,
 } from "schooltalk-shared/group-identifier";
-import { router, procedure, protectedProcedure } from "../../trpc";
+import { router, protectedProcedure } from "../../trpc";
 
 const messagingRouter = router({
   fetchGroups: protectedProcedure
