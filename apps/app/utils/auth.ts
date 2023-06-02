@@ -52,7 +52,7 @@ export function useSetAuthToken() {
 
   return useCallback(async (token: string, expiry: Date) => {
     await setAuthToken(token, expiry);
-    utils.auth.whoami.invalidate();
+    utils.profile.me.invalidate();
   }, []);
 }
 
@@ -71,7 +71,7 @@ export function useLogout() {
       await SecureStore.deleteItemAsync(AUTH_TOKEN_EXPIRY);
       await SecureStore.deleteItemAsync(USER);
 
-      await utils.auth.whoami.invalidate();
+      await utils.profile.me.invalidate();
 
       // Clear all SQLite data
       db.transaction(
@@ -132,7 +132,7 @@ type NotLoggedIn = {
 
 export function useCurrentUser(): LoggedIn | NotLoggedIn {
   const [user, setUser] = useState<User | null>(globalUser);
-  const whoami = trpc.auth.whoami.useQuery(undefined, {
+  const me = trpc.profile.me.useQuery(undefined, {
     retry: false,
     staleTime: 60 * 60 * 1000,
   });
@@ -159,9 +159,9 @@ export function useCurrentUser(): LoggedIn | NotLoggedIn {
 
   useEffect(() => {
     (async () => {
-      if (!whoami.isFetching) {
-        if (whoami.isError) {
-          const error = whoami.error;
+      if (!me.isFetching) {
+        if (me.isError) {
+          const error = me.error;
           if (error.data?.code === "UNAUTHORIZED") {
             // Session is invalid
             setUser(null);
@@ -170,13 +170,13 @@ export function useCurrentUser(): LoggedIn | NotLoggedIn {
           }
         } else {
           // Save locally
-          setUser(whoami.data ?? null);
-          await AsyncStorage.setItem(USER, JSON.stringify(whoami.data));
-          globalUser = whoami.data ?? null;
+          setUser(me.data ?? null);
+          await AsyncStorage.setItem(USER, JSON.stringify(me.data));
+          globalUser = me.data ?? null;
         }
       }
     })();
-  }, [whoami.isFetching]);
+  }, [me.isFetching]);
 
   const isLoggedIn = !!user;
 

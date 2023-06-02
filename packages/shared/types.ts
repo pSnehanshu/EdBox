@@ -32,7 +32,7 @@ export interface Group {
   identifier: string;
 }
 
-export type User = RouterOutput["auth"]["whoami"];
+export type User = RouterOutput["profile"]["me"];
 
 export type UnserializedUser = Extract<
   Context,

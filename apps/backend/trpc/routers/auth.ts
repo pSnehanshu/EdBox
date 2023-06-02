@@ -4,7 +4,6 @@ import { z } from "zod";
 import prisma from "../../prisma";
 import { TRPCError } from "@trpc/server";
 import { addMinutes, addMonths, isFuture, isPast } from "date-fns";
-import _ from "lodash";
 import CONFIG from "../../config";
 import { sendSMS } from "../../utils/sms.service";
 
@@ -197,9 +196,6 @@ const authRouter = router({
         expiry_date: session.expiry_date,
       };
     }),
-  whoami: protectedProcedure.query(({ ctx }) =>
-    _.omit(ctx.user, ["password", "otp", "otp_expiry", "School"]),
-  ),
   logout: protectedProcedure
     .input(
       z.object({
