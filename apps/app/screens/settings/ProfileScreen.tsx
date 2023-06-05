@@ -1,9 +1,10 @@
 import { FAB } from "@rneui/themed";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { View, Text } from "../../components/Themed";
-import { Image, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import { useCurrentUser } from "../../utils/auth";
 import type { RootStackScreenProps } from "../../utils/types/common";
+import { UserAvatar } from "../../components/Avatar";
 
 export default function ProfileScreen({
   navigation,
@@ -16,10 +17,7 @@ export default function ProfileScreen({
     <View style={{ flex: 1 }}>
       <View style={styles.container}>
         <View style={styles.imageContainer}>
-          <Image
-            source={require("../../assets/images/icon.png")}
-            style={styles.image}
-          />
+          <UserAvatar fileId={user.avatar_id} size={120} rounded />
         </View>
 
         <View style={styles.detailsContainer}>
@@ -57,11 +55,6 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     marginBottom: 18,
   },
-  image: {
-    width: 120,
-    height: 120,
-    borderRadius: 75,
-  },
   detailsContainer: {
     flex: 2,
     marginLeft: 18,
@@ -70,6 +63,5 @@ const styles = StyleSheet.create({
   value: {
     fontSize: 18,
     fontWeight: "bold",
-    // marginBottom: 8,
   },
 });
