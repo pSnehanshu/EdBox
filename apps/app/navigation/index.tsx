@@ -88,7 +88,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
   const school = useSchool();
-  const { isLoggedIn } = useCurrentUser();
+  const { isLoggedIn, user } = useCurrentUser();
   const { scheme } = useContext(ColorSchemeContext);
   const [isSchoolSelectorOpen, setIsSchoolSelectorOpen] = useState(false);
   const config = useConfig();
@@ -270,10 +270,16 @@ function RootNavigator() {
           <Stack.Screen
             name="ProfileScreen"
             component={ProfileScreen}
-            options={{
+            options={({
+              route: {
+                params: { userId },
+              },
+            }) => ({
               headerShown: true,
-              title: "My Account",
+              title: "Profile",
               headerRight() {
+                if (userId !== user.id) return null;
+
                 return (
                   <StaticRoleSelector>
                     {({ onPress, selectedString }) => (
@@ -312,7 +318,7 @@ function RootNavigator() {
                   </StaticRoleSelector>
                 );
               },
-            }}
+            })}
           />
 
           <Stack.Screen

@@ -13,6 +13,7 @@ import {
 } from "schooltalk-shared/misc";
 import { useConfig } from "../utils/config";
 import { FilePreview, FullScreenFilePreview } from "./attachments/FilePreview";
+import { useNavigation } from "@react-navigation/native";
 
 interface ChatMessageProps {
   message: Message;
@@ -20,6 +21,8 @@ interface ChatMessageProps {
 function _ChatMessage({ message }: ChatMessageProps) {
   const config = useConfig();
   const { user } = useCurrentUser();
+  const { navigate } = useNavigation();
+
   const time = useMemo(() => {
     if (!message.created_at) return "N/A";
 
@@ -93,8 +96,7 @@ function _ChatMessage({ message }: ChatMessageProps) {
       {isSentByMe ? null : (
         <Pressable
           onPress={() => {
-            // TODO: Show basic user info as modal, with link to full profile
-            alert(`User: ${sender?.name}\nID: ${sender?.id}`);
+            if (sender) navigate("ProfileScreen", { userId: sender?.id });
           }}
         >
           <Text style={[styles.senderName, { color: senderColor }]}>

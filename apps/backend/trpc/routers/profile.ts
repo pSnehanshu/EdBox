@@ -68,6 +68,37 @@ const profileRouter = router({
 
       return file;
     }),
+  getUserProfile: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string().cuid(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const user = await prisma.user.findUnique({
+        where: { id: input.userId },
+        select: {
+          id: true,
+          name: true,
+          gender: true,
+          school_id: true,
+          avatar_id: true,
+          student_id: true,
+          Student: true,
+          teacher_id: true,
+          Teacher: true,
+          parent_id: true,
+          Parent: true,
+          staff_id: true,
+          Staff: true,
+        },
+      });
+
+      if (!user || user.school_id !== ctx.user.school_id)
+        throw new TRPCError({ code: "NOT_FOUND" });
+
+      return user;
+    }),
 });
 
 export default profileRouter;

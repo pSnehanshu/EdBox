@@ -54,7 +54,7 @@ export default function HomeTabScreen() {
             </View>
 
             <Pressable
-              onPress={() => navigate("ProfileScreen")}
+              onPress={() => navigate("ProfileScreen", { userId: user.id })}
               style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
             >
               <Entypo

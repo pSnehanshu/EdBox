@@ -1,17 +1,25 @@
 import { FAB } from "@rneui/themed";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import Spinner from "react-native-loading-spinner-overlay";
 import { View, Text } from "../../components/Themed";
 import { StyleSheet } from "react-native";
 import { useCurrentUser } from "../../utils/auth";
 import type { RootStackScreenProps } from "../../utils/types/common";
 import { UserAvatar } from "../../components/Avatar";
+import { trpc } from "../../utils/trpc";
 
 export default function ProfileScreen({
   navigation,
+  route: {
+    params: { userId },
+  },
 }: RootStackScreenProps<"ProfileScreen">) {
-  const { isLoggedIn, user } = useCurrentUser();
+  const { user: currentUser } = useCurrentUser();
+  const profileQuery = trpc.profile.getUserProfile.useQuery({ userId });
+  const user = profileQuery.data;
 
-  if (!isLoggedIn) return null;
+  if (!user) return <Spinner visible />;
+  const isCurrentUser = currentUser?.id === userId;
 
   return (
     <View style={{ flex: 1 }}>
@@ -22,22 +30,30 @@ export default function ProfileScreen({
 
         <View style={styles.detailsContainer}>
           <Text style={styles.value}>{user.name}</Text>
-          <Text style={styles.value}>{user.phone}</Text>
         </View>
       </View>
 
-      <FAB
-        buttonStyle={{ backgroundColor: "#4E48B2" }}
-        onPress={() => navigation.navigate("ProfileEditScreen")}
-        icon={
-          <MaterialCommunityIcons
-            name="lead-pencil"
-            size={24}
-            color={"white"}
+      {
+        // Only show edit option for current user's profile
+        isCurrentUser && (
+          <FAB
+            buttonStyle={{ backgroundColor: "#4E48B2" }}
+            onPress={() =>
+              navigation.navigate("ProfileEditScreen", {
+                userId: currentUser.id,
+              })
+            }
+            icon={
+              <MaterialCommunityIcons
+                name="lead-pencil"
+                size={24}
+                color={"white"}
+              />
+            }
+            placement="right"
           />
-        }
-        placement="right"
-      />
+        )
+      }
     </View>
   );
 }
