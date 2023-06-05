@@ -4,10 +4,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCallback, useEffect, useState } from "react";
 import Toast from "react-native-toast-message";
 import type { User } from "schooltalk-shared/types";
+import { StaticRole } from "schooltalk-shared/misc";
 import { trpc } from "./trpc";
 import { AUTH_TOKEN, AUTH_TOKEN_EXPIRY, USER } from "./async-storage-keys";
 import { useDB } from "./db";
 import { getPushToken } from "./push-notifications";
+import { useConfigUpdate } from "./config";
 
 /**
  * Get the current token
@@ -58,7 +60,9 @@ export function useSetAuthToken() {
 
 export function useLogout() {
   const utils = trpc.useContext();
+  const setConfig = useConfigUpdate();
   const db = useDB();
+
   const logoutMutation = trpc.auth.logout.useMutation({
     async onSuccess() {
       Toast.show({
@@ -67,6 +71,10 @@ export function useLogout() {
         position: "top",
       });
 
+      // Unset previously selected role
+      setConfig({ activeStaticRole: StaticRole.none });
+
+      // Clear token
       await SecureStore.deleteItemAsync(AUTH_TOKEN);
       await SecureStore.deleteItemAsync(AUTH_TOKEN_EXPIRY);
       await SecureStore.deleteItemAsync(USER);
