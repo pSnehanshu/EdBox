@@ -1,7 +1,5 @@
-import { useState } from "react";
 import { Pressable, StyleSheet } from "react-native";
 import { StaticRole } from "schooltalk-shared/misc";
-import { Dialog } from "@rneui/themed";
 import { Entypo } from "@expo/vector-icons";
 import { Text, View, ScrollView } from "../components/Themed";
 import { useCurrentUser } from "../utils/auth";
@@ -10,7 +8,7 @@ import { RoutineSlider } from "../components/RoutineSlider";
 import Announcements from "../components/Announcements";
 import useColorScheme from "../utils/useColorScheme";
 import { useConfig } from "../utils/config";
-import { StaticRoleSelector } from "../components/StaticRoleSelector";
+import { useNavigation } from "@react-navigation/native";
 
 /**
  * Get a greeting by the time of day.
@@ -35,9 +33,8 @@ export default function HomeTabScreen() {
   const school = useSchool();
   const scheme = useColorScheme();
   const color = scheme === "dark" ? "black" : "white";
-  const config = useConfig();
-
-  const [isVisible, setIsVisible] = useState(false);
+  const { activeStaticRole } = useConfig();
+  const { navigate } = useNavigation();
 
   if (!isLoggedIn) return null;
 
@@ -57,7 +54,7 @@ export default function HomeTabScreen() {
             </View>
 
             <Pressable
-              onPress={() => setIsVisible(true)}
+              onPress={() => navigate("ProfileScreen")}
               style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
             >
               <Entypo
@@ -72,16 +69,11 @@ export default function HomeTabScreen() {
 
         {/* Routine carousel */}
         {[StaticRole.student, StaticRole.teacher].includes(
-          config.activeStaticRole,
+          activeStaticRole,
         ) && <RoutineSlider style={styles.carousel} />}
 
         <Announcements />
       </ScrollView>
-
-      <Dialog isVisible={isVisible} onBackdropPress={() => setIsVisible(false)}>
-        <Dialog.Title title="Choose your role" />
-        <StaticRoleSelector onChange={() => setIsVisible(false)} />
-      </Dialog>
     </View>
   );
 }
