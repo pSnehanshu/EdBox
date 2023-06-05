@@ -1,4 +1,8 @@
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  Entypo,
+  FontAwesome5,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
 import {
   NavigationContainer,
   DefaultTheme,
@@ -33,13 +37,14 @@ import ExamListScreen from "../screens/exam/ExamList";
 import HomeWorkScreen from "../screens/homework/HomeWorkScreen";
 import SchoolSelector from "../components/SchoolSelector";
 import { hasPreloadedSchool, useConfig } from "../utils/config";
-import { View } from "../components/Themed";
+import { Text, View } from "../components/Themed";
 import CreateHomeworkScreen from "../screens/homework/CreateHomeworkScreen";
 import DisplayHomeworkScreen from "../screens/homework/DisplayHomeworkScreen";
 import UpdateHomeworkScreen from "../screens/homework/UpdateHomeworkScreen";
 import CreateExamScreen from "../screens/exam/CreateExamScreen";
 import CreateTestScreen from "../screens/exam/CreateTestScreen";
 import ProfileScreen from "../screens/settings/ProfileScreen";
+import { StaticRoleSelector } from "../components/StaticRoleSelector";
 
 export default function Navigation({
   colorScheme,
@@ -266,6 +271,45 @@ function RootNavigator() {
             options={{
               headerShown: true,
               title: "My Account",
+              headerRight() {
+                return (
+                  <StaticRoleSelector>
+                    {({ onPress, selectedString }) => (
+                      <View style={{ backgroundColor: "transparent" }}>
+                        {hasPreloadedSchool ? null : (
+                          <Pressable
+                            onPress={onPress}
+                            style={({ pressed }) => ({
+                              opacity: pressed ? 0.5 : 1,
+                              padding: 8,
+                              flexDirection: "row",
+                              alignItems: "center",
+                              borderColor: "gray",
+                              borderWidth: 1,
+                              borderRadius: 5,
+                            })}
+                          >
+                            <FontAwesome5
+                              name="user-tag"
+                              size={16}
+                              color={Colors[scheme].text}
+                              style={{ marginRight: 2 }}
+                            />
+                            <Text>{selectedString}</Text>
+
+                            <Entypo
+                              name="chevron-down"
+                              size={24}
+                              color={Colors[scheme].text}
+                              style={{ marginLeft: 4 }}
+                            />
+                          </Pressable>
+                        )}
+                      </View>
+                    )}
+                  </StaticRoleSelector>
+                );
+              },
             }}
           />
         </Stack.Navigator>
