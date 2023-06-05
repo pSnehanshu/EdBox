@@ -46,7 +46,7 @@ const profileRouter = router({
       // Ensure this is an image
       if (!file.mime?.startsWith("image/")) {
         // First delete the file
-        deleteFile(file.id).catch((err) =>
+        deleteFile(file).catch((err) =>
           console.error(
             `Failed to delete file ID: ${file.id}, key: ${file.s3key}`,
             err,
