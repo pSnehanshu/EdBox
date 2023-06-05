@@ -45,6 +45,7 @@ export type RootStackParamList = {
   CreateExamScreen: undefined;
   CreateTestScreen: undefined;
   ProfileScreen: undefined;
+  ProfileEditScreen: undefined;
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> =

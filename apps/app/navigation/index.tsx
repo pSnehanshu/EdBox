@@ -45,6 +45,7 @@ import CreateExamScreen from "../screens/exam/CreateExamScreen";
 import CreateTestScreen from "../screens/exam/CreateTestScreen";
 import ProfileScreen from "../screens/settings/ProfileScreen";
 import { StaticRoleSelector } from "../components/StaticRoleSelector";
+import ProfileEditScreen from "../screens/settings/ProfileEditScreen";
 
 export default function Navigation({
   colorScheme,
@@ -265,6 +266,7 @@ function RootNavigator() {
               title: "About this app",
             }}
           />
+
           <Stack.Screen
             name="ProfileScreen"
             component={ProfileScreen}
@@ -310,6 +312,15 @@ function RootNavigator() {
                   </StaticRoleSelector>
                 );
               },
+            }}
+          />
+
+          <Stack.Screen
+            name="ProfileEditScreen"
+            component={ProfileEditScreen}
+            options={{
+              headerShown: true,
+              title: "Edit profile",
             }}
           />
         </Stack.Navigator>

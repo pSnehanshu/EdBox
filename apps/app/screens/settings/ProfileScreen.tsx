@@ -1,8 +1,13 @@
+import { FAB } from "@rneui/themed";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { View, Text } from "../../components/Themed";
 import { Image, StyleSheet } from "react-native";
 import { useCurrentUser } from "../../utils/auth";
+import type { RootStackScreenProps } from "../../utils/types/common";
 
-export default function ProfileScreen() {
+export default function ProfileScreen({
+  navigation,
+}: RootStackScreenProps<"ProfileScreen">) {
   const { isLoggedIn, user } = useCurrentUser();
 
   if (!isLoggedIn) return null;
@@ -22,6 +27,19 @@ export default function ProfileScreen() {
           <Text style={styles.value}>{user.phone}</Text>
         </View>
       </View>
+
+      <FAB
+        buttonStyle={{ backgroundColor: "#4E48B2" }}
+        onPress={() => navigation.navigate("ProfileEditScreen")}
+        icon={
+          <MaterialCommunityIcons
+            name="lead-pencil"
+            size={24}
+            color={"white"}
+          />
+        }
+        placement="right"
+      />
     </View>
   );
 }
