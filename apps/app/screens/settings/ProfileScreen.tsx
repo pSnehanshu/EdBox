@@ -1,12 +1,12 @@
-import { ScrollView } from "react-native";
 import { View, Text } from "../../components/Themed";
 import { Image, StyleSheet } from "react-native";
-import { Button, Dialog } from "@rneui/themed";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useCurrentUser } from "../../utils/auth";
 
 export default function ProfileScreen() {
-  const [isUpdateProfileModal, setIsUpdateProfileModal] = useState(false);
+  const { isLoggedIn, user } = useCurrentUser();
+
+  if (!isLoggedIn) return null;
+
   return (
     <View style={{ flex: 1 }}>
       <View style={styles.container}>
@@ -18,35 +18,9 @@ export default function ProfileScreen() {
         </View>
 
         <View style={styles.detailsContainer}>
-          <Text style={styles.value}>John Doe</Text>
-          <Text style={styles.value}>johndoe@gmail.com</Text>
-          <Text style={styles.value}>Goalpara, Assam</Text>
-          <View style={{ marginTop: 8 }}>
-            <Button
-              radius={"sm"}
-              type="outline"
-              onPress={() => {
-                setIsUpdateProfileModal(true);
-              }}
-            >
-              <Text style={styles.button_text}>Update</Text>
-            </Button>
-          </View>
+          <Text style={styles.value}>{user.name}</Text>
+          <Text style={styles.value}>{user.phone}</Text>
         </View>
-      </View>
-      <View style={{ width: "100%" }}>
-        <Dialog
-          isVisible={isUpdateProfileModal}
-          onBackdropPress={() => setIsUpdateProfileModal(false)}
-          animationType="fade"
-          //   overlayStyle={{ width: "95%", height: "85%" }}
-        >
-          <Dialog.Title
-            title={"Update Profile"}
-            titleStyle={{ textAlign: "center" }}
-          />
-          <View style={{ marginTop: 4 }}></View>
-        </Dialog>
       </View>
     </View>
   );
@@ -54,7 +28,6 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    // flex: 1,
     borderBottomWidth: 1,
     borderBottomColor: "gray",
     flexDirection: "row",
@@ -80,9 +53,5 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     // marginBottom: 8,
-  },
-  button_text: {
-    fontSize: 16,
-    fontWeight: "500",
   },
 });
