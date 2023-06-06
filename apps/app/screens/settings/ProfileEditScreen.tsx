@@ -55,7 +55,7 @@ export default function ProfileEditScreen({
               { opacity: pressed ? 0.5 : 1 },
             ]}
           >
-            <MaterialCommunityIcons name="upload" size={25} color={iconColor} />
+            <MaterialCommunityIcons name="upload" size={26} color={"#4E48B2"} />
           </Pressable>
         </View>
 
@@ -125,5 +125,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     bottom: "5%",
     right: "5%",
+    borderColor: "#4E48B2",
+    padding: 2,
   },
 });

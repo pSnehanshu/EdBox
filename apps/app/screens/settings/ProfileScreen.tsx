@@ -63,17 +63,17 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "gray",
     flexDirection: "row",
-    paddingHorizontal: 18,
-    paddingTop: 18,
+    paddingHorizontal: 16,
+    paddingTop: 16,
   },
   imageContainer: {
     alignItems: "flex-start",
     justifyContent: "flex-end",
-    marginBottom: 18,
+    marginBottom: 16,
   },
   detailsContainer: {
     flex: 2,
-    marginLeft: 18,
+    marginLeft: 16,
     justifyContent: "flex-start",
   },
   value: {
