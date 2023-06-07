@@ -2,8 +2,8 @@ import { useState } from "react";
 import { ModalTextInput } from "../../components/ModalTextInput";
 import { List, Text, View } from "../../components/Themed";
 import { RootStackScreenProps } from "../../utils/types/common";
-import { Pressable, StyleSheet, Image } from "react-native";
-import { ListItem } from "@rneui/themed";
+import { Pressable, StyleSheet, Image, Alert } from "react-native";
+import { FAB, ListItem } from "@rneui/themed";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import useColorScheme from "../../utils/useColorScheme";
 import { trpc } from "../../utils/trpc";
@@ -24,7 +24,7 @@ export default function ProfileEditScreen({
   const user = profileQuery.data;
   const uploadAvatar = trpc.profile.changeAvatar.useMutation({
     async onSuccess(data) {
-      //
+      Alert.alert("Avatar uploaded");
     },
     onError(error) {
       console.error(error);
@@ -86,6 +86,20 @@ export default function ProfileEditScreen({
         onChange={setUserName}
         defaultValue={userName}
         title="Your Name"
+      />
+      <FAB
+        onPress={() => {
+          if (fileUploadHandler)
+            uploadAvatar.mutate({
+              file_permission: {
+                permission_id: fileUploadHandler.uploadTasks[0].permission.id,
+                file_name: fileUploadHandler.uploadTasks[0].file.name,
+              },
+            });
+        }}
+        buttonStyle={{ backgroundColor: "#4E48B2" }}
+        icon={<MaterialCommunityIcons name="check" size={24} color={"white"} />}
+        placement="right"
       />
     </View>
   );
