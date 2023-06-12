@@ -12,6 +12,8 @@ import { UserAvatar } from "../../components/Avatar";
 import Spinner from "react-native-loading-spinner-overlay";
 import { PendingAttachment } from "../../components/attachments/PendingAttachment";
 import { Avatar } from "@rneui/base";
+import { useCurrentUser } from "../../utils/auth";
+import { useNavigation } from "@react-navigation/native";
 
 export default function ProfileEditScreen({
   navigation,
@@ -22,21 +24,39 @@ export default function ProfileEditScreen({
   const scheme = useColorScheme();
   const profileQuery = trpc.profile.getUserProfile.useQuery({ userId });
   const user = profileQuery.data;
+  const { navigate } = useNavigation();
+  const fileUploadHandler = useFileUpload();
+  const [isTextModalOpen, setIsTextModalOpen] = useState(false);
+  const { user: currentUser } = useCurrentUser();
+  const [userName, setUserName] = useState(currentUser?.name ?? "");
+  const iconColor = scheme === "dark" ? "white" : "black";
+  if (!user) return <Spinner visible />;
+
   const uploadAvatar = trpc.profile.changeAvatar.useMutation({
     async onSuccess(data) {
-      Alert.alert("Avatar uploaded");
+      // Alert.alert("Avatar Updated");
+      navigate("ProfileScreen", { userId: currentUser?.id ?? "" });
     },
     onError(error) {
       console.error(error);
     },
   });
-  const fileUploadHandler = useFileUpload();
-  const [isTextModalOpen, setIsTextModalOpen] = useState(false);
-  const [userName, setUserName] = useState("");
-  const iconColor = scheme === "dark" ? "white" : "black";
-  if (!user) return <Spinner visible />;
+
+  const updateUserDetails = trpc.profile.update.useMutation({
+    async onSuccess(data) {
+      // Alert.alert("Name Updated");
+    },
+    onError(error) {
+      console.error(error);
+    },
+  });
+
   return (
     <View style={{ flex: 1 }}>
+      <Spinner
+        visible={updateUserDetails.isLoading || uploadAvatar.isLoading}
+        textContent="Please wait..."
+      />
       <View style={styles.container}>
         <View style={styles.imageContainer}>
           {fileUploadHandler.uploadTasks.length > 0 ? (
@@ -55,7 +75,7 @@ export default function ProfileEditScreen({
               { opacity: pressed ? 0.5 : 1 },
             ]}
           >
-            <MaterialCommunityIcons name="upload" size={26} color={"#4E48B2"} />
+            <MaterialCommunityIcons name="upload" size={26} color={"white"} />
           </Pressable>
         </View>
 
@@ -83,7 +103,11 @@ export default function ProfileEditScreen({
       <ModalTextInput
         isVisible={isTextModalOpen}
         onClose={() => setIsTextModalOpen(false)}
-        onChange={setUserName}
+        onChange={(name) => {
+          updateUserDetails.mutate({
+            name: name,
+          });
+        }}
         defaultValue={userName}
         title="Your Name"
       />
@@ -96,6 +120,9 @@ export default function ProfileEditScreen({
                 file_name: fileUploadHandler.uploadTasks[0].file.name,
               },
             });
+          // updateUserDetails.mutate({
+          //   name: userName,
+          // });
         }}
         buttonStyle={{ backgroundColor: "#4E48B2" }}
         icon={<MaterialCommunityIcons name="check" size={24} color={"white"} />}
@@ -107,28 +134,23 @@ export default function ProfileEditScreen({
 
 const styles = StyleSheet.create({
   container: {
-    borderBottomWidth: 1,
-    borderBottomColor: "gray",
-    flexDirection: "row",
-    paddingHorizontal: 16,
+    flexDirection: "column",
+    paddingHorizontal: 24,
     paddingTop: 16,
+    justifyContent: "center",
   },
   imageContainer: {
-    position: "relative",
-    alignItems: "flex-start",
-    justifyContent: "flex-end",
-    marginBottom: 16,
-    padding: 8,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
   },
   detailsContainer: {
-    flex: 2,
-    marginLeft: 16,
-    justifyContent: "flex-start",
+    justifyContent: "center",
   },
-  value: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
+  value: { textAlign: "center", fontSize: 18, fontWeight: "bold" },
+
   pending_attachments_list: {
     backgroundColor: "transparent",
   },
@@ -137,9 +159,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 2,
     borderRadius: 100,
-    bottom: "5%",
-    right: "5%",
-    borderColor: "#4E48B2",
+    borderColor: "white",
     padding: 2,
   },
 });

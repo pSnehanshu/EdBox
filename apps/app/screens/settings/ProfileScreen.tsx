@@ -30,6 +30,7 @@ export default function ProfileScreen({
 
         <View style={styles.detailsContainer}>
           <Text style={styles.value}>{user.name}</Text>
+          {/* <Text style={styles.value}>{user.gender}</Text> */}
         </View>
       </View>
 
@@ -60,24 +61,20 @@ export default function ProfileScreen({
 
 const styles = StyleSheet.create({
   container: {
-    borderBottomWidth: 1,
-    borderBottomColor: "gray",
-    flexDirection: "row",
-    paddingHorizontal: 16,
+    flexDirection: "column",
+    paddingHorizontal: 24,
     paddingTop: 16,
+    justifyContent: "center",
   },
   imageContainer: {
-    alignItems: "flex-start",
-    justifyContent: "flex-end",
-    marginBottom: 16,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
   },
   detailsContainer: {
-    flex: 2,
-    marginLeft: 16,
-    justifyContent: "flex-start",
+    justifyContent: "center",
   },
-  value: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
+  value: { textAlign: "center", fontSize: 18, fontWeight: "bold" },
 });
