@@ -27,14 +27,13 @@ export default function ProfileEditScreen({
   const { navigate } = useNavigation();
   const fileUploadHandler = useFileUpload();
   const [isTextModalOpen, setIsTextModalOpen] = useState(false);
-  const { user: currentUser } = useCurrentUser();
+  const currentUser = profileQuery.data;
   const [userName, setUserName] = useState(currentUser?.name ?? "");
   const iconColor = scheme === "dark" ? "white" : "black";
   if (!user) return <Spinner visible />;
 
   const uploadAvatar = trpc.profile.changeAvatar.useMutation({
     async onSuccess(data) {
-      // Alert.alert("Avatar Updated");
       navigate("ProfileScreen", { userId: currentUser?.id ?? "" });
     },
     onError(error) {
@@ -44,7 +43,7 @@ export default function ProfileEditScreen({
 
   const updateUserDetails = trpc.profile.update.useMutation({
     async onSuccess(data) {
-      // Alert.alert("Name Updated");
+      profileQuery.refetch();
     },
     onError(error) {
       console.error(error);
@@ -89,7 +88,7 @@ export default function ProfileEditScreen({
             <ListItem>
               <ListItem.Content>
                 <ListItem.Subtitle>Edit Name</ListItem.Subtitle>
-                <ListItem.Title>{userName || user?.name}</ListItem.Title>
+                <ListItem.Title>{userName}</ListItem.Title>
               </ListItem.Content>
               <MaterialCommunityIcons
                 name="chevron-right"
@@ -107,6 +106,7 @@ export default function ProfileEditScreen({
           updateUserDetails.mutate({
             name: name,
           });
+          setUserName(name);
         }}
         defaultValue={userName}
         title="Your Name"
