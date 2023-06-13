@@ -125,18 +125,17 @@ export default function ProfileEditScreen({
 
       <FAB
         onPress={() => {
-          if (fileUploadHandler)
-            updateUserDetails.mutate({
-              avatar_file_permission:
-                fileUploadHandler.uploadTasks.length > 0
-                  ? {
-                      permission_id:
-                        fileUploadHandler.uploadTasks[0].permission.id,
-                      file_name: fileUploadHandler.uploadTasks[0].file.name,
-                    }
-                  : undefined,
-              name: userName,
-            });
+          updateUserDetails.mutate({
+            avatar_file_permission:
+              fileUploadHandler.uploadTasks.length > 0
+                ? {
+                    permission_id:
+                      fileUploadHandler.uploadTasks[0].permission.id,
+                    file_name: fileUploadHandler.uploadTasks[0].file.name,
+                  }
+                : undefined,
+            name: userName,
+          });
         }}
         buttonStyle={{ backgroundColor: "#4E48B2" }}
         icon={<MaterialCommunityIcons name="check" size={24} color={"white"} />}

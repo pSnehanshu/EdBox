@@ -63,6 +63,16 @@ model User {
   otp                   String?                @db.VarChar(10)
   otp_expiry            DateTime?
   gender                Gender?
+  date_of_birth         DateTime?              @map("dob")
+  salutation            Salutation             @default(None)
+  addr_l1               String?                @db.VarChar(100)
+  addr_l2               String?                @db.VarChar(100)
+  addr_town_vill        String?                @db.VarChar(20)
+  addr_city             String?                @db.VarChar(20)
+  addr_pin              Int?
+  addr_state            String?                @db.VarChar(20)
+  addr_country          String                 @default("India") @db.VarChar(60)
+  blood_group           String?                @db.VarChar(20)
   school_id             String                 @db.VarChar(32)
   School                School                 @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   student_id            String?                @unique @db.VarChar(32)
@@ -95,6 +105,15 @@ enum Gender {
   Male
   Female
   Others
+}
+
+enum Salutation {
+  None
+  Mr
+  Mrs
+  Miss
+  Dr
+  Prof
 }
 
 model Subject {
