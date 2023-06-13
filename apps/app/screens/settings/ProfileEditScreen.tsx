@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ModalTextInput } from "../../components/ModalTextInput";
 import { View } from "../../components/Themed";
 import { RootStackScreenProps } from "../../utils/types/common";
@@ -19,49 +19,42 @@ export default function ProfileEditScreen({
   },
 }: RootStackScreenProps<"ProfileEditScreen">) {
   const scheme = useColorScheme();
+  const iconColor = scheme === "dark" ? "white" : "black";
+
   const trpcUtils = trpc.useContext();
 
   const profileQuery = trpc.profile.getUserProfile.useQuery({ userId });
   const user = profileQuery.data;
+
   const fileUploadHandler = useFileUpload();
   const [isTextModalOpen, setIsTextModalOpen] = useState(false);
-  const currentUser = profileQuery.data;
-  const [userName, setUserName] = useState(currentUser?.name ?? "");
-  const iconColor = scheme === "dark" ? "white" : "black";
-  if (!user) return <Spinner visible />;
 
-  const uploadAvatar = trpc.profile.changeAvatar.useMutation({
-    async onSuccess() {
-      profileQuery.refetch();
-      trpcUtils.profile.me.refetch();
-
-      if (currentUser)
-        navigation.navigate("ProfileScreen", { userId: currentUser.id });
-    },
-    onError(error) {
-      console.error(error);
-    },
-  });
+  const [userName, setUserName] = useState("");
+  useEffect(() => {
+    if (typeof user?.name === "string") setUserName(user.name);
+  }, [user?.name]);
 
   const updateUserDetails = trpc.profile.update.useMutation({
     async onSuccess() {
       profileQuery.refetch();
       trpcUtils.profile.me.refetch();
 
-      if (currentUser)
-        navigation.navigate("ProfileScreen", { userId: currentUser.id });
+      navigation.navigate("ProfileScreen", { userId });
     },
     onError(error) {
       console.error(error);
     },
   });
 
+  if (!user) return <Spinner visible />;
+
   return (
     <View style={{ flex: 1 }}>
       <Spinner
-        visible={updateUserDetails.isLoading || uploadAvatar.isLoading}
+        visible={updateUserDetails.isLoading}
         textContent="Please wait..."
       />
+
       <View style={styles.container}>
         <View style={styles.imageContainer}>
           {fileUploadHandler.uploadTasks.length > 0 ? (
@@ -105,30 +98,25 @@ export default function ProfileEditScreen({
           </Pressable>
         </View>
       </View>
+
       <ModalTextInput
         isVisible={isTextModalOpen}
         onClose={() => setIsTextModalOpen(false)}
-        onChange={(name) => {
-          updateUserDetails.mutate({
-            name: name,
-          });
-          setUserName(name);
-        }}
+        onChange={setUserName}
         defaultValue={userName}
         title="Your Name"
       />
+
       <FAB
         onPress={() => {
           if (fileUploadHandler)
-            uploadAvatar.mutate({
-              file_permission: {
+            updateUserDetails.mutate({
+              avatar_file_permission: {
                 permission_id: fileUploadHandler.uploadTasks[0].permission.id,
                 file_name: fileUploadHandler.uploadTasks[0].file.name,
               },
+              name: userName,
             });
-          // updateUserDetails.mutate({
-          //   name: userName,
-          // });
         }}
         buttonStyle={{ backgroundColor: "#4E48B2" }}
         icon={<MaterialCommunityIcons name="check" size={24} color={"white"} />}

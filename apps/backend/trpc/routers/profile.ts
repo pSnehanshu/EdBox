@@ -16,6 +16,7 @@ const profileRouter = router({
       z.object({
         name: z.string().trim().max(50).min(1).optional(),
         gender: z.nativeEnum(Gender).optional(),
+        avatar_file_permission: FilePermissionsInputSchema.optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -27,46 +28,39 @@ const profileRouter = router({
         },
       });
 
-      return _.omit(user, ["password", "otp", "otp_expiry", "School"]);
-    }),
-  changeAvatar: protectedProcedure
-    .input(
-      z.object({
-        file_permission: FilePermissionsInputSchema,
-      }),
-    )
-    .mutation(async ({ input, ctx }) => {
-      // Consume the file
-      const file = await consumePermission(
-        input.file_permission.permission_id,
-        ctx.user.id,
-        input.file_permission.file_name,
-      );
-
-      // Ensure this is an image
-      if (!file.mime?.startsWith("image/")) {
-        // First delete the file
-        deleteFile(file).catch((err) =>
-          console.error(
-            `Failed to delete file ID: ${file.id}, key: ${file.s3key}`,
-            err,
-          ),
+      if (input.avatar_file_permission) {
+        // Consume the file
+        const file = await consumePermission(
+          input.avatar_file_permission.permission_id,
+          ctx.user.id,
+          input.avatar_file_permission.file_name,
         );
 
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Uploaded file is not an image",
+        // Ensure this is an image
+        if (!file.mime?.startsWith("image/")) {
+          // First delete the file
+          deleteFile(file).catch((err) =>
+            console.error(
+              `Failed to delete file ID: ${file.id}, key: ${file.s3key}`,
+              err,
+            ),
+          );
+
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Uploaded file is not an image",
+          });
+        }
+
+        await prisma.user.update({
+          where: { id: ctx.user.id },
+          data: {
+            avatar_id: file.id,
+          },
         });
       }
 
-      await prisma.user.update({
-        where: { id: ctx.user.id },
-        data: {
-          avatar_id: file.id,
-        },
-      });
-
-      return file;
+      return _.omit(user, ["password", "otp", "otp_expiry", "School"]);
     }),
   getUserProfile: protectedProcedure
     .input(
