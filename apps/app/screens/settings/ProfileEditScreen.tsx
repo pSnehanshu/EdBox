@@ -27,6 +27,11 @@ export default function ProfileEditScreen({
   const user = profileQuery.data;
 
   const fileUploadHandler = useFileUpload();
+  const isUploading =
+    fileUploadHandler.uploadTasks.length > 0
+      ? !fileUploadHandler.allDone
+      : false;
+
   const [isTextModalOpen, setIsTextModalOpen] = useState(false);
 
   const [userName, setUserName] = useState("");
@@ -66,14 +71,25 @@ export default function ProfileEditScreen({
           ) : (
             <UserAvatar fileId={user?.avatar_id} size={120} rounded />
           )}
+
           <Pressable
-            onPress={() => fileUploadHandler.pickAndUploadMediaLib()}
+            onPress={() => {
+              fileUploadHandler.removeAll();
+              fileUploadHandler.pickAndUploadMediaLib();
+            }}
             style={({ pressed }) => [
               styles.attach_btn,
-              { opacity: pressed ? 0.5 : 1 },
+              {
+                opacity: pressed ? 0.5 : 0.7,
+                backgroundColor: scheme === "light" ? "white" : "black",
+              },
             ]}
           >
-            <MaterialCommunityIcons name="upload" size={26} color={"white"} />
+            <MaterialCommunityIcons
+              name={isUploading ? "close" : "upload"}
+              size={24}
+              color={iconColor}
+            />
           </Pressable>
         </View>
 
@@ -111,10 +127,14 @@ export default function ProfileEditScreen({
         onPress={() => {
           if (fileUploadHandler)
             updateUserDetails.mutate({
-              avatar_file_permission: {
-                permission_id: fileUploadHandler.uploadTasks[0].permission.id,
-                file_name: fileUploadHandler.uploadTasks[0].file.name,
-              },
+              avatar_file_permission:
+                fileUploadHandler.uploadTasks.length > 0
+                  ? {
+                      permission_id:
+                        fileUploadHandler.uploadTasks[0].permission.id,
+                      file_name: fileUploadHandler.uploadTasks[0].file.name,
+                    }
+                  : undefined,
               name: userName,
             });
         }}
@@ -151,9 +171,7 @@ const styles = StyleSheet.create({
   attach_btn: {
     position: "absolute",
     alignItems: "center",
-    borderWidth: 2,
     borderRadius: 100,
-    borderColor: "white",
-    padding: 2,
+    padding: 4,
   },
 });
