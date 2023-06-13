@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { ModalTextInput } from "../../components/ModalTextInput";
-import { List, Text, View } from "../../components/Themed";
+import { View } from "../../components/Themed";
 import { RootStackScreenProps } from "../../utils/types/common";
-import { Pressable, StyleSheet, Image, Alert } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 import { FAB, ListItem } from "@rneui/themed";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import useColorScheme from "../../utils/useColorScheme";
@@ -10,10 +10,7 @@ import { trpc } from "../../utils/trpc";
 import { useFileUpload } from "../../utils/file-upload";
 import { UserAvatar } from "../../components/Avatar";
 import Spinner from "react-native-loading-spinner-overlay";
-import { PendingAttachment } from "../../components/attachments/PendingAttachment";
 import { Avatar } from "@rneui/base";
-import { useCurrentUser } from "../../utils/auth";
-import { useNavigation } from "@react-navigation/native";
 
 export default function ProfileEditScreen({
   navigation,
@@ -22,9 +19,10 @@ export default function ProfileEditScreen({
   },
 }: RootStackScreenProps<"ProfileEditScreen">) {
   const scheme = useColorScheme();
+  const trpcUtils = trpc.useContext();
+
   const profileQuery = trpc.profile.getUserProfile.useQuery({ userId });
   const user = profileQuery.data;
-  const { navigate } = useNavigation();
   const fileUploadHandler = useFileUpload();
   const [isTextModalOpen, setIsTextModalOpen] = useState(false);
   const currentUser = profileQuery.data;
@@ -33,8 +31,12 @@ export default function ProfileEditScreen({
   if (!user) return <Spinner visible />;
 
   const uploadAvatar = trpc.profile.changeAvatar.useMutation({
-    async onSuccess(data) {
-      navigate("ProfileScreen", { userId: currentUser?.id ?? "" });
+    async onSuccess() {
+      profileQuery.refetch();
+      trpcUtils.profile.me.refetch();
+
+      if (currentUser)
+        navigation.navigate("ProfileScreen", { userId: currentUser.id });
     },
     onError(error) {
       console.error(error);
@@ -42,8 +44,12 @@ export default function ProfileEditScreen({
   });
 
   const updateUserDetails = trpc.profile.update.useMutation({
-    async onSuccess(data) {
+    async onSuccess() {
       profileQuery.refetch();
+      trpcUtils.profile.me.refetch();
+
+      if (currentUser)
+        navigation.navigate("ProfileScreen", { userId: currentUser.id });
     },
     onError(error) {
       console.error(error);
@@ -68,7 +74,7 @@ export default function ProfileEditScreen({
             <UserAvatar fileId={user?.avatar_id} size={120} rounded />
           )}
           <Pressable
-            onPress={() => fileUploadHandler.pickAndUploadFile()}
+            onPress={() => fileUploadHandler.pickAndUploadMediaLib()}
             style={({ pressed }) => [
               styles.attach_btn,
               { opacity: pressed ? 0.5 : 1 },
