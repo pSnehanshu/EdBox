@@ -1,7 +1,10 @@
 import { Avatar, type AvatarProps } from "@rneui/themed";
+import type { Maybe } from "@trpc/server";
 import { trpc } from "../utils/trpc";
 
-type UserAvatarProps = Omit<AvatarProps, "source"> & { fileId: string | null };
+type UserAvatarProps = Omit<AvatarProps, "source"> & {
+  fileId: Maybe<string>;
+};
 
 export function UserAvatar(props: UserAvatarProps) {
   const urlQuery = trpc.school.attachment.getFileURL.useQuery(

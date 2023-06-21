@@ -1,4 +1,4 @@
-import { Gender } from "@prisma/client";
+import { Gender, Salutation, BloodGroup } from "@prisma/client";
 import _ from "lodash";
 import { FilePermissionsInputSchema } from "schooltalk-shared/misc";
 import { z } from "zod";
@@ -17,6 +17,18 @@ const profileRouter = router({
         name: z.string().trim().max(50).min(1).optional(),
         gender: z.nativeEnum(Gender).optional(),
         avatar_file_permission: FilePermissionsInputSchema.optional(),
+        date_of_birth: z.string().datetime().optional(),
+        salutation: z.nativeEnum(Salutation).optional(),
+        blood_group: z.nativeEnum(BloodGroup).optional(),
+        address: z
+          .object({
+            line1: z.string().trim(),
+            line2: z.string().trim().optional(),
+            town_or_village: z.string().trim(),
+            city: z.string().trim().optional(),
+            country: z.string().trim(),
+          })
+          .optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -25,6 +37,14 @@ const profileRouter = router({
         data: {
           name: input.name,
           gender: input.gender,
+          date_of_birth: input.date_of_birth,
+          salutation: input.salutation,
+          blood_group: input.blood_group,
+          addr_l1: input.address?.line1,
+          addr_l2: input.address?.line2,
+          addr_town_vill: input.address?.town_or_village,
+          addr_city: input.address?.city,
+          addr_country: input.address?.country,
         },
       });
 
@@ -71,19 +91,10 @@ const profileRouter = router({
     .query(async ({ input, ctx }) => {
       const user = await prisma.user.findUnique({
         where: { id: input.userId },
-        select: {
-          id: true,
-          name: true,
-          gender: true,
-          school_id: true,
-          avatar_id: true,
-          student_id: true,
+        include: {
           Student: true,
-          teacher_id: true,
           Teacher: true,
-          parent_id: true,
           Parent: true,
-          staff_id: true,
           Staff: true,
         },
       });
@@ -91,7 +102,7 @@ const profileRouter = router({
       if (!user || user.school_id !== ctx.user.school_id)
         throw new TRPCError({ code: "NOT_FOUND" });
 
-      return user;
+      return _.omit(user, ["password", "otp", "otp_expiry", "School"]);
     }),
 });
 

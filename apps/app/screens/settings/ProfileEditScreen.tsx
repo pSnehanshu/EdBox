@@ -69,7 +69,7 @@ export default function ProfileEditScreen({
               rounded
             />
           ) : (
-            <UserAvatar fileId={user?.avatar_id} size={120} rounded />
+            <UserAvatar fileId={user.avatar_id} size={120} rounded />
           )}
 
           <Pressable

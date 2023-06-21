@@ -72,7 +72,7 @@ model User {
   addr_pin              Int?
   addr_state            String?                @db.VarChar(20)
   addr_country          String                 @default("India") @db.VarChar(60)
-  blood_group           String?                @db.VarChar(20)
+  blood_group           BloodGroup?
   school_id             String                 @db.VarChar(32)
   School                School                 @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   student_id            String?                @unique @db.VarChar(32)
@@ -114,6 +114,18 @@ enum Salutation {
   Miss
   Dr
   Prof
+}
+
+enum BloodGroup {
+  Ap // A+
+  Bp // B+
+  ABp
+  Op
+  An // A-
+  Bn
+  ABn
+  On
+  Other
 }
 
 model Subject {
