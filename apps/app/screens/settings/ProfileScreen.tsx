@@ -1,11 +1,15 @@
-import { FAB } from "@rneui/themed";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { View, Text, ScrollView } from "../../components/Themed";
+import { useMemo, type ComponentProps } from "react";
 import { RefreshControl, StyleSheet } from "react-native";
+import { FAB } from "@rneui/themed";
+import { MaterialCommunityIcons, Fontisto, Entypo } from "@expo/vector-icons";
+import { ListItem } from "@rneui/themed";
+import { format, parseISO } from "date-fns";
+import { View, Text, ScrollView } from "../../components/Themed";
 import { useCurrentUser } from "../../utils/auth";
 import type { RootStackScreenProps } from "../../utils/types/common";
 import { UserAvatar } from "../../components/Avatar";
 import { trpc } from "../../utils/trpc";
+import useColorScheme from "../../utils/useColorScheme";
 
 export default function ProfileScreen({
   navigation,
@@ -13,11 +17,54 @@ export default function ProfileScreen({
     params: { userId },
   },
 }: RootStackScreenProps<"ProfileScreen">) {
+  const scheme = useColorScheme();
+  const iconColor = scheme === "dark" ? "white" : "black";
+
   const { user: currentUser } = useCurrentUser();
   const profileQuery = trpc.profile.getUserProfile.useQuery({ userId });
   const user = profileQuery.data;
 
   const isCurrentUser = currentUser?.id === userId;
+
+  const genderIconName = useMemo<
+    ComponentProps<typeof MaterialCommunityIcons>["name"]
+  >(() => {
+    switch (user?.gender) {
+      case "Male":
+        return "gender-male";
+      case "Female":
+        return "gender-female";
+      case "Others":
+        return "gender-non-binary";
+      default:
+        return "account-question-outline";
+    }
+  }, [user?.gender]);
+
+  const bloodGroup = useMemo<string>(() => {
+    switch (user?.blood_group) {
+      case "Ap":
+        return "A+";
+      case "Bp":
+        return "B+";
+      case "ABp":
+        return "AB+";
+      case "Op":
+        return "O+";
+      case "An":
+        return "A-";
+      case "Bn":
+        return "B-";
+      case "ABn":
+        return "AB-";
+      case "On":
+        return "O-";
+      case "Other":
+        return "Others";
+      default:
+        return "Unknown";
+    }
+  }, [user?.blood_group]);
 
   return (
     <View style={{ height: "100%" }}>
@@ -30,18 +77,82 @@ export default function ProfileScreen({
         }
       >
         {user && (
-          <View style={styles.container}>
-            <View style={styles.imageContainer}>
-              <UserAvatar fileId={user.avatar_id} size={120} rounded />
+          <>
+            <View style={styles.container}>
+              <View style={styles.imageContainer}>
+                <UserAvatar fileId={user.avatar_id} size={120} rounded />
+              </View>
+
+              <View style={styles.detailsContainer}>
+                <Text style={styles.value}>
+                  {user.salutation === "None" ? "" : user.salutation + ". "}
+                  {user.name}{" "}
+                  <MaterialCommunityIcons
+                    name={genderIconName}
+                    size={24}
+                    color={iconColor}
+                  />
+                </Text>
+              </View>
             </View>
 
-            <View style={styles.detailsContainer}>
-              <Text style={styles.value}>
-                {user.salutation === "None" ? "" : user.salutation + ". "}
-                {user.name}
-              </Text>
+            <View style={styles.infoTable}>
+              <ListItem bottomDivider>
+                <ListItem.Content>
+                  <ListItem.Title>Date of birth</ListItem.Title>
+                  <ListItem.Subtitle>
+                    {user.date_of_birth
+                      ? format(parseISO(user.date_of_birth), "do MMMM, yyy")
+                      : "Unknown"}
+                  </ListItem.Subtitle>
+                </ListItem.Content>
+
+                <MaterialCommunityIcons
+                  name="cake-variant"
+                  size={24}
+                  color={iconColor}
+                />
+              </ListItem>
+
+              <ListItem bottomDivider>
+                <ListItem.Content>
+                  <ListItem.Title>Blood group</ListItem.Title>
+                  <ListItem.Subtitle>{bloodGroup}</ListItem.Subtitle>
+                </ListItem.Content>
+
+                <Fontisto name="blood-drop" size={24} color={iconColor} />
+              </ListItem>
+
+              <ListItem bottomDivider>
+                <ListItem.Content>
+                  <ListItem.Title>Address</ListItem.Title>
+                  {user.addr_l1 && (
+                    <ListItem.Subtitle>{user.addr_l1}</ListItem.Subtitle>
+                  )}
+                  {user.addr_l2 && (
+                    <ListItem.Subtitle>{user.addr_l2}</ListItem.Subtitle>
+                  )}
+                  {user.addr_town_vill && (
+                    <ListItem.Subtitle>{user.addr_town_vill}</ListItem.Subtitle>
+                  )}
+                  {(user.addr_city || user.addr_pin) && (
+                    <ListItem.Subtitle>
+                      {user.addr_city ? user.addr_city + ", " : ""}
+                      {user.addr_pin ? "PIN-" + user.addr_pin : ""}
+                    </ListItem.Subtitle>
+                  )}
+                  {(user.addr_state || user.addr_country) && (
+                    <ListItem.Subtitle>
+                      {user.addr_state ? user.addr_state + ", " : ""}
+                      {user.addr_country}
+                    </ListItem.Subtitle>
+                  )}
+                </ListItem.Content>
+
+                <Entypo name="location" size={24} color={iconColor} />
+              </ListItem>
             </View>
-          </View>
+          </>
         )}
       </ScrollView>
 
@@ -87,5 +198,12 @@ const styles = StyleSheet.create({
   detailsContainer: {
     justifyContent: "center",
   },
-  value: { textAlign: "center", fontSize: 18, fontWeight: "bold" },
+  value: {
+    textAlign: "center",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  infoTable: {
+    marginTop: 16,
+  },
 });
