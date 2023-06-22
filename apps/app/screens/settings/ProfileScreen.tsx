@@ -29,15 +29,20 @@ export default function ProfileScreen({
           />
         }
       >
-        <View style={styles.container}>
-          <View style={styles.imageContainer}>
-            <UserAvatar fileId={user?.avatar_id} size={120} rounded />
-          </View>
+        {user && (
+          <View style={styles.container}>
+            <View style={styles.imageContainer}>
+              <UserAvatar fileId={user.avatar_id} size={120} rounded />
+            </View>
 
-          <View style={styles.detailsContainer}>
-            <Text style={styles.value}>{user?.name}</Text>
+            <View style={styles.detailsContainer}>
+              <Text style={styles.value}>
+                {user.salutation === "None" ? "" : user.salutation + ". "}
+                {user.name}
+              </Text>
+            </View>
           </View>
-        </View>
+        )}
       </ScrollView>
 
       {
