@@ -26,6 +26,8 @@ const profileRouter = router({
             line2: z.string().trim().optional(),
             town_or_village: z.string().trim(),
             city: z.string().trim().optional(),
+            state: z.string().trim().optional(),
+            pin: z.number().int().min(100000).max(999999).optional(),
             country: z.string().trim(),
           })
           .optional(),
@@ -44,6 +46,8 @@ const profileRouter = router({
           addr_l2: input.address?.line2,
           addr_town_vill: input.address?.town_or_village,
           addr_city: input.address?.city,
+          addr_state: input.address?.state,
+          addr_pin: input.address?.pin,
           addr_country: input.address?.country,
         },
       });
