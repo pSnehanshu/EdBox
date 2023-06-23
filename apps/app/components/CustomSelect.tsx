@@ -91,8 +91,12 @@ export function CustomSelect<T>(props: CustomSelectProps<T>) {
             {props.control ?? (
               <ListItem>
                 <ListItem.Content>
-                  <ListItem.Title>{props.title}</ListItem.Title>
-                  <ListItem.Subtitle>{selectedItemsText}</ListItem.Subtitle>
+                  <ListItem.Title style={{ fontSize: 14 }}>
+                    {props.title}
+                  </ListItem.Title>
+                  <ListItem.Subtitle style={{ fontSize: 16 }}>
+                    {selectedItemsText}
+                  </ListItem.Subtitle>
                 </ListItem.Content>
                 <ListItem.Chevron />
               </ListItem>
