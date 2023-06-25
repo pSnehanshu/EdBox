@@ -4,6 +4,7 @@ import { FAB } from "@rneui/themed";
 import { MaterialCommunityIcons, Fontisto, Entypo } from "@expo/vector-icons";
 import { ListItem } from "@rneui/themed";
 import { format, parseISO } from "date-fns";
+import { dbBloodGroupToUIBloodGroup } from "schooltalk-shared/misc";
 import { View, Text, ScrollView } from "../../components/Themed";
 import { useCurrentUser } from "../../utils/auth";
 import type { RootStackScreenProps } from "../../utils/types/common";
@@ -41,30 +42,9 @@ export default function ProfileScreen({
     }
   }, [user?.gender]);
 
-  const bloodGroup = useMemo<string>(() => {
-    switch (user?.blood_group) {
-      case "Ap":
-        return "A+";
-      case "Bp":
-        return "B+";
-      case "ABp":
-        return "AB+";
-      case "Op":
-        return "O+";
-      case "An":
-        return "A-";
-      case "Bn":
-        return "B-";
-      case "ABn":
-        return "AB-";
-      case "On":
-        return "O-";
-      case "Other":
-        return "Others";
-      default:
-        return "Unknown";
-    }
-  }, [user?.blood_group]);
+  const bloodGroup = user?.blood_group
+    ? dbBloodGroupToUIBloodGroup(user.blood_group) ?? "Unknown"
+    : "Unknown";
 
   return (
     <View style={{ height: "100%" }}>

@@ -84,6 +84,28 @@ export type UploadedFile = RouterOutput["school"]["attachment"]["fetchFile"];
 export type UploadPermission =
   RouterOutput["school"]["attachment"]["requestPermission"]["permission"];
 
+export type Gender = NonNullable<RouterInput["profile"]["update"]["gender"]>;
+export type Saluation = NonNullable<
+  RouterInput["profile"]["update"]["salutation"]
+>;
+
+/** Blood Groups as stored in DB */
+export type DBBloodGroup = NonNullable<
+  RouterInput["profile"]["update"]["blood_group"]
+>;
+
+/** Blood Groups as rendered on screen */
+export type UIBloodGroup =
+  | "A+"
+  | "B+"
+  | "AB+"
+  | "O+"
+  | "A-"
+  | "B-"
+  | "AB-"
+  | "O-"
+  | "Others";
+
 export interface ServerToClientEvents {
   newMessage: (msg: Message) => void;
 }

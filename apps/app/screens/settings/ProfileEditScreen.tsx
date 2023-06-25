@@ -1,4 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import DatePicker from "react-native-date-picker";
+import { format } from "date-fns";
+import type {
+  DBBloodGroup,
+  Gender,
+  Saluation,
+  UIBloodGroup,
+} from "schooltalk-shared/types";
+import {
+  uiBloodGroupToDBBloodGroup,
+  dbBloodGroupToUIBloodGroup,
+} from "schooltalk-shared/misc";
 import { ModalTextInput } from "../../components/ModalTextInput";
 import { View } from "../../components/Themed";
 import { RootStackScreenProps } from "../../utils/types/common";
@@ -12,8 +24,6 @@ import { UserAvatar } from "../../components/Avatar";
 import Spinner from "react-native-loading-spinner-overlay";
 import { Avatar } from "@rneui/base";
 import { CustomSelect } from "../../components/CustomSelect";
-import DatePicker from "react-native-date-picker";
-import { format } from "date-fns";
 
 export default function ProfileEditScreen({
   navigation,
@@ -37,30 +47,17 @@ export default function ProfileEditScreen({
 
   const [isTextModalOpen, setIsTextModalOpen] = useState(false);
 
-  type Gender = "Male" | "Female" | "Others";
   const defaultGender: Gender[] = ["Male", "Female", "Others"];
-  type Salutation =
-    | "Mr"
-    | "Mrs"
-    | "Ms"
-    | "Dr"
-    | "Miss"
-    | "Prof"
-    | "None"
-    | undefined;
-  const defaultSalutations = ["Mr", "Mrs", "Ms", "Dr", "Miss", "Prof", "None"];
-  type BloodType =
-    | "A+"
-    | "A-"
-    | "B+"
-    | "B-"
-    | "AB+"
-    | "AB-"
-    | "O+"
-    | "O-"
-    | "Others"
-    | undefined;
-  const defaultBloodGroups = [
+  const defaultSalutations: Saluation[] = [
+    "Mr",
+    "Mrs",
+    "Miss",
+    "Dr",
+    "Miss",
+    "Prof",
+    "None",
+  ];
+  const defaultBloodGroups: UIBloodGroup[] = [
     "A+",
     "B+",
     "AB+",
@@ -78,32 +75,10 @@ export default function ProfileEditScreen({
   const [salutation, setSalutation] = useState<string>(
     user?.salutation ?? "None",
   );
-  const bloodGroup = useMemo<string>(() => {
-    switch (user?.blood_group) {
-      case "Ap":
-        return "A+";
-      case "Bp":
-        return "B+";
-      case "ABp":
-        return "AB+";
-      case "Op":
-        return "O+";
-      case "An":
-        return "A-";
-      case "Bn":
-        return "B-";
-      case "ABn":
-        return "AB-";
-      case "On":
-        return "O-";
-      case "Other":
-        return "Others";
-      default:
-        return "Unknown";
-    }
-  }, [user?.blood_group]);
 
-  const [blood_group, setBloodGroup] = useState<string>(bloodGroup);
+  const [blood_group, setBloodGroup] = useState<DBBloodGroup | null>(
+    user?.blood_group ?? null,
+  );
   const [birthOfDate, setBirthOfDate] = useState<Date | null>(null);
 
   useEffect(() => {
@@ -227,11 +202,13 @@ export default function ProfileEditScreen({
           isSingle
           title="Blood Group"
           items={defaultBloodGroups}
-          selected={blood_group}
+          selected={
+            blood_group ? dbBloodGroupToUIBloodGroup(blood_group) : null
+          }
           onSubmit={(item) => {
-            if (item) setBloodGroup(item);
+            if (item) setBloodGroup(uiBloodGroupToDBBloodGroup(item));
           }}
-          idExtractor={(item) => item}
+          idExtractor={(item) => (item ? item : "?")}
           labelExtractor={(item) => `${item}`}
           style={{ flexGrow: 1 }}
           // isLoading={}
@@ -305,7 +282,6 @@ export default function ProfileEditScreen({
 const styles = StyleSheet.create({
   container: {
     flexDirection: "column",
-    // paddingHorizontal: 24,
     paddingTop: 16,
     justifyContent: "center",
   },
