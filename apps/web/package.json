@@ -10,10 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@chakra-ui/react": "^2.7.1",
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
     "@t3-oss/env-core": "^0.6.0",
     "@tanstack/react-query": "^4.29.17",
     "@trpc/client": "^10.32.0",
     "@trpc/react-query": "^10.32.0",
+    "framer-motion": "^10.12.17",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "zod": "^3.21.4"

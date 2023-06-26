@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
+import { ChakraProvider } from "@chakra-ui/react";
 import App from "./App.tsx";
 import { trpc } from "./utils/trpc";
 import { env } from "./utils/env.ts";
-import "./index.css";
 
 const ProvidersTree: React.FC = () => {
   const [queryClient] = useState(() => new QueryClient());
@@ -26,11 +26,13 @@ const ProvidersTree: React.FC = () => {
 
   return (
     <React.StrictMode>
-      <trpc.Provider client={trpcClient} queryClient={queryClient}>
-        <QueryClientProvider client={queryClient}>
-          <App />
-        </QueryClientProvider>
-      </trpc.Provider>
+      <ChakraProvider>
+        <trpc.Provider client={trpcClient} queryClient={queryClient}>
+          <QueryClientProvider client={queryClient}>
+            <App />
+          </QueryClientProvider>
+        </trpc.Provider>
+      </ChakraProvider>
     </React.StrictMode>
   );
 };
