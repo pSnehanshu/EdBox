@@ -3,10 +3,11 @@ import bodyParser from "body-parser";
 import * as trpcExpress from "@trpc/server/adapters/express";
 import parseDataUrl from "parse-data-url";
 import fs from "fs";
+import path from "path";
+import cors from "cors";
 import { appRouter as trpcRouter } from "../trpc";
 import { createContext } from "../trpc/context";
 import prisma from "../prisma";
-import path from "path";
 import config from "../config";
 
 const app = express();
@@ -20,6 +21,9 @@ if (config.NODE_ENV === "development") {
     `Requests are artificially delayed by ${config.ARTIFICIAL_LATENCY} ms`,
   );
   app.use((req, res, next) => setTimeout(next, config.ARTIFICIAL_LATENCY));
+
+  // Allow all cors in dev
+  app.use(cors());
 }
 
 // tRPC

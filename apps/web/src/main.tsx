@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
 import App from "./App.tsx";
 import { trpc } from "./utils/trpc";
+import { env } from "./utils/env.ts";
 import "./index.css";
 
 const ProvidersTree: React.FC = () => {
@@ -12,7 +13,7 @@ const ProvidersTree: React.FC = () => {
     trpc.createClient({
       links: [
         httpBatchLink({
-          url: "http://localhost:3000/trpc",
+          url: `${env.VITE_BACKEND_URL}/trpc`,
           async headers() {
             return {
               // authorization: getAuthCookie(),
