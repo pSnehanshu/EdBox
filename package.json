@@ -9,6 +9,7 @@
   "scripts": {
     "dev:app": "yarn workspace schooltalk-app start",
     "dev:backend": "yarn workspace schooltalk-backend dev",
+    "dev:web": "yarn workspace edbox-web dev",
     "start:backend": "yarn workspace schooltalk-backend start",
     "expo": "yarn workspace schooltalk-app expo",
     "eas": "yarn workspace schooltalk-app eas",
