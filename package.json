@@ -23,7 +23,7 @@
     "packages/*"
   ],
   "dependencies": {
-    "core-js": "^3.30.2",
+    "core-js": "^3.31.0",
     "prop-types": "^15.8.1"
   },
   "packageManager": "yarn@3.3.1",
