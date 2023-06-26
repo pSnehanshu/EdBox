@@ -91,7 +91,11 @@ export type Saluation = NonNullable<
 
 /** Blood Groups as stored in DB */
 export type DBBloodGroup = NonNullable<
-  RouterInput["profile"]["update"]["blood_group"]
+  RouterInput["profile"]["update"]["blood_group"] | undefined
+>;
+
+export type UserAddress = NonNullable<
+  RouterInput["profile"]["update"]["address"]
 >;
 
 /** Blood Groups as rendered on screen */
@@ -104,7 +108,8 @@ export type UIBloodGroup =
   | "B-"
   | "AB-"
   | "O-"
-  | "Others";
+  | "Others"
+  | undefined;
 
 export interface ServerToClientEvents {
   newMessage: (msg: Message) => void;

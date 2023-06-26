@@ -318,7 +318,7 @@ export type ExamTestSchema = z.input<typeof examTestSchema>;
  */
 export function dbBloodGroupToUIBloodGroup(
   db_blood_group: DBBloodGroup,
-): UIBloodGroup | null {
+): UIBloodGroup | undefined {
   switch (db_blood_group) {
     case "Ap":
       return "A+";
@@ -339,7 +339,7 @@ export function dbBloodGroupToUIBloodGroup(
     case "Other":
       return "Others";
     default:
-      return null;
+      return undefined;
   }
 }
 
@@ -350,7 +350,7 @@ export function dbBloodGroupToUIBloodGroup(
  */
 export function uiBloodGroupToDBBloodGroup(
   ui_blood_group: UIBloodGroup,
-): DBBloodGroup | null {
+): DBBloodGroup | undefined {
   switch (ui_blood_group) {
     case "A+":
       return "Ap";
@@ -371,6 +371,6 @@ export function uiBloodGroupToDBBloodGroup(
     case "Others":
       return "Other";
     default:
-      return null;
+      return undefined;
   }
 }

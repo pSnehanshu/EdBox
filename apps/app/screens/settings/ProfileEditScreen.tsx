@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import DatePicker from "react-native-date-picker";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import type {
   DBBloodGroup,
   Gender,
   Saluation,
   UIBloodGroup,
+  UserAddress,
 } from "schooltalk-shared/types";
 import {
   uiBloodGroupToDBBloodGroup,
@@ -38,7 +39,6 @@ export default function ProfileEditScreen({
 
   const profileQuery = trpc.profile.getUserProfile.useQuery({ userId });
   const user = profileQuery.data;
-  console.log(JSON.stringify(user, null, 2));
   const fileUploadHandler = useFileUpload();
   const isUploading =
     fileUploadHandler.uploadTasks.length > 0
@@ -70,24 +70,22 @@ export default function ProfileEditScreen({
   ];
 
   const [datePickerVisible, setDatePickerVisible] = useState(false);
-  const [userName, setUserName] = useState("");
-  const [gender, setGender] = useState<Gender | undefined>(undefined);
-  const [salutation, setSalutation] = useState<string>(
+  const [userName, setUserName] = useState(user?.name ?? "");
+  const [gender, setGender] = useState<Gender | undefined>(
+    user?.gender ?? undefined,
+  );
+  const [salutation, setSalutation] = useState<Saluation>(
     user?.salutation ?? "None",
   );
 
-  const [blood_group, setBloodGroup] = useState<DBBloodGroup | null>(
-    user?.blood_group ?? null,
+  const [blood_group, setBloodGroup] = useState<DBBloodGroup | undefined>(
+    user?.blood_group ?? undefined,
   );
-  const [birthOfDate, setBirthOfDate] = useState<Date | null>(null);
-
-  useEffect(() => {
-    if (typeof user?.name === "string") setUserName(user.name);
-    if (typeof user?.gender === "string") setGender(user.gender);
-    // if (typeof user?.salutation === "string") setSalutation(user.salutation);
-
-    // if (typeof user?.blood_group === "string") setBloodGroup(user.blood_group);
-  }, [user?.name]);
+  const [birthOfDate, setBirthOfDate] = useState<Date | null>(
+    user?.date_of_birth ? parseISO(user?.date_of_birth) : null,
+  );
+  const [address, setAddress] = useState<UserAddress | null>(null);
+  console.log(JSON.stringify(user, null, 2), "apple1");
 
   const updateUserDetails = trpc.profile.update.useMutation({
     async onSuccess() {
@@ -100,6 +98,18 @@ export default function ProfileEditScreen({
       console.error(error);
     },
   });
+  useEffect(() => {
+    if (typeof user?.addr_l1 === "string")
+      setAddress({
+        line1: user.addr_l1 ?? null,
+        line2: user.addr_l2 ?? undefined,
+        town_or_village: user.addr_town_vill ?? "",
+        city: user.addr_city ?? undefined,
+        state: user.addr_state ?? undefined,
+        pin: user.addr_pin ?? undefined,
+        country: user.addr_country ?? "",
+      });
+  }, [user]);
 
   if (!user) return <Spinner visible />;
 
@@ -266,9 +276,10 @@ export default function ProfileEditScreen({
                 : undefined,
             name: userName,
             gender: gender,
-            salutation: "Miss",
-            blood_group: "Ap",
+            salutation: salutation,
+            blood_group: blood_group,
             date_of_birth: birthOfDate?.toISOString(),
+            // address: {},
           });
         }}
         buttonStyle={{ backgroundColor: "#4E48B2" }}
