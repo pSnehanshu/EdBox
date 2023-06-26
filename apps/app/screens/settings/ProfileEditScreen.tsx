@@ -85,7 +85,6 @@ export default function ProfileEditScreen({
     user?.date_of_birth ? parseISO(user?.date_of_birth) : null,
   );
   const [address, setAddress] = useState<UserAddress | null>(null);
-  console.log(JSON.stringify(user, null, 2), "apple1");
 
   const updateUserDetails = trpc.profile.update.useMutation({
     async onSuccess() {
@@ -99,17 +98,17 @@ export default function ProfileEditScreen({
     },
   });
   useEffect(() => {
-    if (typeof user?.addr_l1 === "string")
+    if (user)
       setAddress({
-        line1: user.addr_l1 ?? null,
+        line1: user.addr_l1 ?? undefined,
         line2: user.addr_l2 ?? undefined,
-        town_or_village: user.addr_town_vill ?? "",
+        town_or_village: user.addr_town_vill ?? undefined,
         city: user.addr_city ?? undefined,
         state: user.addr_state ?? undefined,
         pin: user.addr_pin ?? undefined,
-        country: user.addr_country ?? "",
+        country: user.addr_country ?? undefined,
       });
-  }, [user]);
+  }, [user?.addr_country]);
 
   if (!user) return <Spinner visible />;
 
@@ -153,11 +152,27 @@ export default function ProfileEditScreen({
           </Pressable>
         </View>
         {/* form */}
-        <View style={styles.detailsContainer}>
+        <View style={styles.detailsContainerPlus}>
+          {/* <View style={styles.detailsContainer}> */}
+          <CustomSelect
+            isSingle
+            title="Salutation"
+            items={defaultSalutations}
+            selected={salutation}
+            onSubmit={(item) => {
+              if (item) setSalutation(item);
+            }}
+            idExtractor={(item) => item}
+            labelExtractor={(item) => `${item}`}
+            style={{ flexGrow: 1 }}
+          />
+          {/* </View>
+          <View style={styles.detailsContainer}> */}
           <Pressable
             onPress={() => setIsTextModalOpen(true)}
             style={({ pressed }) => ({
               opacity: pressed ? 0.2 : 1,
+              width: "50%",
             })}
           >
             <ListItem>
@@ -172,7 +187,9 @@ export default function ProfileEditScreen({
               />
             </ListItem>
           </Pressable>
+          {/* </View> */}
         </View>
+
         <ModalTextInput
           isVisible={isTextModalOpen}
           onClose={() => setIsTextModalOpen(false)}
@@ -180,21 +197,8 @@ export default function ProfileEditScreen({
           defaultValue={userName}
           title="Your Name"
         />
-        <View style={styles.detailsContainer}>
-          <CustomSelect
-            isSingle
-            title="Salutation"
-            items={defaultSalutations}
-            selected={salutation}
-            onSubmit={(item) => {
-              if (item) setSalutation(item);
-            }}
-            idExtractor={(item) => item}
-            labelExtractor={(item) => `${item}`}
-            style={{ flexGrow: 1 }}
-          />
-        </View>
-        <View style={styles.detailsContainer}>
+        <View style={styles.detailsContainerPlus}>
+          {/* <View style={styles.detailsContainer}> */}
           <CustomSelect
             isSingle
             title="Gender"
@@ -207,8 +211,8 @@ export default function ProfileEditScreen({
             labelExtractor={(item) => `${item}`}
             style={{ flexGrow: 1 }}
           />
-        </View>
-        <View style={styles.detailsContainer}>
+          {/* </View> */}
+          {/* <View style={styles.detailsContainer}> */}
           <CustomSelect
             isSingle
             title="Blood Group"
@@ -223,6 +227,7 @@ export default function ProfileEditScreen({
             labelExtractor={(item) => `${item}`}
             style={{ flexGrow: 1 }}
           />
+          {/* </View> */}
         </View>
 
         <DatePicker
@@ -263,8 +268,140 @@ export default function ProfileEditScreen({
             </ListItem>
           </Pressable>
         </View>
-
         {/* address */}
+        <View style={styles.detailsContainer}>
+          <Pressable
+            onPress={() => setDatePickerVisible((v) => !v)}
+            style={({ pressed }) => ({
+              opacity: pressed ? 0.2 : 1,
+            })}
+          >
+            <ListItem>
+              <ListItem.Content>
+                <ListItem.Title style={{ fontSize: 14 }}>
+                  Address Line1
+                </ListItem.Title>
+                <ListItem.Subtitle style={{ fontSize: 16 }}>
+                  {address?.line1 ?? "Enter House No. ,Building name"}
+                </ListItem.Subtitle>
+              </ListItem.Content>
+              <ListItem.Chevron />
+            </ListItem>
+          </Pressable>
+        </View>
+        <View style={styles.detailsContainer}>
+          <Pressable
+            onPress={() => setDatePickerVisible((v) => !v)}
+            style={({ pressed }) => ({
+              opacity: pressed ? 0.2 : 1,
+            })}
+          >
+            <ListItem>
+              <ListItem.Content>
+                <ListItem.Title style={{ fontSize: 14 }}>
+                  Address Line2
+                </ListItem.Title>
+                <ListItem.Subtitle style={{ fontSize: 16 }}>
+                  {address?.line2 ?? "Enter Road name, Area"}
+                </ListItem.Subtitle>
+              </ListItem.Content>
+              <ListItem.Chevron />
+            </ListItem>
+          </Pressable>
+        </View>
+        <View style={styles.detailsContainerPlus}>
+          <Pressable
+            onPress={() => setDatePickerVisible((v) => !v)}
+            style={({ pressed }) => ({
+              opacity: pressed ? 0.2 : 1,
+              width: "50%",
+            })}
+          >
+            <ListItem>
+              <ListItem.Content>
+                <ListItem.Title style={{ fontSize: 14 }}>Town</ListItem.Title>
+                <ListItem.Subtitle style={{ fontSize: 16 }}>
+                  {address?.town_or_village ?? "Enter Town Name"}
+                </ListItem.Subtitle>
+              </ListItem.Content>
+              <ListItem.Chevron />
+            </ListItem>
+          </Pressable>
+          <Pressable
+            onPress={() => setDatePickerVisible((v) => !v)}
+            style={({ pressed }) => ({
+              opacity: pressed ? 0.2 : 1,
+              width: "50%",
+            })}
+          >
+            <ListItem>
+              <ListItem.Content>
+                <ListItem.Title style={{ fontSize: 14 }}>City</ListItem.Title>
+                <ListItem.Subtitle style={{ fontSize: 16 }}>
+                  {address?.city ?? "Enter City"}
+                </ListItem.Subtitle>
+              </ListItem.Content>
+              <ListItem.Chevron />
+            </ListItem>
+          </Pressable>
+        </View>
+        <View style={styles.detailsContainerPlus}>
+          <Pressable
+            onPress={() => setDatePickerVisible((v) => !v)}
+            style={({ pressed }) => ({
+              opacity: pressed ? 0.2 : 1,
+              width: "50%",
+            })}
+          >
+            <ListItem>
+              <ListItem.Content>
+                <ListItem.Title style={{ fontSize: 14 }}>State</ListItem.Title>
+                <ListItem.Subtitle style={{ fontSize: 16 }}>
+                  {address?.state ?? "Enter State"}
+                </ListItem.Subtitle>
+              </ListItem.Content>
+              <ListItem.Chevron />
+            </ListItem>
+          </Pressable>
+          <Pressable
+            onPress={() => setDatePickerVisible((v) => !v)}
+            style={({ pressed }) => ({
+              opacity: pressed ? 0.2 : 1,
+              width: "50%",
+            })}
+          >
+            <ListItem>
+              <ListItem.Content>
+                <ListItem.Title style={{ fontSize: 14 }}>Pin</ListItem.Title>
+                <ListItem.Subtitle style={{ fontSize: 16 }}>
+                  {address?.pin ?? "Enter Pin"}
+                </ListItem.Subtitle>
+              </ListItem.Content>
+              <ListItem.Chevron />
+            </ListItem>
+          </Pressable>
+        </View>
+        <View style={styles.detailsContainerPlus}>
+          <Pressable
+            onPress={() => setDatePickerVisible((v) => !v)}
+            style={({ pressed }) => ({
+              opacity: pressed ? 0.2 : 1,
+              width: "100%",
+            })}
+          >
+            <ListItem>
+              <ListItem.Content>
+                <ListItem.Title style={{ fontSize: 14 }}>
+                  Country
+                </ListItem.Title>
+                <ListItem.Subtitle style={{ fontSize: 16 }}>
+                  {address?.country ?? "Enter country"}
+                </ListItem.Subtitle>
+              </ListItem.Content>
+              <ListItem.Chevron />
+            </ListItem>
+          </Pressable>
+        </View>
       </View>
 
       <FAB
@@ -311,6 +448,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginVertical: -6,
   },
+  detailsContainerPlus: { flexDirection: "row", marginVertical: -6 },
   value: { textAlign: "center", fontSize: 18, fontWeight: "bold" },
 
   pending_attachments_list: {
