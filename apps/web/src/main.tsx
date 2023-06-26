@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
 import { ChakraProvider } from "@chakra-ui/react";
-import App from "./App.tsx";
+import Routes from "./routes.tsx";
 import { trpc } from "./utils/trpc";
 import { env } from "./utils/env.ts";
 
@@ -29,7 +29,7 @@ const ProvidersTree: React.FC = () => {
       <ChakraProvider>
         <trpc.Provider client={trpcClient} queryClient={queryClient}>
           <QueryClientProvider client={queryClient}>
-            <App />
+            <Routes />
           </QueryClientProvider>
         </trpc.Provider>
       </ChakraProvider>
