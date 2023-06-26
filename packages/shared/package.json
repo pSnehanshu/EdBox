@@ -13,7 +13,7 @@
     "async": "^3.2.4"
   },
   "devDependencies": {
-    "@types/async": "^3.2.18",
+    "@types/async": "^3.2.20",
     "typescript": "^5.1.3"
   }
 }
