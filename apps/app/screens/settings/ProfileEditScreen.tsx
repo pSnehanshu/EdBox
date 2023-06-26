@@ -271,7 +271,6 @@ export default function ProfileEditScreen({
         {/* address */}
         <View style={styles.detailsContainer}>
           <Pressable
-            onPress={() => setDatePickerVisible((v) => !v)}
             style={({ pressed }) => ({
               opacity: pressed ? 0.2 : 1,
             })}
@@ -291,7 +290,6 @@ export default function ProfileEditScreen({
         </View>
         <View style={styles.detailsContainer}>
           <Pressable
-            onPress={() => setDatePickerVisible((v) => !v)}
             style={({ pressed }) => ({
               opacity: pressed ? 0.2 : 1,
             })}
@@ -311,7 +309,6 @@ export default function ProfileEditScreen({
         </View>
         <View style={styles.detailsContainerPlus}>
           <Pressable
-            onPress={() => setDatePickerVisible((v) => !v)}
             style={({ pressed }) => ({
               opacity: pressed ? 0.2 : 1,
               width: "50%",
@@ -328,7 +325,6 @@ export default function ProfileEditScreen({
             </ListItem>
           </Pressable>
           <Pressable
-            onPress={() => setDatePickerVisible((v) => !v)}
             style={({ pressed }) => ({
               opacity: pressed ? 0.2 : 1,
               width: "50%",
@@ -347,7 +343,6 @@ export default function ProfileEditScreen({
         </View>
         <View style={styles.detailsContainerPlus}>
           <Pressable
-            onPress={() => setDatePickerVisible((v) => !v)}
             style={({ pressed }) => ({
               opacity: pressed ? 0.2 : 1,
               width: "50%",
@@ -364,7 +359,6 @@ export default function ProfileEditScreen({
             </ListItem>
           </Pressable>
           <Pressable
-            onPress={() => setDatePickerVisible((v) => !v)}
             style={({ pressed }) => ({
               opacity: pressed ? 0.2 : 1,
               width: "50%",
@@ -383,7 +377,6 @@ export default function ProfileEditScreen({
         </View>
         <View style={styles.detailsContainerPlus}>
           <Pressable
-            onPress={() => setDatePickerVisible((v) => !v)}
             style={({ pressed }) => ({
               opacity: pressed ? 0.2 : 1,
               width: "100%",
