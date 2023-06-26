@@ -162,7 +162,7 @@ export default function ProfileEditScreen({
           >
             <ListItem>
               <ListItem.Content>
-                <ListItem.Subtitle>Edit Name</ListItem.Subtitle>
+                <ListItem.Subtitle>Name</ListItem.Subtitle>
                 <ListItem.Title>{userName}</ListItem.Title>
               </ListItem.Content>
               <MaterialCommunityIcons
@@ -180,49 +180,50 @@ export default function ProfileEditScreen({
           defaultValue={userName}
           title="Your Name"
         />
-
-        <CustomSelect
-          isSingle
-          title="Salutation"
-          items={defaultSalutations}
-          selected={salutation}
-          onSubmit={(item) => {
-            if (item) setSalutation(item);
-          }}
-          idExtractor={(item) => item}
-          labelExtractor={(item) => `${item}`}
-          style={{ flexGrow: 1 }}
-          // isLoading={}
-        />
-
-        <CustomSelect
-          isSingle
-          title="Gender"
-          items={defaultGender}
-          selected={gender}
-          onSubmit={(item) => {
-            setGender(item);
-          }}
-          idExtractor={(item) => item}
-          labelExtractor={(item) => `${item}`}
-          style={{ flexGrow: 1 }}
-          // isLoading={}
-        />
-        <CustomSelect
-          isSingle
-          title="Blood Group"
-          items={defaultBloodGroups}
-          selected={
-            blood_group ? dbBloodGroupToUIBloodGroup(blood_group) : null
-          }
-          onSubmit={(item) => {
-            if (item) setBloodGroup(uiBloodGroupToDBBloodGroup(item));
-          }}
-          idExtractor={(item) => (item ? item : "?")}
-          labelExtractor={(item) => `${item}`}
-          style={{ flexGrow: 1 }}
-          // isLoading={}
-        />
+        <View style={styles.detailsContainer}>
+          <CustomSelect
+            isSingle
+            title="Salutation"
+            items={defaultSalutations}
+            selected={salutation}
+            onSubmit={(item) => {
+              if (item) setSalutation(item);
+            }}
+            idExtractor={(item) => item}
+            labelExtractor={(item) => `${item}`}
+            style={{ flexGrow: 1 }}
+          />
+        </View>
+        <View style={styles.detailsContainer}>
+          <CustomSelect
+            isSingle
+            title="Gender"
+            items={defaultGender}
+            selected={gender}
+            onSubmit={(item) => {
+              setGender(item);
+            }}
+            idExtractor={(item) => item}
+            labelExtractor={(item) => `${item}`}
+            style={{ flexGrow: 1 }}
+          />
+        </View>
+        <View style={styles.detailsContainer}>
+          <CustomSelect
+            isSingle
+            title="Blood Group"
+            items={defaultBloodGroups}
+            selected={
+              blood_group ? dbBloodGroupToUIBloodGroup(blood_group) : null
+            }
+            onSubmit={(item) => {
+              if (item) setBloodGroup(uiBloodGroupToDBBloodGroup(item));
+            }}
+            idExtractor={(item) => (item ? item : "?")}
+            labelExtractor={(item) => `${item}`}
+            style={{ flexGrow: 1 }}
+          />
+        </View>
 
         <DatePicker
           modal
@@ -240,26 +241,29 @@ export default function ProfileEditScreen({
             setDatePickerVisible(false);
           }}
         />
-        <Pressable
-          onPress={() => setDatePickerVisible((v) => !v)}
-          style={({ pressed }) => ({
-            opacity: pressed ? 0.2 : 1,
-          })}
-        >
-          <ListItem>
-            <ListItem.Content>
-              <ListItem.Title style={{ fontSize: 14 }}>
-                Birth date
-              </ListItem.Title>
-              <ListItem.Subtitle style={{ fontSize: 16 }}>
-                {birthOfDate
-                  ? format(birthOfDate, "MMM dd, yyyy")
-                  : "Select Birth date"}
-              </ListItem.Subtitle>
-            </ListItem.Content>
-            <ListItem.Chevron />
-          </ListItem>
-        </Pressable>
+        <View style={styles.detailsContainer}>
+          <Pressable
+            onPress={() => setDatePickerVisible((v) => !v)}
+            style={({ pressed }) => ({
+              opacity: pressed ? 0.2 : 1,
+            })}
+          >
+            <ListItem>
+              <ListItem.Content>
+                <ListItem.Title style={{ fontSize: 14 }}>
+                  Birth date
+                </ListItem.Title>
+                <ListItem.Subtitle style={{ fontSize: 16 }}>
+                  {birthOfDate
+                    ? format(birthOfDate, "MMM dd, yyyy")
+                    : "Select Birth date"}
+                </ListItem.Subtitle>
+              </ListItem.Content>
+              <ListItem.Chevron />
+            </ListItem>
+          </Pressable>
+        </View>
+
         {/* address */}
       </View>
 
@@ -305,6 +309,7 @@ const styles = StyleSheet.create({
   },
   detailsContainer: {
     justifyContent: "center",
+    marginVertical: -6,
   },
   value: { textAlign: "center", fontSize: 18, fontWeight: "bold" },
 
