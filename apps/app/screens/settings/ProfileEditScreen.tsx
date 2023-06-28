@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import DatePicker from "react-native-date-picker";
 import { format, parseISO } from "date-fns";
 import type {
@@ -84,7 +84,29 @@ export default function ProfileEditScreen({
   const [birthOfDate, setBirthOfDate] = useState<Date | null>(
     user?.date_of_birth ? parseISO(user?.date_of_birth) : null,
   );
-  const [address, setAddress] = useState<UserAddress | null>(null);
+
+  const [updatable, setUpdatable] = useState<string | null>(null);
+  const [addressLine1, setAddressLine1] = useState<string | undefined>(
+    user?.addr_l1 ?? undefined,
+  );
+  const [addressLine2, setAddressLine2] = useState<string | undefined>(
+    user?.addr_l2 ?? undefined,
+  );
+  const [addressTown, setAddressTown] = useState<string | undefined>(
+    user?.addr_town_vill ?? undefined,
+  );
+  const [addressCity, setAddressCity] = useState<string | undefined>(
+    user?.addr_city ?? undefined,
+  );
+  const [addressState, setAddressState] = useState<string | undefined>(
+    user?.addr_state ?? undefined,
+  );
+  const [addressPin, setAddressPin] = useState<string | undefined>(
+    user?.addr_pin?.toString() ?? undefined,
+  );
+  const [addressCountry, setAddressCountry] = useState<string | undefined>(
+    user?.addr_country ?? undefined,
+  );
 
   const updateUserDetails = trpc.profile.update.useMutation({
     async onSuccess() {
@@ -97,18 +119,62 @@ export default function ProfileEditScreen({
       console.error(error);
     },
   });
-  useEffect(() => {
-    if (user)
-      setAddress({
-        line1: user.addr_l1 ?? undefined,
-        line2: user.addr_l2 ?? undefined,
-        town_or_village: user.addr_town_vill ?? undefined,
-        city: user.addr_city ?? undefined,
-        state: user.addr_state ?? undefined,
-        pin: user.addr_pin ?? undefined,
-        country: user.addr_country ?? undefined,
-      });
-  }, [user?.addr_country]);
+
+  const [defaultvalue, onchange, title] = useMemo(() => {
+    let result1;
+    let result2;
+    let result3;
+
+    switch (updatable) {
+      case "name":
+        result1 = userName;
+        result2 = setUserName;
+        result3 = "Your Name";
+        break;
+      case "addr_l1":
+        result1 = addressLine1;
+        result2 = setAddressLine1;
+        result3 = "Addres Line1";
+        break;
+      case "addr_l2":
+        result1 = addressLine2;
+        result2 = setAddressLine2;
+        result3 = "Addres Line2";
+        break;
+      case "addr_town_vill":
+        result1 = addressTown;
+        result2 = setAddressTown;
+        result3 = "Town";
+        break;
+      case "addr_city":
+        result1 = addressCity;
+        result2 = setAddressCity;
+        result3 = "City";
+        break;
+      case "addr_pin":
+        result1 = addressPin;
+        result2 = setAddressPin;
+        result3 = "Pin";
+        break;
+      case "addr_state":
+        result1 = addressState;
+        result2 = setAddressState;
+        result3 = "State";
+        break;
+      case "addr_country":
+        result1 = addressCountry;
+        result2 = setAddressCountry;
+        result3 = "Country";
+        break;
+      default:
+        result1 = "Unknown";
+        result2 = "Unknown";
+        result3 = "Unknown";
+        break;
+    }
+    return [result1, result2, result3];
+  }, [updatable]);
+  console.log("test1", JSON.stringify(title));
 
   if (!user) return <Spinner visible />;
 
@@ -169,7 +235,10 @@ export default function ProfileEditScreen({
           {/* </View>
           <View style={styles.detailsContainer}> */}
           <Pressable
-            onPress={() => setIsTextModalOpen(true)}
+            onPress={() => {
+              setUpdatable("name");
+              setIsTextModalOpen(true);
+            }}
             style={({ pressed }) => ({
               opacity: pressed ? 0.2 : 1,
               width: "50%",
@@ -193,9 +262,11 @@ export default function ProfileEditScreen({
         <ModalTextInput
           isVisible={isTextModalOpen}
           onClose={() => setIsTextModalOpen(false)}
-          onChange={setUserName}
-          defaultValue={userName}
-          title="Your Name"
+          // type error
+          onChange={onchange}
+          defaultValue={defaultvalue}
+          title={title}
+          number={title === "Pin"}
         />
         <View style={styles.detailsContainerPlus}>
           {/* <View style={styles.detailsContainer}> */}
@@ -274,6 +345,10 @@ export default function ProfileEditScreen({
             style={({ pressed }) => ({
               opacity: pressed ? 0.2 : 1,
             })}
+            onPress={() => {
+              setIsTextModalOpen(true);
+              setUpdatable("addr_line1");
+            }}
           >
             <ListItem>
               <ListItem.Content>
@@ -281,7 +356,7 @@ export default function ProfileEditScreen({
                   Address Line1
                 </ListItem.Title>
                 <ListItem.Subtitle style={{ fontSize: 16 }}>
-                  {address?.line1 ?? "Enter House No. ,Building name"}
+                  {addressLine1 ?? "Enter House No. ,Building name"}
                 </ListItem.Subtitle>
               </ListItem.Content>
               <ListItem.Chevron />
@@ -293,6 +368,10 @@ export default function ProfileEditScreen({
             style={({ pressed }) => ({
               opacity: pressed ? 0.2 : 1,
             })}
+            onPress={() => {
+              setIsTextModalOpen(true);
+              setUpdatable("addr_line2");
+            }}
           >
             <ListItem>
               <ListItem.Content>
@@ -300,7 +379,7 @@ export default function ProfileEditScreen({
                   Address Line2
                 </ListItem.Title>
                 <ListItem.Subtitle style={{ fontSize: 16 }}>
-                  {address?.line2 ?? "Enter Road name, Area"}
+                  {addressLine2 ?? "Enter Road name, Area"}
                 </ListItem.Subtitle>
               </ListItem.Content>
               <ListItem.Chevron />
@@ -313,12 +392,16 @@ export default function ProfileEditScreen({
               opacity: pressed ? 0.2 : 1,
               width: "50%",
             })}
+            onPress={() => {
+              setIsTextModalOpen(true);
+              setUpdatable("addr_town_vill");
+            }}
           >
             <ListItem>
               <ListItem.Content>
                 <ListItem.Title style={{ fontSize: 14 }}>Town</ListItem.Title>
                 <ListItem.Subtitle style={{ fontSize: 16 }}>
-                  {address?.town_or_village ?? "Enter Town Name"}
+                  {addressTown ?? "Enter Town Name"}
                 </ListItem.Subtitle>
               </ListItem.Content>
               <ListItem.Chevron />
@@ -329,12 +412,16 @@ export default function ProfileEditScreen({
               opacity: pressed ? 0.2 : 1,
               width: "50%",
             })}
+            onPress={() => {
+              setIsTextModalOpen(true);
+              setUpdatable("addr_city");
+            }}
           >
             <ListItem>
               <ListItem.Content>
                 <ListItem.Title style={{ fontSize: 14 }}>City</ListItem.Title>
                 <ListItem.Subtitle style={{ fontSize: 16 }}>
-                  {address?.city ?? "Enter City"}
+                  {addressCity ?? "Enter City"}
                 </ListItem.Subtitle>
               </ListItem.Content>
               <ListItem.Chevron />
@@ -347,12 +434,16 @@ export default function ProfileEditScreen({
               opacity: pressed ? 0.2 : 1,
               width: "50%",
             })}
+            onPress={() => {
+              setIsTextModalOpen(true);
+              setUpdatable("addr_state");
+            }}
           >
             <ListItem>
               <ListItem.Content>
                 <ListItem.Title style={{ fontSize: 14 }}>State</ListItem.Title>
                 <ListItem.Subtitle style={{ fontSize: 16 }}>
-                  {address?.state ?? "Enter State"}
+                  {addressState ?? "Enter State"}
                 </ListItem.Subtitle>
               </ListItem.Content>
               <ListItem.Chevron />
@@ -363,12 +454,16 @@ export default function ProfileEditScreen({
               opacity: pressed ? 0.2 : 1,
               width: "50%",
             })}
+            onPress={() => {
+              setIsTextModalOpen(true);
+              setUpdatable("addr_pin");
+            }}
           >
             <ListItem>
               <ListItem.Content>
                 <ListItem.Title style={{ fontSize: 14 }}>Pin</ListItem.Title>
                 <ListItem.Subtitle style={{ fontSize: 16 }}>
-                  {address?.pin ?? "Enter Pin"}
+                  {addressPin ?? "Enter Pin"}
                 </ListItem.Subtitle>
               </ListItem.Content>
               <ListItem.Chevron />
@@ -381,6 +476,10 @@ export default function ProfileEditScreen({
               opacity: pressed ? 0.2 : 1,
               width: "100%",
             })}
+            onPress={() => {
+              setIsTextModalOpen(true);
+              setUpdatable("addr_country");
+            }}
           >
             <ListItem>
               <ListItem.Content>
@@ -388,7 +487,7 @@ export default function ProfileEditScreen({
                   Country
                 </ListItem.Title>
                 <ListItem.Subtitle style={{ fontSize: 16 }}>
-                  {address?.country ?? "Enter country"}
+                  {addressCountry ?? "Enter country"}
                 </ListItem.Subtitle>
               </ListItem.Content>
               <ListItem.Chevron />
@@ -413,7 +512,15 @@ export default function ProfileEditScreen({
             salutation: salutation,
             blood_group: blood_group,
             date_of_birth: birthOfDate?.toISOString(),
-            // address: {},
+            address: {
+              line1: addressLine1 ?? "",
+              line2: addressLine2 ?? "",
+              town_or_village: addressTown ?? "",
+              city: addressCity ?? undefined,
+              pin: addressPin ? parseInt(addressPin) : undefined,
+              state: addressState ?? undefined,
+              country: addressCountry ?? "",
+            },
           });
         }}
         buttonStyle={{ backgroundColor: "#4E48B2" }}

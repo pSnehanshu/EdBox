@@ -11,6 +11,7 @@ interface ModalTextInputProps {
   defaultValue?: string;
   multiline?: boolean;
   style?: StyleProp<TextStyle>;
+  number?: boolean;
 }
 
 export function ModalTextInput(props: ModalTextInputProps) {
@@ -40,6 +41,7 @@ export function ModalTextInput(props: ModalTextInputProps) {
         numberOfLines={props.multiline ? 10 : 1}
         value={value}
         onChangeText={setValue}
+        keyboardType={props.number ? "numeric" : "ascii-capable"}
       />
 
       <Dialog.Actions>
