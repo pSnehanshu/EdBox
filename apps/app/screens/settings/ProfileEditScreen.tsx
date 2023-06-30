@@ -172,13 +172,14 @@ export default function ProfileEditScreen({
             labelExtractor={(item) => `${item}`}
             style={{ flexGrow: 1 }}
           />
-
-          <ModalTextInput
-            onChange={setUserName}
-            defaultValue={userName}
-            title="Name"
-            selectorStyle={{ width: "50%" }}
-          />
+          <View style={{ width: "50%" }}>
+            <ModalTextInput
+              onChange={setUserName}
+              defaultValue={userName}
+              title="Name"
+              // selectorStyle={{ width: "50%" }}
+            />
+          </View>
         </View>
 
         <View style={styles.detailsContainerPlus}>
@@ -268,37 +269,44 @@ export default function ProfileEditScreen({
           />
         </View>
         <View style={styles.detailsContainerPlus}>
-          <ModalTextInput
-            onChange={setAddressTown}
-            defaultValue={addressTown}
-            title="Town/Village name"
-            selectorStyle={{ width: "50%" }}
-          />
+          <View style={{ width: "50%" }}>
+            <ModalTextInput
+              onChange={setAddressTown}
+              defaultValue={addressTown}
+              title="Town/Village name"
+              selectorStyle={{ width: "50%" }}
+            />
+          </View>
 
-          <ModalTextInput
-            onChange={setAddressCity}
-            defaultValue={addressCity}
-            title="City"
-            selectorStyle={{ width: "50%" }}
-          />
+          <View style={{ width: "50%" }}>
+            <ModalTextInput
+              onChange={setAddressCity}
+              defaultValue={addressCity}
+              title="City"
+              selectorStyle={{ width: "50%" }}
+            />
+          </View>
         </View>
         <View style={styles.detailsContainerPlus}>
-          <ModalTextInput
-            onChange={setAddressState}
-            defaultValue={addressState}
-            title="State"
-            selectorStyle={{ width: "50%" }}
-          />
-
-          <ModalTextInput
-            onChange={setAddressPin}
-            defaultValue={addressPin}
-            title="PIN code"
-            number
-            selectorStyle={{ width: "50%" }}
-          />
+          <View style={{ width: "50%" }}>
+            <ModalTextInput
+              onChange={setAddressState}
+              defaultValue={addressState}
+              title="State"
+              selectorStyle={{ width: "50%" }}
+            />
+          </View>
+          <View style={{ width: "50%" }}>
+            <ModalTextInput
+              onChange={setAddressPin}
+              defaultValue={addressPin}
+              title="PIN code"
+              number
+              selectorStyle={{ width: "50%" }}
+            />
+          </View>
         </View>
-        <View style={styles.detailsContainerPlus}>
+        <View>
           <ModalTextInput
             onChange={setAddressCountry}
             defaultValue={addressCountry}
@@ -359,7 +367,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginVertical: -6,
   },
-  detailsContainerPlus: { flexDirection: "row", marginVertical: -6 },
+  detailsContainerPlus: { flexDirection: "row" },
   value: { textAlign: "center", fontSize: 18, fontWeight: "bold" },
 
   pending_attachments_list: {
