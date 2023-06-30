@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useState } from "react";
 import DatePicker from "react-native-date-picker";
 import { format, parseISO } from "date-fns";
 import type {
@@ -6,7 +6,6 @@ import type {
   Gender,
   Saluation,
   UIBloodGroup,
-  UserAddress,
 } from "schooltalk-shared/types";
 import {
   uiBloodGroupToDBBloodGroup,
@@ -44,8 +43,6 @@ export default function ProfileEditScreen({
     fileUploadHandler.uploadTasks.length > 0
       ? !fileUploadHandler.allDone
       : false;
-
-  const [isTextModalOpen, setIsTextModalOpen] = useState(false);
 
   const defaultGender: Gender[] = ["Male", "Female", "Others"];
   const defaultSalutations: Saluation[] = [
@@ -85,7 +82,6 @@ export default function ProfileEditScreen({
     user?.date_of_birth ? parseISO(user?.date_of_birth) : null,
   );
 
-  const [updatable, setUpdatable] = useState<string | null>(null);
   const [addressLine1, setAddressLine1] = useState<string | undefined>(
     user?.addr_l1 ?? undefined,
   );
@@ -119,61 +115,6 @@ export default function ProfileEditScreen({
       console.error(error);
     },
   });
-
-  const [defaultvalue, onchange, title] = useMemo(() => {
-    let result1;
-    let result2;
-    let result3;
-
-    switch (updatable) {
-      case "name":
-        result1 = userName;
-        result2 = setUserName;
-        result3 = "Your Name";
-        break;
-      case "addr_line1":
-        result1 = addressLine1;
-        result2 = setAddressLine1;
-        result3 = "Addres Line1";
-        break;
-      case "addr_line2":
-        result1 = addressLine2;
-        result2 = setAddressLine2;
-        result3 = "Addres Line2";
-        break;
-      case "addr_town_vill":
-        result1 = addressTown;
-        result2 = setAddressTown;
-        result3 = "Town";
-        break;
-      case "addr_city":
-        result1 = addressCity;
-        result2 = setAddressCity;
-        result3 = "City";
-        break;
-      case "addr_pin":
-        result1 = addressPin;
-        result2 = setAddressPin;
-        result3 = "Pin";
-        break;
-      case "addr_state":
-        result1 = addressState;
-        result2 = setAddressState;
-        result3 = "State";
-        break;
-      case "addr_country":
-        result1 = addressCountry;
-        result2 = setAddressCountry;
-        result3 = "Country";
-        break;
-      default:
-        result1 = "Unknown";
-        result2 = "Unknown";
-        result3 = "Unknown";
-        break;
-    }
-    return [result1, result2, result3];
-  }, [updatable]);
 
   if (!user) return <Spinner visible />;
 
@@ -231,42 +172,15 @@ export default function ProfileEditScreen({
             labelExtractor={(item) => `${item}`}
             style={{ flexGrow: 1 }}
           />
-          {/* </View>
-          <View style={styles.detailsContainer}> */}
-          <Pressable
-            onPress={() => {
-              setUpdatable("name");
-              setIsTextModalOpen(true);
-            }}
-            style={({ pressed }) => ({
-              opacity: pressed ? 0.2 : 1,
-              width: "50%",
-            })}
-          >
-            <ListItem>
-              <ListItem.Content>
-                <ListItem.Subtitle>Name</ListItem.Subtitle>
-                <ListItem.Title>{userName}</ListItem.Title>
-              </ListItem.Content>
-              <MaterialCommunityIcons
-                name="chevron-right"
-                color={iconColor}
-                size={16}
-              />
-            </ListItem>
-          </Pressable>
-          {/* </View> */}
+
+          <ModalTextInput
+            onChange={setUserName}
+            defaultValue={userName}
+            title="Name"
+            selectorStyle={{ width: "50%" }}
+          />
         </View>
 
-        <ModalTextInput
-          isVisible={isTextModalOpen}
-          onClose={() => setIsTextModalOpen(false)}
-          // type error
-          onChange={onchange}
-          defaultValue={defaultvalue}
-          title={title}
-          number={title === "Pin"}
-        />
         <View style={styles.detailsContainerPlus}>
           {/* <View style={styles.detailsContainer}> */}
           <CustomSelect
@@ -340,158 +254,56 @@ export default function ProfileEditScreen({
         </View>
         {/* address */}
         <View style={styles.detailsContainer}>
-          <Pressable
-            style={({ pressed }) => ({
-              opacity: pressed ? 0.2 : 1,
-            })}
-            onPress={() => {
-              setIsTextModalOpen(true);
-              setUpdatable("addr_line1");
-            }}
-          >
-            <ListItem>
-              <ListItem.Content>
-                <ListItem.Title style={{ fontSize: 14 }}>
-                  Address Line1
-                </ListItem.Title>
-                <ListItem.Subtitle style={{ fontSize: 16 }}>
-                  {addressLine1 ?? "Enter House No. ,Building name"}
-                </ListItem.Subtitle>
-              </ListItem.Content>
-              <ListItem.Chevron />
-            </ListItem>
-          </Pressable>
+          <ModalTextInput
+            onChange={setAddressLine1}
+            defaultValue={addressLine1}
+            title="Address Line 2"
+          />
         </View>
         <View style={styles.detailsContainer}>
-          <Pressable
-            style={({ pressed }) => ({
-              opacity: pressed ? 0.2 : 1,
-            })}
-            onPress={() => {
-              setIsTextModalOpen(true);
-              setUpdatable("addr_line2");
-            }}
-          >
-            <ListItem>
-              <ListItem.Content>
-                <ListItem.Title style={{ fontSize: 14 }}>
-                  Address Line2
-                </ListItem.Title>
-                <ListItem.Subtitle style={{ fontSize: 16 }}>
-                  {addressLine2 ?? "Enter Road name, Area"}
-                </ListItem.Subtitle>
-              </ListItem.Content>
-              <ListItem.Chevron />
-            </ListItem>
-          </Pressable>
+          <ModalTextInput
+            onChange={setAddressLine2}
+            defaultValue={addressLine2}
+            title="Address Line 2"
+          />
         </View>
         <View style={styles.detailsContainerPlus}>
-          <Pressable
-            style={({ pressed }) => ({
-              opacity: pressed ? 0.2 : 1,
-              width: "50%",
-            })}
-            onPress={() => {
-              setIsTextModalOpen(true);
-              setUpdatable("addr_town_vill");
-            }}
-          >
-            <ListItem>
-              <ListItem.Content>
-                <ListItem.Title style={{ fontSize: 14 }}>Town</ListItem.Title>
-                <ListItem.Subtitle style={{ fontSize: 16 }}>
-                  {addressTown ?? "Enter Town Name"}
-                </ListItem.Subtitle>
-              </ListItem.Content>
-              <ListItem.Chevron />
-            </ListItem>
-          </Pressable>
-          <Pressable
-            style={({ pressed }) => ({
-              opacity: pressed ? 0.2 : 1,
-              width: "50%",
-            })}
-            onPress={() => {
-              setIsTextModalOpen(true);
-              setUpdatable("addr_city");
-            }}
-          >
-            <ListItem>
-              <ListItem.Content>
-                <ListItem.Title style={{ fontSize: 14 }}>City</ListItem.Title>
-                <ListItem.Subtitle style={{ fontSize: 16 }}>
-                  {addressCity ?? "Enter City"}
-                </ListItem.Subtitle>
-              </ListItem.Content>
-              <ListItem.Chevron />
-            </ListItem>
-          </Pressable>
+          <ModalTextInput
+            onChange={setAddressTown}
+            defaultValue={addressTown}
+            title="Town/Village name"
+            selectorStyle={{ width: "50%" }}
+          />
+
+          <ModalTextInput
+            onChange={setAddressCity}
+            defaultValue={addressCity}
+            title="City"
+            selectorStyle={{ width: "50%" }}
+          />
         </View>
         <View style={styles.detailsContainerPlus}>
-          <Pressable
-            style={({ pressed }) => ({
-              opacity: pressed ? 0.2 : 1,
-              width: "50%",
-            })}
-            onPress={() => {
-              setIsTextModalOpen(true);
-              setUpdatable("addr_state");
-            }}
-          >
-            <ListItem>
-              <ListItem.Content>
-                <ListItem.Title style={{ fontSize: 14 }}>State</ListItem.Title>
-                <ListItem.Subtitle style={{ fontSize: 16 }}>
-                  {addressState ?? "Enter State"}
-                </ListItem.Subtitle>
-              </ListItem.Content>
-              <ListItem.Chevron />
-            </ListItem>
-          </Pressable>
-          <Pressable
-            style={({ pressed }) => ({
-              opacity: pressed ? 0.2 : 1,
-              width: "50%",
-            })}
-            onPress={() => {
-              setIsTextModalOpen(true);
-              setUpdatable("addr_pin");
-            }}
-          >
-            <ListItem>
-              <ListItem.Content>
-                <ListItem.Title style={{ fontSize: 14 }}>Pin</ListItem.Title>
-                <ListItem.Subtitle style={{ fontSize: 16 }}>
-                  {addressPin ?? "Enter Pin"}
-                </ListItem.Subtitle>
-              </ListItem.Content>
-              <ListItem.Chevron />
-            </ListItem>
-          </Pressable>
+          <ModalTextInput
+            onChange={setAddressState}
+            defaultValue={addressState}
+            title="State"
+            selectorStyle={{ width: "50%" }}
+          />
+
+          <ModalTextInput
+            onChange={setAddressPin}
+            defaultValue={addressPin}
+            title="PIN code"
+            number
+            selectorStyle={{ width: "50%" }}
+          />
         </View>
         <View style={styles.detailsContainerPlus}>
-          <Pressable
-            style={({ pressed }) => ({
-              opacity: pressed ? 0.2 : 1,
-              width: "100%",
-            })}
-            onPress={() => {
-              setIsTextModalOpen(true);
-              setUpdatable("addr_country");
-            }}
-          >
-            <ListItem>
-              <ListItem.Content>
-                <ListItem.Title style={{ fontSize: 14 }}>
-                  Country
-                </ListItem.Title>
-                <ListItem.Subtitle style={{ fontSize: 16 }}>
-                  {addressCountry ?? "Enter country"}
-                </ListItem.Subtitle>
-              </ListItem.Content>
-              <ListItem.Chevron />
-            </ListItem>
-          </Pressable>
+          <ModalTextInput
+            onChange={setAddressCountry}
+            defaultValue={addressCountry}
+            title="Country"
+          />
         </View>
       </View>
 
