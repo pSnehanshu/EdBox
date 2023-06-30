@@ -1,6 +1,12 @@
 import { Dialog, ListItem } from "@rneui/themed";
 import { useEffect, useState } from "react";
-import { TextStyle, StyleProp, StyleSheet, Pressable } from "react-native";
+import {
+  TextStyle,
+  StyleProp,
+  StyleSheet,
+  Pressable,
+  ViewStyle,
+} from "react-native";
 import { TextInput } from "./Themed";
 
 interface ModalTextInputProps {
@@ -8,7 +14,8 @@ interface ModalTextInputProps {
   title: string;
   defaultValue?: string;
   multiline?: boolean;
-  style?: StyleProp<TextStyle>;
+  textBoxStyle?: StyleProp<TextStyle>;
+  selectorStyle?: StyleProp<ViewStyle>;
   number?: boolean;
 }
 
@@ -49,7 +56,7 @@ export function ModalTextInput(props: ModalTextInputProps) {
         <TextInput
           style={[
             props.multiline ? styles.input_multiline : styles.input_singleline,
-            props.style,
+            props.textBoxStyle,
           ]}
           autoFocus
           multiline={!!props.multiline}
