@@ -91,11 +91,7 @@ export type Saluation = NonNullable<
 
 /** Blood Groups as stored in DB */
 export type DBBloodGroup = NonNullable<
-  RouterInput["profile"]["update"]["blood_group"] | undefined
->;
-
-export type UserAddress = NonNullable<
-  RouterInput["profile"]["update"]["address"]
+  RouterInput["profile"]["update"]["blood_group"]
 >;
 
 /** Blood Groups as rendered on screen */

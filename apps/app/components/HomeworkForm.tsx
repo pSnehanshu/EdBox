@@ -52,7 +52,6 @@ export default function HomeworkForm({
   const config = useConfig();
   const scheme = useColorScheme();
   const iconColor = scheme === "dark" ? "white" : "black";
-  const [isTextModalOpen, setIsTextModalOpen] = useState(false);
 
   const [selectedClass, setSelectedClass] = useState(homework?.Class);
   const [selectedSection, setSelectedSection] = useState(homework?.Section);
@@ -147,20 +146,12 @@ export default function HomeworkForm({
           </ListItem>
         </Pressable>
 
-        <Pressable
-          onPress={() => setIsTextModalOpen(true)}
-          style={({ pressed }) => ({
-            opacity: pressed ? 0.2 : 1,
-          })}
-        >
-          <ListItem>
-            <ListItem.Content>
-              <ListItem.Title>Description (optional)</ListItem.Title>
-              <ListItem.Subtitle>{textContent || "Empty"}</ListItem.Subtitle>
-            </ListItem.Content>
-            <ListItem.Chevron />
-          </ListItem>
-        </Pressable>
+        <ModalTextInput
+          onChange={setTextContent}
+          defaultValue={textContent}
+          title="Description (optional)"
+          multiline
+        />
 
         {/* upload */}
         <View
@@ -310,16 +301,6 @@ export default function HomeworkForm({
 
         <View style={styles.bottom_margin} />
       </ScrollView>
-
-      {/* Text editor modal */}
-      <ModalTextInput
-        isVisible={isTextModalOpen}
-        onClose={() => setIsTextModalOpen(false)}
-        onChange={setTextContent}
-        defaultValue={textContent}
-        title="Homework description"
-        multiline
-      />
 
       <FAB
         onPress={() => {

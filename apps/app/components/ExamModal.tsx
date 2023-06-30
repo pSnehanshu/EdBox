@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FAB, ListItem, Dialog, Button } from "@rneui/themed";
+import { FAB, Dialog, Button } from "@rneui/themed";
 import React from "react";
 import { List, Text, View } from "./Themed";
 import useColorScheme from "../utils/useColorScheme";
@@ -25,10 +25,6 @@ export default function ExamModal({
   onSubmit,
   examData,
 }: ExamModalProps) {
-  const scheme = useColorScheme();
-  const iconColor = scheme === "dark" ? "white" : "black";
-
-  const [isTextModalOpen, setIsTextModalOpen] = useState(false);
   const [examName, setExamName] = useState(examData?.name ?? "");
   const [isTestCreateModal, setIsTestCreateModal] = useState(false);
   const [selectedTests, setTest] = useState<ExamTestSchema[]>([]);
@@ -38,30 +34,10 @@ export default function ExamModal({
   return (
     <View style={{ height: "100%" }}>
       <ModalTextInput
-        isVisible={isTextModalOpen}
-        onClose={() => setIsTextModalOpen(false)}
         onChange={setExamName}
         defaultValue={examName}
         title="Exam Name"
       />
-      <Pressable
-        onPress={() => setIsTextModalOpen(true)}
-        style={({ pressed }) => ({
-          opacity: pressed ? 0.2 : 1,
-        })}
-      >
-        <ListItem>
-          <ListItem.Content>
-            <ListItem.Subtitle>Exam Name</ListItem.Subtitle>
-            <ListItem.Title>{examName || "Empty"}</ListItem.Title>
-          </ListItem.Content>
-          <MaterialCommunityIcons
-            name="chevron-right"
-            color={iconColor}
-            size={16}
-          />
-        </ListItem>
-      </Pressable>
 
       {displayAddButton &&
         (selectedTests.length > 0 ? (

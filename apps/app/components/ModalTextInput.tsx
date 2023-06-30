@@ -1,13 +1,11 @@
-import { Dialog } from "@rneui/themed";
+import { Dialog, ListItem } from "@rneui/themed";
 import { useEffect, useState } from "react";
-import { TextStyle, StyleProp, StyleSheet } from "react-native";
+import { TextStyle, StyleProp, StyleSheet, Pressable } from "react-native";
 import { TextInput } from "./Themed";
 
 interface ModalTextInputProps {
-  isVisible: boolean;
-  onClose?: () => void;
   onChange?: (text: string) => void;
-  title?: string;
+  title: string;
   defaultValue?: string;
   multiline?: boolean;
   style?: StyleProp<TextStyle>;
@@ -16,45 +14,63 @@ interface ModalTextInputProps {
 
 export function ModalTextInput(props: ModalTextInputProps) {
   const [value, setValue] = useState(props.defaultValue ?? "");
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     // When opening the Dialog, sync local value with parent value
-    if (props.isVisible) {
+    if (isVisible) {
       setValue(props.defaultValue ?? "");
     }
-  }, [props.isVisible]);
+  }, [isVisible]);
 
   return (
-    <Dialog
-      isVisible={props.isVisible}
-      onBackdropPress={props.onClose}
-      animationType="fade"
-    >
-      {props.title && <Dialog.Title title={props.title} />}
-      <TextInput
-        style={[
-          props.multiline ? styles.input_multiline : styles.input_singleline,
-          props.style,
-        ]}
-        autoFocus
-        multiline={!!props.multiline}
-        numberOfLines={props.multiline ? 10 : 1}
-        value={value}
-        onChangeText={setValue}
-        keyboardType={props.number ? "numeric" : "ascii-capable"}
-      />
+    <>
+      <Pressable
+        onPress={() => setIsVisible(true)}
+        style={({ pressed }) => ({
+          opacity: pressed ? 0.2 : 1,
+        })}
+      >
+        <ListItem>
+          <ListItem.Content>
+            <ListItem.Title>{props.title}</ListItem.Title>
+            <ListItem.Subtitle>{value || "Empty"}</ListItem.Subtitle>
+          </ListItem.Content>
+          <ListItem.Chevron />
+        </ListItem>
+      </Pressable>
 
-      <Dialog.Actions>
-        <Dialog.Button
-          title="Done"
-          onPress={() => {
-            props.onChange?.(value);
-            props.onClose?.();
-          }}
-          type="solid"
+      <Dialog
+        isVisible={isVisible}
+        onBackdropPress={() => setIsVisible(false)}
+        animationType="fade"
+      >
+        {props.title && <Dialog.Title title={props.title} />}
+        <TextInput
+          style={[
+            props.multiline ? styles.input_multiline : styles.input_singleline,
+            props.style,
+          ]}
+          autoFocus
+          multiline={!!props.multiline}
+          numberOfLines={props.multiline ? 10 : 1}
+          value={value}
+          onChangeText={setValue}
+          keyboardType={props.number ? "numeric" : "ascii-capable"}
         />
-      </Dialog.Actions>
-    </Dialog>
+
+        <Dialog.Actions>
+          <Dialog.Button
+            title="Done"
+            onPress={() => {
+              props.onChange?.(value);
+              setIsVisible(false);
+            }}
+            type="solid"
+          />
+        </Dialog.Actions>
+      </Dialog>
+    </>
   );
 }
 
