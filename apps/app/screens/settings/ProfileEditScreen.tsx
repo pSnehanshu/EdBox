@@ -131,12 +131,12 @@ export default function ProfileEditScreen({
         result2 = setUserName;
         result3 = "Your Name";
         break;
-      case "addr_l1":
+      case "addr_line1":
         result1 = addressLine1;
         result2 = setAddressLine1;
         result3 = "Addres Line1";
         break;
-      case "addr_l2":
+      case "addr_line2":
         result1 = addressLine2;
         result2 = setAddressLine2;
         result3 = "Addres Line2";
@@ -174,7 +174,6 @@ export default function ProfileEditScreen({
     }
     return [result1, result2, result3];
   }, [updatable]);
-  console.log("test1", JSON.stringify(title));
 
   if (!user) return <Spinner visible />;
 
