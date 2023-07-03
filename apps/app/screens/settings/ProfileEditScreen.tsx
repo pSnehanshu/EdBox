@@ -269,42 +269,34 @@ export default function ProfileEditScreen({
           />
         </View>
         <View style={styles.detailsContainerPlus}>
-          <View style={{ width: "50%" }}>
-            <ModalTextInput
-              onChange={setAddressTown}
-              defaultValue={addressTown}
-              title="Town/Village name"
-              selectorStyle={{ width: "50%" }}
-            />
-          </View>
-
-          <View style={{ width: "50%" }}>
-            <ModalTextInput
-              onChange={setAddressCity}
-              defaultValue={addressCity}
-              title="City"
-              selectorStyle={{ width: "50%" }}
-            />
-          </View>
+          <ModalTextInput
+            onChange={setAddressTown}
+            defaultValue={addressTown}
+            title="Town/Village name"
+            selectorStyle={{ width: "50%" }}
+          />
+          <ModalTextInput
+            onChange={setAddressCity}
+            defaultValue={addressCity}
+            title="City"
+            selectorStyle={{ width: "50%" }}
+          />
         </View>
         <View style={styles.detailsContainerPlus}>
-          <View style={{ width: "50%" }}>
-            <ModalTextInput
-              onChange={setAddressState}
-              defaultValue={addressState}
-              title="State"
-              selectorStyle={{ width: "50%" }}
-            />
-          </View>
-          <View style={{ width: "50%" }}>
-            <ModalTextInput
-              onChange={setAddressPin}
-              defaultValue={addressPin}
-              title="PIN code"
-              number
-              selectorStyle={{ width: "50%" }}
-            />
-          </View>
+          <ModalTextInput
+            onChange={setAddressState}
+            defaultValue={addressState}
+            title="State"
+            selectorStyle={{ width: "50%" }}
+          />
+
+          <ModalTextInput
+            onChange={setAddressPin}
+            defaultValue={addressPin}
+            title="PIN code"
+            number
+            selectorStyle={{ width: "50%" }}
+          />
         </View>
         <View>
           <ModalTextInput

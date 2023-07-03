@@ -34,9 +34,10 @@ export function ModalTextInput(props: ModalTextInputProps) {
     <>
       <Pressable
         onPress={() => setIsVisible(true)}
-        style={({ pressed }) => ({
-          opacity: pressed ? 0.2 : 1,
-        })}
+        style={({ pressed }) => [
+          props.selectorStyle ?? { width: "100%" },
+          { opacity: pressed ? 0.5 : 1 },
+        ]}
       >
         <ListItem>
           <ListItem.Content>
