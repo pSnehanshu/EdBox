@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginVertical: -6,
   },
-  detailsContainerPlus: { flexDirection: "row" },
+  detailsContainerPlus: { flexDirection: "row", marginVertical: -6 },
   value: { textAlign: "center", fontSize: 18, fontWeight: "bold" },
 
   pending_attachments_list: {
