@@ -1,6 +1,6 @@
-import { useMemo, type ComponentProps } from "react";
+import { useState, useMemo, type ComponentProps } from "react";
 import { RefreshControl, StyleSheet } from "react-native";
-import { FAB } from "@rneui/themed";
+import { FAB, SpeedDial } from "@rneui/themed";
 import { MaterialCommunityIcons, Fontisto, Entypo } from "@expo/vector-icons";
 import { ListItem } from "@rneui/themed";
 import { format, parseISO } from "date-fns";
@@ -20,6 +20,7 @@ export default function ProfileScreen({
 }: RootStackScreenProps<"ProfileScreen">) {
   const scheme = useColorScheme();
   const iconColor = scheme === "dark" ? "white" : "black";
+  const [isActionOpen, setActionOpen] = useState(false);
 
   const { user: currentUser } = useCurrentUser();
   const profileQuery = trpc.profile.getUserProfile.useQuery({ userId });
@@ -77,6 +78,21 @@ export default function ProfileScreen({
             </View>
 
             <View style={styles.infoTable}>
+              {isCurrentUser && (
+                <ListItem bottomDivider>
+                  <ListItem.Content>
+                    <ListItem.Title>Phone No</ListItem.Title>
+                    <ListItem.Subtitle>
+                      +{user.phone_isd_code}-{user.phone}
+                    </ListItem.Subtitle>
+                  </ListItem.Content>
+                  <MaterialCommunityIcons
+                    name="phone"
+                    size={24}
+                    color={iconColor}
+                  />
+                </ListItem>
+              )}
               <ListItem bottomDivider>
                 <ListItem.Content>
                   <ListItem.Title>Date of birth</ListItem.Title>
@@ -139,22 +155,51 @@ export default function ProfileScreen({
       {
         // Only show edit option for current user's profile
         isCurrentUser && (
-          <FAB
+          <SpeedDial
+            isOpen={isActionOpen}
+            icon={{ name: "menu", color: "white" }}
+            openIcon={{ name: "close", color: "white" }}
+            onOpen={() => setActionOpen(true)}
+            onClose={() => setActionOpen(false)}
             buttonStyle={{ backgroundColor: "#4E48B2" }}
-            onPress={() =>
-              navigation.navigate("ProfileEditScreen", {
-                userId: currentUser.id,
-              })
-            }
-            icon={
-              <MaterialCommunityIcons
-                name="lead-pencil"
-                size={24}
-                color={"white"}
-              />
-            }
-            placement="right"
-          />
+          >
+            {[
+              <SpeedDial.Action
+                icon={{ name: "add", color: "white" }}
+                title="Edit Phone No"
+                buttonStyle={{ backgroundColor: "#4E48B2" }}
+                key={1}
+              />,
+              <SpeedDial.Action
+                icon={{ name: "edit", color: "white" }}
+                title="Edit Personal Details"
+                onPress={() =>
+                  navigation.navigate("ProfileEditScreen", {
+                    userId: currentUser.id,
+                  })
+                }
+                buttonStyle={{ backgroundColor: "#4E48B2" }}
+                key={3}
+              />,
+            ]}
+          </SpeedDial>
+
+          // <FAB
+          //   buttonStyle={{ backgroundColor: "#4E48B2" }}
+          // onPress={() =>
+          //   navigation.navigate("ProfileEditScreen", {
+          //     userId: currentUser.id,
+          //   })
+          // }
+          //   icon={
+          //     <MaterialCommunityIcons
+          //       name="lead-pencil"
+          //       size={24}
+          //       color={"white"}
+          //     />
+          //   }
+          //   placement="right"
+          // />
         )
       }
     </View>
