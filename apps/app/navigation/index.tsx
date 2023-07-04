@@ -46,6 +46,7 @@ import CreateTestScreen from "../screens/exam/CreateTestScreen";
 import ProfileScreen from "../screens/settings/ProfileScreen";
 import { StaticRoleSelector } from "../components/StaticRoleSelector";
 import ProfileEditScreen from "../screens/settings/ProfileEditScreen";
+import PhoneNoEditScreen from "../screens/settings/PhoneNoEditScreen";
 
 export default function Navigation({
   colorScheme,
@@ -327,6 +328,14 @@ function RootNavigator() {
             options={{
               headerShown: true,
               title: "Edit profile",
+            }}
+          />
+          <Stack.Screen
+            name="PhoneNoEditScreen"
+            component={PhoneNoEditScreen}
+            options={{
+              headerShown: true,
+              title: "Edit Phone No",
             }}
           />
         </Stack.Navigator>
