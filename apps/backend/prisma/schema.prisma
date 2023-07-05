@@ -127,11 +127,11 @@ enum BloodGroup {
 }
 
 model UserSensitiveInfo {
-  user_id    String    @id
-  User       User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  password   String?   @db.VarChar(80)
-  otp        String?   @db.VarChar(10)
-  otp_expiry DateTime?
+  user_id          String    @id
+  User             User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  password         String?   @db.VarChar(80)
+  login_otp        String?   @db.VarChar(10)
+  login_otp_expiry DateTime?
 }
 
 model Subject {

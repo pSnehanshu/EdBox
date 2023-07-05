@@ -8,7 +8,7 @@ import CONFIG from "../../config";
 import { sendSMS } from "../../utils/sms.service";
 
 function generateUserOTP(
-  userSensitive: Pick<UserSensitiveInfo, "otp" | "otp_expiry">,
+  userSensitive: Pick<UserSensitiveInfo, "login_otp" | "login_otp_expiry">,
 ) {
   // Generate OTP
   let otp = (
@@ -17,12 +17,12 @@ function generateUserOTP(
   ).toString();
 
   if (
-    userSensitive.otp &&
-    userSensitive.otp_expiry &&
-    isFuture(userSensitive.otp_expiry)
+    userSensitive.login_otp &&
+    userSensitive.login_otp_expiry &&
+    isFuture(userSensitive.login_otp_expiry)
   ) {
     // An OTP exists, reuse it
-    otp = userSensitive.otp;
+    otp = userSensitive.login_otp;
   }
 
   const expiry = addMinutes(new Date(), 10);
@@ -65,7 +65,7 @@ const authRouter = router({
 
       await prisma.userSensitiveInfo.update({
         where: { user_id: user.id },
-        data: { otp, otp_expiry: expiry },
+        data: { login_otp: otp, login_otp_expiry: expiry },
       });
 
       // TODO: Send the email with the OTP
@@ -116,7 +116,7 @@ const authRouter = router({
 
       await prisma.userSensitiveInfo.update({
         where: { user_id: user.id },
-        data: { otp, otp_expiry: expiry },
+        data: { login_otp: otp, login_otp_expiry: expiry },
       });
 
       // Send the SMS with the OTP
@@ -160,13 +160,13 @@ const authRouter = router({
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
-      if (user.SensitiveInfo?.otp !== input.otp) {
+      if (user.SensitiveInfo?.login_otp !== input.otp) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
       if (
-        !user.SensitiveInfo.otp_expiry ||
-        isPast(user.SensitiveInfo.otp_expiry)
+        !user.SensitiveInfo.login_otp_expiry ||
+        isPast(user.SensitiveInfo.login_otp_expiry)
       ) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
@@ -185,8 +185,8 @@ const authRouter = router({
         await tx.userSensitiveInfo.update({
           where: { user_id: user.id },
           data: {
-            otp: null,
-            otp_expiry: null,
+            login_otp: null,
+            login_otp_expiry: null,
           },
         });
 
@@ -337,7 +337,7 @@ const authRouter = router({
 
       await prisma.userSensitiveInfo.update({
         where: { user_id: student.User.id },
-        data: { otp, otp_expiry: expiry },
+        data: { login_otp: otp, login_otp_expiry: expiry },
       });
 
       // Send the SMS with the OTP
