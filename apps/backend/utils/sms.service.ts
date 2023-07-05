@@ -7,11 +7,20 @@ type AuthKeyTemplateInputs = {
     school: string;
     student: string;
   };
+  change_phone_otp_old: {
+    otp: string;
+    newphone: string;
+  };
+  change_phone_otp_new: {
+    otp: string;
+  };
 };
 
 const AuthKeyTemplateIDs: Record<keyof AuthKeyTemplateInputs, number> = {
   login_otp_self: 7471,
   login_otp_student: 7472,
+  change_phone_otp_old: 9245,
+  change_phone_otp_new: 9246,
 };
 
 export async function sendSMS<T extends keyof AuthKeyTemplateInputs>(
