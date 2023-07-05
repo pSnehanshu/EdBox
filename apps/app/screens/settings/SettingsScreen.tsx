@@ -37,7 +37,7 @@ export default function SettingsScreen() {
         />
       ),
       onPress() {
-        if (user) navigation.navigate("ProfileScreen", { userId: user.id });
+        if (user?.id) navigation.navigate("ProfileScreen", { userId: user.id });
       },
     });
 

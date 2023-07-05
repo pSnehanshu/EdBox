@@ -59,9 +59,6 @@ model User {
   phone                 String?                @db.VarChar(15)
   phone_isd_code        Int                    @default(91) @db.SmallInt()
   email                 String?                @db.VarChar(256)
-  password              String?                @db.VarChar(80)
-  otp                   String?                @db.VarChar(10)
-  otp_expiry            DateTime?
   gender                Gender?
   date_of_birth         DateTime?              @map("dob")
   salutation            Salutation             @default(None)
@@ -96,6 +93,7 @@ model User {
   FileUploadPermissions FileUploadPermission[]
   UploadedFiles         UploadedFile[]         @relation("uploader")
   PushTokens            PushToken[]
+  SensitiveInfo         UserSensitiveInfo?
 
   @@unique([email, school_id])
   @@unique([phone_isd_code, phone, school_id])
@@ -126,6 +124,14 @@ enum BloodGroup {
   ABn
   On
   Other
+}
+
+model UserSensitiveInfo {
+  user_id    String    @id
+  User       User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  password   String?   @db.VarChar(80)
+  otp        String?   @db.VarChar(10)
+  otp_expiry DateTime?
 }
 
 model Subject {

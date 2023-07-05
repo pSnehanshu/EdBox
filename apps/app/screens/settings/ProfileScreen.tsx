@@ -174,6 +174,7 @@ export default function ProfileScreen({
                 icon={{ name: "edit", color: "white" }}
                 title="Edit Personal Details"
                 onPress={() =>
+                  currentUser.id &&
                   navigation.navigate("ProfileEditScreen", {
                     userId: currentUser.id,
                   })

@@ -1,4 +1,4 @@
-import { PushTokenType, User } from "@prisma/client";
+import { PushTokenType, UserSensitiveInfo } from "@prisma/client";
 import { router, publicProcedure, protectedProcedure } from "../trpc";
 import { z } from "zod";
 import prisma from "../../prisma";
@@ -7,16 +7,22 @@ import { addMinutes, addMonths, isFuture, isPast } from "date-fns";
 import CONFIG from "../../config";
 import { sendSMS } from "../../utils/sms.service";
 
-function generateUserOTP(user: Pick<User, "otp" | "otp_expiry">) {
+function generateUserOTP(
+  userSensitive: Pick<UserSensitiveInfo, "otp" | "otp_expiry">,
+) {
   // Generate OTP
   let otp = (
     Math.floor(Math.random() * 9 * 10 ** (CONFIG.OTP_LENGTH - 1)) +
     10 ** (CONFIG.OTP_LENGTH - 1)
   ).toString();
 
-  if (user.otp && user.otp_expiry && isFuture(user.otp_expiry)) {
+  if (
+    userSensitive.otp &&
+    userSensitive.otp_expiry &&
+    isFuture(userSensitive.otp_expiry)
+  ) {
     // An OTP exists, reuse it
-    otp = user.otp;
+    otp = userSensitive.otp;
   }
 
   const expiry = addMinutes(new Date(), 10);
@@ -42,16 +48,23 @@ const authRouter = router({
         },
         select: {
           id: true,
-          otp: true,
-          otp_expiry: true,
+          SensitiveInfo: true,
         },
       });
 
-      // Generate OTP
-      const { otp, expiry } = generateUserOTP(user);
+      if (!user.SensitiveInfo) {
+        user.SensitiveInfo = await prisma.userSensitiveInfo.create({
+          data: {
+            user_id: user.id,
+          },
+        });
+      }
 
-      await prisma.user.update({
-        where: { id: user.id },
+      // Generate OTP
+      const { otp, expiry } = generateUserOTP(user.SensitiveInfo);
+
+      await prisma.userSensitiveInfo.update({
+        where: { user_id: user.id },
         data: { otp, otp_expiry: expiry },
       });
 
@@ -81,8 +94,7 @@ const authRouter = router({
         },
         select: {
           id: true,
-          otp: true,
-          otp_expiry: true,
+          SensitiveInfo: true,
           School: {
             select: {
               name: true,
@@ -91,13 +103,19 @@ const authRouter = router({
         },
       });
 
+      if (!user.SensitiveInfo) {
+        user.SensitiveInfo = await prisma.userSensitiveInfo.create({
+          data: { user_id: user.id },
+        });
+      }
+
       // User exists, and is active
 
       // Generate OTP
-      const { otp, expiry } = generateUserOTP(user);
+      const { otp, expiry } = generateUserOTP(user.SensitiveInfo);
 
-      await prisma.user.update({
-        where: { id: user.id },
+      await prisma.userSensitiveInfo.update({
+        where: { user_id: user.id },
         data: { otp, otp_expiry: expiry },
       });
 
@@ -133,8 +151,7 @@ const authRouter = router({
         },
         select: {
           id: true,
-          otp: true,
-          otp_expiry: true,
+          SensitiveInfo: true,
           school_id: true,
         },
       });
@@ -143,11 +160,14 @@ const authRouter = router({
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
-      if (user.otp !== input.otp) {
+      if (user.SensitiveInfo?.otp !== input.otp) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
-      if (!user.otp_expiry || isPast(user.otp_expiry)) {
+      if (
+        !user.SensitiveInfo.otp_expiry ||
+        isPast(user.SensitiveInfo.otp_expiry)
+      ) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
@@ -162,8 +182,8 @@ const authRouter = router({
         });
 
         // Remove OTP
-        await tx.user.update({
-          where: { id: user.id },
+        await tx.userSensitiveInfo.update({
+          where: { user_id: user.id },
           data: {
             otp: null,
             otp_expiry: null,
@@ -266,17 +286,28 @@ const authRouter = router({
           },
           User: {},
         },
-        include: {
+        select: {
           Parents: {
             include: {
               Parent: {
-                include: {
-                  User: true,
+                select: {
+                  User: {
+                    select: {
+                      phone: true,
+                      phone_isd_code: true,
+                    },
+                  },
                 },
               },
             },
           },
-          User: true,
+          User: {
+            select: {
+              id: true,
+              name: true,
+              SensitiveInfo: true,
+            },
+          },
           School: {
             select: {
               name: true,
@@ -293,11 +324,19 @@ const authRouter = router({
         isd: p.Parent.User?.phone_isd_code,
       }));
 
-      // Generate OTP
-      const { otp, expiry } = generateUserOTP(student.User);
+      if (!student.User.SensitiveInfo) {
+        student.User.SensitiveInfo = await prisma.userSensitiveInfo.create({
+          data: {
+            user_id: student.User.id,
+          },
+        });
+      }
 
-      await prisma.user.update({
-        where: { id: student.User.id },
+      // Generate OTP
+      const { otp, expiry } = generateUserOTP(student.User.SensitiveInfo);
+
+      await prisma.userSensitiveInfo.update({
+        where: { user_id: student.User.id },
         data: { otp, otp_expiry: expiry },
       });
 

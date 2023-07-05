@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { getYear, getMonth, getDate, parseISO } from "date-fns";
 import type {
+  Nullable,
   UnserializedUser,
   User,
   DBBloodGroup,
@@ -152,7 +153,7 @@ export function hasUserStaticRoles(
 }
 
 /** Get appropritate display name based on gender and role */
-export function getDisplayName(user: UnserializedUser | User) {
+export function getDisplayName(user: UnserializedUser | User): string {
   const role = getUserRoleHierarchical(user);
 
   const sirMam = user.gender
@@ -161,7 +162,8 @@ export function getDisplayName(user: UnserializedUser | User) {
       : "sir"
     : "sir";
 
-  function onlySurnameFull(fullName: string) {
+  function onlySurnameFull(fullName: Nullable<string>) {
+    if (!fullName) return "";
     const splitted = fullName.split(" ");
     if (splitted.length < 2) return fullName;
     const surname = splitted.pop();
@@ -170,7 +172,8 @@ export function getDisplayName(user: UnserializedUser | User) {
     return `${initials}. ${surname}`;
   }
 
-  function onlyFirstNameFull(fullName: string) {
+  function onlyFirstNameFull(fullName: Nullable<string>) {
+    if (!fullName) return "";
     const splitted = fullName.split(" ");
     if (splitted.length < 2) return fullName;
     const firstName = splitted.shift();
@@ -193,7 +196,7 @@ export function getDisplayName(user: UnserializedUser | User) {
     case StaticRole.parent:
       return `${onlySurnameFull(user.name)} (guardian)`;
     default:
-      return user.name;
+      return user.name ?? "";
   }
 }
 

@@ -46,7 +46,7 @@ export default function HomeTabScreen() {
           <View style={[styles.header_container, { backgroundColor: color }]}>
             <View style={styles.greeting}>
               <Text style={styles.text_head}>
-                {greeting(new Date())}, {user.name.split(" ")[0]}
+                {greeting(new Date())}, {user.name?.split(" ")[0]}
               </Text>
               <Text style={styles.text}>
                 Welcome to {school?.name ?? "your school"}
@@ -54,7 +54,9 @@ export default function HomeTabScreen() {
             </View>
 
             <Pressable
-              onPress={() => navigate("ProfileScreen", { userId: user.id })}
+              onPress={() =>
+                user.id && navigate("ProfileScreen", { userId: user.id })
+              }
               style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
             >
               <UserAvatar fileId={user.avatar_id} size={40} rounded />
