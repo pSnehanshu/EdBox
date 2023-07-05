@@ -1,34 +1,12 @@
-import { PushTokenType, UserSensitiveInfo } from "@prisma/client";
+import { PushTokenType } from "@prisma/client";
 import { router, publicProcedure, protectedProcedure } from "../trpc";
 import { z } from "zod";
 import prisma from "../../prisma";
 import { TRPCError } from "@trpc/server";
-import { addMinutes, addMonths, isFuture, isPast } from "date-fns";
-import CONFIG from "../../config";
+import { addMonths, isPast } from "date-fns";
+import config from "../../config";
 import { sendSMS } from "../../utils/sms.service";
-
-function generateUserOTP(
-  userSensitive: Pick<UserSensitiveInfo, "login_otp" | "login_otp_expiry">,
-) {
-  // Generate OTP
-  let otp = (
-    Math.floor(Math.random() * 9 * 10 ** (CONFIG.OTP_LENGTH - 1)) +
-    10 ** (CONFIG.OTP_LENGTH - 1)
-  ).toString();
-
-  if (
-    userSensitive.login_otp &&
-    userSensitive.login_otp_expiry &&
-    isFuture(userSensitive.login_otp_expiry)
-  ) {
-    // An OTP exists, reuse it
-    otp = userSensitive.login_otp;
-  }
-
-  const expiry = addMinutes(new Date(), 10);
-
-  return { otp, expiry };
-}
+import { generateLoginOTP } from "../../utils/auth-utils";
 
 const authRouter = router({
   requestEmailLoginOTP: publicProcedure
@@ -61,7 +39,7 @@ const authRouter = router({
       }
 
       // Generate OTP
-      const { otp, expiry } = generateUserOTP(user.SensitiveInfo);
+      const { otp, expiry } = generateLoginOTP(user.SensitiveInfo);
 
       await prisma.userSensitiveInfo.update({
         where: { user_id: user.id },
@@ -112,7 +90,7 @@ const authRouter = router({
       // User exists, and is active
 
       // Generate OTP
-      const { otp, expiry } = generateUserOTP(user.SensitiveInfo);
+      const { otp, expiry } = generateLoginOTP(user.SensitiveInfo);
 
       await prisma.userSensitiveInfo.update({
         where: { user_id: user.id },
@@ -132,7 +110,7 @@ const authRouter = router({
   submitLoginOTP: publicProcedure
     .input(
       z.object({
-        otp: z.string().regex(/^\d+$/).length(CONFIG.OTP_LENGTH),
+        otp: z.string().regex(/^\d+$/).length(config.OTP_LENGTH),
         userId: z.string().cuid(),
         schoolId: z.string().cuid(),
         pushToken: z
@@ -333,7 +311,7 @@ const authRouter = router({
       }
 
       // Generate OTP
-      const { otp, expiry } = generateUserOTP(student.User.SensitiveInfo);
+      const { otp, expiry } = generateLoginOTP(student.User.SensitiveInfo);
 
       await prisma.userSensitiveInfo.update({
         where: { user_id: student.User.id },
