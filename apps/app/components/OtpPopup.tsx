@@ -11,6 +11,7 @@ import { getPushToken } from "../utils/push-notifications";
 interface props {
   visible: boolean;
   userId: string | null;
+  onSubmit: (otp: any) => void;
   onClose?: () => void;
   description?: string;
 }
@@ -18,6 +19,7 @@ interface props {
 export default function OtpPopup({
   visible,
   userId,
+  onSubmit,
   onClose,
   description,
 }: props) {
@@ -25,46 +27,42 @@ export default function OtpPopup({
   const [otp, setOtp] = useState<string | null>(null);
   const config = useConfig();
 
-  const submitOTPMutation = trpc.auth.submitLoginOTP.useMutation({
-    async onSuccess(data) {
-      setAuthToken(data.token, new Date(data.expiry_date));
-    },
-    onError(error) {
-      console.error(error);
-      Alert.alert("Invalid OTP", "Looks like the OTP you entered is incorrect");
-      setOtp(null);
-    },
-  });
+  // const submitOTPMutation = trpc.auth.submitLoginOTP.useMutation({
+  //   async onSuccess(data) {
+  //     setAuthToken(data.token, new Date(data.expiry_date));
+  //   },
+  //   onError(error) {
+  //     console.error(error);
+  //     Alert.alert("Invalid OTP", "Looks like the OTP you entered is incorrect");
+  //     setOtp(null);
+  //   },
+  // });
 
-  const onSubmit = useCallback(async () => {
-    if (userId && otp) {
-      submitOTPMutation.mutate({
-        userId,
-        otp,
-        schoolId: config.schoolId,
-        // Also pass device push token if possible
-        pushToken: await getPushToken()
-          .then((token) => ({
-            token,
-            type: "expo" as const,
-          }))
-          .catch((err) => {
-            alert((err as any)?.message);
-            return undefined;
-          }),
-      });
-    }
-  }, [userId, otp, config.schoolId]);
+  // const onSubmit = useCallback(async () => {
+  //   if (userId && otp) {
+  //     submitOTPMutation.mutate({
+  //       userId,
+  //       otp,
+  //       schoolId: config.schoolId,
+  //       // Also pass device push token if possible
+  //       pushToken: await getPushToken()
+  //         .then((token) => ({
+  //           token,
+  //           type: "expo" as const,
+  //         }))
+  //         .catch((err) => {
+  //           alert((err as any)?.message);
+  //           return undefined;
+  //         }),
+  //     });
+  //   }
+  // }, [userId, otp, config.schoolId]);
 
   const color = useColorScheme();
   const blurBg = color === "dark" ? "rgba(0,0,0,.6)" : "rgba(255,255,255,.6)";
 
   return (
     <View style={styles.centeredView}>
-      <Spinner
-        visible={submitOTPMutation.isLoading}
-        textContent="Please wait..."
-      />
       <Modal
         animationType="slide"
         transparent={true}
@@ -89,7 +87,10 @@ export default function OtpPopup({
                 styles.button,
                 { opacity: pressed ? 0.5 : 1 },
               ]}
-              onPress={onSubmit}
+              onPress={() => {
+                onSubmit(otp);
+                onClose && onClose();
+              }}
             >
               <Text style={styles.textStyle}>Submit</Text>
             </Pressable>

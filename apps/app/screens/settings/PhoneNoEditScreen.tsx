@@ -26,12 +26,13 @@ export default function PhoneNoEditScreen({
         defaultValue={phoneNo}
         title="Phone No"
       />
-      <OtpPopup
+      {/* <OtpPopup
         visible={otpPopUp}
         userId={userId}
         onClose={() => setOtpPopUp(false)}
         description={"OTP has been sent to new Phone No"}
-      />
+        onSubmit={}
+      /> */}
       <FAB
         onPress={() => {
           setOtpPopUp(true);
