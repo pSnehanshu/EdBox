@@ -6,6 +6,7 @@ import { RootStackScreenProps } from "../../utils/types/common";
 import { FAB } from "@rneui/themed";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import OtpPopup from "../../components/OtpPopup";
+import { Alert } from "react-native";
 
 export default function PhoneNoEditScreen({
   navigation,
@@ -19,6 +20,17 @@ export default function PhoneNoEditScreen({
     user?.phone ?? undefined,
   );
   const [otpPopUp, setOtpPopUp] = useState(false);
+
+  const changePhoneSumbitOTP = trpc.profile.changePhoneSumbitOTP.useMutation({
+    onSuccess(data) {
+      console.log(data);
+    },
+    onError(error) {
+      console.error(error);
+      Alert.alert("Error", "Phone number isn't registered");
+    },
+  });
+
   return (
     <View style={{ flex: 1 }}>
       <ModalTextInput

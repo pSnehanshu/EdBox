@@ -1,5 +1,5 @@
 import { useState, useMemo, type ComponentProps } from "react";
-import { RefreshControl, StyleSheet } from "react-native";
+import { Alert, RefreshControl, StyleSheet } from "react-native";
 import { FAB, SpeedDial } from "@rneui/themed";
 import { MaterialCommunityIcons, Fontisto, Entypo } from "@expo/vector-icons";
 import { ListItem } from "@rneui/themed";
@@ -167,12 +167,25 @@ export default function ProfileScreen({
               <SpeedDial.Action
                 icon={{ name: "add", color: "white" }}
                 title="Edit Phone No"
-                onPress={() =>
-                  currentUser.id &&
-                  navigation.navigate("PhoneNoEditScreen", {
-                    userId: currentUser.id,
-                  })
-                }
+                onPress={() => {
+                  Alert.alert("Edit", "Do you want to edit your PhoneNo?", [
+                    {
+                      text: "Edit",
+                      style: "destructive",
+                      onPress() {
+                        // open optpopup and take the opt
+                        // ifsucess go to PhoneNoEditScreen
+                      },
+                    },
+                    {
+                      text: "Cancel",
+                      style: "cancel",
+                      onPress() {
+                        setActionOpen(false);
+                      },
+                    },
+                  ]);
+                }}
                 buttonStyle={{ backgroundColor: "#4E48B2" }}
                 key={1}
               />,
