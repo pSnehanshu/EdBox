@@ -1,5 +1,5 @@
 import { useState, useMemo, type ComponentProps } from "react";
-import { Alert, RefreshControl, StyleSheet } from "react-native";
+import { RefreshControl, StyleSheet } from "react-native";
 import { FAB, SpeedDial } from "@rneui/themed";
 import { MaterialCommunityIcons, Fontisto, Entypo } from "@expo/vector-icons";
 import { ListItem } from "@rneui/themed";
@@ -167,25 +167,12 @@ export default function ProfileScreen({
               <SpeedDial.Action
                 icon={{ name: "add", color: "white" }}
                 title="Edit Phone No"
-                onPress={() => {
-                  Alert.alert("Edit", "Do you want to edit your PhoneNo?", [
-                    {
-                      text: "Edit",
-                      style: "destructive",
-                      onPress() {
-                        // open optpopup and take the opt
-                        // ifsucess go to PhoneNoEditScreen
-                      },
-                    },
-                    {
-                      text: "Cancel",
-                      style: "cancel",
-                      onPress() {
-                        setActionOpen(false);
-                      },
-                    },
-                  ]);
-                }}
+                onPress={() =>
+                  currentUser.id &&
+                  navigation.navigate("PhoneNoEditScreen", {
+                    userId: currentUser.id,
+                  })
+                }
                 buttonStyle={{ backgroundColor: "#4E48B2" }}
                 key={1}
               />,
@@ -203,23 +190,6 @@ export default function ProfileScreen({
               />,
             ]}
           </SpeedDial>
-
-          // <FAB
-          //   buttonStyle={{ backgroundColor: "#4E48B2" }}
-          // onPress={() =>
-          //   navigation.navigate("ProfileEditScreen", {
-          //     userId: currentUser.id,
-          //   })
-          // }
-          //   icon={
-          //     <MaterialCommunityIcons
-          //       name="lead-pencil"
-          //       size={24}
-          //       color={"white"}
-          //     />
-          //   }
-          //   placement="right"
-          // />
         )
       }
     </View>

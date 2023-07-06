@@ -7,6 +7,8 @@ import { FAB } from "@rneui/themed";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import OtpPopup from "../../components/OtpPopup";
 import { Alert } from "react-native";
+import OtpPopUpTwo from "../../components/OtpPopUpTwo";
+import Spinner from "react-native-loading-spinner-overlay";
 
 export default function PhoneNoEditScreen({
   navigation,
@@ -21,6 +23,16 @@ export default function PhoneNoEditScreen({
   );
   const [otpPopUp, setOtpPopUp] = useState(false);
 
+  const changePhoneRequestOTP = trpc.profile.changePhoneRequestOTP.useMutation({
+    onSuccess(data) {
+      console.log(data);
+    },
+    onError(error) {
+      console.error(error);
+      Alert.alert("Error", "Phone number isn't registered");
+    },
+  });
+
   const changePhoneSumbitOTP = trpc.profile.changePhoneSumbitOTP.useMutation({
     onSuccess(data) {
       console.log(data);
@@ -33,21 +45,35 @@ export default function PhoneNoEditScreen({
 
   return (
     <View style={{ flex: 1 }}>
+      <Spinner
+        visible={
+          changePhoneRequestOTP.isLoading || changePhoneSumbitOTP.isLoading
+        }
+        textContent="Please wait..."
+      />
       <ModalTextInput
         onChange={setPhoneNo}
         defaultValue={phoneNo}
         title="Phone No"
       />
-      {/* <OtpPopup
+      <OtpPopUpTwo
         visible={otpPopUp}
         userId={userId}
         onClose={() => setOtpPopUp(false)}
-        description={"OTP has been sent to new Phone No"}
-        onSubmit={}
-      /> */}
+        onSubmit={(otpOld, otpNew) => {
+          changePhoneSumbitOTP.mutate({
+            old_otp: otpOld,
+            new_otp: otpNew,
+          });
+        }}
+      />
       <FAB
         onPress={() => {
           setOtpPopUp(true);
+          changePhoneRequestOTP.mutate({
+            isd: 91,
+            phoneNumber: "NewPhoneNo",
+          });
         }}
         buttonStyle={{ backgroundColor: "#4E48B2" }}
         icon={<MaterialCommunityIcons name="check" size={24} color={"white"} />}
