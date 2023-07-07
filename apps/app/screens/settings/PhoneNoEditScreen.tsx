@@ -18,6 +18,8 @@ export default function PhoneNoEditScreen({
 }: RootStackScreenProps<"PhoneNoEditScreen">) {
   const profileQuery = trpc.profile.getUserProfile.useQuery({ userId });
   const user = profileQuery.data;
+  const trpcUtils = trpc.useContext();
+
   const [phoneNo, setPhoneNo] = useState<string | undefined>(
     user?.phone ?? undefined,
   );
@@ -25,21 +27,25 @@ export default function PhoneNoEditScreen({
 
   const changePhoneRequestOTP = trpc.profile.changePhoneRequestOTP.useMutation({
     onSuccess(data) {
+      setOtpPopUp(true);
       console.log(data);
     },
     onError(error) {
       console.error(error);
-      Alert.alert("Error", "Phone number isn't registered");
+      Alert.alert("Error", error.message);
     },
   });
 
   const changePhoneSumbitOTP = trpc.profile.changePhoneSumbitOTP.useMutation({
     onSuccess(data) {
       console.log(data);
+      profileQuery.refetch();
+      trpcUtils.profile.me.refetch();
+      navigation.navigate("ProfileScreen", { userId });
     },
     onError(error) {
       console.error(error);
-      Alert.alert("Error", "Phone number isn't registered");
+      Alert.alert("Error", error.message);
     },
   });
 
@@ -66,14 +72,17 @@ export default function PhoneNoEditScreen({
             new_otp: otpNew,
           });
         }}
+        oldPhoneNo={`+${user?.phone_isd_code}${user?.phone}`}
+        newPhoneNo={`+${91}${phoneNo}`}
       />
       <FAB
         onPress={() => {
-          setOtpPopUp(true);
-          changePhoneRequestOTP.mutate({
-            isd: 91,
-            phoneNumber: "NewPhoneNo",
-          });
+          if (phoneNo) {
+            changePhoneRequestOTP.mutate({
+              isd: 91,
+              phoneNumber: phoneNo,
+            });
+          }
         }}
         buttonStyle={{ backgroundColor: "#4E48B2" }}
         icon={<MaterialCommunityIcons name="check" size={24} color={"white"} />}

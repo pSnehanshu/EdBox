@@ -167,24 +167,26 @@ export default function ProfileScreen({
               <SpeedDial.Action
                 icon={{ name: "add", color: "white" }}
                 title="Edit Phone No"
-                onPress={() =>
+                onPress={() => {
                   currentUser.id &&
-                  navigation.navigate("PhoneNoEditScreen", {
-                    userId: currentUser.id,
-                  })
-                }
+                    navigation.navigate("PhoneNoEditScreen", {
+                      userId: currentUser.id,
+                    });
+                  setActionOpen(false);
+                }}
                 buttonStyle={{ backgroundColor: "#4E48B2" }}
                 key={1}
               />,
               <SpeedDial.Action
                 icon={{ name: "edit", color: "white" }}
                 title="Edit Personal Details"
-                onPress={() =>
+                onPress={() => {
                   currentUser.id &&
-                  navigation.navigate("ProfileEditScreen", {
-                    userId: currentUser.id,
-                  })
-                }
+                    navigation.navigate("ProfileEditScreen", {
+                      userId: currentUser.id,
+                    });
+                  setActionOpen(false);
+                }}
                 buttonStyle={{ backgroundColor: "#4E48B2" }}
                 key={3}
               />,

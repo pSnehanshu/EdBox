@@ -13,6 +13,8 @@ interface props {
   userId: string | null;
   onSubmit: (otpold: any, otpNew: any) => void;
   onClose?: () => void;
+  oldPhoneNo: string;
+  newPhoneNo: string;
 }
 
 export default function OtpPopUpTwo({
@@ -20,6 +22,8 @@ export default function OtpPopUpTwo({
   userId,
   onSubmit,
   onClose,
+  oldPhoneNo,
+  newPhoneNo,
 }: props) {
   const setAuthToken = useSetAuthToken();
   const [otpOld, setOtpOld] = useState<string | null>(null);
@@ -40,7 +44,9 @@ export default function OtpPopUpTwo({
         <View style={[styles.centeredView, { backgroundColor: blurBg }]}>
           <View style={styles.modalView}>
             <Text style={styles.mainText}>Verification Code</Text>
-            <Text style={styles.subText}>OldNo OTP</Text>
+            <Text style={styles.subText}>
+              Enter OTP sent to your existing phone number ({oldPhoneNo})
+            </Text>
             <TextInput
               style={styles.inputText}
               value={otpOld ?? ""}
@@ -50,12 +56,13 @@ export default function OtpPopUpTwo({
               maxLength={6}
             />
 
-            <Text style={styles.subText}>NewNo OTP</Text>
+            <Text style={styles.subText}>
+              Enter OTP sent to your new phone number ({newPhoneNo})
+            </Text>
             <TextInput
               style={styles.inputText}
               value={otpNew ?? ""}
               onChangeText={setOtpNew}
-              autoFocus
               keyboardType="number-pad"
               maxLength={6}
             />
