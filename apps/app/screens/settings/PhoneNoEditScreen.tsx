@@ -23,6 +23,7 @@ export default function PhoneNoEditScreen({
     user?.phone ?? undefined,
   );
   const [otpPopUp, setOtpPopUp] = useState(false);
+  const [isd, setIsd] = useState(91);
 
   const changePhoneRequestOTP = trpc.profile.changePhoneRequestOTP.useMutation({
     onSuccess(data) {
@@ -78,7 +79,7 @@ export default function PhoneNoEditScreen({
         onPress={() => {
           if (phoneNo) {
             changePhoneRequestOTP.mutate({
-              isd: 91,
+              isd: isd,
               phoneNumber: phoneNo,
             });
           }
