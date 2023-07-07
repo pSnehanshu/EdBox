@@ -157,9 +157,8 @@ export default function ProfileEditScreen({
             />
           </Pressable>
         </View>
-        {/* form */}
+
         <View style={styles.detailsContainerPlus}>
-          {/* <View style={styles.detailsContainer}> */}
           <CustomSelect
             isSingle
             title="Salutation"
@@ -177,13 +176,11 @@ export default function ProfileEditScreen({
               onChange={setUserName}
               defaultValue={userName}
               title="Name"
-              // selectorStyle={{ width: "50%" }}
             />
           </View>
         </View>
 
         <View style={styles.detailsContainerPlus}>
-          {/* <View style={styles.detailsContainer}> */}
           <CustomSelect
             isSingle
             title="Gender"
@@ -196,8 +193,7 @@ export default function ProfileEditScreen({
             labelExtractor={(item) => `${item}`}
             style={{ flexGrow: 1 }}
           />
-          {/* </View> */}
-          {/* <View style={styles.detailsContainer}> */}
+
           <CustomSelect
             isSingle
             title="Blood Group"
@@ -212,7 +208,6 @@ export default function ProfileEditScreen({
             labelExtractor={(item) => `${item}`}
             style={{ flexGrow: 1 }}
           />
-          {/* </View> */}
         </View>
 
         <DatePicker
@@ -231,6 +226,7 @@ export default function ProfileEditScreen({
             setDatePickerVisible(false);
           }}
         />
+
         <View style={styles.detailsContainer}>
           <Pressable
             onPress={() => setDatePickerVisible((v) => !v)}
@@ -253,7 +249,7 @@ export default function ProfileEditScreen({
             </ListItem>
           </Pressable>
         </View>
-        {/* address */}
+
         <View style={styles.detailsContainer}>
           <ModalTextInput
             onChange={setAddressLine1}
@@ -282,6 +278,7 @@ export default function ProfileEditScreen({
             selectorStyle={{ width: "50%" }}
           />
         </View>
+
         <View style={styles.detailsContainerPlus}>
           <ModalTextInput
             onChange={setAddressState}
@@ -298,6 +295,7 @@ export default function ProfileEditScreen({
             selectorStyle={{ width: "50%" }}
           />
         </View>
+
         <View>
           <ModalTextInput
             onChange={setAddressCountry}

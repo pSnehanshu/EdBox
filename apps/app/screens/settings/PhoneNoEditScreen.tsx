@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { ModalTextInput } from "../../components/ModalTextInput";
-import { Text, View } from "../../components/Themed";
+import { View } from "../../components/Themed";
 import { trpc } from "../../utils/trpc";
 import { RootStackScreenProps } from "../../utils/types/common";
 import { FAB } from "@rneui/themed";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import OtpPopup from "../../components/OtpPopup";
 import { Alert } from "react-native";
 import OtpPopUpTwo from "../../components/OtpPopUpTwo";
 import Spinner from "react-native-loading-spinner-overlay";

@@ -1,12 +1,7 @@
-import { useCallback, useState } from "react";
-import { Alert, Modal, StyleSheet, Pressable } from "react-native";
-import { trpc } from "../utils/trpc";
-import { useSetAuthToken } from "../utils/auth";
-import { useConfig } from "../utils/config";
-import Spinner from "react-native-loading-spinner-overlay";
+import { useState } from "react";
+import { Modal, StyleSheet, Pressable } from "react-native";
 import { View, Text, TextInput } from "./Themed";
 import useColorScheme from "../utils/useColorScheme";
-import { getPushToken } from "../utils/push-notifications";
 
 interface props {
   visible: boolean;
@@ -25,13 +20,11 @@ export default function OtpPopUpTwo({
   oldPhoneNo,
   newPhoneNo,
 }: props) {
-  const setAuthToken = useSetAuthToken();
-  const [otpOld, setOtpOld] = useState<string | null>(null);
-  const [otpNew, setOtpNew] = useState<string | null>(null);
-  const config = useConfig();
-
   const color = useColorScheme();
   const blurBg = color === "dark" ? "rgba(0,0,0,.6)" : "rgba(255,255,255,.6)";
+
+  const [otpOld, setOtpOld] = useState<string | null>(null);
+  const [otpNew, setOtpNew] = useState<string | null>(null);
 
   return (
     <View style={styles.centeredView}>
@@ -66,6 +59,7 @@ export default function OtpPopUpTwo({
               keyboardType="number-pad"
               maxLength={6}
             />
+
             <Pressable
               style={({ pressed }) => [
                 styles.button,
@@ -78,6 +72,7 @@ export default function OtpPopUpTwo({
             >
               <Text style={styles.textStyle}>Submit</Text>
             </Pressable>
+
             {onClose && (
               <Pressable
                 onPress={onClose}
