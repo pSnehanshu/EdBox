@@ -26,9 +26,8 @@ export default function PhoneNoEditScreen({
   const [isd, setIsd] = useState(91);
 
   const changePhoneRequestOTP = trpc.profile.changePhoneRequestOTP.useMutation({
-    onSuccess(data) {
+    onSuccess({ expiry }) {
       setOtpPopUp(true);
-      console.log(data);
     },
     onError(error) {
       console.error(error);
@@ -61,6 +60,7 @@ export default function PhoneNoEditScreen({
         onChange={setPhoneNo}
         defaultValue={phoneNo}
         title="Phone No"
+        number
       />
       <OtpPopUpTwo
         visible={otpPopUp}
@@ -72,8 +72,8 @@ export default function PhoneNoEditScreen({
             new_otp: otpNew,
           });
         }}
-        oldPhoneNo={`+${user?.phone_isd_code}${user?.phone}`}
-        newPhoneNo={`+${91}${phoneNo}`}
+        oldPhoneNo={`+${user?.phone_isd_code}-${user?.phone}`}
+        newPhoneNo={`+${isd}-${phoneNo}`}
       />
       <FAB
         onPress={() => {

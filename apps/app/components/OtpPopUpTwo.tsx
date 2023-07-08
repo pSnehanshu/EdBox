@@ -6,7 +6,7 @@ import useColorScheme from "../utils/useColorScheme";
 interface props {
   visible: boolean;
   userId: string | null;
-  onSubmit: (otpold: any, otpNew: any) => void;
+  onSubmit: (otpold: string, otpNew: string) => void;
   onClose?: () => void;
   oldPhoneNo: string;
   newPhoneNo: string;
@@ -23,8 +23,8 @@ export default function OtpPopUpTwo({
   const color = useColorScheme();
   const blurBg = color === "dark" ? "rgba(0,0,0,.6)" : "rgba(255,255,255,.6)";
 
-  const [otpOld, setOtpOld] = useState<string | null>(null);
-  const [otpNew, setOtpNew] = useState<string | null>(null);
+  const [otpOld, setOtpOld] = useState("");
+  const [otpNew, setOtpNew] = useState("");
 
   return (
     <View style={styles.centeredView}>
@@ -42,7 +42,7 @@ export default function OtpPopUpTwo({
             </Text>
             <TextInput
               style={styles.inputText}
-              value={otpOld ?? ""}
+              value={otpOld}
               onChangeText={setOtpOld}
               autoFocus
               keyboardType="number-pad"
@@ -54,7 +54,7 @@ export default function OtpPopUpTwo({
             </Text>
             <TextInput
               style={styles.inputText}
-              value={otpNew ?? ""}
+              value={otpNew}
               onChangeText={setOtpNew}
               keyboardType="number-pad"
               maxLength={6}
@@ -67,7 +67,7 @@ export default function OtpPopUpTwo({
               ]}
               onPress={() => {
                 onSubmit(otpOld, otpNew);
-                onClose && onClose();
+                onClose?.();
               }}
             >
               <Text style={styles.textStyle}>Submit</Text>
