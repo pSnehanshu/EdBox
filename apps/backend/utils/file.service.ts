@@ -5,13 +5,14 @@ import {
   PutObjectCommand,
   HeadObjectCommand,
   GetObjectCommand,
+  DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { mapLimit } from "async";
 import type { FilePermissionsInput } from "schooltalk-shared/misc";
 import type { UploadedFile } from "@prisma/client";
 import prisma from "../prisma";
-import CONFIG from "../config";
+import config from "../config";
 import { s3client } from "./aws-clients";
 
 export function getFileS3Key(schoolId: string, fileName: string) {
@@ -38,7 +39,7 @@ export async function generatePermission(userId: string) {
     data: {
       school_id,
       user_id: userId,
-      expiry: addSeconds(new Date(), CONFIG.S3_UPLOAD_URL_EXPIRY_SECONDS),
+      expiry: addSeconds(new Date(), config.S3_UPLOAD_URL_EXPIRY_SECONDS),
       s3key: getFileS3Key(school_id, fileName),
     },
   });
@@ -50,13 +51,13 @@ export async function generateSignedUploadS3URL(userId: string) {
 
   try {
     const command = new PutObjectCommand({
-      Bucket: CONFIG.S3_USERCONTENT_BUCKET,
+      Bucket: config.S3_USERCONTENT_BUCKET,
       Key: permission.s3key,
     });
 
     // Generate URL
     const signedURL = await getSignedUrl(s3client, command, {
-      expiresIn: CONFIG.S3_UPLOAD_URL_EXPIRY_SECONDS,
+      expiresIn: config.S3_UPLOAD_URL_EXPIRY_SECONDS,
     });
 
     return { permission, signedURL };
@@ -72,18 +73,18 @@ export async function generateSignedUploadS3URL(userId: string) {
 
 export async function generateSignedDownloadS3URL(s3key: string) {
   const command = new GetObjectCommand({
-    Bucket: CONFIG.S3_USERCONTENT_BUCKET,
+    Bucket: config.S3_USERCONTENT_BUCKET,
     Key: s3key,
   });
 
   // Generate URL
   const signedURL = await getSignedUrl(s3client, command, {
-    expiresIn: CONFIG.S3_DOWNLOAD_URL_EXPIRY_SECONDS,
+    expiresIn: config.S3_DOWNLOAD_URL_EXPIRY_SECONDS,
   });
 
   return {
     url: signedURL,
-    expiry: addSeconds(new Date(), CONFIG.S3_DOWNLOAD_URL_EXPIRY_SECONDS),
+    expiry: addSeconds(new Date(), config.S3_DOWNLOAD_URL_EXPIRY_SECONDS),
   };
 }
 
@@ -135,7 +136,7 @@ export async function consumePermission(
 
   // Fetch file metadata
   const headCommand = new HeadObjectCommand({
-    Bucket: CONFIG.S3_USERCONTENT_BUCKET,
+    Bucket: config.S3_USERCONTENT_BUCKET,
     Key: permission.s3key,
   });
   const headResponse = await s3client.send(headCommand).catch((err) => {
@@ -176,4 +177,24 @@ export async function consumeMultiplePermissions(
 
   //
   return files;
+}
+
+/**
+ * Delete file from s3 and DB
+ */
+export async function deleteFile(file: UploadedFile) {
+  await Promise.all([
+    // Delete from s3
+    s3client.send(
+      new DeleteObjectCommand({
+        Bucket: config.S3_USERCONTENT_BUCKET,
+        Key: file.s3key,
+      }),
+    ),
+
+    // Delete from DB
+    prisma.uploadedFile.delete({
+      where: { id: file.id },
+    }),
+  ]);
 }

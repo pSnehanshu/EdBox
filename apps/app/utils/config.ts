@@ -7,7 +7,9 @@ import { z } from "zod";
 import Constants from "expo-constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SELECTED_SCHOOL_ID } from "./async-storage-keys";
-import { StaticRole } from "schooltalk-shared/misc";
+import { StaticRole, getUserRoleHierarchical } from "schooltalk-shared/misc";
+import { useEffect } from "react";
+import { useCurrentUser } from "./auth";
 
 /** The schema */
 const ConfigSchema = z.object({
@@ -91,4 +93,19 @@ export function useConfigUpdate() {
   const [, setConfig] = useAtom(ConfigAtom);
 
   return setConfig;
+}
+
+/**
+ * This hook will automatically select a default role if none is selected
+ */
+export function useSelectDefaultRole() {
+  const config = useConfig();
+  const setConfig = useConfigUpdate();
+  const { isLoggedIn, user } = useCurrentUser();
+
+  useEffect(() => {
+    if (config.activeStaticRole === StaticRole.none && isLoggedIn) {
+      setConfig({ activeStaticRole: getUserRoleHierarchical(user) });
+    }
+  }, [config.activeStaticRole, user, isLoggedIn]);
 }

@@ -1,32 +1,15 @@
-import { PushTokenType, User } from "@prisma/client";
-import { t, authMiddleware } from "../trpc";
+import { PushTokenType } from "@prisma/client";
+import { router, publicProcedure, protectedProcedure } from "../trpc";
 import { z } from "zod";
 import prisma from "../../prisma";
 import { TRPCError } from "@trpc/server";
-import { addMinutes, addMonths, isFuture, isPast } from "date-fns";
-import _ from "lodash";
-import CONFIG from "../../config";
+import { addMonths, isPast } from "date-fns";
+import config from "../../config";
 import { sendSMS } from "../../utils/sms.service";
+import { generateLoginOTP } from "../../utils/auth-utils";
 
-function generateUserOTP(user: Pick<User, "otp" | "otp_expiry">) {
-  // Generate OTP
-  let otp = (
-    Math.floor(Math.random() * 9 * 10 ** (CONFIG.OTP_LENGTH - 1)) +
-    10 ** (CONFIG.OTP_LENGTH - 1)
-  ).toString();
-
-  if (user.otp && user.otp_expiry && isFuture(user.otp_expiry)) {
-    // An OTP exists, reuse it
-    otp = user.otp;
-  }
-
-  const expiry = addMinutes(new Date(), 10);
-
-  return { otp, expiry };
-}
-
-const authRouter = t.router({
-  requestEmailLoginOTP: t.procedure
+const authRouter = router({
+  requestEmailLoginOTP: publicProcedure
     .input(
       z.object({
         email: z.string().email(),
@@ -43,17 +26,24 @@ const authRouter = t.router({
         },
         select: {
           id: true,
-          otp: true,
-          otp_expiry: true,
+          SensitiveInfo: true,
         },
       });
 
-      // Generate OTP
-      const { otp, expiry } = generateUserOTP(user);
+      if (!user.SensitiveInfo) {
+        user.SensitiveInfo = await prisma.userSensitiveInfo.create({
+          data: {
+            user_id: user.id,
+          },
+        });
+      }
 
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { otp, otp_expiry: expiry },
+      // Generate OTP
+      const { otp, expiry } = generateLoginOTP(user.SensitiveInfo);
+
+      await prisma.userSensitiveInfo.update({
+        where: { user_id: user.id },
+        data: { login_otp: otp, login_otp_expiry: expiry },
       });
 
       // TODO: Send the email with the OTP
@@ -61,7 +51,7 @@ const authRouter = t.router({
 
       return { userId: user.id };
     }),
-  requestPhoneNumberOTP: t.procedure
+  requestPhoneNumberOTP: publicProcedure
     .input(
       z.object({
         isd: z.number().int().default(91),
@@ -82,8 +72,7 @@ const authRouter = t.router({
         },
         select: {
           id: true,
-          otp: true,
-          otp_expiry: true,
+          SensitiveInfo: true,
           School: {
             select: {
               name: true,
@@ -92,14 +81,20 @@ const authRouter = t.router({
         },
       });
 
+      if (!user.SensitiveInfo) {
+        user.SensitiveInfo = await prisma.userSensitiveInfo.create({
+          data: { user_id: user.id },
+        });
+      }
+
       // User exists, and is active
 
       // Generate OTP
-      const { otp, expiry } = generateUserOTP(user);
+      const { otp, expiry } = generateLoginOTP(user.SensitiveInfo);
 
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { otp, otp_expiry: expiry },
+      await prisma.userSensitiveInfo.update({
+        where: { user_id: user.id },
+        data: { login_otp: otp, login_otp_expiry: expiry },
       });
 
       // Send the SMS with the OTP
@@ -112,10 +107,10 @@ const authRouter = t.router({
 
       return { userId: user.id };
     }),
-  submitLoginOTP: t.procedure
+  submitLoginOTP: publicProcedure
     .input(
       z.object({
-        otp: z.string().regex(/^\d+$/).length(CONFIG.OTP_LENGTH),
+        otp: z.string().regex(/^\d+$/).length(config.OTP_LENGTH),
         userId: z.string().cuid(),
         schoolId: z.string().cuid(),
         pushToken: z
@@ -134,8 +129,7 @@ const authRouter = t.router({
         },
         select: {
           id: true,
-          otp: true,
-          otp_expiry: true,
+          SensitiveInfo: true,
           school_id: true,
         },
       });
@@ -144,11 +138,14 @@ const authRouter = t.router({
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
-      if (user.otp !== input.otp) {
+      if (user.SensitiveInfo?.login_otp !== input.otp) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
-      if (!user.otp_expiry || isPast(user.otp_expiry)) {
+      if (
+        !user.SensitiveInfo.login_otp_expiry ||
+        isPast(user.SensitiveInfo.login_otp_expiry)
+      ) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
@@ -163,11 +160,11 @@ const authRouter = t.router({
         });
 
         // Remove OTP
-        await tx.user.update({
-          where: { id: user.id },
+        await tx.userSensitiveInfo.update({
+          where: { user_id: user.id },
           data: {
-            otp: null,
-            otp_expiry: null,
+            login_otp: null,
+            login_otp_expiry: null,
           },
         });
 
@@ -197,13 +194,7 @@ const authRouter = t.router({
         expiry_date: session.expiry_date,
       };
     }),
-  whoami: t.procedure
-    .use(authMiddleware)
-    .query(({ ctx }) =>
-      _.omit(ctx.user, ["password", "otp", "otp_expiry", "School"]),
-    ),
-  logout: t.procedure
-    .use(authMiddleware)
+  logout: protectedProcedure
     .input(
       z.object({
         pushToken: z
@@ -245,7 +236,7 @@ const authRouter = t.router({
         });
       }
     }),
-  rollNumberLoginRequestOTP: t.procedure
+  rollNumberLoginRequestOTP: publicProcedure
     .input(
       z.object({
         class_id: z.number().int(),
@@ -273,17 +264,28 @@ const authRouter = t.router({
           },
           User: {},
         },
-        include: {
+        select: {
           Parents: {
             include: {
               Parent: {
-                include: {
-                  User: true,
+                select: {
+                  User: {
+                    select: {
+                      phone: true,
+                      phone_isd_code: true,
+                    },
+                  },
                 },
               },
             },
           },
-          User: true,
+          User: {
+            select: {
+              id: true,
+              name: true,
+              SensitiveInfo: true,
+            },
+          },
           School: {
             select: {
               name: true,
@@ -300,12 +302,20 @@ const authRouter = t.router({
         isd: p.Parent.User?.phone_isd_code,
       }));
 
-      // Generate OTP
-      const { otp, expiry } = generateUserOTP(student.User);
+      if (!student.User.SensitiveInfo) {
+        student.User.SensitiveInfo = await prisma.userSensitiveInfo.create({
+          data: {
+            user_id: student.User.id,
+          },
+        });
+      }
 
-      await prisma.user.update({
-        where: { id: student.User.id },
-        data: { otp, otp_expiry: expiry },
+      // Generate OTP
+      const { otp, expiry } = generateLoginOTP(student.User.SensitiveInfo);
+
+      await prisma.userSensitiveInfo.update({
+        where: { user_id: student.User.id },
+        data: { login_otp: otp, login_otp_expiry: expiry },
       });
 
       // Send the SMS with the OTP

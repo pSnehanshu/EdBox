@@ -6,10 +6,10 @@ import { FilePermissionsInputSchema } from "schooltalk-shared/misc";
 import prisma from "../../../prisma";
 import { consumeMultiplePermissions } from "../../../utils/file.service";
 import {
-  t,
-  authMiddleware,
-  teacherMiddleware,
-  studentMiddleware,
+  router,
+  protectedProcedure,
+  teacherProcedure,
+  studentProcedure,
 } from "../../trpc";
 
 const DateSchema = z
@@ -17,9 +17,8 @@ const DateSchema = z
   .datetime()
   .transform((d) => parseISO(d));
 
-const homeworkRouter = t.router({
-  fetchForSection: t.procedure
-    .use(authMiddleware)
+const homeworkRouter = router({
+  fetchForSection: protectedProcedure
     .input(
       z.object({
         section_id: z.number().int(),
@@ -86,8 +85,7 @@ const homeworkRouter = t.router({
 
       return { data: homeworks, total, nextCursor };
     }),
-  fetchForTeacher: t.procedure
-    .use(teacherMiddleware)
+  fetchForTeacher: teacherProcedure
     .input(
       z.object({
         limit: z.number().int().min(1).max(20).default(10),
@@ -151,8 +149,7 @@ const homeworkRouter = t.router({
 
       return { data: homeworks, total, nextCursor };
     }),
-  fetchHomework: t.procedure
-    .use(authMiddleware)
+  fetchHomework: protectedProcedure
     .input(
       z.object({
         homework_id: z.string().cuid(),
@@ -185,8 +182,7 @@ const homeworkRouter = t.router({
         },
       });
     }),
-  create: t.procedure
-    .use(teacherMiddleware)
+  create: teacherProcedure
     .input(
       z.object({
         text: z.string().optional(),
@@ -228,8 +224,7 @@ const homeworkRouter = t.router({
 
       return { id };
     }),
-  update: t.procedure
-    .use(teacherMiddleware)
+  update: teacherProcedure
     .input(
       z.object({
         homework_id: z.string().cuid(),
@@ -295,8 +290,7 @@ const homeworkRouter = t.router({
           },
         });
     }),
-  delete: t.procedure
-    .use(teacherMiddleware)
+  delete: teacherProcedure
     .input(
       z.object({
         homework_id: z.string().cuid(),
@@ -311,8 +305,7 @@ const homeworkRouter = t.router({
         },
       });
     }),
-  fetchSubmissions: t.procedure
-    .use(teacherMiddleware)
+  fetchSubmissions: teacherProcedure
     .input(
       z.object({
         homework_id: z.string().cuid(),
@@ -360,8 +353,7 @@ const homeworkRouter = t.router({
 
       return { data: submissions, total };
     }),
-  createSubmission: t.procedure
-    .use(studentMiddleware)
+  createSubmission: studentProcedure
     .input(
       z.object({
         homework_id: z.string().cuid(),
@@ -446,8 +438,7 @@ const homeworkRouter = t.router({
 
       return id;
     }),
-  updateSubmission: t.procedure
-    .use(studentMiddleware)
+  updateSubmission: studentProcedure
     .input(
       z.object({
         submission_id: z.string().cuid(),

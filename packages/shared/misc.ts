@@ -1,6 +1,12 @@
 import { z } from "zod";
 import { getYear, getMonth, getDate, parseISO } from "date-fns";
-import type { UnserializedUser, User } from "./types";
+import type {
+  Nullable,
+  UnserializedUser,
+  User,
+  DBBloodGroup,
+  UIBloodGroup,
+} from "./types";
 
 const MonthSchema = z.enum([
   "jan",
@@ -147,7 +153,7 @@ export function hasUserStaticRoles(
 }
 
 /** Get appropritate display name based on gender and role */
-export function getDisplayName(user: UnserializedUser | User) {
+export function getDisplayName(user: UnserializedUser | User): string {
   const role = getUserRoleHierarchical(user);
 
   const sirMam = user.gender
@@ -156,7 +162,8 @@ export function getDisplayName(user: UnserializedUser | User) {
       : "sir"
     : "sir";
 
-  function onlySurnameFull(fullName: string) {
+  function onlySurnameFull(fullName: Nullable<string>) {
+    if (!fullName) return "";
     const splitted = fullName.split(" ");
     if (splitted.length < 2) return fullName;
     const surname = splitted.pop();
@@ -165,7 +172,8 @@ export function getDisplayName(user: UnserializedUser | User) {
     return `${initials}. ${surname}`;
   }
 
-  function onlyFirstNameFull(fullName: string) {
+  function onlyFirstNameFull(fullName: Nullable<string>) {
+    if (!fullName) return "";
     const splitted = fullName.split(" ");
     if (splitted.length < 2) return fullName;
     const firstName = splitted.shift();
@@ -188,7 +196,7 @@ export function getDisplayName(user: UnserializedUser | User) {
     case StaticRole.parent:
       return `${onlySurnameFull(user.name)} (guardian)`;
     default:
-      return user.name;
+      return user.name ?? "";
   }
 }
 
@@ -305,3 +313,67 @@ export const examTestSchema = z.object({
 });
 
 export type ExamTestSchema = z.input<typeof examTestSchema>;
+
+/**
+ * Given a blood group value stored in DB, returns what should be shown in UI
+ * @param db_blood_group
+ * @returns UI friendly blood group
+ */
+export function dbBloodGroupToUIBloodGroup(
+  db_blood_group: DBBloodGroup,
+): UIBloodGroup | undefined {
+  switch (db_blood_group) {
+    case "Ap":
+      return "A+";
+    case "Bp":
+      return "B+";
+    case "ABp":
+      return "AB+";
+    case "Op":
+      return "O+";
+    case "An":
+      return "A-";
+    case "Bn":
+      return "B-";
+    case "ABn":
+      return "AB-";
+    case "On":
+      return "O-";
+    case "Other":
+      return "Others";
+    default:
+      return undefined;
+  }
+}
+
+/**
+ * Give a UI friendly blood group, returns what should be stored in DB
+ * @param ui_blood_group
+ * @returns DB friendly Blood group
+ */
+export function uiBloodGroupToDBBloodGroup(
+  ui_blood_group: UIBloodGroup,
+): DBBloodGroup | undefined {
+  switch (ui_blood_group) {
+    case "A+":
+      return "Ap";
+    case "B+":
+      return "Bp";
+    case "AB+":
+      return "ABp";
+    case "O+":
+      return "Op";
+    case "A-":
+      return "An";
+    case "B-":
+      return "Bn";
+    case "AB-":
+      return "ABn";
+    case "O-":
+      return "On";
+    case "Others":
+      return "Other";
+    default:
+      return undefined;
+  }
+}

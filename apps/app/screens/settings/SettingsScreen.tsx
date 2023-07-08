@@ -5,7 +5,7 @@ import { MaterialCommunityIcons, FontAwesome5 } from "@expo/vector-icons";
 import { List, Text, View } from "../../components/Themed";
 import { ColorSchemeContext } from "../../utils/useColorScheme";
 import { useCallback, useContext, useMemo } from "react";
-import { useLogout } from "../../utils/auth";
+import { useCurrentUser, useLogout } from "../../utils/auth";
 import { StaticRole } from "schooltalk-shared/misc";
 import { SettingsOption } from "../../utils/types/common";
 import { useConfig } from "../../utils/config";
@@ -16,6 +16,7 @@ export default function SettingsScreen() {
   const navigation = useNavigation();
   const logout = useLogout();
   const config = useConfig();
+  const { user } = useCurrentUser();
 
   const isPrincipal = [
     StaticRole.principal,
@@ -36,7 +37,7 @@ export default function SettingsScreen() {
         />
       ),
       onPress() {
-        alert("Account Settings");
+        if (user?.id) navigation.navigate("ProfileScreen", { userId: user.id });
       },
     });
 

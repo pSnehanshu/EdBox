@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { StyleSheet, Pressable, Alert } from "react-native";
 import type { ClassWithSections, Section } from "schooltalk-shared/types";
 import Spinner from "react-native-loading-spinner-overlay";
@@ -8,9 +8,12 @@ import { useConfig } from "../../utils/config";
 import OtpPopup from "../../components/OtpPopup";
 import useColorScheme from "../../utils/useColorScheme";
 import { CustomSelect } from "../../components/CustomSelect";
+import { useSetAuthToken } from "../../utils/auth";
+import { getPushToken } from "../../utils/push-notifications";
 
 export default function LoginScreen() {
   const config = useConfig();
+  const setAuthToken = useSetAuthToken();
 
   // Form States
   const [phone, setPhone] = useState("");
@@ -58,6 +61,39 @@ export default function LoginScreen() {
     },
   });
 
+  const onSubmit = useCallback(
+    async (otp: any) => {
+      if (userId && otp) {
+        submitOTPMutation.mutate({
+          userId,
+          otp,
+          schoolId: config.schoolId,
+          // Also pass device push token if possible
+          pushToken: await getPushToken()
+            .then((token) => ({
+              token,
+              type: "expo" as const,
+            }))
+            .catch((err) => {
+              alert((err as any)?.message);
+              return undefined;
+            }),
+        });
+      }
+    },
+    [userId, config.schoolId],
+  );
+
+  const submitOTPMutation = trpc.auth.submitLoginOTP.useMutation({
+    async onSuccess(data) {
+      setAuthToken(data.token, new Date(data.expiry_date));
+    },
+    onError(error) {
+      console.error(error);
+      Alert.alert("Invalid OTP", "Looks like the OTP you entered is incorrect");
+    },
+  });
+
   const color = useColorScheme();
 
   return (
@@ -67,7 +103,11 @@ export default function LoginScreen() {
       }}
     >
       <Spinner
-        visible={requestOtp.isLoading || requestRollNumberOTP.isLoading}
+        visible={
+          requestOtp.isLoading ||
+          requestRollNumberOTP.isLoading ||
+          submitOTPMutation.isLoading
+        }
         textContent="Please wait..."
       />
       {/* login */}
@@ -258,6 +298,7 @@ export default function LoginScreen() {
         <OtpPopup
           visible={true}
           userId={userId}
+          onSubmit={(otp: any) => onSubmit(otp)}
           onClose={() => setStep("requestOTP")}
           description={
             formType === "student"

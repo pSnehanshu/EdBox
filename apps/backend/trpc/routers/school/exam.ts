@@ -4,7 +4,7 @@ import _ from "lodash";
 import { StaticRole, examTestSchema } from "schooltalk-shared/misc";
 import { z } from "zod";
 import prisma from "../../../prisma";
-import { authMiddleware, roleMiddleware, t } from "../../trpc";
+import { protectedProcedure, getRoleProcedure, router } from "../../trpc";
 
 const dateStringSchema = z
   .string()
@@ -53,9 +53,8 @@ type ExamItem =
       item: IndependentTest;
     };
 
-const examRouter = t.router({
-  getTestInfo: t.procedure
-    .use(authMiddleware)
+const examRouter = router({
+  getTestInfo: protectedProcedure
     .input(
       z.object({
         testId: z.string().cuid(),
@@ -105,15 +104,12 @@ const examRouter = t.router({
 
       return test;
     }),
-  createTest: t.procedure
-    .use(
-      roleMiddleware([
-        StaticRole.principal,
-        StaticRole.vice_principal,
-        StaticRole.teacher,
-        StaticRole.staff,
-      ]),
-    )
+  createTest: getRoleProcedure([
+    StaticRole.principal,
+    StaticRole.vice_principal,
+    StaticRole.teacher,
+    StaticRole.staff,
+  ])
     .input(examTestSchema.extend({ exam_id: z.string().cuid().optional() }))
     .mutation(async ({ input, ctx }) => {
       const test = await prisma.examTest.create({
@@ -136,15 +132,12 @@ const examRouter = t.router({
 
       return test;
     }),
-  updateTest: t.procedure
-    .use(
-      roleMiddleware([
-        StaticRole.principal,
-        StaticRole.vice_principal,
-        StaticRole.teacher,
-        StaticRole.staff,
-      ]),
-    )
+  updateTest: getRoleProcedure([
+    StaticRole.principal,
+    StaticRole.vice_principal,
+    StaticRole.teacher,
+    StaticRole.staff,
+  ])
     .input(
       z.object({
         id: z.string().cuid(),
@@ -218,15 +211,12 @@ const examRouter = t.router({
         });
       });
     }),
-  deleteTest: t.procedure
-    .use(
-      roleMiddleware([
-        StaticRole.principal,
-        StaticRole.vice_principal,
-        StaticRole.teacher,
-        StaticRole.staff,
-      ]),
-    )
+  deleteTest: getRoleProcedure([
+    StaticRole.principal,
+    StaticRole.vice_principal,
+    StaticRole.teacher,
+    StaticRole.staff,
+  ])
     .input(
       z.object({
         id: z.string().cuid(),
@@ -240,8 +230,7 @@ const examRouter = t.router({
         },
       });
     }),
-  getExamInfo: t.procedure
-    .use(authMiddleware)
+  getExamInfo: protectedProcedure
     .input(
       z.object({
         examId: z.string().cuid(),
@@ -276,15 +265,12 @@ const examRouter = t.router({
 
       return exam;
     }),
-  createExam: t.procedure
-    .use(
-      roleMiddleware([
-        StaticRole.principal,
-        StaticRole.vice_principal,
-        StaticRole.teacher,
-        StaticRole.staff,
-      ]),
-    )
+  createExam: getRoleProcedure([
+    StaticRole.principal,
+    StaticRole.vice_principal,
+    StaticRole.teacher,
+    StaticRole.staff,
+  ])
     .input(
       z.object({
         name: z.string().max(100),
@@ -322,15 +308,12 @@ const examRouter = t.router({
 
       return exam;
     }),
-  updateExam: t.procedure
-    .use(
-      roleMiddleware([
-        StaticRole.principal,
-        StaticRole.vice_principal,
-        StaticRole.teacher,
-        StaticRole.staff,
-      ]),
-    )
+  updateExam: getRoleProcedure([
+    StaticRole.principal,
+    StaticRole.vice_principal,
+    StaticRole.teacher,
+    StaticRole.staff,
+  ])
     .input(
       z.object({
         id: z.string().cuid(),
@@ -348,8 +331,7 @@ const examRouter = t.router({
         },
       });
     }),
-  fetchExamsAndTestsForStudent: t.procedure
-    .use(roleMiddleware([StaticRole.student]))
+  fetchExamsAndTestsForStudent: getRoleProcedure([StaticRole.student])
     .input(
       z.object({
         after_date: dateStringSchema,
@@ -452,8 +434,7 @@ const examRouter = t.router({
         }
       });
     }),
-  fetchExamsAndTestsForTeacher: t.procedure
-    .use(roleMiddleware([StaticRole.teacher]))
+  fetchExamsAndTestsForTeacher: getRoleProcedure([StaticRole.teacher])
     .input(
       z.object({
         after_date: dateStringSchema,

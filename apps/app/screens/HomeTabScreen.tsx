@@ -1,8 +1,5 @@
-import { useState } from "react";
 import { Pressable, StyleSheet } from "react-native";
 import { StaticRole } from "schooltalk-shared/misc";
-import { Dialog } from "@rneui/themed";
-import { Entypo } from "@expo/vector-icons";
 import { Text, View, ScrollView } from "../components/Themed";
 import { useCurrentUser } from "../utils/auth";
 import { useSchool } from "../utils/useSchool";
@@ -10,7 +7,8 @@ import { RoutineSlider } from "../components/RoutineSlider";
 import Announcements from "../components/Announcements";
 import useColorScheme from "../utils/useColorScheme";
 import { useConfig } from "../utils/config";
-import { StaticRoleSelector } from "../components/StaticRoleSelector";
+import { useNavigation } from "@react-navigation/native";
+import { UserAvatar } from "../components/Avatar";
 
 /**
  * Get a greeting by the time of day.
@@ -31,13 +29,14 @@ function greeting(date: Date): string {
 }
 
 export default function HomeTabScreen() {
-  const { user } = useCurrentUser();
+  const { isLoggedIn, user } = useCurrentUser();
   const school = useSchool();
   const scheme = useColorScheme();
   const color = scheme === "dark" ? "black" : "white";
-  const config = useConfig();
+  const { activeStaticRole } = useConfig();
+  const { navigate } = useNavigation();
 
-  const [isVisible, setIsVisible] = useState(false);
+  if (!isLoggedIn) return null;
 
   return (
     <View style={styles.container}>
@@ -47,7 +46,7 @@ export default function HomeTabScreen() {
           <View style={[styles.header_container, { backgroundColor: color }]}>
             <View style={styles.greeting}>
               <Text style={styles.text_head}>
-                {greeting(new Date())}, {user?.name.split(" ")[0]}
+                {greeting(new Date())}, {user.name?.split(" ")[0]}
               </Text>
               <Text style={styles.text}>
                 Welcome to {school?.name ?? "your school"}
@@ -55,31 +54,23 @@ export default function HomeTabScreen() {
             </View>
 
             <Pressable
-              onPress={() => setIsVisible(true)}
+              onPress={() =>
+                user.id && navigate("ProfileScreen", { userId: user.id })
+              }
               style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
             >
-              <Entypo
-                name="user"
-                size={32}
-                color="white"
-                style={styles.user_avatar}
-              />
+              <UserAvatar fileId={user.avatar_id} size={40} rounded />
             </Pressable>
           </View>
         </View>
 
         {/* Routine carousel */}
         {[StaticRole.student, StaticRole.teacher].includes(
-          config.activeStaticRole,
+          activeStaticRole,
         ) && <RoutineSlider style={styles.carousel} />}
 
         <Announcements />
       </ScrollView>
-
-      <Dialog isVisible={isVisible} onBackdropPress={() => setIsVisible(false)}>
-        <Dialog.Title title="Choose your role" />
-        <StaticRoleSelector onChange={() => setIsVisible(false)} />
-      </Dialog>
     </View>
   );
 }
@@ -98,12 +89,6 @@ const styles = StyleSheet.create({
   },
   greeting: {
     flexGrow: 1,
-  },
-  user_avatar: {
-    backgroundColor: "blue",
-    margin: 2,
-    borderRadius: 24,
-    padding: 8,
   },
   title: {
     fontSize: 20,

@@ -4,11 +4,10 @@ import _ from "lodash";
 import { StaticRole } from "schooltalk-shared/misc";
 import { z } from "zod";
 import prisma from "../../../prisma";
-import { principalMiddleware, studentMiddleware, t } from "../../trpc";
+import { principalProcedure, studentProcedure, router } from "../../trpc";
 
-const peopleRouter = t.router({
-  fetchPeople: t.procedure
-    .use(principalMiddleware)
+const peopleRouter = router({
+  fetchPeople: principalProcedure
     .input(
       z.object({
         page: z.number().int().min(1).default(1),
@@ -86,7 +85,7 @@ const peopleRouter = t.router({
 
       return users.map((u) => _.omit(u, ["password", "otp", "otp_expiry"]));
     }),
-  getStudentClass: t.procedure.use(studentMiddleware).query(async ({ ctx }) => {
+  getStudentClass: studentProcedure.query(async ({ ctx }) => {
     const student = await prisma.student.findFirst({
       where: {
         id: ctx.user.Student?.id,

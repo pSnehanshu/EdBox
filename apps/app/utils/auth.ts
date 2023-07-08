@@ -4,10 +4,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCallback, useEffect, useState } from "react";
 import Toast from "react-native-toast-message";
 import type { User } from "schooltalk-shared/types";
+import { StaticRole } from "schooltalk-shared/misc";
 import { trpc } from "./trpc";
 import { AUTH_TOKEN, AUTH_TOKEN_EXPIRY, USER } from "./async-storage-keys";
 import { useDB } from "./db";
 import { getPushToken } from "./push-notifications";
+import { useConfigUpdate } from "./config";
 
 /**
  * Get the current token
@@ -52,13 +54,15 @@ export function useSetAuthToken() {
 
   return useCallback(async (token: string, expiry: Date) => {
     await setAuthToken(token, expiry);
-    utils.auth.whoami.invalidate();
+    utils.profile.me.invalidate();
   }, []);
 }
 
 export function useLogout() {
   const utils = trpc.useContext();
+  const setConfig = useConfigUpdate();
   const db = useDB();
+
   const logoutMutation = trpc.auth.logout.useMutation({
     async onSuccess() {
       Toast.show({
@@ -67,11 +71,15 @@ export function useLogout() {
         position: "top",
       });
 
+      // Unset previously selected role
+      setConfig({ activeStaticRole: StaticRole.none });
+
+      // Clear token
       await SecureStore.deleteItemAsync(AUTH_TOKEN);
       await SecureStore.deleteItemAsync(AUTH_TOKEN_EXPIRY);
       await SecureStore.deleteItemAsync(USER);
 
-      await utils.auth.whoami.invalidate();
+      await utils.profile.me.invalidate();
 
       // Clear all SQLite data
       db.transaction(
@@ -118,11 +126,21 @@ export function useLogout() {
 /**
  * Cache user object to avoid fetching from AsyncStorage over and over
  */
-let globalUser: User | undefined = undefined;
+let globalUser: User | null = null;
 
-export function useCurrentUser() {
-  const [user, setUser] = useState<User | undefined>(globalUser);
-  const whoami = trpc.auth.whoami.useQuery(undefined, {
+type LoggedIn = {
+  isLoggedIn: true;
+  user: User;
+};
+
+type NotLoggedIn = {
+  isLoggedIn: false;
+  user: null;
+};
+
+export function useCurrentUser(): LoggedIn | NotLoggedIn {
+  const [user, setUser] = useState<User | null>(globalUser);
+  const me = trpc.profile.me.useQuery(undefined, {
     retry: false,
     staleTime: 60 * 60 * 1000,
   });
@@ -149,27 +167,36 @@ export function useCurrentUser() {
 
   useEffect(() => {
     (async () => {
-      if (!whoami.isFetching) {
-        if (whoami.isError) {
-          const error = whoami.error;
+      if (!me.isFetching) {
+        if (me.isError) {
+          const error = me.error;
           if (error.data?.code === "UNAUTHORIZED") {
             // Session is invalid
-            setUser(undefined);
+            setUser(null);
             await AsyncStorage.removeItem(USER);
-            globalUser = undefined;
+            globalUser = null;
           }
         } else {
           // Save locally
-          setUser(whoami.data);
-          await AsyncStorage.setItem(USER, JSON.stringify(whoami.data));
-          globalUser = whoami.data;
+          setUser(me.data ?? null);
+          await AsyncStorage.setItem(USER, JSON.stringify(me.data));
+          globalUser = me.data ?? null;
         }
       }
     })();
-  }, [whoami.isFetching]);
+  }, [me.isFetching]);
+
+  const isLoggedIn = !!user;
+
+  if (isLoggedIn) {
+    return {
+      isLoggedIn,
+      user,
+    };
+  }
 
   return {
-    isLoggedIn: !!user,
-    user,
+    isLoggedIn,
+    user: null,
   };
 }

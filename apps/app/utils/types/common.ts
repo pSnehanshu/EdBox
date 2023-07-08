@@ -44,6 +44,9 @@ export type RootStackParamList = {
   UpdateHomeworkScreen: { homeworkId: string };
   CreateExamScreen: undefined;
   CreateTestScreen: undefined;
+  ProfileScreen: { userId: string };
+  ProfileEditScreen: { userId: string };
+  PhoneNoEditScreen: undefined;
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> =
