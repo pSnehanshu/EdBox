@@ -36,7 +36,11 @@ import { BottomTabNavigator } from "./BottomTabNav";
 import ExamListScreen from "../screens/exam/ExamList";
 import HomeWorkScreen from "../screens/homework/HomeWorkScreen";
 import SchoolSelector from "../components/SchoolSelector";
-import { hasPreloadedSchool, useConfig } from "../utils/config";
+import {
+  hasPreloadedSchool,
+  useConfig,
+  useSelectDefaultRole,
+} from "../utils/config";
 import { Text, View } from "../components/Themed";
 import CreateHomeworkScreen from "../screens/homework/CreateHomeworkScreen";
 import DisplayHomeworkScreen from "../screens/homework/DisplayHomeworkScreen";
@@ -93,6 +97,9 @@ function RootNavigator() {
   const { scheme } = useContext(ColorSchemeContext);
   const [isSchoolSelectorOpen, setIsSchoolSelectorOpen] = useState(false);
   const config = useConfig();
+
+  // DO NOT EVER REMOVE THIS HOOK
+  useSelectDefaultRole();
 
   if (!school) return null;
 

@@ -1,13 +1,19 @@
-import { useEffect, useMemo } from "react";
-import { getUserRoleHierarchical, StaticRole } from "schooltalk-shared/misc";
+import { useMemo } from "react";
+import { StaticRole } from "schooltalk-shared/misc";
 import { useCurrentUser } from "../utils/auth";
-import { useConfig, useConfigUpdate } from "../utils/config";
+import {
+  useConfig,
+  useConfigUpdate,
+  useSelectDefaultRole,
+} from "../utils/config";
 import { CustomSelect, type SelectControlParams } from "./CustomSelect";
 
 interface StaticRoleSelector {
   children?: (params: SelectControlParams) => React.ReactNode;
 }
 export function StaticRoleSelector({ children }: StaticRoleSelector) {
+  useSelectDefaultRole();
+
   const { isLoggedIn, user } = useCurrentUser();
   const config = useConfig();
   const setConfig = useConfigUpdate();
@@ -26,12 +32,6 @@ export function StaticRoleSelector({ children }: StaticRoleSelector) {
 
     return roles;
   }, [user, isLoggedIn]);
-
-  useEffect(() => {
-    if (config.activeStaticRole === StaticRole.none && isLoggedIn) {
-      setConfig({ activeStaticRole: getUserRoleHierarchical(user) });
-    }
-  }, [config.activeStaticRole, user, isLoggedIn]);
 
   return (
     <CustomSelect
