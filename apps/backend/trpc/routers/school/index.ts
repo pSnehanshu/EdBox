@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { t } from "../../trpc";
+import { router, publicProcedure } from "../../trpc";
 import prisma from "../../../prisma";
 import { TRPCError } from "@trpc/server";
 import messagingRouter from "./messaging";
@@ -12,8 +12,8 @@ import examRouter from "./exam";
 import attachmentsRouter from "./attachments";
 import homeworkRouter from "./homework";
 
-const schoolRouter = t.router({
-  schoolBasicInfo: t.procedure
+const schoolRouter = router({
+  schoolBasicInfo: publicProcedure
     .input(
       z.object({
         schoolId: z.string().cuid(),
@@ -43,7 +43,7 @@ const schoolRouter = t.router({
 
       return school;
     }),
-  schoolList: t.procedure
+  schoolList: publicProcedure
     .input(
       z.object({
         search: z.string().trim().optional(),

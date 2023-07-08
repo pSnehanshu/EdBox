@@ -5,45 +5,42 @@ import { dateOfAttendance } from "schooltalk-shared/misc";
 import { z } from "zod";
 import prisma from "../../../prisma";
 import {
-  authMiddleware,
-  principalMiddleware,
-  studentMiddleware,
-  t,
-  teacherMiddleware,
+  protectedProcedure,
+  principalProcedure,
+  studentProcedure,
+  router,
+  teacherProcedure,
 } from "../../trpc";
 import classStdRouter from "./class-std";
 
-const routineRouter = t.router({
-  fetchForSchool: t.procedure
-    .use(principalMiddleware)
-    .query(async ({ ctx }) => {
-      const school = await prisma.school.findUnique({
-        where: {
-          id: ctx.user.school_id,
-        },
-        select: {
-          is_active: true,
-          Periods: {
-            include: {
-              Teacher: true,
-              Class: true,
-              Section: true,
-              Subject: true,
-            },
+const routineRouter = router({
+  fetchForSchool: principalProcedure.query(async ({ ctx }) => {
+    const school = await prisma.school.findUnique({
+      where: {
+        id: ctx.user.school_id,
+      },
+      select: {
+        is_active: true,
+        Periods: {
+          include: {
+            Teacher: true,
+            Class: true,
+            Section: true,
+            Subject: true,
           },
         },
+      },
+    });
+
+    if (!school || !school.is_active) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
       });
+    }
 
-      if (!school || !school.is_active) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-        });
-      }
-
-      return school.Periods;
-    }),
-  fetchForTeacher: t.procedure
-    .use(teacherMiddleware)
+    return school.Periods;
+  }),
+  fetchForTeacher: teacherProcedure
     .input(
       z.object({
         dateOfAttendance,
@@ -95,8 +92,7 @@ const routineRouter = t.router({
         typeof periods | undefined
       >;
     }),
-  fetchForStudent: t.procedure
-    .use(studentMiddleware)
+  fetchForStudent: studentProcedure
     .input(
       z.object({
         dateOfAttendance,
@@ -188,8 +184,7 @@ const routineRouter = t.router({
         typeof periods | undefined
       >;
     }),
-  fetchPeriodStudents: t.procedure
-    .use(authMiddleware)
+  fetchPeriodStudents: protectedProcedure
     .input(
       z.object({
         periodId: z.string().cuid(),

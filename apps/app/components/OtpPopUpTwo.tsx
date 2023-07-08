@@ -1,65 +1,30 @@
-import { useCallback, useState } from "react";
-import { Alert, Modal, StyleSheet, Pressable } from "react-native";
-import { trpc } from "../utils/trpc";
-import { useSetAuthToken } from "../utils/auth";
-import { useConfig } from "../utils/config";
-import Spinner from "react-native-loading-spinner-overlay";
+import { useState } from "react";
+import { Modal, StyleSheet, Pressable } from "react-native";
 import { View, Text, TextInput } from "./Themed";
 import useColorScheme from "../utils/useColorScheme";
-import { getPushToken } from "../utils/push-notifications";
 
 interface props {
   visible: boolean;
   userId: string | null;
-  onSubmit: (otp: any) => void;
+  onSubmit: (otpold: string, otpNew: string) => void;
   onClose?: () => void;
-  description?: string;
+  oldPhoneNo: string;
+  newPhoneNo: string;
 }
 
-export default function OtpPopup({
+export default function OtpPopUpTwo({
   visible,
   userId,
   onSubmit,
   onClose,
-  description,
+  oldPhoneNo,
+  newPhoneNo,
 }: props) {
-  const setAuthToken = useSetAuthToken();
-  const [otp, setOtp] = useState<string | null>(null);
-  const config = useConfig();
-
-  // const submitOTPMutation = trpc.auth.submitLoginOTP.useMutation({
-  //   async onSuccess(data) {
-  //     setAuthToken(data.token, new Date(data.expiry_date));
-  //   },
-  //   onError(error) {
-  //     console.error(error);
-  //     Alert.alert("Invalid OTP", "Looks like the OTP you entered is incorrect");
-  //     setOtp(null);
-  //   },
-  // });
-
-  // const onSubmit = useCallback(async () => {
-  //   if (userId && otp) {
-  //     submitOTPMutation.mutate({
-  //       userId,
-  //       otp,
-  //       schoolId: config.schoolId,
-  //       // Also pass device push token if possible
-  //       pushToken: await getPushToken()
-  //         .then((token) => ({
-  //           token,
-  //           type: "expo" as const,
-  //         }))
-  //         .catch((err) => {
-  //           alert((err as any)?.message);
-  //           return undefined;
-  //         }),
-  //     });
-  //   }
-  // }, [userId, otp, config.schoolId]);
-
   const color = useColorScheme();
   const blurBg = color === "dark" ? "rgba(0,0,0,.6)" : "rgba(255,255,255,.6)";
+
+  const [otpOld, setOtpOld] = useState("");
+  const [otpNew, setOtpNew] = useState("");
 
   return (
     <View style={styles.centeredView}>
@@ -72,28 +37,42 @@ export default function OtpPopup({
         <View style={[styles.centeredView, { backgroundColor: blurBg }]}>
           <View style={styles.modalView}>
             <Text style={styles.mainText}>Verification Code</Text>
-            {description && <Text style={styles.subText}>{description}</Text>}
-
+            <Text style={styles.subText}>
+              Enter OTP sent to your existing phone number ({oldPhoneNo})
+            </Text>
             <TextInput
               style={styles.inputText}
-              value={otp ?? ""}
-              onChangeText={setOtp}
+              value={otpOld}
+              onChangeText={setOtpOld}
               autoFocus
               keyboardType="number-pad"
               maxLength={6}
             />
+
+            <Text style={styles.subText}>
+              Enter OTP sent to your new phone number ({newPhoneNo})
+            </Text>
+            <TextInput
+              style={styles.inputText}
+              value={otpNew}
+              onChangeText={setOtpNew}
+              keyboardType="number-pad"
+              maxLength={6}
+            />
+
             <Pressable
               style={({ pressed }) => [
                 styles.button,
                 { opacity: pressed ? 0.5 : 1 },
               ]}
               onPress={() => {
-                onSubmit(otp);
-                onClose && onClose();
+                onSubmit(otpOld, otpNew);
+                onClose?.();
               }}
             >
               <Text style={styles.textStyle}>Submit</Text>
             </Pressable>
+
             {onClose && (
               <Pressable
                 onPress={onClose}

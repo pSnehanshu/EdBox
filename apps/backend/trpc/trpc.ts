@@ -4,9 +4,13 @@ import { Permissions } from "schooltalk-shared/permissions.enum";
 import { userHasPermissions } from "../utils/permissions";
 import type { Context } from "./context";
 
-export const t = initTRPC.context<Context>().create();
+const t = initTRPC.context<Context>().create();
 
-export const authMiddleware = t.middleware(({ ctx, next }) => {
+//////////////////
+// MIDDLEWARES //
+////////////////
+
+const authMiddleware = t.middleware(({ ctx, next }) => {
   if (!ctx.session) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
@@ -23,72 +27,65 @@ export const authMiddleware = t.middleware(({ ctx, next }) => {
 });
 
 /** Verify that the user is a teacher */
-export const teacherMiddleware = authMiddleware.unstable_pipe(
-  ({ ctx, next }) => {
-    if (!ctx.session.User.Teacher) {
-      throw new TRPCError({
-        code: "FORBIDDEN",
-        message: "Not a teacher",
-      });
-    }
-
-    return next({
-      ctx: {
-        ...ctx,
-        teacher: ctx.session.User.Teacher,
-      },
+const teacherMiddleware = authMiddleware.unstable_pipe(({ ctx, next }) => {
+  if (!ctx.session.User.Teacher) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Not a teacher",
     });
-  },
-);
+  }
+
+  return next({
+    ctx: {
+      ...ctx,
+      teacher: ctx.session.User.Teacher,
+    },
+  });
+});
 
 /** Verify that the user is a student */
-export const studentMiddleware = authMiddleware.unstable_pipe(
-  ({ ctx, next }) => {
-    if (!ctx.session.User.Student) {
-      throw new TRPCError({
-        code: "FORBIDDEN",
-        message: "Not a student",
-      });
-    }
-
-    return next({
-      ctx: {
-        ...ctx,
-        student: ctx.session.User.Student,
-      },
+const studentMiddleware = authMiddleware.unstable_pipe(({ ctx, next }) => {
+  if (!ctx.session.User.Student) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Not a student",
     });
-  },
-);
+  }
 
-export const principalMiddleware = authMiddleware.unstable_pipe(
-  ({ ctx, next }) => {
-    if (
-      !hasUserStaticRoles(
-        ctx.user,
-        [StaticRole.principal, StaticRole.vice_principal],
-        "some",
-      ) ||
-      !ctx.session.User.Staff
-    ) {
-      throw new TRPCError({
-        code: "FORBIDDEN",
-        message: "You are not principal",
-      });
-    }
+  return next({
+    ctx: {
+      ...ctx,
+      student: ctx.session.User.Student,
+    },
+  });
+});
 
-    return next({
-      ctx: {
-        ...ctx,
-        principal: ctx.session.User.Staff,
-      },
+const principalMiddleware = authMiddleware.unstable_pipe(({ ctx, next }) => {
+  if (
+    !hasUserStaticRoles(
+      ctx.user,
+      [StaticRole.principal, StaticRole.vice_principal],
+      "some",
+    ) ||
+    !ctx.session.User.Staff
+  ) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "You are not principal",
     });
-  },
-);
+  }
 
-export const roleMiddleware = (
-  allowedRoles: StaticRole[],
-  mode: "all" | "some" = "some",
-) =>
+  return next({
+    ctx: {
+      ...ctx,
+      principal: ctx.session.User.Staff,
+    },
+  });
+});
+
+type RoleMode = "all" | "some";
+
+const roleMiddleware = (allowedRoles: StaticRole[], mode: RoleMode) =>
   authMiddleware.unstable_pipe(({ ctx, next }) => {
     if (!hasUserStaticRoles(ctx.user, allowedRoles, mode)) {
       throw new TRPCError({
@@ -99,10 +96,7 @@ export const roleMiddleware = (
     return next({ ctx });
   });
 
-export const dynamicRoleMiddleware = (
-  permissions: Permissions[],
-  mode: "all" | "some",
-) =>
+const dynamicRoleMiddleware = (permissions: Permissions[], mode: RoleMode) =>
   authMiddleware.unstable_pipe(async ({ ctx, next }) => {
     const hasPermission = await userHasPermissions(
       ctx.user.id,
@@ -119,3 +113,33 @@ export const dynamicRoleMiddleware = (
 
     return next({ ctx });
   });
+
+/////////////////
+// PROCEDURES //
+///////////////
+
+export const publicProcedure = t.procedure;
+
+export const principalProcedure = publicProcedure.use(principalMiddleware);
+
+export const studentProcedure = publicProcedure.use(studentMiddleware);
+
+export const teacherProcedure = publicProcedure.use(teacherMiddleware);
+
+export const protectedProcedure = publicProcedure.use(authMiddleware);
+
+export const getDynamicRoleProcedure = (
+  permissions: Permissions[],
+  mode: RoleMode = "some",
+) => publicProcedure.use(dynamicRoleMiddleware(permissions, mode));
+
+export const getRoleProcedure = (
+  allowedRoles: StaticRole[],
+  mode: RoleMode = "some",
+) => publicProcedure.use(roleMiddleware(allowedRoles, mode));
+
+/////////////
+// ROUTER //
+///////////
+
+export const router = t.router;

@@ -1,4 +1,8 @@
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  Entypo,
+  FontAwesome5,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
 import {
   NavigationContainer,
   DefaultTheme,
@@ -32,13 +36,21 @@ import { BottomTabNavigator } from "./BottomTabNav";
 import ExamListScreen from "../screens/exam/ExamList";
 import HomeWorkScreen from "../screens/homework/HomeWorkScreen";
 import SchoolSelector from "../components/SchoolSelector";
-import { hasPreloadedSchool, useConfig } from "../utils/config";
-import { View } from "../components/Themed";
+import {
+  hasPreloadedSchool,
+  useConfig,
+  useSelectDefaultRole,
+} from "../utils/config";
+import { Text, View } from "../components/Themed";
 import CreateHomeworkScreen from "../screens/homework/CreateHomeworkScreen";
 import DisplayHomeworkScreen from "../screens/homework/DisplayHomeworkScreen";
 import UpdateHomeworkScreen from "../screens/homework/UpdateHomeworkScreen";
 import CreateExamScreen from "../screens/exam/CreateExamScreen";
 import CreateTestScreen from "../screens/exam/CreateTestScreen";
+import ProfileScreen from "../screens/settings/ProfileScreen";
+import { StaticRoleSelector } from "../components/StaticRoleSelector";
+import ProfileEditScreen from "../screens/settings/ProfileEditScreen";
+import PhoneNoEditScreen from "../screens/settings/PhoneNoEditScreen";
 
 export default function Navigation({
   colorScheme,
@@ -81,10 +93,13 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
   const school = useSchool();
-  const { isLoggedIn } = useCurrentUser();
+  const { isLoggedIn, user } = useCurrentUser();
   const { scheme } = useContext(ColorSchemeContext);
   const [isSchoolSelectorOpen, setIsSchoolSelectorOpen] = useState(false);
   const config = useConfig();
+
+  // DO NOT EVER REMOVE THIS HOOK
+  useSelectDefaultRole();
 
   if (!school) return null;
 
@@ -257,6 +272,77 @@ function RootNavigator() {
             options={{
               headerShown: true,
               title: "About this app",
+            }}
+          />
+
+          <Stack.Screen
+            name="ProfileScreen"
+            component={ProfileScreen}
+            options={({
+              route: {
+                params: { userId },
+              },
+            }) => ({
+              headerShown: true,
+              title: "Profile",
+              headerRight() {
+                if (userId !== user.id) return null;
+
+                return (
+                  <StaticRoleSelector>
+                    {({ onPress, selectedString }) => (
+                      <View style={{ backgroundColor: "transparent" }}>
+                        {hasPreloadedSchool ? null : (
+                          <Pressable
+                            onPress={onPress}
+                            style={({ pressed }) => ({
+                              opacity: pressed ? 0.5 : 1,
+                              padding: 8,
+                              flexDirection: "row",
+                              alignItems: "center",
+                              borderColor: "gray",
+                              borderWidth: 1,
+                              borderRadius: 5,
+                            })}
+                          >
+                            <FontAwesome5
+                              name="user-tag"
+                              size={16}
+                              color={Colors[scheme].text}
+                              style={{ marginRight: 2 }}
+                            />
+                            <Text>{selectedString}</Text>
+
+                            <Entypo
+                              name="chevron-down"
+                              size={24}
+                              color={Colors[scheme].text}
+                              style={{ marginLeft: 4 }}
+                            />
+                          </Pressable>
+                        )}
+                      </View>
+                    )}
+                  </StaticRoleSelector>
+                );
+              },
+            })}
+          />
+
+          <Stack.Screen
+            name="ProfileEditScreen"
+            component={ProfileEditScreen}
+            options={{
+              headerShown: true,
+              title: "Edit profile",
+            }}
+          />
+          <Stack.Screen
+            name="PhoneNoEditScreen"
+            component={PhoneNoEditScreen}
+            options={{
+              headerShown: true,
+              title: "Edit Phone No",
             }}
           />
         </Stack.Navigator>

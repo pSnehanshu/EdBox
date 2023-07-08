@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { addSeconds } from "date-fns";
-import { t, authMiddleware } from "../../trpc";
+import { router, protectedProcedure } from "../../trpc";
 import {
   generateSignedDownloadS3URL,
   generateSignedUploadS3URL,
@@ -11,9 +11,8 @@ import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import config from "../../../config";
 import { imagekit, s3client } from "../../../utils/aws-clients";
 
-const attachmentsRouter = t.router({
-  requestPermission: t.procedure
-    .use(authMiddleware)
+const attachmentsRouter = router({
+  requestPermission: protectedProcedure
     .input(
       z.object({
         file_name: z.string().optional(),
@@ -36,8 +35,7 @@ const attachmentsRouter = t.router({
 
       return { ...data, permission };
     }),
-  cancelPermission: t.procedure
-    .use(authMiddleware)
+  cancelPermission: protectedProcedure
     .input(
       z.object({
         permission_id: z.string().cuid(),
@@ -72,8 +70,7 @@ const attachmentsRouter = t.router({
       // Attempt delete, but ignore when it fails
       await s3client.send(deleteCommand).catch(() => null);
     }),
-  fetchFile: t.procedure
-    .use(authMiddleware)
+  fetchFile: protectedProcedure
     .input(
       z.object({
         file: z.union([z.string().cuid(), z.object({ id: z.string().cuid() })]),
@@ -94,8 +91,7 @@ const attachmentsRouter = t.router({
 
       return file;
     }),
-  getFileURL: t.procedure
-    .use(authMiddleware)
+  getFileURL: protectedProcedure
     .input(
       z.object({
         file_id: z.string().cuid(),

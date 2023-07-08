@@ -22,7 +22,7 @@ interface AnnouncementProps {
 }
 function SingleAnnouncement({ message }: AnnouncementProps) {
   const config = useConfig();
-  const { user } = useCurrentUser();
+  const { isLoggedIn, user } = useCurrentUser();
   const time = useMemo(() => {
     if (!message.created_at) return "N/A";
 
@@ -70,7 +70,7 @@ function SingleAnnouncement({ message }: AnnouncementProps) {
     }
   };
 
-  if (!user) return null;
+  if (!isLoggedIn) return null;
 
   const isSentByMe = user.id === sender?.id;
 

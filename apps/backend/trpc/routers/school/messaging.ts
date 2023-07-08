@@ -10,11 +10,10 @@ import {
   GroupDefinition,
   groupIdentifierSchema,
 } from "schooltalk-shared/group-identifier";
-import { t, authMiddleware } from "../../trpc";
+import { router, protectedProcedure } from "../../trpc";
 
-const messagingRouter = t.router({
-  fetchGroups: t.procedure
-    .use(authMiddleware)
+const messagingRouter = router({
+  fetchGroups: protectedProcedure
     .input(
       z.object({
         limit: z.number().int().min(1).max(20).default(10),
@@ -28,8 +27,7 @@ const messagingRouter = t.router({
         page: input.page,
       }),
     ),
-  createGroup: t.procedure
-    .use(authMiddleware)
+  createGroup: protectedProcedure
     .input(
       z.object({
         name: z.string().max(50).trim(),
@@ -52,8 +50,7 @@ const messagingRouter = t.router({
 
       return group;
     }),
-  addMemberToGroup: t.procedure
-    .use(authMiddleware)
+  addMemberToGroup: protectedProcedure
     .input(
       z.object({
         groupId: z.string().cuid(),
@@ -134,8 +131,7 @@ const messagingRouter = t.router({
 
       return member;
     }),
-  removeMemberFromGroup: t.procedure
-    .use(authMiddleware)
+  removeMemberFromGroup: protectedProcedure
     .input(
       z.object({
         groupId: z.string().cuid(),
@@ -220,8 +216,7 @@ const messagingRouter = t.router({
         },
       });
     }),
-  makeMemberAdmin: t.procedure
-    .use(authMiddleware)
+  makeMemberAdmin: protectedProcedure
     .input(
       z.object({
         groupId: z.string().cuid(),
@@ -305,8 +300,7 @@ const messagingRouter = t.router({
         });
       }
     }),
-  giveUpAdminRole: t.procedure
-    .use(authMiddleware)
+  giveUpAdminRole: protectedProcedure
     .input(
       z.object({
         groupId: z.string().cuid(),
@@ -356,8 +350,7 @@ const messagingRouter = t.router({
         data: { is_admin: false },
       });
     }),
-  updateGroupDetails: t.procedure
-    .use(authMiddleware)
+  updateGroupDetails: protectedProcedure
     .input(
       z.object({
         groupId: z.string().cuid(),
@@ -418,8 +411,7 @@ const messagingRouter = t.router({
 
       return updatedGroup;
     }),
-  fetchGroupInfo: t.procedure
-    .use(authMiddleware)
+  fetchGroupInfo: protectedProcedure
     .input(
       z.object({
         groupIdentifier: groupIdentifierSchema,
@@ -590,8 +582,7 @@ const messagingRouter = t.router({
         };
       }
     }),
-  fetchGroupMessages: t.procedure
-    .use(authMiddleware)
+  fetchGroupMessages: protectedProcedure
     .input(
       z.object({
         groupIdentifier: groupIdentifierSchema,

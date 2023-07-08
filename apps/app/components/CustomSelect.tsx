@@ -1,5 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   Modal,
   Pressable,
@@ -20,6 +20,11 @@ type ItemComponent<T = unknown> = (
   index: number,
 ) => React.ReactNode;
 
+export type SelectControlParams = {
+  selectedString: string;
+  onPress: () => void;
+};
+
 interface SelectProps<T = unknown> {
   items?: T[];
   title: string;
@@ -28,6 +33,7 @@ interface SelectProps<T = unknown> {
   itemComponent?: ItemComponent<T>;
   style?: StyleProp<ViewStyle>;
   isLoading?: boolean;
+  control?: (params: SelectControlParams) => React.ReactNode;
 }
 
 interface MultiSelectProps<T = unknown> extends SelectProps<T> {
@@ -44,9 +50,7 @@ interface SingleSelectProps<T = unknown> extends SelectProps<T> {
 
 type CustomSelectProps<T> = SingleSelectProps<T> | MultiSelectProps<T>;
 
-export function CustomSelect<T>(
-  props: CustomSelectProps<T> & { children?: React.ReactNode },
-) {
+export function CustomSelect<T>(props: CustomSelectProps<T>) {
   const [isVisible, setIsVisible] = useState(false);
 
   const selectedItemsText = useMemo(() => {
@@ -73,22 +77,33 @@ export function CustomSelect<T>(
 
   return (
     <>
-      <View style={[{ maxHeight: 70 }, props.style]}>
-        <Pressable
-          onPress={() => setIsVisible(true)}
-          style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
-        >
-          {props.children ?? (
-            <ListItem>
-              <ListItem.Content>
-                <ListItem.Title>{props.title}</ListItem.Title>
-                <ListItem.Subtitle>{selectedItemsText}</ListItem.Subtitle>
-              </ListItem.Content>
-              <ListItem.Chevron />
-            </ListItem>
-          )}
-        </Pressable>
-      </View>
+      {props.control ? (
+        props.control({
+          onPress: () => setIsVisible(true),
+          selectedString: selectedItemsText,
+        })
+      ) : (
+        <View style={[{ maxHeight: 70 }, props.style]}>
+          <Pressable
+            onPress={() => setIsVisible(true)}
+            style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
+          >
+            {props.control ?? (
+              <ListItem>
+                <ListItem.Content>
+                  <ListItem.Title style={{ fontSize: 14 }}>
+                    {props.title}
+                  </ListItem.Title>
+                  <ListItem.Subtitle style={{ fontSize: 16 }}>
+                    {selectedItemsText}
+                  </ListItem.Subtitle>
+                </ListItem.Content>
+                <ListItem.Chevron />
+              </ListItem>
+            )}
+          </Pressable>
+        </View>
+      )}
 
       {isVisible && (
         <ModalSelect
@@ -231,6 +246,8 @@ function ModalSelect<T>(
           <Text>Cancel</Text>
         </Pressable>
 
+        <Text style={styles.title}>{props.title}</Text>
+
         {props.isSingle ? null : (
           <MaterialIcons.Button
             name="check"
@@ -279,6 +296,13 @@ const styles = StyleSheet.create({
     borderColor: "gray",
     borderWidth: 1,
     borderRadius: 5,
+  },
+  title: {
+    flexGrow: 1,
+    paddingHorizontal: 16,
+    verticalAlign: "middle",
+    fontSize: 18,
+    fontWeight: "bold",
   },
   list: {
     flex: 1,
