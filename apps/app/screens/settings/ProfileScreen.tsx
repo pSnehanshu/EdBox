@@ -1,6 +1,6 @@
 import { useState, useMemo, type ComponentProps } from "react";
 import { RefreshControl, StyleSheet } from "react-native";
-import { FAB, SpeedDial } from "@rneui/themed";
+import { SpeedDial } from "@rneui/themed";
 import { MaterialCommunityIcons, Fontisto, Entypo } from "@expo/vector-icons";
 import { ListItem } from "@rneui/themed";
 import { format, parseISO } from "date-fns";
@@ -78,12 +78,12 @@ export default function ProfileScreen({
             </View>
 
             <View style={styles.infoTable}>
-              {isCurrentUser && (
+              {isCurrentUser && currentUser.phone && (
                 <ListItem bottomDivider>
                   <ListItem.Content>
                     <ListItem.Title>Phone No</ListItem.Title>
                     <ListItem.Subtitle>
-                      +{user.phone_isd_code}-{user.phone}
+                      +{currentUser.phone_isd_code}-{currentUser.phone}
                     </ListItem.Subtitle>
                   </ListItem.Content>
                   <MaterialCommunityIcons
@@ -168,10 +168,7 @@ export default function ProfileScreen({
                 icon={{ name: "add", color: "white" }}
                 title="Edit Phone No"
                 onPress={() => {
-                  currentUser.id &&
-                    navigation.navigate("PhoneNoEditScreen", {
-                      userId: currentUser.id,
-                    });
+                  navigation.navigate("PhoneNoEditScreen");
                   setActionOpen(false);
                 }}
                 buttonStyle={{ backgroundColor: "#4E48B2" }}

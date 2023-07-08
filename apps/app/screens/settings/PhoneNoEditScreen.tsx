@@ -8,15 +8,12 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Alert } from "react-native";
 import OtpPopUpTwo from "../../components/OtpPopUpTwo";
 import Spinner from "react-native-loading-spinner-overlay";
+import { useCurrentUser } from "../../utils/auth";
 
 export default function PhoneNoEditScreen({
   navigation,
-  route: {
-    params: { userId },
-  },
 }: RootStackScreenProps<"PhoneNoEditScreen">) {
-  const profileQuery = trpc.profile.getUserProfile.useQuery({ userId });
-  const user = profileQuery.data;
+  const { user } = useCurrentUser();
   const trpcUtils = trpc.useContext();
 
   const [phoneNo, setPhoneNo] = useState<string | undefined>(
@@ -36,17 +33,21 @@ export default function PhoneNoEditScreen({
   });
 
   const changePhoneSumbitOTP = trpc.profile.changePhoneSumbitOTP.useMutation({
-    onSuccess(data) {
-      console.log(data);
-      profileQuery.refetch();
+    onSuccess() {
       trpcUtils.profile.me.refetch();
-      navigation.navigate("ProfileScreen", { userId });
+
+      if (user?.id) {
+        trpcUtils.profile.getUserProfile.refetch({ userId: user.id });
+        navigation.navigate("ProfileScreen", { userId: user.id });
+      }
     },
     onError(error) {
       console.error(error);
       Alert.alert("Error", error.message);
     },
   });
+
+  if (!user?.id) return null;
 
   return (
     <View style={{ flex: 1 }}>
@@ -64,7 +65,7 @@ export default function PhoneNoEditScreen({
       />
       <OtpPopUpTwo
         visible={otpPopUp}
-        userId={userId}
+        userId={user?.id}
         onClose={() => setOtpPopUp(false)}
         onSubmit={(otpOld, otpNew) => {
           changePhoneSumbitOTP.mutate({

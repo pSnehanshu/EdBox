@@ -99,7 +99,21 @@ const profileRouter = router({
     .query(async ({ input, ctx }) => {
       const user = await prisma.user.findUnique({
         where: { id: input.userId },
-        include: {
+        select: {
+          school_id: true,
+          name: true,
+          avatar_id: true,
+          blood_group: true,
+          gender: true,
+          salutation: true,
+          date_of_birth: true,
+          addr_city: true,
+          addr_country: true,
+          addr_l1: true,
+          addr_l2: true,
+          addr_pin: true,
+          addr_state: true,
+          addr_town_vill: true,
           Student: true,
           Teacher: true,
           Parent: true,
@@ -110,7 +124,8 @@ const profileRouter = router({
       if (!user || user.school_id !== ctx.user.school_id)
         throw new TRPCError({ code: "NOT_FOUND" });
 
-      return _.omit(user, ["password", "otp", "otp_expiry", "School"]);
+      return user;
+      // return _.omit(user, ["password", "otp", "otp_expiry", "School", "phone", "phone"]);
     }),
   changePhoneRequestOTP: protectedProcedure
     .input(
