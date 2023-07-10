@@ -1,8 +1,8 @@
 import {
   Entypo,
   FontAwesome5,
+  Ionicons,
   MaterialCommunityIcons,
-  Octicons,
 } from "@expo/vector-icons";
 import {
   NavigationContainer,
@@ -128,17 +128,32 @@ function RootNavigator() {
               headerShown: true,
               title: `${route.params.name ?? "Messages"}`,
               headerRight: (props) => (
-                <Octicons
-                  name="kebab-horizontal"
-                  size={16}
+                <Ionicons
+                  name="information"
+                  size={24}
                   color="black"
-                  style={{ transform: [{ rotate: "90deg" }] }}
                   onPress={() => {
                     navigate("ChatGroupDetails", {
                       params: route.params,
                     });
                   }}
                 />
+              ),
+              headerTitle: (props) => (
+                <Pressable
+                  onPress={() => {
+                    navigate("ChatGroupDetails", {
+                      params: route.params,
+                    });
+                  }}
+                  style={({ pressed }) => ({
+                    opacity: pressed ? 0.5 : 1,
+                  })}
+                >
+                  <Text style={{ fontSize: 20, fontWeight: "500" }}>
+                    {route.params.name ?? "Messages"}
+                  </Text>
+                </Pressable>
               ),
             })}
           />
