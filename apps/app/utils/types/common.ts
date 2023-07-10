@@ -16,6 +16,8 @@ import type {
 } from "schooltalk-shared/types";
 import type { Subject } from "rxjs";
 import type { FileSystemUploadResult } from "expo-file-system";
+import { identity } from "lodash";
+import { string } from "zod";
 
 declare global {
   namespace ReactNavigation {
@@ -47,6 +49,12 @@ export type RootStackParamList = {
   ProfileScreen: { userId: string };
   ProfileEditScreen: { userId: string };
   PhoneNoEditScreen: undefined;
+  ChatGroupDetails: { params: ChatGroupType };
+};
+
+export type ChatGroupType = {
+  name: string;
+  identifier: string;
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> =

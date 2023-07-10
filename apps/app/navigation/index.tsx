@@ -2,11 +2,13 @@ import {
   Entypo,
   FontAwesome5,
   MaterialCommunityIcons,
+  Octicons,
 } from "@expo/vector-icons";
 import {
   NavigationContainer,
   DefaultTheme,
   DarkTheme,
+  useNavigation,
 } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { ColorSchemeName, Modal, Pressable } from "react-native";
@@ -51,6 +53,7 @@ import ProfileScreen from "../screens/settings/ProfileScreen";
 import { StaticRoleSelector } from "../components/StaticRoleSelector";
 import ProfileEditScreen from "../screens/settings/ProfileEditScreen";
 import PhoneNoEditScreen from "../screens/settings/PhoneNoEditScreen";
+import ChatGroupDetails from "../screens/chat/ChatGroupDetails";
 
 export default function Navigation({
   colorScheme,
@@ -102,6 +105,7 @@ function RootNavigator() {
   useSelectDefaultRole();
 
   if (!school) return null;
+  const { navigate } = useNavigation();
 
   return isLoggedIn ? (
     <SocketProvider>
@@ -123,6 +127,19 @@ function RootNavigator() {
             options={({ route }) => ({
               headerShown: true,
               title: `${route.params.name ?? "Messages"}`,
+              headerRight: (props) => (
+                <Octicons
+                  name="kebab-horizontal"
+                  size={16}
+                  color="black"
+                  style={{ transform: [{ rotate: "90deg" }] }}
+                  onPress={() => {
+                    navigate("ChatGroupDetails", {
+                      params: route.params,
+                    });
+                  }}
+                />
+              ),
             })}
           />
 
@@ -335,6 +352,14 @@ function RootNavigator() {
             options={{
               headerShown: true,
               title: "Edit profile",
+            }}
+          />
+          <Stack.Screen
+            name="ChatGroupDetails"
+            component={ChatGroupDetails}
+            options={{
+              headerShown: true,
+              title: "Chat Details",
             }}
           />
           <Stack.Screen
