@@ -128,19 +128,25 @@ function RootNavigator() {
             options={({ route }) => ({
               headerShown: true,
               title: `${route.params.name ?? "Messages"}`,
-              headerRight: (props) => (
-                <Ionicons
-                  name="information"
-                  size={24}
-                  color="black"
+              headerRight: () => (
+                <Pressable
                   onPress={() => {
                     navigate("ChatGroupDetails", {
                       params: route.params,
                     });
                   }}
-                />
+                  style={({ pressed }) => ({
+                    opacity: pressed ? 0.5 : 1,
+                  })}
+                >
+                  <Ionicons
+                    name="information-circle-sharp"
+                    size={24}
+                    color={Colors[scheme].text}
+                  />
+                </Pressable>
               ),
-              headerTitle: (props) => (
+              headerTitle: () => (
                 <Pressable
                   onPress={() => {
                     navigate("ChatGroupDetails", {
