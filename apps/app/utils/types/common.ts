@@ -50,6 +50,7 @@ export type RootStackParamList = {
   ProfileEditScreen: { userId: string };
   PhoneNoEditScreen: undefined;
   ChatGroupDetails: { params: ChatGroupType };
+  ChatMediaList: undefined;
 };
 
 export type ChatGroupType = {

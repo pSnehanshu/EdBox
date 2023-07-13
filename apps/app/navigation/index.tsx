@@ -54,6 +54,7 @@ import { StaticRoleSelector } from "../components/StaticRoleSelector";
 import ProfileEditScreen from "../screens/settings/ProfileEditScreen";
 import PhoneNoEditScreen from "../screens/settings/PhoneNoEditScreen";
 import ChatGroupDetails from "../screens/chat/ChatGroupDetails";
+import ChatMediaList from "../screens/chat/ChatMediaList";
 
 export default function Navigation({
   colorScheme,
@@ -383,6 +384,14 @@ function RootNavigator() {
             options={{
               headerShown: true,
               title: "Edit Phone No",
+            }}
+          />
+          <Stack.Screen
+            name="ChatMediaList"
+            component={ChatMediaList}
+            options={{
+              headerShown: true,
+              title: "Media",
             }}
           />
         </Stack.Navigator>

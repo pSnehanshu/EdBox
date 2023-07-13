@@ -1,12 +1,13 @@
 import { Dimensions, Pressable, StyleSheet } from "react-native";
 import { List, ScrollView, Text, View } from "../../components/Themed";
 import type { RootStackScreenProps } from "../../utils/types/common";
-import { Image, ListItem, Switch } from "@rneui/themed";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Image, Switch } from "@rneui/themed";
+import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
 import useColorScheme from "../../utils/useColorScheme";
 import { ModalTextInput } from "../../components/ModalTextInput";
 import { useState } from "react";
 import { Carousel } from "react-native-snap-carousel";
+import { useNavigation } from "@react-navigation/native";
 
 export default function ChatGroupDetails({
   navigation,
@@ -83,9 +84,10 @@ export default function ChatGroupDetails({
                   { name: "2" },
                   { name: "1" },
                   { name: "2" },
+                  { name: "button" },
                 ]}
                 renderItem={({ item, index }) => (
-                  <SingleMediaCard period={item} index={index} />
+                  <SingleMediaCard item={item} index={index} />
                 )}
                 sliderWidth={SLIDER_WIDTH}
                 itemWidth={ITEM_WIDTH}
@@ -120,7 +122,7 @@ export default function ChatGroupDetails({
               style={{
                 marginHorizontal: 16,
                 marginVertical: 8,
-                width: "100%",
+                // width: "100%",
                 height: "100%",
               }}
             >
@@ -156,7 +158,21 @@ export default function ChatGroupDetails({
   );
 }
 
-export function SingleMediaCard({ details }: any) {
+export function SingleMediaCard({ item }: any) {
+  const navigation = useNavigation();
+  if (item?.name === "button")
+    return (
+      <View style={styles.container_carousel_button}>
+        <Pressable
+          style={({ pressed }) => ({
+            opacity: pressed ? 0.4 : 1,
+          })}
+          onPress={() => navigation.navigate("ChatMediaList")}
+        >
+          <Entypo name="chevron-thin-right" size={48} color="gray" />
+        </Pressable>
+      </View>
+    );
   return (
     <View style={styles.container_carousel}>
       <Text> </Text>
@@ -229,6 +245,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     margin: 4,
     height: 120,
+    justifyContent: "center",
+  },
+  container_carousel_button: {
+    borderRadius: 8,
+    marginVertical: 4,
+    marginHorizontal: 24,
+    height: 120,
+    justifyContent: "center",
   },
   container_default: {
     marginHorizontal: 16,
@@ -238,6 +262,7 @@ const styles = StyleSheet.create({
   },
   card: {
     borderBottomWidth: 0.5,
+    paddingBottom: 4,
     borderColor: "gray",
     marginVertical: 8,
     alignItems: "center",
