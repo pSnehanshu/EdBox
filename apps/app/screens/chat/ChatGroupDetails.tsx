@@ -1,7 +1,7 @@
 import { Dimensions, Pressable, StyleSheet } from "react-native";
-import { ScrollView, Text, View } from "../../components/Themed";
+import { List, ScrollView, Text, View } from "../../components/Themed";
 import type { RootStackScreenProps } from "../../utils/types/common";
-import { Image, ListItem } from "@rneui/themed";
+import { Image, ListItem, Switch } from "@rneui/themed";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import useColorScheme from "../../utils/useColorScheme";
 import { ModalTextInput } from "../../components/ModalTextInput";
@@ -19,6 +19,7 @@ export default function ChatGroupDetails({
   const [groupName, setGroupName] = useState<string | undefined>(
     params.name ?? undefined,
   );
+  const [muteNotification, setMuteNotification] = useState<boolean>(false);
   const [groupDetails, setGroupDetails] = useState<string | undefined>(
     "chat details...." ?? undefined,
   );
@@ -74,7 +75,7 @@ export default function ChatGroupDetails({
                 layout="default"
                 vertical={false}
                 layoutCardOffset={9}
-                firstItem={1}
+                firstItem={0}
                 data={[
                   { name: "1" },
                   { name: "2" },
@@ -89,12 +90,63 @@ export default function ChatGroupDetails({
                 sliderWidth={SLIDER_WIDTH}
                 itemWidth={ITEM_WIDTH}
                 inactiveSlideShift={0}
-                // useScrollView={true}
                 inactiveSlideOpacity={1}
                 inactiveSlideScale={1}
                 activeSlideAlignment="start"
                 useExperimentalSnap
-                slideStyle={{ marginLeft: 16 }}
+                slideStyle={{ marginLeft: 16, marginTop: 8 }}
+              />
+            </View>
+
+            <View style={styles.container_default}>
+              <Text
+                style={{
+                  textAlignVertical: "center",
+                  textAlign: "center",
+                  fontSize: 16,
+                }}
+              >
+                Mute notifications
+              </Text>
+
+              <Switch
+                trackColor={{ true: "#3bde50", false: "#f5f6fc" }}
+                thumbColor="#FFF"
+                value={muteNotification}
+                onValueChange={setMuteNotification}
+              />
+            </View>
+            <View
+              style={{
+                marginHorizontal: 16,
+                marginVertical: 8,
+                width: "100%",
+                height: "100%",
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 16,
+                }}
+              >
+                3 participants
+              </Text>
+              <List
+                data={[
+                  { name: "Simanta Ray", id: 1, status: "Not gone respawn" },
+                  {
+                    name: "Snehanshu Phukan",
+                    id: 2,
+                    status: "probably coding....",
+                  },
+                  {
+                    name: "Mrityunjoy Bora Ray",
+                    id: 3,
+                    status: "hey there",
+                  },
+                ]}
+                renderItem={({ item }) => <Partcipants item={item} />}
+                estimatedItemSize={200}
               />
             </View>
           </>
@@ -108,6 +160,21 @@ export function SingleMediaCard({ details }: any) {
   return (
     <View style={styles.container_carousel}>
       <Text> </Text>
+    </View>
+  );
+}
+
+export function Partcipants({ item }: any) {
+  return (
+    <View style={styles.card}>
+      <Image
+        source={require("../../assets/images/multiple-users-silhouette.png")}
+        style={styles.image}
+      />
+      <View style={{ flexDirection: "column", marginLeft: 8 }}>
+        <Text style={styles.name}>{item.name}</Text>
+        <Text style={styles.status}>{item.status}</Text>
+      </View>
     </View>
   );
 }
@@ -162,5 +229,31 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     margin: 4,
     height: 120,
+  },
+  container_default: {
+    marginHorizontal: 16,
+    marginVertical: 8,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  card: {
+    borderBottomWidth: 0.5,
+    borderColor: "gray",
+    marginVertical: 8,
+    alignItems: "center",
+    flexDirection: "row",
+  },
+  image: {
+    width: 50,
+    height: 50,
+    borderRadius: 50,
+    borderWidth: 0.5,
+  },
+  name: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  status: {
+    fontSize: 14,
   },
 });
