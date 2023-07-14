@@ -2,6 +2,7 @@ import type {
   School as DBSchool,
   User as DBUser,
   SchoolStaff,
+  GroupActivity,
 } from "@prisma/client";
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "../../apps/backend/trpc";
@@ -15,19 +16,6 @@ export type ArrayElement<ArrayType extends readonly unknown[]> =
 
 export type RouterOutput = inferRouterOutputs<AppRouter>;
 export type RouterInput = inferRouterInputs<AppRouter>;
-
-/**
- * Because messages are cached in SQLite, this type may not always
- * be correct for old messages if the structure of a message changed
- * e.g. Addition or removal of a field. Hence it's safer to mark this
- * as `Partial<...>` so that while using any of the properties, the
- * developer is forced to manually check if a property exists or not.
- */
-export type Message = Partial<
-  ArrayElement<
-    RouterOutput["school"]["messaging"]["fetchGroupMessages"]["messages"]
-  >
->;
 
 export interface Group {
   name: string;
@@ -110,15 +98,15 @@ export type UIBloodGroup =
   | undefined;
 
 export interface ServerToClientEvents {
-  newMessage: (msg: Message) => void;
+  newActivity: (activity: GroupActivity) => void;
 }
 
 export interface ClientToServerEvents {
   messageCreate: (
-    groupIdentifier: string,
+    groupId: string,
     text: string,
     files: FilePermissionsInput[],
-    callback: (message: Message) => void,
+    callback: (activity: GroupActivity) => void,
   ) => void;
 }
 

@@ -33,8 +33,7 @@ model School {
   Teachers                  Teacher[]
   Parents                   Parent[]
   Staff                     SchoolStaff[]
-  CustomGroups              CustomGroup[]
-  Messages                  Message[]
+  Groups                    Group[]
   Subjects                  Subject[]
   Periods                   RoutinePeriod[]
   AttendancesTaken          PeriodAttendance[]
@@ -45,7 +44,6 @@ model School {
   Homeworks                 Homework[]
   FileUploadPermissions     FileUploadPermission[]
   UploadedFiles             UploadedFile[]
-  MessageAttachments        MessageAttachment[]
   app_scheme                String                 @default("edbox")
   app_splash                String?
   app_ios_bundle_identifier String?
@@ -87,9 +85,9 @@ model User {
   created_at             DateTime               @default(now())
   updated_at             DateTime               @updatedAt
   Sessions               LoginSession[]
-  CustomGroups           CustomGroupMembers[]
-  CreatedCustomGroups    CustomGroup[]
-  Messages               Message[]
+  Groups                 GroupMembers[]
+  CreatedGroups          Group[]
+  GroupActivities        GroupActivity[]
   TestsCreated           ExamTest[]
   DynamicRoles           RoleUserMapping[]
   FileUploadPermissions  FileUploadPermission[]
@@ -355,62 +353,52 @@ model ParentStudent_mapping {
   @@id([parent_id, student_id])
 }
 
-model CustomGroup {
-  id            String               @id @default(cuid()) @db.VarChar(32)
-  name          String               @db.VarChar(50)
-  school_id     String               @db.VarChar(32)
-  School        School               @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  created_by_id String?              @db.VarChar(32)
-  CreatedBy     User?                @relation(fields: [created_by_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  created_at    DateTime             @default(now())
-  updated_at    DateTime             @updatedAt
-  Members       CustomGroupMembers[]
+model Group {
+  id            String          @id @default(cuid()) @db.VarChar(32)
+  name          String          @db.VarChar(50)
+  school_id     String          @db.VarChar(32)
+  School        School          @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  created_by_id String?         @db.VarChar(32)
+  CreatedBy     User?           @relation(fields: [created_by_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  created_at    DateTime        @default(now())
+  updated_at    DateTime        @updatedAt
+  Members       GroupMembers[]
+  Activities    GroupActivity[]
 }
 
-model CustomGroupMembers {
-  user_id    String      @db.VarChar(32)
-  User       User        @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  group_id   String      @db.VarChar(32)
-  Group      CustomGroup @relation(fields: [group_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  is_admin   Boolean     @default(false)
-  created_at DateTime    @default(now())
+model GroupMembers {
+  user_id    String   @db.VarChar(32)
+  User       User     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  group_id   String   @db.VarChar(32)
+  Group      Group    @relation(fields: [group_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  is_admin   Boolean  @default(false)
+  is_mute    Boolean  @default(false)
+  created_at DateTime @default(now())
 
   @@id([user_id, group_id])
 }
 
-model Message {
-  id                String              @default(cuid()) @db.VarChar(32)
-  parent_message_id String?             @db.VarChar(32)
-  ParentMessage     Message?            @relation("Replies", fields: [parent_message_id, school_id], references: [id, school_id], onDelete: Cascade, onUpdate: Cascade)
-  school_id         String              @db.VarChar(32)
-  School            School              @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  text              String              @db.Text
-  sender_id         String              @db.VarChar(32)
-  Sender            User                @relation(fields: [sender_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  sender_role       SenderRole
-  group_identifier  String
-  attachments       Json?
-  edit_history      Json?
-  created_at        DateTime            @default(now())
-  updated_at        DateTime            @updatedAt
-  sort_key          BigInt              @unique @default(autoincrement()) @db.BigInt
-  Replies           Message[]           @relation("Replies")
-  Attachments       MessageAttachment[]
-
-  @@id([id, school_id])
-  @@index([group_identifier, school_id])
+model GroupActivity {
+  sn                  BigInt            @id @default(autoincrement()) @db.BigInt
+  type                GroupActivityType
+  payload             Json
+  created_at          DateTime          @default(now())
+  author_id           String?           @db.VarChar(32)
+  Author              User?             @relation(fields: [author_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  is_system_generated Boolean           @default(false) @map("sys")
+  group_id            String            @db.VarChar(32)
+  Group               Group             @relation(fields: [group_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
-model MessageAttachment {
-  message_id String       @db.VarChar(32)
-  Message    Message      @relation(fields: [message_id, school_id], references: [id, school_id], onDelete: Cascade, onUpdate: Cascade)
-  school_id  String       @db.VarChar(32)
-  School     School       @relation(fields: [school_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  file_id    String       @db.VarChar(32)
-  File       UploadedFile @relation(fields: [file_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  created_at DateTime     @default(now())
-
-  @@id([message_id, file_id])
+enum GroupActivityType {
+  message_new
+  message_edit
+  message_delete
+  member_add
+  member_remove
+  name_change
+  description_change
+  icon_change
 }
 
 enum SenderRole {
@@ -532,7 +520,6 @@ model UploadedFile {
   Homeworks                 HomeworkAttachment[]
   HomeworkSubmissions       HomeworkSubmissionAttachment[]
   HomeworkSubmissionRemarks HomeworkSubmissionRemarkAttachment[]
-  Messages                  MessageAttachment[]
   AvatarUser                User?                                @relation("avatar")
 }
 

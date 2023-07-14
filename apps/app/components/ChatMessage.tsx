@@ -4,7 +4,7 @@ import { useCurrentUser } from "../utils/auth";
 import { Text, View } from "./Themed";
 import Hyperlink from "react-native-hyperlink";
 import { Alert, Pressable, StyleSheet } from "react-native";
-import type { Message, UploadedFile } from "schooltalk-shared/types";
+import type { UploadedFile } from "schooltalk-shared/types";
 import MIMEType from "whatwg-mimetype";
 import {
   getDisplayName,
@@ -16,63 +16,63 @@ import { FilePreview, FullScreenFilePreview } from "./attachments/FilePreview";
 import { useNavigation } from "@react-navigation/native";
 
 interface ChatMessageProps {
-  message: Message;
+  activity: null;
 }
-function _ChatMessage({ message }: ChatMessageProps) {
+function _ChatMessage({ activity }: ChatMessageProps) {
   const config = useConfig();
   const { user } = useCurrentUser();
   const { navigate } = useNavigation();
 
-  const time = useMemo(() => {
-    if (!message.created_at) return "N/A";
+  // const time = useMemo(() => {
+  //   if (!message.created_at) return "N/A";
 
-    const date = new Date(message.created_at);
-    const time = format(date, "hh:mm aaa");
+  //   const date = new Date(message.created_at);
+  //   const time = format(date, "hh:mm aaa");
 
-    if (isToday(date)) {
-      return time;
-    }
-    if (isYesterday(date)) {
-      return `Yesterday ${time}`;
-    }
-    if (isThisYear(date)) {
-      return `${format(date, "d MMM")} ${time}`;
-    }
-    return `${format(date, "dd/MM/yy")} ${time}`;
-  }, [message.created_at]);
+  //   if (isToday(date)) {
+  //     return time;
+  //   }
+  //   if (isYesterday(date)) {
+  //     return `Yesterday ${time}`;
+  //   }
+  //   if (isThisYear(date)) {
+  //     return `${format(date, "d MMM")} ${time}`;
+  //   }
+  //   return `${format(date, "dd/MM/yy")} ${time}`;
+  // }, [message.created_at]);
 
-  const sender = message.Sender;
-  const isSentByMe = user?.id === sender?.id;
+  // const sender = message.Sender;
+  // const isSentByMe = user?.id === sender?.id;
 
-  const bgColor = useMemo(
-    () => (isSentByMe ? "#005d4b" : "#1f2c34"),
-    [isSentByMe],
-  );
-  const color = useMemo(() => getTextColorForGivenBG(bgColor), [bgColor]);
-  const senderDisplayName = useMemo(
-    () => (sender ? getDisplayName(sender) : "User"),
-    [sender],
-  );
-  const senderColor = useMemo(
-    () => getUserColor(message.sender_id ?? ""),
-    [message.sender_id],
-  );
+  // const bgColor = useMemo(
+  //   () => (isSentByMe ? "#005d4b" : "#1f2c34"),
+  //   [isSentByMe],
+  // );
+  // const color = useMemo(() => getTextColorForGivenBG(bgColor), [bgColor]);
+  // const senderDisplayName = useMemo(
+  //   () => (sender ? getDisplayName(sender) : "User"),
+  //   [sender],
+  // );
+  // const senderColor = useMemo(
+  //   () => getUserColor(message.sender_id ?? ""),
+  //   [message.sender_id],
+  // );
 
-  const shouldCollapse =
-    (message.text?.length ?? 0) > config.previewMessageLength;
-  const trimmedMessage = useMemo(
-    () =>
-      shouldCollapse
-        ? message.text?.slice(0, config.previewMessageLength).trimEnd()
-        : message.text,
-    [message.text, config.previewMessageLength],
-  );
+  // const shouldCollapse =
+  //   (message.text?.length ?? 0) > config.previewMessageLength;
+  // const trimmedMessage = useMemo(
+  //   () =>
+  //     shouldCollapse
+  //       ? message.text?.slice(0, config.previewMessageLength).trimEnd()
+  //       : message.text,
+  //   [message.text, config.previewMessageLength],
+  // );
 
-  const viewFullMessage = useCallback(() => {
-    if (shouldCollapse) {
-      Alert.alert(senderDisplayName, message.text);
-    }
-  }, [senderDisplayName, message.text, shouldCollapse]);
+  // const viewFullMessage = useCallback(() => {
+  //   if (shouldCollapse) {
+  //     Alert.alert(senderDisplayName, message.text);
+  //   }
+  // }, [senderDisplayName, message.text, shouldCollapse]);
 
   const [pressedFileId, setPressedFileId] = useState<string | null>(null);
   const handleFilePress = (file: UploadedFile) => {
@@ -88,12 +88,12 @@ function _ChatMessage({ message }: ChatMessageProps) {
       style={[
         styles.container,
         {
-          backgroundColor: bgColor,
-          alignSelf: isSentByMe ? "flex-end" : "flex-start",
+          // backgroundColor: bgColor,
+          // alignSelf: isSentByMe ? "flex-end" : "flex-start",
         },
       ]}
     >
-      {isSentByMe ? null : (
+      {/* {isSentByMe ? null : (
         <Pressable
           onPress={() => {
             if (sender) navigate("ProfileScreen", { userId: sender?.id });
@@ -149,7 +149,7 @@ function _ChatMessage({ message }: ChatMessageProps) {
         visible={!!pressedFileId}
         initialFileId={pressedFileId}
         onClose={() => setPressedFileId(null)}
-      />
+      /> */}
     </View>
   );
 }

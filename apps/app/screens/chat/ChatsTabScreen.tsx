@@ -4,7 +4,7 @@ import { format, isToday, isYesterday, isThisYear } from "date-fns";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { SafeAreaView, StyleSheet, Pressable, Image } from "react-native";
 import { getDisplayName } from "schooltalk-shared/misc";
-import type { Group, Message } from "schooltalk-shared/types";
+import type { Group } from "schooltalk-shared/types";
 import type { ListRenderItem } from "@shopify/flash-list";
 import { List, Text, View } from "../../components/Themed";
 import { useGetUserGroups } from "../../utils/groups";
@@ -21,30 +21,7 @@ function GroupItem(props: GroupItemProps) {
     props.group.identifier,
     1,
   );
-  const lastMessage = messages[0] as Message | undefined;
-  const time = useMemo(() => {
-    if (!lastMessage?.created_at) return "";
-
-    const date = new Date(lastMessage.created_at);
-
-    if (isToday(date)) {
-      return format(date, "h:mm aaa");
-    }
-    if (isYesterday(date)) {
-      return "Yesterday";
-    }
-    if (isThisYear(date)) {
-      return format(date, "d MMM");
-    }
-
-    return format(date, "dd/LL/yy");
-  }, [lastMessage?.created_at]);
-
-  useEffect(() => {
-    if (lastMessage?.created_at) {
-      props.onMessage?.(new Date(lastMessage.created_at));
-    }
-  }, [lastMessage?.created_at]);
+  // const lastMessage = messages[0] as undefined;
 
   return (
     <Pressable
@@ -61,7 +38,7 @@ function GroupItem(props: GroupItemProps) {
       <View style={styles.chatGroupMiddle}>
         <Text style={styles.chatGroupName}>{props.group.name}</Text>
         <Text style={styles.chatGroupLastMessage}>
-          {lastMessage
+          {/* {lastMessage
             ? _.truncate(
                 `${
                   lastMessage.Sender
@@ -72,11 +49,11 @@ function GroupItem(props: GroupItemProps) {
                   length: 45,
                 },
               )
-            : "Tap to chat"}
+            : "Tap to chat"} */}
         </Text>
       </View>
       <View style={styles.chatGroupRight}>
-        <Text style={styles.chatGroupLastMessage}>{time}</Text>
+        {/* <Text style={styles.chatGroupLastMessage}>{time}</Text> */}
       </View>
     </Pressable>
   );

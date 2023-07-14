@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { Text, View } from "./Themed";
 import { Alert, Pressable, StyleSheet } from "react-native";
-import type { Group, Message, UploadedFile } from "schooltalk-shared/types";
+import type { Group, UploadedFile } from "schooltalk-shared/types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMessages } from "../utils/messages-repository";
 import { useCurrentUser } from "../utils/auth";
@@ -18,48 +18,49 @@ import { LottieAnimation } from "./LottieAnimation";
 import { useSchool } from "../utils/useSchool";
 
 interface AnnouncementProps {
-  message: Message;
+  message: null;
 }
 function SingleAnnouncement({ message }: AnnouncementProps) {
   const config = useConfig();
   const { isLoggedIn, user } = useCurrentUser();
-  const time = useMemo(() => {
-    if (!message.created_at) return "N/A";
 
-    const date = new Date(message.created_at);
-    const time = format(date, "hh:mm aaa");
+  // const time = useMemo(() => {
+  //   if (!message.created_at) return "N/A";
 
-    if (isToday(date)) {
-      return time;
-    }
-    if (isYesterday(date)) {
-      return `Yesterday ${time}`;
-    }
-    if (isThisYear(date)) {
-      return `${format(date, "d MMM")} ${time}`;
-    }
-    return `${format(date, "dd/MM/yy")} ${time}`;
-  }, [message.created_at]);
+  //   const date = new Date(message.created_at);
+  //   const time = format(date, "hh:mm aaa");
 
-  const sender = message.Sender;
-  const shouldCollapse =
-    (message.text ?? "").length > config.previewMessageLength;
-  const trimmedMessage = useMemo(
-    () =>
-      shouldCollapse
-        ? (message.text ?? "").slice(0, config.previewMessageLength).trimEnd()
-        : message.text,
-    [message.text],
-  );
-  const senderDisplayName = useMemo(
-    () => (sender ? getDisplayName(sender) : "User"),
-    [sender],
-  );
-  const viewFullMessage = useCallback(() => {
-    if (shouldCollapse) {
-      Alert.alert(senderDisplayName, message.text);
-    }
-  }, [senderDisplayName, message.text, shouldCollapse]);
+  //   if (isToday(date)) {
+  //     return time;
+  //   }
+  //   if (isYesterday(date)) {
+  //     return `Yesterday ${time}`;
+  //   }
+  //   if (isThisYear(date)) {
+  //     return `${format(date, "d MMM")} ${time}`;
+  //   }
+  //   return `${format(date, "dd/MM/yy")} ${time}`;
+  // }, [message.created_at]);
+
+  // const sender = message.Sender;
+  // const shouldCollapse =
+  //   (message.text ?? "").length > config.previewMessageLength;
+  // const trimmedMessage = useMemo(
+  //   () =>
+  //     shouldCollapse
+  //       ? (message.text ?? "").slice(0, config.previewMessageLength).trimEnd()
+  //       : message.text,
+  //   [message.text],
+  // );
+  // const senderDisplayName = useMemo(
+  //   () => (sender ? getDisplayName(sender) : "User"),
+  //   [sender],
+  // );
+  // const viewFullMessage = useCallback(() => {
+  //   if (shouldCollapse) {
+  //     Alert.alert(senderDisplayName, message.text);
+  //   }
+  // }, [senderDisplayName, message.text, shouldCollapse]);
 
   const [pressedFileId, setPressedFileId] = useState<string | null>(null);
   const handleFilePress = (file: UploadedFile) => {
@@ -72,11 +73,11 @@ function SingleAnnouncement({ message }: AnnouncementProps) {
 
   if (!isLoggedIn) return null;
 
-  const isSentByMe = user.id === sender?.id;
+  // const isSentByMe = user.id === sender?.id;
 
   return (
     <View style={styles.single_announcement_container}>
-      <View style={styles.announcement_header}>
+      {/* <View style={styles.announcement_header}>
         <Text style={styles.name_text}>
           {isSentByMe ? "You" : senderDisplayName}
         </Text>
@@ -128,7 +129,7 @@ function SingleAnnouncement({ message }: AnnouncementProps) {
         visible={!!pressedFileId}
         initialFileId={pressedFileId}
         onClose={() => setPressedFileId(null)}
-      />
+      /> */}
     </View>
   );
 }
@@ -161,7 +162,7 @@ export default function Announcements() {
     <View>
       <Text style={styles.header_text}>Announcements</Text>
       {groupMessages.messages.map((message) => (
-        <SingleAnnouncement message={message} key={message.id} />
+        <></> // <SingleAnnouncement message={message} key={message.id} />
       ))}
 
       {groupMessages.messages.length > 0 ? (

@@ -12,13 +12,12 @@ import { List, Text, View } from "../../components/Themed";
 import { RootStackParamList } from "../../utils/types/common";
 import { ChatMessage } from "../../components/ChatMessage";
 import { useMessages } from "../../utils/messages-repository";
-import { Message } from "schooltalk-shared/types";
 import { useGroupInfo } from "../../utils/groups";
 import { MsgComposer } from "../../components/ChatComposer";
 import { useFileUpload } from "../../utils/file-upload";
 
-const renderItem: ListRenderItem<Message> = ({ item }) => (
-  <ChatMessage message={item} />
+const renderItem: ListRenderItem<null> = ({ item }) => (
+  <ChatMessage activity={item} />
 );
 
 export default function ChatWindowScreen({
@@ -64,14 +63,14 @@ export default function ChatWindowScreen({
   useEffect(() => {
     if (
       !groupInfoQuery.isLoading &&
-      !groupInfoQuery.isError &&
-      groupInfoQuery.data?.name
+      !groupInfoQuery.isError // &&
+      // groupInfoQuery.data?.name
     ) {
-      navigation.setOptions({
-        title: groupInfoQuery.data?.name,
-      });
+      // navigation.setOptions({
+      //   title: groupInfoQuery.data?.name,
+      // });
     }
-  }, [groupInfoQuery.data?.name, groupInfo.identifier]);
+  }, [/* groupInfoQuery.data?.name, */ groupInfo.identifier]);
 
   const handleMsgSend = useCallback(
     (msg: string, files?: FilePermissionsInput[]) => {

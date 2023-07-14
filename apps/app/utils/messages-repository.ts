@@ -9,7 +9,6 @@ import {
   useState,
 } from "react";
 import { Subject } from "rxjs";
-import type { Message } from "schooltalk-shared/types";
 import { SocketClient } from "../utils/types/common";
 import { useDB } from "./db";
 import { useSocket } from "./socketio";
@@ -23,10 +22,10 @@ import { fetchUnseenGroupsInfo, insertGroups } from "./groups";
 
 export class MessagesRepository {
   /** The observable representing all received messages */
-  readonly allMessagesObservable = new Subject<Message>();
+  readonly allMessagesObservable = new Subject<null>();
 
   /** Group wise observables */
-  readonly groupMessagesObservableMap = new Map<string, Subject<Message>>();
+  readonly groupMessagesObservableMap = new Map<string, Subject<null>>();
 
   readonly composerObservable = new Subject<{
     groupIdentifier: string;
@@ -35,19 +34,20 @@ export class MessagesRepository {
   }>();
 
   constructor(private db: WebSQLDatabase, private socket: SocketClient) {
-    this.socket.on("newMessage", (msg) => this.allMessagesObservable.next(msg));
+    this.socket.on("newActivity", (msg) => {
+      // this.allMessagesObservable.next(msg),
+    });
 
     // Forward group messages to group observers
     this.allMessagesObservable.subscribe((message) => {
-      if (message.group_identifier) {
-        const groupObservable = this.groupMessagesObservableMap.get(
-          message.group_identifier,
-        );
-
-        if (groupObservable) {
-          groupObservable.next(message);
-        }
-      }
+      // if (message.group_identifier) {
+      //   const groupObservable = this.groupMessagesObservableMap.get(
+      //     message.group_identifier,
+      //   );
+      //   if (groupObservable) {
+      //     groupObservable.next(message);
+      //   }
+      // }
     });
 
     // When new message is created
@@ -58,9 +58,9 @@ export class MessagesRepository {
         message.text,
         message.files ?? [],
         (createdMessage) => {
-          this.getGroupMessageObservable(message.groupIdentifier).next(
-            createdMessage,
-          );
+          // this.getGroupMessageObservable(message.groupIdentifier).next(
+          //   createdMessage,
+          // );
         },
       );
     });
@@ -68,21 +68,20 @@ export class MessagesRepository {
     // Show message alert
     this.allMessagesObservable.subscribe((message) => {
       // TODO: Show group info
-      Toast.show({
-        type: "info",
-        text1: `Message from ${message.Sender?.name}`,
-        text2: message.text,
-        onPress() {
-          if (message.group_identifier) {
-            navigationRef.navigate("ChatWindow", {
-              identifier: message.group_identifier,
-              name: "",
-            });
-          }
-
-          Toast.hide();
-        },
-      });
+      // Toast.show({
+      //   type: "info",
+      //   text1: `Message from ${message.Sender?.name}`,
+      //   text2: message.text,
+      //   onPress() {
+      //     if (message.group_identifier) {
+      //       navigationRef.navigate("ChatWindow", {
+      //         identifier: message.group_identifier,
+      //         name: "",
+      //       });
+      //     }
+      //     Toast.hide();
+      //   },
+      // });
     });
   }
 
@@ -97,36 +96,36 @@ export class MessagesRepository {
     }
 
     // Create new observable
-    const groupObservable = new Subject<Message>();
-    this.groupMessagesObservableMap.set(groupIdentifier, groupObservable);
+    // const groupObservable = new Subject<Message>();
+    // this.groupMessagesObservableMap.set(groupIdentifier, groupObservable);
 
-    return groupObservable;
+    // return groupObservable;
   }
 
   useGroupMessageReceived(
     groupIdentifier: string,
-    onReceive: (message: Message) => void,
+    onReceive: (message: null) => void,
   ) {
     useEffect(() => {
       const observable = this.getGroupMessageObservable(groupIdentifier);
-      const subscription = observable.subscribe((message) => {
+      const subscription = observable?.subscribe((message) => {
         onReceive(message);
       });
 
       return () => {
-        subscription.unsubscribe();
+        subscription?.unsubscribe();
       };
     }, [groupIdentifier]);
   }
 
   useFetchGroupMessages(groupIdentifier: string, limit = 20) {
     const utils = trpc.useContext();
-    const [finalMessages, setFinalMessages] = useState<Message[]>([]);
+    const [finalMessages, setFinalMessages] = useState<null[]>([]);
     const [nextCursor, setNextCursor] = useState<string>();
     const [isLoading, setIsLoading] = useState(false);
 
     const setMessagesReconcile = useCallback(
-      (messages: Message[], cursor?: string) => {
+      (messages: null[], cursor?: string) => {
         setNextCursor(cursor);
 
         setFinalMessages((existingMessages) => {
@@ -157,13 +156,15 @@ export class MessagesRepository {
 
           // TODO: Optimize (read above)
           // Give more preference to `messages` because it is likely fresher
-          return _.chain(messages.concat(existingMessages))
-            .sortBy((m) =>
-              BigInt(m.sort_key ?? Math.round(Math.random()).toString()),
-            )
-            .sortedUniqBy((m) => m.sort_key)
-            .reverse()
-            .value();
+          return (
+            _.chain(messages.concat(existingMessages))
+              // .sortBy((m) =>
+              //   BigInt(m.sort_key ?? Math.round(Math.random()).toString()),
+              // )
+              // .sortedUniqBy((m) => m.sort_key)
+              // .reverse()
+              .value()
+          );
         });
       },
       [],
@@ -175,12 +176,12 @@ export class MessagesRepository {
           // Start loading
           setIsLoading(true);
 
-          const serverPromise =
-            utils.client.school.messaging.fetchGroupMessages.query({
-              groupIdentifier,
-              limit,
-              cursor,
-            });
+          // const serverPromise =
+          //   utils.client.school.messaging.fetchGroupMessages.query({
+          //     groupIdentifier,
+          //     limit,
+          //     cursor,
+          //   });
 
           // 1. Fetch from local
           const dbMessages = await this.fetchMessagesFromDB({
@@ -193,10 +194,10 @@ export class MessagesRepository {
           setMessagesReconcile(dbMessages.messages, dbMessages.cursor);
 
           // 3. Fetch from Server
-          const serverMessages = await serverPromise;
+          // const serverMessages = await serverPromise;
 
           // 4. Save server data into local
-          await this.insertMessagesToDB(serverMessages.messages, utils);
+          // await this.insertMessagesToDB(serverMessages.messages, utils);
 
           // 5. Re-fetch from local
           const dbMessages2 = await this.fetchMessagesFromDB({
@@ -206,7 +207,7 @@ export class MessagesRepository {
           });
 
           // 6. Return fresh local data
-          setMessagesReconcile(dbMessages2.messages, serverMessages.cursor);
+          // setMessagesReconcile(dbMessages2.messages, serverMessages.cursor);
         } catch (error) {
           console.error("fetchMessages Error:", error);
         } finally {
@@ -252,7 +253,7 @@ export class MessagesRepository {
     groupIdentifier: string;
     limit?: number;
     cursor?: string | number;
-  }): Promise<{ messages: Message[]; cursor?: string }> {
+  }): Promise<{ messages: null[]; cursor?: string }> {
     const args: Array<string | number | null> = [];
     let sql = `SELECT * FROM messages WHERE `;
 
@@ -279,13 +280,13 @@ export class MessagesRepository {
           args,
           (tx, result) => {
             const localMessages = result.rows._array.map(
-              (row) => JSON.parse(row.obj) as Message,
+              (row) => JSON.parse(row.obj) as null,
             );
 
             let cursor: string | undefined = undefined;
             if (localMessages.length > limit) {
               const last = localMessages.pop();
-              cursor = last?.sort_key;
+              cursor = "last?.sort_key";
             }
 
             resolve({ messages: localMessages, cursor });
@@ -304,7 +305,7 @@ export class MessagesRepository {
    * @param messages
    */
   async insertMessagesToDB(
-    messages: Message[],
+    messages: null[],
     trpcUtils: ReturnType<typeof trpc.useContext>,
   ): Promise<void> {
     if (messages.length < 1) return;
@@ -314,7 +315,7 @@ export class MessagesRepository {
       const groupsToInsert = await fetchUnseenGroupsInfo(
         this.db,
         messages
-          .map((m) => m.group_identifier)
+          .map((m) => /* m.group_identifier ?? */ "")
           .filter((iden) => !!iden) as string[],
         trpcUtils,
       );
@@ -325,25 +326,25 @@ export class MessagesRepository {
     }
 
     const insertMessagesArgs: Array<string | number | null> = [];
-    const insertMessagesSQL = `INSERT OR REPLACE INTO messages (id, obj, created_at, group_identifier, sort_key) VALUES ${messages
-      .map((m) => {
-        insertMessagesArgs.push(
-          // These props will probably never be undefined, but this ?? is here
-          // for safety and/or to satisfy TypeScript.
-          m.id ?? Math.random().toString(),
-          JSON.stringify(m),
-          m.created_at ?? new Date().toISOString(),
-          m.group_identifier ?? "",
-          m.sort_key ?? Math.round(Math.random()),
-        );
-        return "(?,?,?,?,?)";
-      })
-      .join(",")}`;
+    // const insertMessagesSQL = `INSERT OR REPLACE INTO messages (id, obj, created_at, group_identifier, sort_key) VALUES ${messages
+    //   .map((m) => {
+    //     insertMessagesArgs.push(
+    //       // These props will probably never be undefined, but this ?? is here
+    //       // for safety and/or to satisfy TypeScript.
+    //       m.id ?? Math.random().toString(),
+    //       JSON.stringify(m),
+    //       m.created_at ?? new Date().toISOString(),
+    //       m.group_identifier ?? "",
+    //       m.sort_key ?? Math.round(Math.random()),
+    //     );
+    //     return "(?,?,?,?,?)";
+    //   })
+    //   .join(",")}`;
 
     return new Promise<void>((resolve, reject) => {
       this.db.transaction(
         (tx) => {
-          tx.executeSql(insertMessagesSQL, insertMessagesArgs);
+          // tx.executeSql(insertMessagesSQL, insertMessagesArgs);
         },
         reject,
         resolve,

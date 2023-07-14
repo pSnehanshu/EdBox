@@ -17,16 +17,16 @@ export function useGroupInfo(groupIdentifier: string) {
     "SELECT * FROM groups WHERE id = ?",
     [groupIdentifier],
   );
-  const groupQuery = trpc.school.messaging.fetchGroupInfo.useQuery({
-    groupIdentifier,
-  });
+  // const groupQuery = trpc.school.messaging.fetchGroupInfo.useQuery({
+  //   groupIdentifier,
+  // });
 
-  useEffect(() => {
-    if (groupQuery.isFetched && groupQuery.data) {
-      // Update in DB
-      insertGroups(db, [groupQuery.data]).catch(console.error);
-    }
-  }, [groupQuery.isFetched]);
+  // useEffect(() => {
+  //   if (groupQuery.isFetched && groupQuery.data) {
+  //     // Update in DB
+  //     insertGroups(db, [groupQuery.data]).catch(console.error);
+  //   }
+  // }, [groupQuery.isFetched]);
 
   const dbData = useMemo(() => {
     return dbResult.data?.[0]
@@ -34,13 +34,13 @@ export function useGroupInfo(groupIdentifier: string) {
       : undefined;
   }, [dbResult.data?.[0]?.id]);
 
-  const data = groupQuery.data ?? dbData;
+  // const data = groupQuery.data ?? dbData;
 
   return {
-    data,
-    isLoading: !data && (dbResult.isLoading || groupQuery.isLoading),
-    isError: !data && (dbResult.isError || groupQuery.isError),
-    error: { db: dbResult.error, server: groupQuery.error },
+    data: null,
+    isLoading: false, // !data && (dbResult.isLoading || groupQuery.isLoading),
+    isError: false, //  !data && (dbResult.isError || groupQuery.isError),
+    error: { db: dbResult.error, server: "groupQuery.error" },
   };
 }
 
@@ -186,25 +186,25 @@ export async function fetchUnseenGroupsInfo(
 
             // Now fetch the groups
             try {
-              const queryResults = await Promise.allSettled(
-                unsavedGroupIds.map((identifier) =>
-                  trpcUtils.client.school.messaging.fetchGroupInfo.query({
-                    groupIdentifier: identifier,
-                  }),
-                ),
-              );
+              // const queryResults = await Promise.allSettled(
+              //   unsavedGroupIds.map((identifier) =>
+              //     trpcUtils.client.school.messaging.fetchGroupInfo.query({
+              //       groupIdentifier: identifier,
+              //     }),
+              //   ),
+              // );
 
               // Generate final result
               const finalMap: Awaited<
                 ReturnType<typeof fetchUnseenGroupsInfo>
               > = {};
 
-              queryResults.map((result, i) => {
-                const groupId = unsavedGroupIds[i];
-                if (result.status === "fulfilled") {
-                  finalMap[groupId] = result.value;
-                }
-              });
+              // queryResults.map((result, i) => {
+              //   const groupId = unsavedGroupIds[i];
+              //   if (result.status === "fulfilled") {
+              //     finalMap[groupId] = result.value;
+              //   }
+              // });
 
               resolve(finalMap);
             } catch (error) {

@@ -229,37 +229,32 @@ export async function getUserGroups(
   user: BareMinimumUser,
   pagination?: { page: number; limit: number },
 ): Promise<Group[]> {
+  return [];
   // Fetch all custom groups
-  const customGroupMembers = await prisma.customGroupMembers.findMany({
-    where: {
-      user_id: user.id,
-    },
-    include: {
-      Group: true,
-    },
-  });
-
-  // Sort
-  // if (pagination.sort === "recent_message") {
-  //   // TODO
-  // }
-
-  const customGroups: Group[] = customGroupMembers.map((cgm) => ({
-    identifier: getCustomGroupIdentifier(user.school_id, cgm.group_id),
-    name: cgm.Group.name,
-  }));
-
-  // Now fetch all automatic groups
-  const autoGroups = await getAutoGroups(user);
-
-  // Combine
-  const combined = autoGroups.concat(customGroups);
-
-  if (!pagination) return combined;
-
-  // slice and return
-  const startIndex = (pagination.page - 1) * pagination.limit;
-  return combined.slice(startIndex, startIndex + pagination.limit);
+  // const customGroupMembers = await prisma.customGroupMembers.findMany({
+  //   where: {
+  //     user_id: user.id,
+  //   },
+  //   include: {
+  //     Group: true,
+  //   },
+  // });
+  // // Sort
+  // // if (pagination.sort === "recent_message") {
+  // //   // TODO
+  // // }
+  // const customGroups: Group[] = customGroupMembers.map((cgm) => ({
+  //   identifier: getCustomGroupIdentifier(user.school_id, cgm.group_id),
+  //   name: cgm.Group.name,
+  // }));
+  // // Now fetch all automatic groups
+  // const autoGroups = await getAutoGroups(user);
+  // // Combine
+  // const combined = autoGroups.concat(customGroups);
+  // if (!pagination) return combined;
+  // // slice and return
+  // const startIndex = (pagination.page - 1) * pagination.limit;
+  // return combined.slice(startIndex, startIndex + pagination.limit);
 }
 
 interface Membership {
@@ -286,27 +281,28 @@ export async function getGroupMembers(
 
   if (groupIdentifier.gd === GroupDefinition.custom) {
     // Fetch all custom groups
-    const customGroupMembers = await prisma.customGroupMembers.findMany({
-      where: {
-        group_id: groupIdentifier.id,
-      },
-      include: {
-        User: {
-          select: {
-            name: true,
-          },
-        },
-      },
-      take: pagination?.limit,
-      skip: pagination ? (pagination.page - 1) * pagination.limit : undefined,
-    });
+    // const customGroupMembers = await prisma.customGroupMembers.findMany({
+    //   where: {
+    //     group_id: groupIdentifier.id,
+    //   },
+    //   include: {
+    //     User: {
+    //       select: {
+    //         name: true,
+    //       },
+    //     },
+    //   },
+    //   take: pagination?.limit,
+    //   skip: pagination ? (pagination.page - 1) * pagination.limit : undefined,
+    // });
 
-    return customGroupMembers.map((cgm) => ({
-      userId: cgm.user_id,
-      name: cgm.User.name,
-      groupIdentifier: groupIdentifierString,
-      isAdmin: cgm.is_admin,
-    }));
+    // return customGroupMembers.map((cgm) => ({
+    //   userId: cgm.user_id,
+    //   name: cgm.User.name,
+    //   groupIdentifier: groupIdentifierString,
+    //   isAdmin: cgm.is_admin,
+    // }));
+    return [];
   }
 
   // Fetch auto group members

@@ -128,36 +128,36 @@ export default function initSocketIo(server: HTTPServer) {
             );
 
             // Save message
-            const message = await prisma.message.create({
-              data: {
-                group_identifier: cleanGroupIdentifier,
-                sender_id: user.id,
-                sender_role: "student",
-                text,
-                school_id: school.id,
-                // Consume the files
-                Attachments: {
-                  createMany: {
-                    data: files.map((file) => ({
-                      file_id: file.id,
-                    })),
-                    skipDuplicates: true,
-                  },
-                },
-              },
-              include: {
-                ParentMessage: true,
-                Sender: true,
-                Attachments: {
-                  include: {
-                    File: true,
-                  },
-                },
-              },
-            });
+            const message: null[] = []; // await prisma.message.create({
+            //   data: {
+            //     group_identifier: cleanGroupIdentifier,
+            //     sender_id: user.id,
+            //     sender_role: "student",
+            //     text,
+            //     school_id: school.id,
+            //     // Consume the files
+            //     Attachments: {
+            //       createMany: {
+            //         data: files.map((file) => ({
+            //           file_id: file.id,
+            //         })),
+            //         skipDuplicates: true,
+            //       },
+            //     },
+            //   },
+            //   include: {
+            //     ParentMessage: true,
+            //     Sender: true,
+            //     Attachments: {
+            //       include: {
+            //         File: true,
+            //       },
+            //     },
+            //   },
+            // });
 
             // Must do this, becasue JSON.stringify can't serialize big ints
-            message.sort_key = message.sort_key.toString() as any;
+            // message.sort_key = message.sort_key.toString() as any;
 
             const serializedMessage =
               defaultTransformer.output.serialize(message);
@@ -165,7 +165,7 @@ export default function initSocketIo(server: HTTPServer) {
             // Broadcast to all clients
             socket
               .to(cleanGroupIdentifier)
-              .emit("newMessage", serializedMessage);
+              .emit("newActivity", serializedMessage);
 
             // Send acknowledgement
             callback(serializedMessage);
