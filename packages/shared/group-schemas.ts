@@ -64,7 +64,3 @@ export const ActivityPayloadSchema = z.discriminatedUnion("t", [
   ReadReceiptSchema,
   DeliveryReceiptSchema,
 ]);
-
-export interface IGroupActivity extends GroupActivity {
-  payload: z.infer<typeof ActivityPayloadSchema>;
-}

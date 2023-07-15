@@ -2,11 +2,13 @@ import type {
   School as DBSchool,
   User as DBUser,
   SchoolStaff,
+  GroupActivity,
 } from "@prisma/client";
+import type { z } from "zod";
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "../../apps/backend/trpc";
 import type { Context } from "../../apps/backend/trpc/context";
-import type { IGroupActivity } from "./group-schemas";
+import { ActivityPayloadSchema } from "./group-schemas";
 
 export type Nullable<T> = T | null | undefined | void;
 
@@ -95,6 +97,10 @@ export type UIBloodGroup =
   | "O-"
   | "Others"
   | undefined;
+
+export interface IGroupActivity extends GroupActivity {
+  payload: z.infer<typeof ActivityPayloadSchema>;
+}
 
 export interface ServerToClientEvents {
   newActivity: (activity: IGroupActivity) => void;

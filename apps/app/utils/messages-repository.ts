@@ -16,16 +16,21 @@ import { trpc } from "./trpc";
 import _ from "lodash";
 import BigInt from "big-integer";
 import Toast from "react-native-toast-message";
+import type { IGroupActivity } from "schooltalk-shared/types";
 import type { FilePermissionsInput } from "schooltalk-shared/misc";
 import { navigationRef } from "../navigation/navRef";
 import { fetchUnseenGroupsInfo, insertGroups } from "./groups";
+import { ActivityPayloadSchema } from "schooltalk-shared/group-schemas";
 
 export class MessagesRepository {
   /** The observable representing all received messages */
-  readonly allMessagesObservable = new Subject<null>();
+  readonly allActivityObservable = new Subject<IGroupActivity>();
 
   /** Group wise observables */
-  readonly groupMessagesObservableMap = new Map<string, Subject<null>>();
+  readonly groupMessagesObservableMap = new Map<
+    string,
+    Subject<IGroupActivity>
+  >();
 
   readonly composerObservable = new Subject<{
     groupIdentifier: string;
@@ -34,54 +39,46 @@ export class MessagesRepository {
   }>();
 
   constructor(private db: WebSQLDatabase, private socket: SocketClient) {
-    this.socket.on("newActivity", (msg) => {
-      // this.allMessagesObservable.next(msg),
+    this.socket.on("newActivity", (activity) => {
+      this.allActivityObservable.next(activity);
     });
 
     // Forward group messages to group observers
-    this.allMessagesObservable.subscribe((message) => {
-      // if (message.group_identifier) {
-      //   const groupObservable = this.groupMessagesObservableMap.get(
-      //     message.group_identifier,
-      //   );
-      //   if (groupObservable) {
-      //     groupObservable.next(message);
-      //   }
-      // }
+    this.allActivityObservable.subscribe((activity) => {
+      const groupObservable = this.groupMessagesObservableMap.get(
+        activity.group_id,
+      );
+      if (groupObservable) {
+        groupObservable.next(activity);
+      }
     });
 
     // When new message is created
-    this.composerObservable.subscribe((message) => {
-      this.socket.emit(
-        "messageCreate",
-        message.groupIdentifier,
-        message.text,
-        message.files ?? [],
-        (createdMessage) => {
-          // this.getGroupMessageObservable(message.groupIdentifier).next(
-          //   createdMessage,
-          // );
-        },
-      );
+    this.composerObservable.subscribe((activity) => {
+      // TODO: Send via tRPC
     });
 
     // Show message alert
-    this.allMessagesObservable.subscribe((message) => {
-      // TODO: Show group info
-      // Toast.show({
-      //   type: "info",
-      //   text1: `Message from ${message.Sender?.name}`,
-      //   text2: message.text,
-      //   onPress() {
-      //     if (message.group_identifier) {
-      //       navigationRef.navigate("ChatWindow", {
-      //         identifier: message.group_identifier,
-      //         name: "",
-      //       });
-      //     }
-      //     Toast.hide();
-      //   },
-      // });
+    this.allActivityObservable.subscribe((activity) => {
+      // TODO: Show group and author info
+      if (
+        activity.type === "message_new" &&
+        activity.payload.t === "message_new"
+      ) {
+        Toast.show({
+          type: "info",
+          text1: `Message from ${activity.author_id}`,
+          text2: activity.payload.body,
+          onPress() {
+            navigationRef.navigate("ChatWindow", {
+              identifier: activity.group_id,
+              name: "",
+            });
+
+            Toast.hide();
+          },
+        });
+      }
     });
   }
 
@@ -102,9 +99,9 @@ export class MessagesRepository {
     // return groupObservable;
   }
 
-  useGroupMessageReceived(
+  useGroupActivityReceived(
     groupIdentifier: string,
-    onReceive: (message: null) => void,
+    onReceive: (activity: IGroupActivity) => void,
   ) {
     useEffect(() => {
       const observable = this.getGroupMessageObservable(groupIdentifier);
@@ -118,14 +115,14 @@ export class MessagesRepository {
     }, [groupIdentifier]);
   }
 
-  useFetchGroupMessages(groupIdentifier: string, limit = 20) {
+  useFetchGroupMessages(groupId: string, limit = 20) {
     const utils = trpc.useContext();
-    const [finalMessages, setFinalMessages] = useState<null[]>([]);
+    const [finalMessages, setFinalMessages] = useState<IGroupActivity[]>([]);
     const [nextCursor, setNextCursor] = useState<string>();
     const [isLoading, setIsLoading] = useState(false);
 
     const setMessagesReconcile = useCallback(
-      (messages: null[], cursor?: string) => {
+      (messages: IGroupActivity[], cursor?: string) => {
         setNextCursor(cursor);
 
         setFinalMessages((existingMessages) => {
@@ -185,7 +182,7 @@ export class MessagesRepository {
 
           // 1. Fetch from local
           const dbMessages = await this.fetchMessagesFromDB({
-            groupIdentifier,
+            groupIdentifier: groupId,
             limit,
             cursor,
           });
@@ -201,7 +198,7 @@ export class MessagesRepository {
 
           // 5. Re-fetch from local
           const dbMessages2 = await this.fetchMessagesFromDB({
-            groupIdentifier,
+            groupIdentifier: groupId,
             limit,
             cursor,
           });
@@ -215,7 +212,7 @@ export class MessagesRepository {
           setIsLoading(false);
         }
       },
-      [groupIdentifier, limit, setMessagesReconcile],
+      [groupId, limit, setMessagesReconcile],
     );
 
     const fetchNextPage = useCallback(() => {
@@ -232,10 +229,10 @@ export class MessagesRepository {
       setFinalMessages([]);
       setNextCursor(undefined);
       fetchMessages();
-    }, [groupIdentifier]);
+    }, [groupId]);
 
-    this.useGroupMessageReceived(groupIdentifier, (newMessage) => {
-      setFinalMessages((m) => [newMessage].concat(m));
+    this.useGroupActivityReceived(groupId, (activity) => {
+      setFinalMessages((m) => [activity].concat(m));
     });
 
     return {
@@ -253,7 +250,7 @@ export class MessagesRepository {
     groupIdentifier: string;
     limit?: number;
     cursor?: string | number;
-  }): Promise<{ messages: null[]; cursor?: string }> {
+  }): Promise<{ messages: IGroupActivity[]; cursor?: string }> {
     const args: Array<string | number | null> = [];
     let sql = `SELECT * FROM messages WHERE `;
 
@@ -279,17 +276,17 @@ export class MessagesRepository {
           sql,
           args,
           (tx, result) => {
-            const localMessages = result.rows._array.map(
-              (row) => JSON.parse(row.obj) as null,
-            );
+            // const localMessages = result.rows._array.map((row) =>
+            //   ActivityPayloadSchema.parse(row.obj),
+            // );
 
-            let cursor: string | undefined = undefined;
-            if (localMessages.length > limit) {
-              const last = localMessages.pop();
-              cursor = "last?.sort_key";
-            }
+            const cursor: string | undefined = undefined;
+            // if (localMessages.length > limit) {
+            //   const last = localMessages.pop();
+            //   cursor = "last?.sort_key";
+            // }
 
-            resolve({ messages: localMessages, cursor });
+            resolve({ messages: [], cursor });
           },
           (tx, error) => {
             reject(error);
