@@ -85,7 +85,7 @@ model User {
   created_at             DateTime               @default(now())
   updated_at             DateTime               @updatedAt
   Sessions               LoginSession[]
-  Groups                 GroupMembers[]
+  Groups                 GroupMember[]
   CreatedGroups          Group[]
   GroupActivities        GroupActivity[]
   TestsCreated           ExamTest[]
@@ -362,11 +362,11 @@ model Group {
   CreatedBy     User?           @relation(fields: [created_by_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
   created_at    DateTime        @default(now())
   updated_at    DateTime        @updatedAt
-  Members       GroupMembers[]
+  Members       GroupMember[]
   Activities    GroupActivity[]
 }
 
-model GroupMembers {
+model GroupMember {
   user_id    String   @db.VarChar(32)
   User       User     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   group_id   String   @db.VarChar(32)
