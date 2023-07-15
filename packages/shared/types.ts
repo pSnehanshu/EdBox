@@ -2,12 +2,11 @@ import type {
   School as DBSchool,
   User as DBUser,
   SchoolStaff,
-  GroupActivity,
 } from "@prisma/client";
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "../../apps/backend/trpc";
 import type { Context } from "../../apps/backend/trpc/context";
-import type { FilePermissionsInput } from "./misc";
+import type { IGroupActivity } from "./group-schemas";
 
 export type Nullable<T> = T | null | undefined | void;
 
@@ -98,16 +97,13 @@ export type UIBloodGroup =
   | undefined;
 
 export interface ServerToClientEvents {
-  newActivity: (activity: GroupActivity) => void;
+  newActivity: (activity: IGroupActivity) => void;
+  addedToGroup: (groupId: string) => void;
+  removedFromGroup: (groupId: string) => void;
 }
 
 export interface ClientToServerEvents {
-  messageCreate: (
-    groupId: string,
-    text: string,
-    files: FilePermissionsInput[],
-    callback: (activity: GroupActivity) => void,
-  ) => void;
+  joinGroupRoom: (groupId: string) => void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
