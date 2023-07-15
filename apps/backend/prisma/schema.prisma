@@ -379,7 +379,7 @@ model GroupMember {
 }
 
 model GroupActivity {
-  id                  String            @id @default(cuid()) @db.VarChar(32)
+  id                  String            @id @default(uuid()) @db.VarChar(32)
   type                GroupActivityType
   payload             Json
   created_at          DateTime          @default(now())
