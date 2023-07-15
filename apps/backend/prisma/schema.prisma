@@ -379,7 +379,7 @@ model GroupMember {
 }
 
 model GroupActivity {
-  sn                  BigInt            @id @default(autoincrement()) @db.BigInt
+  id                  String            @id @default(cuid()) @db.VarChar(32)
   type                GroupActivityType
   payload             Json
   created_at          DateTime          @default(now())
@@ -388,8 +388,8 @@ model GroupActivity {
   is_system_generated Boolean           @default(false) @map("sys")
   group_id            String            @db.VarChar(32)
   Group               Group             @relation(fields: [group_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  parent_activity_sn  BigInt?           @map("parent") @db.BigInt
-  ParentActivity      GroupActivity?    @relation("parent", fields: [parent_activity_sn], references: [sn], onDelete: Cascade, onUpdate: Cascade)
+  parent_id           String?           @map("parent") @db.VarChar(32)
+  ParentActivity      GroupActivity?    @relation("parent", fields: [parent_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   ChildrenActivities  GroupActivity[]   @relation("parent")
 }
 

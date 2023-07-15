@@ -13714,6 +13714,7 @@ __metadata:
     nodemon: ^2.0.22
     parse-data-url: ^5.0.0
     prisma: ^4.13.0
+    rxjs: ^7.8.1
     schooltalk-shared: "*"
     socket.io: ^4.6.1
     ts-node: ^10.9.1
