@@ -2,7 +2,10 @@ import { Database } from "@nozbe/watermelondb";
 import SQLiteAdapter from "@nozbe/watermelondb/adapters/sqlite";
 import schema from "./schema";
 import migrations from "./migrations";
-import Group from "./Group";
+
+// Models
+import Group from "./models/Group";
+import GroupActivity from "./models/GroupActivity";
 
 const adapter = new SQLiteAdapter({
   schema,
@@ -16,5 +19,5 @@ const adapter = new SQLiteAdapter({
 
 export const database = new Database({
   adapter,
-  modelClasses: [Group],
+  modelClasses: [Group, GroupActivity],
 });

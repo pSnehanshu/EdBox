@@ -1,7 +1,7 @@
 import { Model, Query } from "@nozbe/watermelondb";
 import { field, text, children } from "@nozbe/watermelondb/decorators";
 import GroupActivity from "./GroupActivity";
-import { TableNames } from "./TableNames";
+import { TableNames } from "../TableNames";
 
 export default class Group extends Model {
   static table = "group";
