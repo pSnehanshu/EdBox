@@ -4,7 +4,7 @@ import { useCurrentUser } from "../utils/auth";
 import { Text, View } from "./Themed";
 import Hyperlink from "react-native-hyperlink";
 import { Alert, Pressable, StyleSheet } from "react-native";
-import type { UploadedFile } from "schooltalk-shared/types";
+import type { IGroupActivity, UploadedFile } from "schooltalk-shared/types";
 import MIMEType from "whatwg-mimetype";
 import {
   getDisplayName,
@@ -16,7 +16,7 @@ import { FilePreview, FullScreenFilePreview } from "./attachments/FilePreview";
 import { useNavigation } from "@react-navigation/native";
 
 interface ChatMessageProps {
-  activity: null;
+  activity: IGroupActivity;
 }
 function _ChatMessage({ activity }: ChatMessageProps) {
   const config = useConfig();

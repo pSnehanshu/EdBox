@@ -14,7 +14,6 @@ import Navigation from "./navigation";
 import { useSchool } from "./utils/useSchool";
 import { getAuthToken } from "./utils/auth";
 import { useConfig } from "./utils/config";
-import { DBProvider } from "./utils/db";
 import Toast from "react-native-toast-message";
 import SchoolNotFound from "./screens/SchoolNotFound";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -70,20 +69,18 @@ function AppWithConfig() {
   if (!isLoadingComplete) return null;
 
   return (
-    <DBProvider>
-      <trpc.Provider client={trpcClient} queryClient={queryClient}>
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider theme={theme}>
-            <ColorSchemeContext.Provider
-              value={{ scheme: colorScheme, change: setAndSaveColorScheme }}
-            >
-              {isSchoolSelected ? <AppWithSchool /> : <SchoolSelector />}
-            </ColorSchemeContext.Provider>
-          </ThemeProvider>
-        </QueryClientProvider>
-      </trpc.Provider>
+    <trpc.Provider client={trpcClient} queryClient={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider theme={theme}>
+          <ColorSchemeContext.Provider
+            value={{ scheme: colorScheme, change: setAndSaveColorScheme }}
+          >
+            {isSchoolSelected ? <AppWithSchool /> : <SchoolSelector />}
+          </ColorSchemeContext.Provider>
+        </ThemeProvider>
+      </QueryClientProvider>
       <Toast />
-    </DBProvider>
+    </trpc.Provider>
   );
 }
 

@@ -7,7 +7,6 @@ import type { User } from "schooltalk-shared/types";
 import { StaticRole } from "schooltalk-shared/misc";
 import { trpc } from "./trpc";
 import { AUTH_TOKEN, AUTH_TOKEN_EXPIRY, USER } from "./async-storage-keys";
-import { useDB } from "./db";
 import { getPushToken } from "./push-notifications";
 import { useConfigUpdate } from "./config";
 
@@ -61,7 +60,6 @@ export function useSetAuthToken() {
 export function useLogout() {
   const utils = trpc.useContext();
   const setConfig = useConfigUpdate();
-  const db = useDB();
 
   const logoutMutation = trpc.auth.logout.useMutation({
     async onSuccess() {
@@ -81,19 +79,7 @@ export function useLogout() {
 
       await utils.profile.me.invalidate();
 
-      // Clear all SQLite data
-      db.transaction(
-        (tx) => {
-          tx.executeSql("DELETE FROM messages");
-          tx.executeSql("DELETE FROM groups");
-        },
-        (error) => {
-          console.error("Failed to delete all SQLite data", error);
-        },
-        () => {
-          console.log("Deleted all SQLite data!");
-        },
-      );
+      // TODO: Clear all SQLite data
     },
     onError() {
       Toast.show({

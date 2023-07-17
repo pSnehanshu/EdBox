@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import type { ListRenderItem } from "@shopify/flash-list";
 import type { FilePermissionsInput } from "schooltalk-shared/misc";
+import type { IGroupActivity } from "schooltalk-shared/types";
 import { List, Text, View } from "../../components/Themed";
 import { RootStackParamList } from "../../utils/types/common";
 import { ChatMessage } from "../../components/ChatMessage";
@@ -16,7 +17,7 @@ import { useGroupInfo } from "../../utils/groups";
 import { MsgComposer } from "../../components/ChatComposer";
 import { useFileUpload } from "../../utils/file-upload";
 
-const renderItem: ListRenderItem<null> = ({ item }) => (
+const renderItem: ListRenderItem<IGroupActivity> = ({ item }) => (
   <ChatMessage activity={item} />
 );
 

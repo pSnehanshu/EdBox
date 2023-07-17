@@ -1,4 +1,3 @@
-import type { WebSQLDatabase } from "expo-sqlite";
 import {
   createContext,
   createElement,
@@ -10,17 +9,13 @@ import {
 } from "react";
 import { Subject } from "rxjs";
 import { SocketClient } from "../utils/types/common";
-import { useDB } from "./db";
 import { useSocket } from "./socketio";
 import { trpc } from "./trpc";
 import _ from "lodash";
-import BigInt from "big-integer";
 import Toast from "react-native-toast-message";
 import type { IGroupActivity } from "schooltalk-shared/types";
 import type { FilePermissionsInput } from "schooltalk-shared/misc";
 import { navigationRef } from "../navigation/navRef";
-import { fetchUnseenGroupsInfo, insertGroups } from "./groups";
-import { ActivityPayloadSchema } from "schooltalk-shared/group-schemas";
 
 export class MessagesRepository {
   /** The observable representing all received messages */
@@ -38,7 +33,7 @@ export class MessagesRepository {
     files?: FilePermissionsInput[];
   }>();
 
-  constructor(private db: WebSQLDatabase, private socket: SocketClient) {
+  constructor(private db: any, private socket: SocketClient) {
     this.socket.on("newActivity", (activity) => {
       this.allActivityObservable.next(activity);
     });
@@ -188,7 +183,7 @@ export class MessagesRepository {
           });
 
           // 2. Return local data
-          setMessagesReconcile(dbMessages.messages, dbMessages.cursor);
+          // setMessagesReconcile(dbMessages.messages, dbMessages.cursor);
 
           // 3. Fetch from Server
           // const serverMessages = await serverPromise;
@@ -250,7 +245,7 @@ export class MessagesRepository {
     groupIdentifier: string;
     limit?: number;
     cursor?: string | number;
-  }): Promise<{ messages: IGroupActivity[]; cursor?: string }> {
+  }) {
     const args: Array<string | number | null> = [];
     let sql = `SELECT * FROM messages WHERE `;
 
@@ -270,31 +265,6 @@ export class MessagesRepository {
     args.push(limit + 1 /* +1 for cursor */);
 
     // Finally, run the query to fetch the result
-    return new Promise((resolve, reject) => {
-      this.db.readTransaction((tx) => {
-        tx.executeSql(
-          sql,
-          args,
-          (tx, result) => {
-            // const localMessages = result.rows._array.map((row) =>
-            //   ActivityPayloadSchema.parse(row.obj),
-            // );
-
-            const cursor: string | undefined = undefined;
-            // if (localMessages.length > limit) {
-            //   const last = localMessages.pop();
-            //   cursor = "last?.sort_key";
-            // }
-
-            resolve({ messages: [], cursor });
-          },
-          (tx, error) => {
-            reject(error);
-            return true;
-          },
-        );
-      });
-    });
   }
 
   /**
@@ -309,15 +279,14 @@ export class MessagesRepository {
 
     try {
       // Fetch all unseen groups, groups that don't exist in the local SQLite
-      const groupsToInsert = await fetchUnseenGroupsInfo(
-        this.db,
-        messages
-          .map((m) => /* m.group_identifier ?? */ "")
-          .filter((iden) => !!iden) as string[],
-        trpcUtils,
-      );
+      // const groupsToInsert = await fetchUnseenGroupsInfo(
+      //   this.db,
+      //   messages
+      //     .map((m) => /* m.group_identifier ?? */ "")
+      //     .filter((iden) => !!iden) as string[],
+      //   trpcUtils,
+      // );
       // Insert those groups
-      insertGroups(this.db, Object.values(groupsToInsert));
     } catch (error) {
       console.error("Failed to fetch or save unseen groups", error);
     }
@@ -337,16 +306,6 @@ export class MessagesRepository {
     //     return "(?,?,?,?,?)";
     //   })
     //   .join(",")}`;
-
-    return new Promise<void>((resolve, reject) => {
-      this.db.transaction(
-        (tx) => {
-          // tx.executeSql(insertMessagesSQL, insertMessagesArgs);
-        },
-        reject,
-        resolve,
-      );
-    });
   }
 
   /**
@@ -375,15 +334,13 @@ interface MessagesProviderProp {
   children: JSX.Element | JSX.Element[];
 }
 export function MessagesProvider({ children }: MessagesProviderProp) {
-  const db = useDB();
   const socket = useSocket();
   const messages = useRef<MessagesRepository>();
   const [, setIsLoaded] = useState(false);
 
   useEffect(() => {
     if (socket && !messages.current) {
-      messages.current = new MessagesRepository(db, socket);
-      setIsLoaded(true);
+      // setIsLoaded(true);
     }
   }, [socket]);
 
