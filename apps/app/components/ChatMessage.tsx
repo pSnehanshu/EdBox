@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { format, isThisYear, isToday, isYesterday } from "date-fns";
 import { useCurrentUser } from "../utils/auth";
 import { Text, View } from "./Themed";
@@ -14,6 +14,8 @@ import {
 import { useConfig } from "../utils/config";
 import { FilePreview, FullScreenFilePreview } from "./attachments/FilePreview";
 import { useNavigation } from "@react-navigation/native";
+import RBSheet from "react-native-raw-bottom-sheet";
+import { AntDesign, Foundation, MaterialIcons } from "@expo/vector-icons";
 
 interface ChatMessageProps {
   message: Message;
@@ -82,6 +84,29 @@ function _ChatMessage({ message }: ChatMessageProps) {
       setPressedFileId(file.id);
     }
   };
+  const refRBSheet = useRef<RBSheet>(null);
+  const popupArray = [
+    {
+      title: "Edit",
+      icon: <MaterialIcons name="edit" size={24} color="black" />,
+      onPress: "",
+    },
+    {
+      title: "Delete",
+      icon: <MaterialIcons name="delete" size={24} color="black" />,
+      onPress: "",
+    },
+    {
+      title: "Report",
+      icon: <MaterialIcons name="report" size={24} color="black" />,
+      onPress: "",
+    },
+    {
+      title: "Info",
+      icon: <MaterialIcons name="info" size={24} color="black" />,
+      onPress: "",
+    },
+  ];
 
   return (
     <View
@@ -104,12 +129,44 @@ function _ChatMessage({ message }: ChatMessageProps) {
           </Text>
         </Pressable>
       )}
+      <RBSheet
+        ref={refRBSheet}
+        closeOnDragDown={true}
+        closeOnPressMask={true}
+        height={250}
+        customStyles={{
+          container: styles.bottom_sheet_container,
+          wrapper: styles.bottom_sheet_wrapper,
+          draggableIcon: styles.bottom_sheet_draggable_icon,
+        }}
+        openDuration={200}
+        closeDuration={200}
+      >
+        {popupArray.map((item, i) => (
+          <Pressable
+            key={i}
+            onPress={() => {
+              refRBSheet.current?.close();
+            }}
+            style={({ pressed }) => [
+              styles.item,
+              { opacity: pressed ? 0.5 : 1 },
+            ]}
+          >
+            {item.icon}
+            <View style={styles.titleArea}>
+              <Text style={styles.itemTitle}>{item.title}</Text>
+            </View>
+          </Pressable>
+        ))}
+      </RBSheet>
 
       <Pressable
         onPress={viewFullMessage}
         style={({ pressed }) => ({
           opacity: pressed ? 0.4 : 1,
         })}
+        onLongPress={() => refRBSheet?.current?.open()}
       >
         <Hyperlink
           linkDefault
@@ -170,6 +227,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     width: "75%",
     marginHorizontal: 16,
+    backgroundColor: "transparent",
   },
   senderName: {
     fontSize: 12,
@@ -198,6 +256,44 @@ const styles = StyleSheet.create({
   attachment: {
     borderWidth: 0,
     marginBottom: 4,
+  },
+  bottom_sheet_container: {
+    borderTopRightRadius: 15,
+    borderTopLeftRadius: 15,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+    shadowOpacity: 0.34,
+    shadowRadius: 6.27,
+    elevation: 10,
+  },
+  bottom_sheet_wrapper: {
+    backgroundColor: "transparent",
+  },
+  bottom_sheet_draggable_icon: {
+    backgroundColor: "#000",
+  },
+  item: {
+    paddingVertical: 16,
+    borderBottomColor: "gray",
+    borderBottomWidth: 0.5,
+    flexDirection: "row",
+    paddingLeft: 8,
+  },
+  icon: {
+    width: 48,
+    marginVertical: 4,
+  },
+  titleArea: {
+    backgroundColor: undefined,
+    flexGrow: 1,
+    marginHorizontal: 8,
+    marginVertical: 2,
+  },
+  itemTitle: {
+    fontSize: 16,
   },
 });
 
