@@ -2,6 +2,7 @@ import { Database } from "@nozbe/watermelondb";
 import SQLiteAdapter from "@nozbe/watermelondb/adapters/sqlite";
 import schema from "./schema";
 import migrations from "./migrations";
+import { TableNames } from "./TableNames";
 
 // Models
 import Group from "./models/Group";
@@ -21,3 +22,11 @@ export const database = new Database({
   adapter,
   modelClasses: [Group, GroupActivity],
 });
+
+/** A Map of all the table Collection objects */
+export const Tables = {
+  [TableNames.GROUP]: database.get<Group>(TableNames.GROUP),
+  [TableNames.GROUP_ACTIVITY]: database.get<GroupActivity>(
+    TableNames.GROUP_ACTIVITY,
+  ),
+};
