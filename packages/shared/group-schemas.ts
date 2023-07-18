@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { GroupActivityType, type GroupActivity } from "@prisma/client";
+import { GroupActivityType } from "@prisma/client";
 
 const MessageNewSchema = z.object({
   t: z.literal(GroupActivityType.message_new),
@@ -64,3 +64,14 @@ export const ActivityPayloadSchema = z.discriminatedUnion("t", [
   ReadReceiptSchema,
   DeliveryReceiptSchema,
 ]);
+
+export const GroupActivitySchema = z.object({
+  id: z.string().uuid(),
+  author_id: z.string().cuid().nullish(),
+  is_system_generated: z.boolean(),
+  group_id: z.string().cuid(),
+  parent_id: z.string().uuid().nullish(),
+  created_at: z.string().datetime(),
+  payload: ActivityPayloadSchema,
+  type: z.nativeEnum(GroupActivityType),
+});

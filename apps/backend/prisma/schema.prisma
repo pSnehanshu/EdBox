@@ -382,7 +382,7 @@ model GroupActivity {
   id                  String            @id @default(uuid()) @db.VarChar(32)
   type                GroupActivityType
   payload             Json
-  created_at          DateTime          @default(now())
+  created_at          DateTime          @unique @default(now())
   author_id           String?           @db.VarChar(32)
   Author              User?             @relation(fields: [author_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
   is_system_generated Boolean           @default(false) @map("sys")
