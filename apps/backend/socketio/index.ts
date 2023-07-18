@@ -9,7 +9,7 @@ import {
   ServerToClientEvents,
   SocketData,
 } from "schooltalk-shared/types";
-import { AllGroupActivitiesObservable } from "../groups/GroupActivity";
+import { GroupActivities$ } from "../groups/GroupActivity";
 
 async function _getSchoolIdFromGroupId(
   groupId: string,
@@ -132,7 +132,7 @@ export default function initSocketIo(server: HTTPServer) {
     });
 
   // Tie up with Activity Observable
-  AllGroupActivitiesObservable.subscribe(async (activity) => {
+  GroupActivities$.subscribe(async (activity) => {
     const schoolId = await getSchoolIdFromGroupId(activity.group_id);
 
     if (schoolId) {

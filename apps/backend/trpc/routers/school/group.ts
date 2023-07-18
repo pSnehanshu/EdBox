@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { v4 as uuidv4 } from "uuid";
 import { GroupActivityType } from "@prisma/client";
-import { AllGroupActivitiesObservable } from "../../../groups/GroupActivity";
+import { GroupActivities$ } from "../../../groups/GroupActivity";
 import { protectedProcedure, router } from "../../trpc";
 import prisma from "../../../prisma";
 import { parseISO } from "date-fns";
@@ -39,7 +39,7 @@ const groupRouter = router({
       // TODO: Check sending messages right
 
       // Send the message
-      AllGroupActivitiesObservable.next({
+      GroupActivities$.next({
         author_id: ctx.user.id,
         type: GroupActivityType.message_new,
         created_at: new Date().toISOString(),

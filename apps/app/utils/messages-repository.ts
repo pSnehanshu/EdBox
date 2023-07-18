@@ -19,7 +19,7 @@ import { navigationRef } from "../navigation/navRef";
 
 export class MessagesRepository {
   /** The observable representing all received messages */
-  readonly allActivityObservable = new Subject<IGroupActivity>();
+  readonly Activity$ = new Subject<IGroupActivity>();
 
   /** Group wise observables */
   readonly groupMessagesObservableMap = new Map<
@@ -27,7 +27,7 @@ export class MessagesRepository {
     Subject<IGroupActivity>
   >();
 
-  readonly composerObservable = new Subject<{
+  readonly Composer$ = new Subject<{
     groupIdentifier: string;
     text: string;
     files?: FilePermissionsInput[];
@@ -35,11 +35,11 @@ export class MessagesRepository {
 
   constructor(private db: any, private socket: SocketClient) {
     this.socket.on("newActivity", (activity) => {
-      this.allActivityObservable.next(activity);
+      this.Activity$.next(activity);
     });
 
     // Forward group messages to group observers
-    this.allActivityObservable.subscribe((activity) => {
+    this.Activity$.subscribe((activity) => {
       const groupObservable = this.groupMessagesObservableMap.get(
         activity.group_id,
       );
@@ -49,12 +49,12 @@ export class MessagesRepository {
     });
 
     // When new message is created
-    this.composerObservable.subscribe((activity) => {
+    this.Composer$.subscribe((activity) => {
       // TODO: Send via tRPC
     });
 
     // Show message alert
-    this.allActivityObservable.subscribe((activity) => {
+    this.Activity$.subscribe((activity) => {
       // TODO: Show group and author info
       if (
         activity.type === "message_new" &&
@@ -318,7 +318,7 @@ export class MessagesRepository {
     text: string,
     files?: FilePermissionsInput[],
   ) {
-    this.composerObservable.next({
+    this.Composer$.next({
       groupIdentifier,
       text,
       files,
