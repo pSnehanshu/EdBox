@@ -1,12 +1,14 @@
 import {
   Entypo,
   FontAwesome5,
+  Ionicons,
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import {
   NavigationContainer,
   DefaultTheme,
   DarkTheme,
+  useNavigation,
 } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { ColorSchemeName, Modal, Pressable } from "react-native";
@@ -51,6 +53,8 @@ import ProfileScreen from "../screens/settings/ProfileScreen";
 import { StaticRoleSelector } from "../components/StaticRoleSelector";
 import ProfileEditScreen from "../screens/settings/ProfileEditScreen";
 import PhoneNoEditScreen from "../screens/settings/PhoneNoEditScreen";
+import ChatGroupDetails from "../screens/chat/ChatGroupDetails";
+import ChatMediaList from "../screens/chat/ChatMediaList";
 
 export default function Navigation({
   colorScheme,
@@ -102,6 +106,7 @@ function RootNavigator() {
   useSelectDefaultRole();
 
   if (!school) return null;
+  const { navigate } = useNavigation();
 
   return isLoggedIn ? (
     <SocketProvider>
@@ -123,6 +128,40 @@ function RootNavigator() {
             options={({ route }) => ({
               headerShown: true,
               title: `${route.params.name ?? "Messages"}`,
+              headerRight: () => (
+                <Pressable
+                  onPress={() => {
+                    navigate("ChatGroupDetails", {
+                      params: route.params,
+                    });
+                  }}
+                  style={({ pressed }) => ({
+                    opacity: pressed ? 0.5 : 1,
+                  })}
+                >
+                  <Ionicons
+                    name="information-circle-sharp"
+                    size={24}
+                    color={Colors[scheme].text}
+                  />
+                </Pressable>
+              ),
+              headerTitle: () => (
+                <Pressable
+                  onPress={() => {
+                    navigate("ChatGroupDetails", {
+                      params: route.params,
+                    });
+                  }}
+                  style={({ pressed }) => ({
+                    opacity: pressed ? 0.5 : 1,
+                  })}
+                >
+                  <Text style={{ fontSize: 20, fontWeight: "500" }}>
+                    {route.params.name ?? "Messages"}
+                  </Text>
+                </Pressable>
+              ),
             })}
           />
 
@@ -338,11 +377,27 @@ function RootNavigator() {
             }}
           />
           <Stack.Screen
+            name="ChatGroupDetails"
+            component={ChatGroupDetails}
+            options={{
+              headerShown: true,
+              title: "Chat Details",
+            }}
+          />
+          <Stack.Screen
             name="PhoneNoEditScreen"
             component={PhoneNoEditScreen}
             options={{
               headerShown: true,
               title: "Edit Phone No",
+            }}
+          />
+          <Stack.Screen
+            name="ChatMediaList"
+            component={ChatMediaList}
+            options={{
+              headerShown: true,
+              title: "Media",
             }}
           />
         </Stack.Navigator>
