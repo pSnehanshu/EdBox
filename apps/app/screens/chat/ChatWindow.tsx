@@ -26,59 +26,59 @@ export default function ChatWindowScreen({
   navigation,
 }: NativeStackScreenProps<RootStackParamList, "ChatWindow">) {
   const messages = useMessages();
-  const groupMessages = messages.useFetchGroupMessages(
-    groupInfo.identifier,
-    30,
-  );
-  const groupInfoQuery = useGroupInfo(groupInfo.identifier);
+  // const groupMessages = messages.useFetchGroupMessages(
+  //   groupInfo.identifier,
+  //   30,
+  // );
+  // const groupInfoQuery = useGroupInfo(groupInfo.identifier);
 
   /** The Element that should appear at the end of the chat */
-  const chatEndElement = useMemo(() => {
-    if (groupMessages.isLoading) {
-      return <ActivityIndicator style={styles.chatLoading} size="large" />;
-    }
+  // const chatEndElement = useMemo(() => {
+  //   if (groupMessages.isLoading) {
+  //     return <ActivityIndicator style={styles.chatLoading} size="large" />;
+  //   }
 
-    if (groupMessages.hasMore) {
-      return (
-        <View style={styles.loadMoreBtn}>
-          <Button
-            title="Load older messages"
-            onPress={groupMessages.fetchNextPage}
-          />
-        </View>
-      );
-    }
+  //   if (groupMessages.hasMore) {
+  //     return (
+  //       <View style={styles.loadMoreBtn}>
+  //         <Button
+  //           title="Load older messages"
+  //           onPress={groupMessages.fetchNextPage}
+  //         />
+  //       </View>
+  //     );
+  //   }
 
-    if (groupMessages.messages.length > 0) {
-      return <Text style={styles.endOfChat}>End of chat</Text>;
-    }
+  //   if (groupMessages.messages.length > 0) {
+  //     return <Text style={styles.endOfChat}>End of chat</Text>;
+  //   }
 
-    return <></>;
-  }, [
-    groupMessages.hasMore,
-    groupMessages.isLoading,
-    groupMessages.fetchNextPage,
-    groupMessages.messages.length,
-  ]);
+  //   return <></>;
+  // }, [
+  //   groupMessages.hasMore,
+  //   groupMessages.isLoading,
+  //   groupMessages.fetchNextPage,
+  //   groupMessages.messages.length,
+  // ]);
 
-  useEffect(() => {
-    if (
-      !groupInfoQuery.isLoading &&
-      !groupInfoQuery.isError // &&
-      // groupInfoQuery.data?.name
-    ) {
-      // navigation.setOptions({
-      //   title: groupInfoQuery.data?.name,
-      // });
-    }
-  }, [/* groupInfoQuery.data?.name, */ groupInfo.identifier]);
+  // useEffect(() => {
+  //   if (
+  //     !groupInfoQuery.isLoading &&
+  //     !groupInfoQuery.isError // &&
+  //     // groupInfoQuery.data?.name
+  //   ) {
+  //     // navigation.setOptions({
+  //     //   title: groupInfoQuery.data?.name,
+  //     // });
+  //   }
+  // }, [/* groupInfoQuery.data?.name, */ groupInfo.identifier]);
 
-  const handleMsgSend = useCallback(
-    (msg: string, files?: FilePermissionsInput[]) => {
-      messages.sendMessage(groupInfo.identifier, msg, files);
-    },
-    [groupInfo.identifier, messages.sendMessage],
-  );
+  // const handleMsgSend = useCallback(
+  //   (msg: string, files?: FilePermissionsInput[]) => {
+  //     messages.sendMessage(groupInfo.identifier, msg, files);
+  //   },
+  //   [groupInfo.identifier, messages.sendMessage],
+  // );
 
   // The handler for attachments
   const fileUploadHandler = useFileUpload();
@@ -101,7 +101,7 @@ export default function ChatWindowScreen({
         style={styles.image}
       >
         {/* TODO: Add a manual load more button to the top of the chat list. this is because sometimes onEndReached is not triggered */}
-        <List
+        {/* <List
           inverted
           data={groupMessages.messages}
           renderItem={renderItem}
@@ -116,7 +116,7 @@ export default function ChatWindowScreen({
         <MsgComposer
           onSend={handleMsgSend}
           fileUploadHandler={fileUploadHandler}
-        />
+        /> */}
       </ImageBackground>
     </View>
   );

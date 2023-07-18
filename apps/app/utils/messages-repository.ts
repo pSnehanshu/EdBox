@@ -65,10 +65,10 @@ export class MessagesRepository {
           text1: `Message from ${activity.author_id}`,
           text2: activity.payload.body,
           onPress() {
-            navigationRef.navigate("ChatWindow", {
-              identifier: activity.group_id,
-              name: "",
-            });
+            // navigationRef.navigate("ChatWindow", {
+            //   identifier: activity.group_id,
+            //   name: "",
+            // });
 
             Toast.hide();
           },

@@ -1,15 +1,8 @@
 import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { Group } from "schooltalk-shared/types";
 import prisma from "../../../prisma";
 import { getUserGroups } from "../../../utils/groups";
-import {
-  AutoGroupType,
-  convertObjectToOrderedQueryString,
-  GroupDefinition,
-  groupIdentifierSchema,
-} from "schooltalk-shared/group-identifier";
 import { router, protectedProcedure } from "../../trpc";
 
 const messagingRouter = router({

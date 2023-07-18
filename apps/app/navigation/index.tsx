@@ -127,13 +127,13 @@ function RootNavigator() {
             component={ChatWindowScreen}
             options={({ route }) => ({
               headerShown: true,
-              title: `${route.params.name ?? "Messages"}`,
+              // title: `${route.params.name ?? "Messages"}`,
               headerRight: () => (
                 <Pressable
                   onPress={() => {
-                    navigate("ChatGroupDetails", {
-                      params: route.params,
-                    });
+                    // navigate("ChatGroupDetails", {
+                    //   params: route.params,
+                    // });
                   }}
                   style={({ pressed }) => ({
                     opacity: pressed ? 0.5 : 1,
@@ -149,16 +149,16 @@ function RootNavigator() {
               headerTitle: () => (
                 <Pressable
                   onPress={() => {
-                    navigate("ChatGroupDetails", {
-                      params: route.params,
-                    });
+                    // navigate("ChatGroupDetails", {
+                    //   params: route.params,
+                    // });
                   }}
                   style={({ pressed }) => ({
                     opacity: pressed ? 0.5 : 1,
                   })}
                 >
                   <Text style={{ fontSize: 20, fontWeight: "500" }}>
-                    {route.params.name ?? "Messages"}
+                    {/* {route.params.name ?? "Messages"} */}
                   </Text>
                 </Pressable>
               ),

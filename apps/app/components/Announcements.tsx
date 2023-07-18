@@ -1,14 +1,13 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { Text, View } from "./Themed";
 import { Alert, Pressable, StyleSheet } from "react-native";
-import type { Group, UploadedFile } from "schooltalk-shared/types";
+import type { UploadedFile } from "schooltalk-shared/types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMessages } from "../utils/messages-repository";
 import { useCurrentUser } from "../utils/auth";
 import { format, isThisYear, isToday, isYesterday } from "date-fns";
 import { getDisplayName, StaticRole } from "schooltalk-shared/misc";
 import { useNavigation } from "@react-navigation/native";
-import { getSchoolGroupIdentifier } from "schooltalk-shared/group-identifier";
 import MIMEType from "whatwg-mimetype";
 import Hyperlink from "react-native-hyperlink";
 import { useConfig } from "../utils/config";
@@ -138,15 +137,15 @@ export default function Announcements() {
   const messages = useMessages();
 
   const config = useConfig();
-  const group: Group = useMemo(
+  const group = useMemo(
     () => ({
       name: "School Group",
-      identifier: getSchoolGroupIdentifier(config.schoolId),
+      // identifier: getSchoolGroupIdentifier(config.schoolId),
     }),
     [config.schoolId],
   );
 
-  const groupMessages = messages.useFetchGroupMessages(group.identifier, 7);
+  const groupMessages = messages.useFetchGroupMessages(group.name, 7);
   const navigation = useNavigation();
 
   const scheme = useColorScheme();
@@ -174,7 +173,7 @@ export default function Announcements() {
               opacity: pressed ? 0.5 : 1,
             },
           ]}
-          onPress={() => navigation.navigate("ChatWindow", group)}
+          // onPress={() => navigation.navigate("ChatWindow", group)}
         >
           <Text style={styles.view_more_btn}>View more</Text>
         </Pressable>
@@ -198,7 +197,7 @@ export default function Announcements() {
                       opacity: pressed ? 0.5 : 1,
                     },
                   ]}
-                  onPress={() => navigation.navigate("ChatWindow", group)}
+                  // onPress={() => navigation.navigate("ChatWindow", group)}
                 >
                   <MaterialCommunityIcons
                     name="lead-pencil"

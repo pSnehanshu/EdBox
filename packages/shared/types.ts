@@ -17,11 +17,6 @@ export type ArrayElement<ArrayType extends readonly unknown[]> =
 export type RouterOutput = inferRouterOutputs<AppRouter>;
 export type RouterInput = inferRouterInputs<AppRouter>;
 
-export interface Group {
-  name: string;
-  identifier: string;
-}
-
 export type User = RouterOutput["profile"]["me"];
 
 export type UnserializedUser = Extract<

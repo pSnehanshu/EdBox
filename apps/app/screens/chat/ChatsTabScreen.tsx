@@ -4,7 +4,6 @@ import { format, isToday, isYesterday, isThisYear } from "date-fns";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { SafeAreaView, StyleSheet, Pressable, Image } from "react-native";
 import { getDisplayName } from "schooltalk-shared/misc";
-import type { Group } from "schooltalk-shared/types";
 import type { ListRenderItem } from "@shopify/flash-list";
 import { List, Text, View } from "../../components/Themed";
 import { useGetUserGroups } from "../../utils/groups";
@@ -12,16 +11,11 @@ import { useMessages } from "../../utils/messages-repository";
 
 interface GroupItemProps {
   onClick?: () => void;
-  group: Group;
+  group: unknown;
   onMessage?: (date: Date) => void;
 }
 function GroupItem(props: GroupItemProps) {
   const Messages = useMessages();
-  const { messages } = Messages.useFetchGroupMessages(
-    props.group.identifier,
-    1,
-  );
-  // const lastMessage = messages[0] as undefined;
 
   return (
     <Pressable
@@ -36,7 +30,7 @@ function GroupItem(props: GroupItemProps) {
         style={styles.chatGroupIcon}
       />
       <View style={styles.chatGroupMiddle}>
-        <Text style={styles.chatGroupName}>{props.group.name}</Text>
+        <Text style={styles.chatGroupName}></Text>
         <Text style={styles.chatGroupLastMessage}>
           {/* {lastMessage
             ? _.truncate(
@@ -72,20 +66,20 @@ export default function ChatsListScreen() {
     if (!groups) return [];
 
     return _.sortBy(groups, (group) => {
-      const t = groupTimeMapping[group.identifier];
+      const t = null;
       return t ?? new Date("1970-01-01T00:00:00Z"); // This is to keep empty chats at the bottom
     }).reverse();
   }, [groupTimeMapping, groups?.length]);
 
-  const renderItem = useCallback<ListRenderItem<Group>>(
+  const renderItem = useCallback<ListRenderItem<unknown>>(
     ({ item: group }) => (
       <GroupItem
         group={group}
-        onClick={() => navigation.navigate("ChatWindow", group)}
+        onClick={() => null}
         onMessage={(date) => {
           setGroupTimeMapping((mapping) => ({
             ...mapping,
-            [group.identifier]: date,
+            // [group.identifier]: date,
           }));
         }}
       />
@@ -97,7 +91,6 @@ export default function ChatsListScreen() {
     <SafeAreaView style={styles.container}>
       <List
         data={sortedGroups}
-        keyExtractor={(g) => g.identifier}
         estimatedItemSize={styles.chatGroup.height}
         renderItem={renderItem}
         refreshing={isLoading}

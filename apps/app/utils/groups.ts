@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { useCallback, useEffect, useState } from "react";
-import type { Group, RouterInput } from "schooltalk-shared/types";
+import type { RouterInput } from "schooltalk-shared/types";
 import { trpc } from "./trpc";
 
 type FetchGroupsInput = RouterInput["school"]["messaging"]["fetchGroups"];
@@ -37,12 +37,12 @@ export function useGroupInfo(groupIdentifier: string) {
 export function useGetUserGroups(input: FetchGroupsInput) {
   const utils = trpc.useContext();
   const [isLoading, setIsLoading] = useState(false);
-  const [groups, setGroups] = useState<Group[]>([]);
+  const [groups, setGroups] = useState<unknown[]>([]);
 
   const appendGroups = useCallback(
-    (newGroups: Group[]) => {
+    (newGroups: unknown[]) => {
       setGroups((existingGroups) => {
-        return _.uniqBy(existingGroups.concat(newGroups), (g) => g.identifier);
+        return _.uniqBy(existingGroups.concat(newGroups), (g) => g);
       });
     },
     [setGroups],
