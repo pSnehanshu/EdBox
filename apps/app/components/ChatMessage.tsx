@@ -15,7 +15,8 @@ import { useConfig } from "../utils/config";
 import { FilePreview, FullScreenFilePreview } from "./attachments/FilePreview";
 import { useNavigation } from "@react-navigation/native";
 import RBSheet from "react-native-raw-bottom-sheet";
-import { AntDesign, Foundation, MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
+import ChatMessageEdit from "../screens/chat/ChatMessageEdit";
 
 interface ChatMessageProps {
   message: Message;
@@ -85,28 +86,6 @@ function _ChatMessage({ message }: ChatMessageProps) {
     }
   };
   const refRBSheet = useRef<RBSheet>(null);
-  const popupArray = [
-    {
-      title: "Edit",
-      icon: <MaterialIcons name="edit" size={24} color="black" />,
-      onPress: "",
-    },
-    {
-      title: "Delete",
-      icon: <MaterialIcons name="delete" size={24} color="black" />,
-      onPress: "",
-    },
-    {
-      title: "Report",
-      icon: <MaterialIcons name="report" size={24} color="black" />,
-      onPress: "",
-    },
-    {
-      title: "Info",
-      icon: <MaterialIcons name="info" size={24} color="black" />,
-      onPress: "",
-    },
-  ];
 
   return (
     <View
@@ -129,37 +108,8 @@ function _ChatMessage({ message }: ChatMessageProps) {
           </Text>
         </Pressable>
       )}
-      <RBSheet
-        ref={refRBSheet}
-        closeOnDragDown={true}
-        closeOnPressMask={true}
-        height={250}
-        customStyles={{
-          container: styles.bottom_sheet_container,
-          wrapper: styles.bottom_sheet_wrapper,
-          draggableIcon: styles.bottom_sheet_draggable_icon,
-        }}
-        openDuration={200}
-        closeDuration={200}
-      >
-        {popupArray.map((item, i) => (
-          <Pressable
-            key={i}
-            onPress={() => {
-              refRBSheet.current?.close();
-            }}
-            style={({ pressed }) => [
-              styles.item,
-              { opacity: pressed ? 0.5 : 1 },
-            ]}
-          >
-            {item.icon}
-            <View style={styles.titleArea}>
-              <Text style={styles.itemTitle}>{item.title}</Text>
-            </View>
-          </Pressable>
-        ))}
-      </RBSheet>
+
+      <ChatMessageEdit chatMessageId={"123p"} refRBSheet={refRBSheet} />
 
       <Pressable
         onPress={viewFullMessage}
