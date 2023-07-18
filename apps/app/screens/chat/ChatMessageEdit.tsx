@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { Text, View } from "../../components/Themed";
 import RBSheet from "react-native-raw-bottom-sheet";
 import { StyleSheet, Pressable } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { Dialog } from "@rneui/base";
+import { Dialog } from "@rneui/themed";
 
 interface ChatMessageEditProps {
   chatMessageId: any;
@@ -13,36 +13,60 @@ export default function ChatMessageEdit({
   chatMessageId,
   refRBSheet,
 }: ChatMessageEditProps) {
+  const [isVisible, setIsVisible] = useState(false);
+  const [typeOfEdit, setTypeOfEdit] = useState<
+    "edit" | "delete" | "report" | "info" | null
+  >(null);
   const popupArray = [
     {
       title: "Edit",
       icon: <MaterialIcons name="edit" size={24} color="black" />,
-      onPress: "",
+      onPress: () => setTypeOfEdit("edit"),
+      onDone: "",
     },
     {
       title: "Delete",
       icon: <MaterialIcons name="delete" size={24} color="black" />,
-      onPress: "",
+      onPress: () => setTypeOfEdit("delete"),
+      onDone: "",
     },
     {
       title: "Report",
       icon: <MaterialIcons name="report" size={24} color="black" />,
-      onPress: "",
+      onPress: () => setTypeOfEdit("report"),
+      onDone: "",
     },
     {
       title: "Info",
       icon: <MaterialIcons name="info" size={24} color="black" />,
-      onPress: "",
+      onPress: () => setTypeOfEdit("info"),
+      onDone: "",
     },
   ];
 
   return (
     <View>
+      <Dialog
+        isVisible={isVisible}
+        onBackdropPress={() => setIsVisible(false)}
+        animationType="fade"
+      >
+        <Text>{typeOfEdit}</Text>
+        <Dialog.Actions>
+          <Dialog.Button
+            title="Done"
+            onPress={() => {
+              setIsVisible(false);
+            }}
+            type="solid"
+          />
+        </Dialog.Actions>
+      </Dialog>
       <RBSheet
         ref={refRBSheet}
         closeOnDragDown={true}
         closeOnPressMask={true}
-        height={250}
+        height={260}
         customStyles={{
           container: styles.bottom_sheet_container,
           wrapper: styles.bottom_sheet_wrapper,
@@ -55,6 +79,8 @@ export default function ChatMessageEdit({
           <Pressable
             key={i}
             onPress={() => {
+              setIsVisible(true);
+              item.onPress();
               refRBSheet.current?.close();
             }}
             style={({ pressed }) => [
