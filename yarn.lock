@@ -11607,13 +11607,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mimic-fn@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "mimic-fn@npm:4.0.0"
-  checksum: 995dcece15ee29aa16e188de6633d43a3db4611bcf93620e7e62109ec41c79c0f34277165b8ce5e361205049766e371851264c21ac64ca35499acb5421c2ba56
-  languageName: node
-  linkType: hard
-
 "minimatch@npm:2 || 3, minimatch@npm:^3.0.2, minimatch@npm:^3.0.4, minimatch@npm:^3.0.5, minimatch@npm:^3.1.1, minimatch@npm:^3.1.2":
   version: 3.1.2
   resolution: "minimatch@npm:3.1.2"
@@ -12358,16 +12351,6 @@ __metadata:
   dependencies:
     aggregate-error: ^3.0.0
   checksum: cb0ab21ec0f32ddffd31dfc250e3afa61e103ef43d957cc45497afe37513634589316de4eb88abdfd969fe6410c22c0b93ab24328833b8eb1ccc087fc0442a1c
-  languageName: node
-  linkType: hard
-
-"p-memoize@npm:^7.1.1":
-  version: 7.1.1
-  resolution: "p-memoize@npm:7.1.1"
-  dependencies:
-    mimic-fn: ^4.0.0
-    type-fest: ^3.0.0
-  checksum: 2fc5b12fc530aed9c1e455f706d8da2a2e6bed4573f611a4e92b2a75f253e8c0acc63ad014b55f155b5d5de110c586b490a4d6612d64bc743106cad626d995fd
   languageName: node
   linkType: hard
 
@@ -13932,7 +13915,6 @@ __metadata:
     imagekit: ^4.1.3
     lodash: ^4.17.21
     nodemon: ^2.0.22
-    p-memoize: ^7.1.1
     parse-data-url: ^5.0.0
     prisma: ^4.13.0
     rxjs: ^7.8.1
@@ -15142,13 +15124,6 @@ __metadata:
   version: 0.7.1
   resolution: "type-fest@npm:0.7.1"
   checksum: 5b1b113529d59949d97b76977d545989ddc11b81bb0c766b6d2ccc65473cb4b4a5c7d24f5be2c2bb2de302a5d7a13c1732ea1d34c8c59b7e0ec1f890cf7fc424
-  languageName: node
-  linkType: hard
-
-"type-fest@npm:^3.0.0":
-  version: 3.13.0
-  resolution: "type-fest@npm:3.13.0"
-  checksum: f7be142ae1ad0582eafd52d085350799c8cd918c15455896a06c82c147b61f8cea58892bedf1348943478e37740562219375b3b59fd855db99cd2b2766510f98
   languageName: node
   linkType: hard
 

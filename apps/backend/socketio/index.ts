@@ -1,6 +1,5 @@
 import { Server } from "socket.io";
 import { Server as HTTPServer } from "http";
-import pMemoize from "p-memoize";
 import prisma from "../prisma";
 import { isPast } from "date-fns";
 import {
@@ -11,19 +10,26 @@ import {
 } from "schooltalk-shared/types";
 import { GroupActivities$ } from "../groups/GroupActivity";
 
-async function _getSchoolIdFromGroupId(
-  groupId: string,
-): Promise<string | null> {
+const GroupIdSchoolIdMap = new Map<string, string>();
+
+/** Get school id from group id */
+async function getSchoolIdFromGroupId(groupId: string): Promise<string | null> {
+  if (GroupIdSchoolIdMap.has(groupId)) {
+    return GroupIdSchoolIdMap.get(groupId) ?? null;
+  }
+
   const group = await prisma.group.findUnique({
     where: { id: groupId },
     select: { school_id: true },
   });
 
-  return group?.school_id ?? null;
-}
+  const schoolId = group?.school_id ?? null;
 
-/** Get school id from group id */
-const getSchoolIdFromGroupId = pMemoize(_getSchoolIdFromGroupId);
+  // Set in cache
+  if (schoolId) GroupIdSchoolIdMap.set(groupId, schoolId);
+
+  return schoolId;
+}
 
 export default function initSocketIo(server: HTTPServer) {
   const io = new Server<
