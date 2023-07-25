@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { format, isThisYear, isToday, isYesterday } from "date-fns";
 import { useCurrentUser } from "../utils/auth";
 import { Text, View } from "./Themed";
@@ -14,6 +14,9 @@ import {
 import { useConfig } from "../utils/config";
 import { FilePreview, FullScreenFilePreview } from "./attachments/FilePreview";
 import { useNavigation } from "@react-navigation/native";
+import RBSheet from "react-native-raw-bottom-sheet";
+import { MaterialIcons } from "@expo/vector-icons";
+import ChatMessageEdit from "../screens/chat/ChatMessageEdit";
 
 interface ChatMessageProps {
   activity: IGroupActivity;
@@ -82,6 +85,7 @@ function _ChatMessage({ activity }: ChatMessageProps) {
       setPressedFileId(file.id);
     }
   };
+  const refRBSheet = useRef<RBSheet>(null);
 
   return (
     <View
@@ -105,11 +109,14 @@ function _ChatMessage({ activity }: ChatMessageProps) {
         </Pressable>
       )}
 
+      <ChatMessageEdit chatMessageId={"123p"} refRBSheet={refRBSheet} />
+
       <Pressable
         onPress={viewFullMessage}
         style={({ pressed }) => ({
           opacity: pressed ? 0.4 : 1,
         })}
+        onLongPress={() => refRBSheet?.current?.open()}
       >
         <Hyperlink
           linkDefault
@@ -170,6 +177,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     width: "75%",
     marginHorizontal: 16,
+    backgroundColor: "transparent",
   },
   senderName: {
     fontSize: 12,
@@ -198,6 +206,44 @@ const styles = StyleSheet.create({
   attachment: {
     borderWidth: 0,
     marginBottom: 4,
+  },
+  bottom_sheet_container: {
+    borderTopRightRadius: 15,
+    borderTopLeftRadius: 15,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+    shadowOpacity: 0.34,
+    shadowRadius: 6.27,
+    elevation: 10,
+  },
+  bottom_sheet_wrapper: {
+    backgroundColor: "transparent",
+  },
+  bottom_sheet_draggable_icon: {
+    backgroundColor: "#000",
+  },
+  item: {
+    paddingVertical: 16,
+    borderBottomColor: "gray",
+    borderBottomWidth: 0.5,
+    flexDirection: "row",
+    paddingLeft: 8,
+  },
+  icon: {
+    width: 48,
+    marginVertical: 4,
+  },
+  titleArea: {
+    backgroundColor: undefined,
+    flexGrow: 1,
+    marginHorizontal: 8,
+    marginVertical: 2,
+  },
+  itemTitle: {
+    fontSize: 16,
   },
 });
 
