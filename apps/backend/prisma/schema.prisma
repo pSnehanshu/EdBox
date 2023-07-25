@@ -379,7 +379,7 @@ model GroupMember {
 }
 
 model GroupActivity {
-  id                  String            @id @default(uuid()) @db.VarChar(32)
+  id                  String            @id @default(uuid()) @db.VarChar(36)
   type                GroupActivityType
   payload             Json
   created_at          DateTime          @unique @default(now())
@@ -388,7 +388,7 @@ model GroupActivity {
   is_system_generated Boolean           @default(false) @map("sys")
   group_id            String            @db.VarChar(32)
   Group               Group             @relation(fields: [group_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  parent_id           String?           @map("parent") @db.VarChar(32)
+  parent_id           String?           @map("parent") @db.VarChar(36)
   ParentActivity      GroupActivity?    @relation("parent", fields: [parent_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   ChildrenActivities  GroupActivity[]   @relation("parent")
 }
