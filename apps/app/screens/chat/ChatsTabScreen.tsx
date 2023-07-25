@@ -3,6 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import { format, isToday, isYesterday, isThisYear } from "date-fns";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { SafeAreaView, StyleSheet, Pressable, Image } from "react-native";
+import type { Group } from "schooltalk-shared/types";
 import { getDisplayName } from "schooltalk-shared/misc";
 import type { ListRenderItem } from "@shopify/flash-list";
 import { List, Text, View } from "../../components/Themed";
@@ -11,10 +12,10 @@ import { useMessages } from "../../utils/messages-repository";
 
 interface GroupItemProps {
   onClick?: () => void;
-  group: unknown;
+  group: Group;
   onMessage?: (date: Date) => void;
 }
-function GroupItem(props: GroupItemProps) {
+function GroupItem({ group, onClick, onMessage }: GroupItemProps) {
   const Messages = useMessages();
 
   return (
@@ -23,14 +24,14 @@ function GroupItem(props: GroupItemProps) {
         styles.chatGroup,
         { opacity: pressed ? 0.5 : 1 },
       ]}
-      onPress={props.onClick}
+      onPress={onClick}
     >
       <Image
         source={require("../../assets/images/multiple-users-silhouette.png")}
         style={styles.chatGroupIcon}
       />
       <View style={styles.chatGroupMiddle}>
-        <Text style={styles.chatGroupName}></Text>
+        <Text style={styles.chatGroupName}>{group.name}</Text>
         <Text style={styles.chatGroupLastMessage}>
           {/* {lastMessage
             ? _.truncate(
@@ -71,11 +72,16 @@ export default function ChatsListScreen() {
     }).reverse();
   }, [groupTimeMapping, groups?.length]);
 
-  const renderItem = useCallback<ListRenderItem<unknown>>(
+  const renderItem = useCallback<ListRenderItem<Group>>(
     ({ item: group }) => (
       <GroupItem
         group={group}
-        onClick={() => null}
+        onClick={() =>
+          navigation.navigate("ChatWindow", {
+            groupId: group.id,
+            name: group.name,
+          })
+        }
         onMessage={(date) => {
           setGroupTimeMapping((mapping) => ({
             ...mapping,

@@ -92,6 +92,10 @@ export type UIBloodGroup =
   | "Others"
   | undefined;
 
+export type Group = ArrayElement<
+  RouterOutput["school"]["messaging"]["fetchGroups"]
+>;
+
 export type IGroupActivity = z.infer<typeof GroupActivitySchema>;
 
 export interface ServerToClientEvents {

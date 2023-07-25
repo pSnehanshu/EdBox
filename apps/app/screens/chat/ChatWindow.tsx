@@ -26,10 +26,7 @@ export default function ChatWindowScreen({
   navigation,
 }: NativeStackScreenProps<RootStackParamList, "ChatWindow">) {
   const messages = useMessages();
-  // const groupMessages = messages.useFetchGroupMessages(
-  //   groupInfo.identifier,
-  //   30,
-  // );
+  const groupMessages = messages.useFetchGroupMessages(groupInfo.groupId, 30);
   // const groupInfoQuery = useGroupInfo(groupInfo.identifier);
 
   /** The Element that should appear at the end of the chat */
@@ -100,6 +97,7 @@ export default function ChatWindowScreen({
         source={require("../../assets/images/chat-bg.jpg")}
         style={styles.image}
       >
+        <Text>{JSON.stringify(groupMessages.messages, null, 2)}</Text>
         {/* TODO: Add a manual load more button to the top of the chat list. this is because sometimes onEndReached is not triggered */}
         {/* <List
           inverted

@@ -15,6 +15,7 @@ import _ from "lodash";
 import Toast from "react-native-toast-message";
 import type { IGroupActivity } from "schooltalk-shared/types";
 import type { FilePermissionsInput } from "schooltalk-shared/misc";
+import { parseISO } from "date-fns";
 
 export class MessagesRepository {
   /** The observable representing all received messages */
@@ -111,15 +112,15 @@ export class MessagesRepository {
 
   useFetchGroupMessages(groupId: string, limit = 20) {
     const utils = trpc.useContext();
-    const [finalMessages, setFinalMessages] = useState<IGroupActivity[]>([]);
+    const [finalActivites, setFinalActivities] = useState<IGroupActivity[]>([]);
     const [nextCursor, setNextCursor] = useState<string>();
     const [isLoading, setIsLoading] = useState(false);
 
-    const setMessagesReconcile = useCallback(
-      (messages: IGroupActivity[], cursor?: string) => {
+    const setActivitiesReconcile = useCallback(
+      (activites: IGroupActivity[], cursor?: string) => {
         setNextCursor(cursor);
 
-        setFinalMessages((existingMessages) => {
+        setFinalActivities((existingActivities) => {
           // // Assume both `existingMessages` and `messages` are
           // // ordered based on `sort_key` in decreasing order.
           // // We need to merge these two arrays, and the final array
@@ -147,58 +148,57 @@ export class MessagesRepository {
 
           // TODO: Optimize (read above)
           // Give more preference to `messages` because it is likely fresher
-          return (
-            _.chain(messages.concat(existingMessages))
-              // .sortBy((m) =>
-              //   BigInt(m.sort_key ?? Math.round(Math.random()).toString()),
-              // )
-              // .sortedUniqBy((m) => m.sort_key)
-              // .reverse()
-              .value()
-          );
+          return _.chain(activites.concat(existingActivities))
+            .sortBy((act) => parseISO(act.created_at))
+            .sortedUniqBy((act) => act.id)
+            .reverse()
+            .value();
         });
       },
       [],
     );
 
-    const fetchMessages = useCallback(
+    const fetchActivities = useCallback(
       async (cursor?: string) => {
         try {
           // Start loading
           setIsLoading(true);
 
-          // const serverPromise =
-          //   utils.client.school.messaging.fetchGroupMessages.query({
-          //     groupIdentifier,
-          //     limit,
-          //     cursor,
-          //   });
+          const serverPromise =
+            utils.client.school.messaging.fetchGroupActivities.query({
+              groupId,
+              limit,
+              cursor,
+            });
 
           // 1. Fetch from local
-          const dbMessages = await this.fetchMessagesFromDB({
-            groupIdentifier: groupId,
-            limit,
-            cursor,
-          });
+          // const dbMessages = await this.fetchMessagesFromDB({
+          //   groupIdentifier: groupId,
+          //   limit,
+          //   cursor,
+          // });
 
-          // 2. Return local data
-          // setMessagesReconcile(dbMessages.messages, dbMessages.cursor);
+          // // 2. Return local data
+          // // setMessagesReconcile(dbMessages.messages, dbMessages.cursor);
 
-          // 3. Fetch from Server
-          // const serverMessages = await serverPromise;
+          // // 3. Fetch from Server
+          const serverActivities = await serverPromise;
 
-          // 4. Save server data into local
-          // await this.insertMessagesToDB(serverMessages.messages, utils);
+          // // 4. Save server data into local
+          // // await this.insertMessagesToDB(serverMessages.messages, utils);
 
-          // 5. Re-fetch from local
-          const dbMessages2 = await this.fetchMessagesFromDB({
-            groupIdentifier: groupId,
-            limit,
-            cursor,
-          });
+          // // 5. Re-fetch from local
+          // const dbMessages2 = await this.fetchMessagesFromDB({
+          //   groupIdentifier: groupId,
+          //   limit,
+          //   cursor,
+          // });
 
           // 6. Return fresh local data
-          // setMessagesReconcile(dbMessages2.messages, serverMessages.cursor);
+          setActivitiesReconcile(
+            serverActivities.data,
+            serverActivities.nextCursor,
+          );
         } catch (error) {
           console.error("fetchMessages Error:", error);
         } finally {
@@ -206,31 +206,31 @@ export class MessagesRepository {
           setIsLoading(false);
         }
       },
-      [groupId, limit, setMessagesReconcile],
+      [groupId, limit, setActivitiesReconcile],
     );
 
     const fetchNextPage = useCallback(() => {
       if (nextCursor && !isLoading) {
-        fetchMessages(nextCursor);
+        fetchActivities(nextCursor);
       }
-    }, [fetchMessages, nextCursor, isLoading]);
+    }, [fetchActivities, nextCursor, isLoading]);
 
     useEffect(() => {
-      fetchMessages(nextCursor);
-    }, [fetchMessages]);
+      fetchActivities(nextCursor);
+    }, [fetchActivities]);
 
     useEffect(() => {
-      setFinalMessages([]);
+      setFinalActivities([]);
       setNextCursor(undefined);
-      fetchMessages();
+      fetchActivities();
     }, [groupId]);
 
     this.useGroupActivityReceived(groupId, (activity) => {
-      setFinalMessages((m) => [activity].concat(m));
+      setFinalActivities((m) => [activity].concat(m));
     });
 
     return {
-      messages: finalMessages,
+      messages: finalActivites,
       fetchNextPage,
       hasMore: !!nextCursor,
       isLoading,

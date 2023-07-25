@@ -2,8 +2,10 @@ import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import prisma from "../../../prisma";
-import { getUserGroups } from "../../../utils/groups";
 import { router, protectedProcedure } from "../../trpc";
+import { parseISO } from "date-fns";
+import { IGroupActivity } from "schooltalk-shared/types";
+import { ActivityPayloadSchema } from "schooltalk-shared/group-schemas";
 
 const messagingRouter = router({
   fetchGroups: protectedProcedure
@@ -14,12 +16,17 @@ const messagingRouter = router({
         // sort: z.enum([/* "name_asc", "name_desc", */ "recent_message"]),
       }),
     )
-    .query(async ({ input, ctx }) =>
-      getUserGroups(ctx.user, {
-        limit: input.limit,
-        page: input.page,
-      }),
-    ),
+    .query(async ({ input, ctx }) => {
+      const memberships = await prisma.groupMember.findMany({
+        where: { user_id: ctx.user.id },
+        take: input.limit,
+        skip: (input.page - 1) * input.limit,
+        orderBy: { created_at: "desc" },
+        select: { Group: true },
+      });
+
+      return memberships.map((m) => m.Group);
+    }),
   createGroup: protectedProcedure
     .input(
       z.object({
@@ -574,74 +581,68 @@ const messagingRouter = router({
   //       };
   //     }
   //   }),
-  // fetchGroupMessages: protectedProcedure
-  //   .input(
-  //     z.object({
-  //       groupIdentifier: groupIdentifierSchema,
-  //       limit: z.number().min(1).max(500).default(100),
-  //       cursor: z
-  //         .string()
-  //         .regex(/^\d+$/, "Must be a numeric string")
-  //         .transform((v) => BigInt(v))
-  //         .optional(),
-  //     }),
-  //   )
-  //   .query(async ({ input, ctx }) => {
-  //     if (input.groupIdentifier.sc !== ctx.user.school_id) {
-  //       throw new TRPCError({
-  //         code: "NOT_FOUND",
-  //         message: "Can't find group from other schools",
-  //       });
-  //     }
+  fetchGroupActivities: protectedProcedure
+    .input(
+      z.object({
+        groupId: z.string().cuid(),
+        limit: z.number().min(1).max(500).default(100),
+        cursor: z
+          .string()
+          .datetime()
+          .transform((v) => parseISO(v))
+          .optional(),
+      }),
+    )
+    .query(
+      async ({
+        input,
+        ctx,
+      }): Promise<{ data: IGroupActivity[]; nextCursor?: string }> => {
+        // Fetch the activities from DB
+        const activites = await prisma.groupActivity.findMany({
+          where: {
+            group_id: input.groupId,
+            Group: { school_id: ctx.user.school_id },
+          },
+          take: input.limit + 1, // get an extra item at the end which we'll use as next cursor
+          cursor: input.cursor ? { created_at: input.cursor } : undefined,
+          orderBy: { created_at: "desc" },
+        });
 
-  //     const messages = (
-  //       await prisma.message.findMany({
-  //         where: {
-  //           school_id: ctx.user.school_id,
-  //           group_identifier: convertObjectToOrderedQueryString(
-  //             input.groupIdentifier,
-  //           ),
-  //         },
-  //         include: {
-  //           ParentMessage: true,
-  //           Sender: {
-  //             include: {
-  //               Student: true,
-  //               Teacher: true,
-  //               Parent: true,
-  //               Staff: true,
-  //             },
-  //           },
-  //           Attachments: {
-  //             include: {
-  //               File: true,
-  //             },
-  //           },
-  //         },
-  //         orderBy: {
-  //           sort_key: "desc",
-  //         },
-  //         take: input.limit + 1, // get an extra item at the end which we'll use as next cursor
-  //         cursor: input.cursor
-  //           ? {
-  //               sort_key: input.cursor,
-  //             }
-  //           : undefined,
-  //       })
-  //     ).map((m) => ({
-  //       ...m,
-  //       sort_key: m.sort_key.toString(), // Convert bigint to string
-  //     }));
+        // Determining the cursor
+        let nextCursor: string | undefined = undefined;
+        if (activites.length > input.limit) {
+          const nextItem = activites.pop();
+          if (nextItem) nextCursor = nextItem.created_at.toISOString();
+        }
 
-  //     // Determining the cursor
-  //     let nextCursor: string | undefined = undefined;
-  //     if (messages.length > input.limit) {
-  //       const nextItem = messages.pop();
-  //       if (nextItem) nextCursor = nextItem.sort_key;
-  //     }
+        // Parse the activites first
+        const parsedActivities: IGroupActivity[] = [];
+        const parsePromises = activites.map(async (activity) => {
+          const parsedPayload = await ActivityPayloadSchema.safeParseAsync(
+            activity.payload,
+          );
 
-  //     return { messages, cursor: nextCursor };
-  //   }),
+          if (parsedPayload.success && parsedPayload.data.t === activity.type) {
+            parsedActivities.push({
+              ...activity,
+              created_at: activity.created_at.toISOString(),
+              payload: parsedPayload.data,
+            });
+          }
+        });
+        await Promise.all(parsePromises);
+
+        return {
+          data: activites.map((act) => ({
+            ...act,
+            created_at: act.created_at.toISOString(),
+            payload: ActivityPayloadSchema.parse(act.payload),
+          })),
+          nextCursor,
+        };
+      },
+    ),
 });
 
 export default messagingRouter;

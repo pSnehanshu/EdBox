@@ -27,7 +27,7 @@ declare global {
 export type RootStackParamList = {
   Login: undefined;
   Root: NavigatorScreenParams<RootTabParamList> | undefined;
-  ChatWindow: undefined;
+  ChatWindow: { groupId: string; name?: string };
   AttendanceTaker: { periodId: string };
   NotFound: undefined;
   SchoolSettings: undefined;
