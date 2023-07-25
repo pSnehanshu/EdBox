@@ -106,7 +106,6 @@ function RootNavigator() {
   useSelectDefaultRole();
 
   if (!school) return null;
-  const { navigate } = useNavigation();
 
   return isLoggedIn ? (
     <SocketProvider>
