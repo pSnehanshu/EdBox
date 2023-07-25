@@ -4282,7 +4282,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nozbe/watermelondb@npm:^0.26.0":
+"@nozbe/watermelondb@npm:0.26.0":
   version: 0.26.0
   resolution: "@nozbe/watermelondb@npm:0.26.0"
   dependencies:
@@ -4295,6 +4295,22 @@ __metadata:
     rxjs: ^7.8.0
     sql-escape-string: ^1.1.0
   checksum: 2739e2906ccada9fe8fccb551d6d6195f3d3eec418f4a4533462f324c589bf088adf4a46310b2bf412c4b0954e5dee3b80be267481c2135b5963f72040e214e8
+  languageName: node
+  linkType: hard
+
+"@nozbe/watermelondb@patch:@nozbe/watermelondb@npm%3A0.26.0#./.yarn/patches/@nozbe-watermelondb-npm-0.26.0-0699a1d10a.patch::locator=schooltalk%40workspace%3A.":
+  version: 0.26.0
+  resolution: "@nozbe/watermelondb@patch:@nozbe/watermelondb@npm%3A0.26.0#./.yarn/patches/@nozbe-watermelondb-npm-0.26.0-0699a1d10a.patch::version=0.26.0&hash=505aa2&locator=schooltalk%40workspace%3A."
+  dependencies:
+    "@babel/runtime": 7.21.0
+    "@nozbe/simdjson": 3.1.0-wmelon1
+    "@nozbe/sqlite": 3.40.1
+    "@nozbe/with-observables": ^1.5.0-2
+    hoist-non-react-statics: ^3.3.2
+    lokijs: "npm:@nozbe/lokijs@1.5.12-wmelon6"
+    rxjs: ^7.8.0
+    sql-escape-string: ^1.1.0
+  checksum: 489f59cd447c5a4bb35be2eeaf575cdb3ae58c60e3965d079f73ebacb665109ad58e4c4e819e06d5bbb13f2b171a7744d31dad6fc841a17e07087bb30fdce0b5
   languageName: node
   linkType: hard
 
