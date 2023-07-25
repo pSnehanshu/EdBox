@@ -15,7 +15,6 @@ import _ from "lodash";
 import Toast from "react-native-toast-message";
 import type { IGroupActivity } from "schooltalk-shared/types";
 import type { FilePermissionsInput } from "schooltalk-shared/misc";
-import { navigationRef } from "../navigation/navRef";
 
 export class MessagesRepository {
   /** The observable representing all received messages */
@@ -33,7 +32,7 @@ export class MessagesRepository {
     files?: FilePermissionsInput[];
   }>();
 
-  constructor(private db: any, private socket: SocketClient) {
+  constructor(private socket: SocketClient) {
     this.socket.on("newActivity", (activity) => {
       this.Activity$.next(activity);
     });
@@ -331,16 +330,15 @@ const MessagesRepositoryContext = createContext<MessagesRepository | null>(
 );
 
 interface MessagesProviderProp {
-  children: JSX.Element | JSX.Element[];
+  children: React.ReactNode;
 }
 export function MessagesProvider({ children }: MessagesProviderProp) {
   const socket = useSocket();
   const messages = useRef<MessagesRepository>();
-  const [, setIsLoaded] = useState(false);
 
   useEffect(() => {
     if (socket && !messages.current) {
-      // setIsLoaded(true);
+      messages.current = new MessagesRepository(socket);
     }
   }, [socket]);
 
