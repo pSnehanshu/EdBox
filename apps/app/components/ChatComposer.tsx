@@ -8,6 +8,7 @@ import useColorScheme from "../utils/useColorScheme";
 import { List, TextInput, View } from "./Themed";
 import { PendingAttachment } from "./attachments/PendingAttachment";
 import { IComposerContent } from "../utils/types/common";
+import { Composer$ } from "../utils/messages-repository";
 
 const _demoAtom = atom<IComposerContent>({
   groupId: "",
@@ -77,14 +78,14 @@ const _MsgComposer = ({ groupId }: MsgComposerProps) => {
 
     if (!messageText.trim() && fileUploadHandler.uploadTasks.length < 1) return;
 
-    // TODO: Send to Composer$
-    // onSend(
-    //   messageText.trim(),
-    //   fileUploadHandler.uploadTasks.map((t) => ({
-    //     permission_id: t.permission.id,
-    //     file_name: t.file.name,
-    //   })),
-    // );
+    Composer$.next({
+      body: messageText.trim(),
+      groupId,
+      files: fileUploadHandler.uploadTasks.map((t) => ({
+        permission_id: t.permission.id,
+        file_name: t.file.name,
+      })),
+    });
 
     reset();
 

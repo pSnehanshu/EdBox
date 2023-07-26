@@ -104,5 +104,8 @@ export interface FileUploadTask {
 export interface IComposerContent {
   groupId: string;
   body: string;
-  files?: FileUploadTask[];
+  files?: {
+    permission_id: string;
+    file_name?: string;
+  }[];
 }
