@@ -8,7 +8,6 @@ import { getDisplayName } from "schooltalk-shared/misc";
 import type { ListRenderItem } from "@shopify/flash-list";
 import { List, Text, View } from "../../components/Themed";
 import { useGetUserGroups } from "../../utils/groups";
-import { useMessages } from "../../utils/messages-repository";
 
 interface GroupItemProps {
   onClick?: () => void;
@@ -16,8 +15,6 @@ interface GroupItemProps {
   onMessage?: (date: Date) => void;
 }
 function GroupItem({ group, onClick, onMessage }: GroupItemProps) {
-  const Messages = useMessages();
-
   return (
     <Pressable
       style={({ pressed }) => [

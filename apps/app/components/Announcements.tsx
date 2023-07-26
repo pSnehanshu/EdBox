@@ -3,7 +3,6 @@ import { Text, View } from "./Themed";
 import { Alert, Pressable, StyleSheet } from "react-native";
 import type { UploadedFile } from "schooltalk-shared/types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useMessages } from "../utils/messages-repository";
 import { useCurrentUser } from "../utils/auth";
 import { format, isThisYear, isToday, isYesterday } from "date-fns";
 import { getDisplayName, StaticRole } from "schooltalk-shared/misc";
@@ -134,8 +133,6 @@ function SingleAnnouncement({ message }: AnnouncementProps) {
 }
 
 export default function Announcements() {
-  const messages = useMessages();
-
   const config = useConfig();
   const group = useMemo(
     () => ({
@@ -145,7 +142,6 @@ export default function Announcements() {
     [config.schoolId],
   );
 
-  const groupMessages = messages.useFetchGroupMessages(group.name, 7);
   const navigation = useNavigation();
 
   const scheme = useColorScheme();
@@ -160,61 +156,64 @@ export default function Announcements() {
   return (
     <View>
       <Text style={styles.header_text}>Announcements</Text>
-      {groupMessages.messages.map((message) => (
+      {/* {groupMessages.messages.map((message) => (
         <></> // <SingleAnnouncement message={message} key={message.id} />
-      ))}
+      ))} */}
 
-      {groupMessages.messages.length > 0 ? (
-        <Pressable
-          style={({ pressed }) => [
-            styles.view_more_btn_wrapper,
-            {
-              borderColor: color,
-              opacity: pressed ? 0.5 : 1,
-            },
-          ]}
-          // onPress={() => navigation.navigate("ChatWindow", group)}
-        >
-          <Text style={styles.view_more_btn}>View more</Text>
-        </Pressable>
-      ) : (
-        <LottieAnimation
-          src={require("../assets/lotties/shake-a-empty-box.json")}
-          caption="No announcements to show. It's quite empty!"
-          style={styles.no_announcements}
-          FooterComponent={
-            isPrincipal && (
-              <>
-                <Text style={{ textAlign: "center" }}>
-                  Messages sent in the {school?.name} group are automatically
-                  treated as announcements.
-                </Text>
-                <Pressable
-                  style={({ pressed }) => [
-                    styles.view_more_btn_wrapper,
-                    {
-                      borderColor: color,
-                      opacity: pressed ? 0.5 : 1,
-                    },
-                  ]}
-                  // onPress={() => navigation.navigate("ChatWindow", group)}
-                >
-                  <MaterialCommunityIcons
-                    name="lead-pencil"
-                    size={16}
-                    color={color}
-                    style={{ marginRight: 8 }}
-                  />
-                  <Text style={styles.view_more_btn}>
-                    Write an announcement
+      {
+        // eslint-disable-next-line no-constant-condition
+        /* groupMessages.messages.length > 0 */ false ? (
+          <Pressable
+            style={({ pressed }) => [
+              styles.view_more_btn_wrapper,
+              {
+                borderColor: color,
+                opacity: pressed ? 0.5 : 1,
+              },
+            ]}
+            // onPress={() => navigation.navigate("ChatWindow", group)}
+          >
+            <Text style={styles.view_more_btn}>View more</Text>
+          </Pressable>
+        ) : (
+          <LottieAnimation
+            src={require("../assets/lotties/shake-a-empty-box.json")}
+            caption="No announcements to show. It's quite empty!"
+            style={styles.no_announcements}
+            FooterComponent={
+              isPrincipal && (
+                <>
+                  <Text style={{ textAlign: "center" }}>
+                    Messages sent in the {school?.name} group are automatically
+                    treated as announcements.
                   </Text>
-                </Pressable>
-              </>
-            )
-          }
-          FooterComponentStyle={styles.write_announcement}
-        />
-      )}
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.view_more_btn_wrapper,
+                      {
+                        borderColor: color,
+                        opacity: pressed ? 0.5 : 1,
+                      },
+                    ]}
+                    // onPress={() => navigation.navigate("ChatWindow", group)}
+                  >
+                    <MaterialCommunityIcons
+                      name="lead-pencil"
+                      size={16}
+                      color={color}
+                      style={{ marginRight: 8 }}
+                    />
+                    <Text style={styles.view_more_btn}>
+                      Write an announcement
+                    </Text>
+                  </Pressable>
+                </>
+              )
+            }
+            FooterComponentStyle={styles.write_announcement}
+          />
+        )
+      }
     </View>
   );
 }
