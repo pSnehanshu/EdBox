@@ -13,20 +13,25 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 
+// import { trpc } from "../../../utils/trpc";
+
+// Mutations
+// const requestOtp = trpc.auth.requestPhoneNumberOTP.useMutation({
+//   onSuccess(data) {
+//     // setUserId(data.userId);
+//   },
+//   onError(error) {
+//     console.error(error);
+//     console.error("Error", "Phone number isn't registered");
+//   },
+// });
+
 export default function LoginOTP() {
   return (
-    <Flex
-      minH={"100vh"}
-      align={"center"}
-      justify={"center"}
-      bg={useColorModeValue("gray.50", "gray.800")}
-    >
-      <Stack spacing={8} mx={"auto"} maxW={"lg"} py={12} px={6}>
-        <Stack align={"center"}>
+    <Flex>
+      <Stack>
+        <Stack>
           <Heading fontSize={"4xl"}>Sign in to your account</Heading>
-          {/* <Text fontSize={"lg"} color={"gray.600"}>
-              to enjoy all of our cool <Link color={"blue.400"}>features</Link> ✌️
-            </Text> */}
         </Stack>
         <Box
           rounded={"lg"}
@@ -39,20 +44,19 @@ export default function LoginOTP() {
               <FormLabel>Phone Number</FormLabel>
               <Input type="tel" />
             </FormControl>
-            {/* <FormControl id="password">
-              <FormLabel>Password</FormLabel>
-              <Input type="password" />
-            </FormControl> */}
             <Stack spacing={10}>
-              {/* <Stack
-                  direction={{ base: "column", sm: "row" }}
-                  align={"start"}
-                  justify={"space-between"}
-                >
-                  <Checkbox>Remember me</Checkbox>
-                  <Link color={"purple.700"}>Forgot password?</Link>
-                </Stack> */}
+              <Stack
+                direction={{ base: "column", sm: "row" }}
+                align={"start"}
+                justify={"space-between"}
+              >
+                <Checkbox>Remember me</Checkbox>
+                <Link color={"purple.700"}>Forgot password?</Link>
+              </Stack>
               <Button
+                onClick={() => {
+                  console.log("otp");
+                }}
                 bg={"purple.600"}
                 color={"white"}
                 _hover={{
@@ -61,10 +65,6 @@ export default function LoginOTP() {
               >
                 Request OTP
               </Button>
-              <Stack>
-                <Link color={"purple.900"}>Login with Email</Link>
-                <Link color={"purple.900"}>Login with Password</Link>
-              </Stack>
             </Stack>
           </Stack>
         </Box>
