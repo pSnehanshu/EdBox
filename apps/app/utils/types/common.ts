@@ -100,3 +100,9 @@ export interface FileUploadTask {
   uploadResult?: FileSystemUploadResult;
   started: boolean;
 }
+
+export interface IComposerContent {
+  groupId: string;
+  body: string;
+  files?: FileUploadTask[];
+}

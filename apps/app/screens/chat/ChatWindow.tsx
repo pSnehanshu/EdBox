@@ -7,14 +7,12 @@ import {
   ImageBackground,
 } from "react-native";
 import type { ListRenderItem } from "@shopify/flash-list";
-import type { FilePermissionsInput } from "schooltalk-shared/misc";
 import type { IGroupActivity } from "schooltalk-shared/types";
 import { List, Text, View } from "../../components/Themed";
 import { RootStackParamList } from "../../utils/types/common";
 import { ChatMessage } from "../../components/ChatMessage";
 import { useGroupInfo } from "../../utils/groups";
 import { MsgComposer } from "../../components/ChatComposer";
-import { useFileUpload } from "../../utils/file-upload";
 
 const renderItem: ListRenderItem<IGroupActivity> = ({ item }) => (
   <ChatMessage activity={item} />
@@ -67,27 +65,6 @@ export default function ChatWindowScreen({
   //   }
   // }, [/* groupInfoQuery.data?.name, */ groupInfo.identifier]);
 
-  // const handleMsgSend = useCallback(
-  //   (msg: string, files?: FilePermissionsInput[]) => {
-  //     messages.sendMessage(groupInfo.identifier, msg, files);
-  //   },
-  //   [groupInfo.identifier, messages.sendMessage],
-  // );
-
-  // The handler for attachments
-  const fileUploadHandler = useFileUpload();
-
-  // Effect to delete pending uploads before exiting
-  useEffect(
-    () =>
-      navigation.addListener("beforeRemove", () => {
-        Promise.allSettled(
-          fileUploadHandler.uploadTasks.map((task) => task.cancel()),
-        );
-      }),
-    [navigation, fileUploadHandler.uploadTasks],
-  );
-
   return (
     <View style={styles.container}>
       <ImageBackground
@@ -105,12 +82,9 @@ export default function ChatWindowScreen({
           ListFooterComponent={chatEndElement}
           ListHeaderComponent={<View style={styles.messagesHeadElement} />}
           contentContainerStyle={{ backgroundColor: "transparent" }}
-        />
+        />*/}
 
-        <MsgComposer
-          onSend={handleMsgSend}
-          fileUploadHandler={fileUploadHandler}
-        /> */}
+        <MsgComposer groupId={groupInfo.groupId} />
       </ImageBackground>
     </View>
   );
