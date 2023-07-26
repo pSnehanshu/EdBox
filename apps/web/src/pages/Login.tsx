@@ -25,13 +25,14 @@ import {} from "@chakra-ui/react";
 export default function LoginPage() {
   return (
     <>
+      <Search />
       <Flex
         minH="100vh"
         align={"center"}
         justify={"center"}
         bg={useColorModeValue("gray.50", "gray.800")}
+        flexDirection={"column"}
       >
-        search school
         <Tabs colorScheme="purple" isFitted maxH="40vh">
           <TabList justifyContent="center">
             <Tab>Parents</Tab>
