@@ -12,7 +12,7 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { useAtom } from "jotai";
-import { SelectedSchoolIdAtom } from "../utils/config";
+import { SelectedSchoolIdAtom } from "../utils/atoms";
 
 export default function LoginPage() {
   const schoolId = useAtom(SelectedSchoolIdAtom);

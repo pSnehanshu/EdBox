@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { trpc } from "../../../utils/trpc";
-import { SelectedSchoolIdAtom } from "../../../utils/config";
+import { SelectedSchoolIdAtom } from "../../../utils/atoms";
 import { useAtom } from "jotai";
 import {
   Box,
@@ -8,6 +8,8 @@ import {
   FormControl,
   Heading,
   Input,
+  InputGroup,
+  InputRightElement,
   Link,
   List,
   ListItem,
@@ -72,18 +74,25 @@ export default function Search() {
           boxShadow={"lg"}
           p={8}
         >
-          {isFetching && <Spinner />}
           <Stack spacing={4}>
             <FormControl id="school" w="100%">
               <Popover isLazy>
-                <Input
-                  placeholder="Your school!"
-                  value={search}
-                  mb={2}
-                  onChange={(e) => setSearch(e.target.value)}
-                  onFocus={() => setIsDropdownOpen(true)}
-                  onBlur={() => setTimeout(() => setIsDropdownOpen(false), 500)}
-                />
+                <InputGroup>
+                  <Input
+                    placeholder="Your school!"
+                    value={search}
+                    mb={2}
+                    onChange={(e) => setSearch(e.target.value)}
+                    onFocus={() => setIsDropdownOpen(true)}
+                    onBlur={() =>
+                      setTimeout(() => setIsDropdownOpen(false), 500)
+                    }
+                  />
+                  <InputRightElement>
+                    {isFetching && <Spinner />}
+                  </InputRightElement>
+                </InputGroup>
+
                 <p>{selectedSchool?.name}</p>
 
                 <Box maxHeight="150px" overflowY="auto">
