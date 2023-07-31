@@ -97,9 +97,6 @@ export type Group = ArrayElement<
 >;
 
 export type IGroupActivity = z.infer<typeof GroupActivitySchema>;
-export type SelfGroupActivity = {
-  activity: IGroupActivity;
-};
 
 export interface ServerToClientEvents {
   newActivity: (activity: IGroupActivity) => void;
