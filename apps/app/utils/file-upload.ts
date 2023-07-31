@@ -13,7 +13,7 @@ import type { FileUploadTask } from "./types/common";
  * @param s3url The s3 URL
  */
 function uploadFileToS3(file: FileUploadTask["file"], s3url: string) {
-  const uploadProgressSubject = new Subject<number>();
+  const UploadProgress$ = new Subject<number>();
 
   const task = FileSystem.createUploadTask(
     s3url,
@@ -35,20 +35,20 @@ function uploadFileToS3(file: FileUploadTask["file"], s3url: string) {
       );
 
       // Notify the observer about the value
-      uploadProgressSubject.next(percentage);
+      UploadProgress$.next(percentage);
 
       // When 100% done, end the subject
       if (percentage >= 100) {
-        uploadProgressSubject.complete();
+        UploadProgress$.complete();
       }
     },
   );
 
   return {
-    progress: uploadProgressSubject,
+    progress: UploadProgress$,
     start: () =>
       task.uploadAsync().catch((error) => {
-        uploadProgressSubject.error(error);
+        UploadProgress$.error(error);
         return undefined;
       }),
     cancel: () => task.cancelAsync(),

@@ -1,14 +1,12 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { Text, View } from "./Themed";
 import { Alert, Pressable, StyleSheet } from "react-native";
-import type { Group, Message, UploadedFile } from "schooltalk-shared/types";
+import type { UploadedFile } from "schooltalk-shared/types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useMessages } from "../utils/messages-repository";
 import { useCurrentUser } from "../utils/auth";
 import { format, isThisYear, isToday, isYesterday } from "date-fns";
 import { getDisplayName, StaticRole } from "schooltalk-shared/misc";
 import { useNavigation } from "@react-navigation/native";
-import { getSchoolGroupIdentifier } from "schooltalk-shared/group-identifier";
 import MIMEType from "whatwg-mimetype";
 import Hyperlink from "react-native-hyperlink";
 import { useConfig } from "../utils/config";
@@ -18,48 +16,49 @@ import { LottieAnimation } from "./LottieAnimation";
 import { useSchool } from "../utils/useSchool";
 
 interface AnnouncementProps {
-  message: Message;
+  message: null;
 }
 function SingleAnnouncement({ message }: AnnouncementProps) {
   const config = useConfig();
   const { isLoggedIn, user } = useCurrentUser();
-  const time = useMemo(() => {
-    if (!message.created_at) return "N/A";
 
-    const date = new Date(message.created_at);
-    const time = format(date, "hh:mm aaa");
+  // const time = useMemo(() => {
+  //   if (!message.created_at) return "N/A";
 
-    if (isToday(date)) {
-      return time;
-    }
-    if (isYesterday(date)) {
-      return `Yesterday ${time}`;
-    }
-    if (isThisYear(date)) {
-      return `${format(date, "d MMM")} ${time}`;
-    }
-    return `${format(date, "dd/MM/yy")} ${time}`;
-  }, [message.created_at]);
+  //   const date = new Date(message.created_at);
+  //   const time = format(date, "hh:mm aaa");
 
-  const sender = message.Sender;
-  const shouldCollapse =
-    (message.text ?? "").length > config.previewMessageLength;
-  const trimmedMessage = useMemo(
-    () =>
-      shouldCollapse
-        ? (message.text ?? "").slice(0, config.previewMessageLength).trimEnd()
-        : message.text,
-    [message.text],
-  );
-  const senderDisplayName = useMemo(
-    () => (sender ? getDisplayName(sender) : "User"),
-    [sender],
-  );
-  const viewFullMessage = useCallback(() => {
-    if (shouldCollapse) {
-      Alert.alert(senderDisplayName, message.text);
-    }
-  }, [senderDisplayName, message.text, shouldCollapse]);
+  //   if (isToday(date)) {
+  //     return time;
+  //   }
+  //   if (isYesterday(date)) {
+  //     return `Yesterday ${time}`;
+  //   }
+  //   if (isThisYear(date)) {
+  //     return `${format(date, "d MMM")} ${time}`;
+  //   }
+  //   return `${format(date, "dd/MM/yy")} ${time}`;
+  // }, [message.created_at]);
+
+  // const sender = message.Sender;
+  // const shouldCollapse =
+  //   (message.text ?? "").length > config.previewMessageLength;
+  // const trimmedMessage = useMemo(
+  //   () =>
+  //     shouldCollapse
+  //       ? (message.text ?? "").slice(0, config.previewMessageLength).trimEnd()
+  //       : message.text,
+  //   [message.text],
+  // );
+  // const senderDisplayName = useMemo(
+  //   () => (sender ? getDisplayName(sender) : "User"),
+  //   [sender],
+  // );
+  // const viewFullMessage = useCallback(() => {
+  //   if (shouldCollapse) {
+  //     Alert.alert(senderDisplayName, message.text);
+  //   }
+  // }, [senderDisplayName, message.text, shouldCollapse]);
 
   const [pressedFileId, setPressedFileId] = useState<string | null>(null);
   const handleFilePress = (file: UploadedFile) => {
@@ -72,11 +71,11 @@ function SingleAnnouncement({ message }: AnnouncementProps) {
 
   if (!isLoggedIn) return null;
 
-  const isSentByMe = user.id === sender?.id;
+  // const isSentByMe = user.id === sender?.id;
 
   return (
     <View style={styles.single_announcement_container}>
-      <View style={styles.announcement_header}>
+      {/* <View style={styles.announcement_header}>
         <Text style={styles.name_text}>
           {isSentByMe ? "You" : senderDisplayName}
         </Text>
@@ -128,24 +127,21 @@ function SingleAnnouncement({ message }: AnnouncementProps) {
         visible={!!pressedFileId}
         initialFileId={pressedFileId}
         onClose={() => setPressedFileId(null)}
-      />
+      /> */}
     </View>
   );
 }
 
 export default function Announcements() {
-  const messages = useMessages();
-
   const config = useConfig();
-  const group: Group = useMemo(
+  const group = useMemo(
     () => ({
       name: "School Group",
-      identifier: getSchoolGroupIdentifier(config.schoolId),
+      // identifier: getSchoolGroupIdentifier(config.schoolId),
     }),
     [config.schoolId],
   );
 
-  const groupMessages = messages.useFetchGroupMessages(group.identifier, 7);
   const navigation = useNavigation();
 
   const scheme = useColorScheme();
@@ -160,61 +156,64 @@ export default function Announcements() {
   return (
     <View>
       <Text style={styles.header_text}>Announcements</Text>
-      {groupMessages.messages.map((message) => (
-        <SingleAnnouncement message={message} key={message.id} />
-      ))}
+      {/* {groupMessages.messages.map((message) => (
+        <></> // <SingleAnnouncement message={message} key={message.id} />
+      ))} */}
 
-      {groupMessages.messages.length > 0 ? (
-        <Pressable
-          style={({ pressed }) => [
-            styles.view_more_btn_wrapper,
-            {
-              borderColor: color,
-              opacity: pressed ? 0.5 : 1,
-            },
-          ]}
-          onPress={() => navigation.navigate("ChatWindow", group)}
-        >
-          <Text style={styles.view_more_btn}>View more</Text>
-        </Pressable>
-      ) : (
-        <LottieAnimation
-          src={require("../assets/lotties/shake-a-empty-box.json")}
-          caption="No announcements to show. It's quite empty!"
-          style={styles.no_announcements}
-          FooterComponent={
-            isPrincipal && (
-              <>
-                <Text style={{ textAlign: "center" }}>
-                  Messages sent in the {school?.name} group are automatically
-                  treated as announcements.
-                </Text>
-                <Pressable
-                  style={({ pressed }) => [
-                    styles.view_more_btn_wrapper,
-                    {
-                      borderColor: color,
-                      opacity: pressed ? 0.5 : 1,
-                    },
-                  ]}
-                  onPress={() => navigation.navigate("ChatWindow", group)}
-                >
-                  <MaterialCommunityIcons
-                    name="lead-pencil"
-                    size={16}
-                    color={color}
-                    style={{ marginRight: 8 }}
-                  />
-                  <Text style={styles.view_more_btn}>
-                    Write an announcement
+      {
+        // eslint-disable-next-line no-constant-condition
+        /* groupMessages.messages.length > 0 */ false ? (
+          <Pressable
+            style={({ pressed }) => [
+              styles.view_more_btn_wrapper,
+              {
+                borderColor: color,
+                opacity: pressed ? 0.5 : 1,
+              },
+            ]}
+            // onPress={() => navigation.navigate("ChatWindow", group)}
+          >
+            <Text style={styles.view_more_btn}>View more</Text>
+          </Pressable>
+        ) : (
+          <LottieAnimation
+            src={require("../assets/lotties/shake-a-empty-box.json")}
+            caption="No announcements to show. It's quite empty!"
+            style={styles.no_announcements}
+            FooterComponent={
+              isPrincipal && (
+                <>
+                  <Text style={{ textAlign: "center" }}>
+                    Messages sent in the {school?.name} group are automatically
+                    treated as announcements.
                   </Text>
-                </Pressable>
-              </>
-            )
-          }
-          FooterComponentStyle={styles.write_announcement}
-        />
-      )}
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.view_more_btn_wrapper,
+                      {
+                        borderColor: color,
+                        opacity: pressed ? 0.5 : 1,
+                      },
+                    ]}
+                    // onPress={() => navigation.navigate("ChatWindow", group)}
+                  >
+                    <MaterialCommunityIcons
+                      name="lead-pencil"
+                      size={16}
+                      color={color}
+                      style={{ marginRight: 8 }}
+                    />
+                    <Text style={styles.view_more_btn}>
+                      Write an announcement
+                    </Text>
+                  </Pressable>
+                </>
+              )
+            }
+            FooterComponentStyle={styles.write_announcement}
+          />
+        )
+      }
     </View>
   );
 }

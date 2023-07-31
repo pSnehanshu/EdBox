@@ -3,10 +3,11 @@ import type {
   User as DBUser,
   SchoolStaff,
 } from "@prisma/client";
+import { z } from "zod";
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "../../apps/backend/trpc";
 import type { Context } from "../../apps/backend/trpc/context";
-import type { FilePermissionsInput } from "./misc";
+import { GroupActivitySchema } from "./group-schemas";
 
 export type Nullable<T> = T | null | undefined | void;
 
@@ -15,24 +16,6 @@ export type ArrayElement<ArrayType extends readonly unknown[]> =
 
 export type RouterOutput = inferRouterOutputs<AppRouter>;
 export type RouterInput = inferRouterInputs<AppRouter>;
-
-/**
- * Because messages are cached in SQLite, this type may not always
- * be correct for old messages if the structure of a message changed
- * e.g. Addition or removal of a field. Hence it's safer to mark this
- * as `Partial<...>` so that while using any of the properties, the
- * developer is forced to manually check if a property exists or not.
- */
-export type Message = Partial<
-  ArrayElement<
-    RouterOutput["school"]["messaging"]["fetchGroupMessages"]["messages"]
-  >
->;
-
-export interface Group {
-  name: string;
-  identifier: string;
-}
 
 export type User = RouterOutput["profile"]["me"];
 
@@ -109,17 +92,20 @@ export type UIBloodGroup =
   | "Others"
   | undefined;
 
+export type Group = ArrayElement<
+  RouterOutput["school"]["messaging"]["fetchGroups"]
+>;
+
+export type IGroupActivity = z.infer<typeof GroupActivitySchema>;
+
 export interface ServerToClientEvents {
-  newMessage: (msg: Message) => void;
+  newActivity: (activity: IGroupActivity) => void;
+  addedToGroup: (groupId: string) => void;
+  removedFromGroup: (groupId: string) => void;
 }
 
 export interface ClientToServerEvents {
-  messageCreate: (
-    groupIdentifier: string,
-    text: string,
-    files: FilePermissionsInput[],
-    callback: (message: Message) => void,
-  ) => void;
+  joinGroupRoom: (groupId: string) => void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

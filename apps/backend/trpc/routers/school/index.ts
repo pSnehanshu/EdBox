@@ -11,6 +11,7 @@ import peopleRouter from "./people";
 import examRouter from "./exam";
 import attachmentsRouter from "./attachments";
 import homeworkRouter from "./homework";
+import groupRouter from "./group";
 
 const schoolRouter = router({
   schoolBasicInfo: publicProcedure
@@ -83,6 +84,7 @@ const schoolRouter = router({
       return { schools, hasMore };
     }),
   messaging: messagingRouter,
+  group: groupRouter,
   routine: routineRouter,
   attendance: attendanceRouter,
   class: classStdRouter,

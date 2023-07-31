@@ -10,7 +10,6 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { Socket } from "socket.io-client";
 import type {
   ClientToServerEvents,
-  Group,
   ServerToClientEvents,
   UploadPermission,
 } from "schooltalk-shared/types";
@@ -28,7 +27,7 @@ declare global {
 export type RootStackParamList = {
   Login: undefined;
   Root: NavigatorScreenParams<RootTabParamList> | undefined;
-  ChatWindow: Group;
+  ChatWindow: { groupId: string; name?: string };
   AttendanceTaker: { periodId: string };
   NotFound: undefined;
   SchoolSettings: undefined;
@@ -100,4 +99,13 @@ export interface FileUploadTask {
   file: File;
   uploadResult?: FileSystemUploadResult;
   started: boolean;
+}
+
+export interface IComposerContent {
+  groupId: string;
+  body: string;
+  files?: {
+    permission_id: string;
+    file_name?: string;
+  }[];
 }

@@ -3,65 +3,34 @@ import { useNavigation } from "@react-navigation/native";
 import { format, isToday, isYesterday, isThisYear } from "date-fns";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { SafeAreaView, StyleSheet, Pressable, Image } from "react-native";
+import type { Group } from "schooltalk-shared/types";
 import { getDisplayName } from "schooltalk-shared/misc";
-import type { Group, Message } from "schooltalk-shared/types";
 import type { ListRenderItem } from "@shopify/flash-list";
 import { List, Text, View } from "../../components/Themed";
 import { useGetUserGroups } from "../../utils/groups";
-import { useMessages } from "../../utils/messages-repository";
 
 interface GroupItemProps {
   onClick?: () => void;
   group: Group;
   onMessage?: (date: Date) => void;
 }
-function GroupItem(props: GroupItemProps) {
-  const Messages = useMessages();
-  const { messages } = Messages.useFetchGroupMessages(
-    props.group.identifier,
-    1,
-  );
-  const lastMessage = messages[0] as Message | undefined;
-  const time = useMemo(() => {
-    if (!lastMessage?.created_at) return "";
-
-    const date = new Date(lastMessage.created_at);
-
-    if (isToday(date)) {
-      return format(date, "h:mm aaa");
-    }
-    if (isYesterday(date)) {
-      return "Yesterday";
-    }
-    if (isThisYear(date)) {
-      return format(date, "d MMM");
-    }
-
-    return format(date, "dd/LL/yy");
-  }, [lastMessage?.created_at]);
-
-  useEffect(() => {
-    if (lastMessage?.created_at) {
-      props.onMessage?.(new Date(lastMessage.created_at));
-    }
-  }, [lastMessage?.created_at]);
-
+function GroupItem({ group, onClick, onMessage }: GroupItemProps) {
   return (
     <Pressable
       style={({ pressed }) => [
         styles.chatGroup,
         { opacity: pressed ? 0.5 : 1 },
       ]}
-      onPress={props.onClick}
+      onPress={onClick}
     >
       <Image
         source={require("../../assets/images/multiple-users-silhouette.png")}
         style={styles.chatGroupIcon}
       />
       <View style={styles.chatGroupMiddle}>
-        <Text style={styles.chatGroupName}>{props.group.name}</Text>
+        <Text style={styles.chatGroupName}>{group.name}</Text>
         <Text style={styles.chatGroupLastMessage}>
-          {lastMessage
+          {/* {lastMessage
             ? _.truncate(
                 `${
                   lastMessage.Sender
@@ -72,11 +41,11 @@ function GroupItem(props: GroupItemProps) {
                   length: 45,
                 },
               )
-            : "Tap to chat"}
+            : "Tap to chat"} */}
         </Text>
       </View>
       <View style={styles.chatGroupRight}>
-        <Text style={styles.chatGroupLastMessage}>{time}</Text>
+        {/* <Text style={styles.chatGroupLastMessage}>{time}</Text> */}
       </View>
     </Pressable>
   );
@@ -95,7 +64,7 @@ export default function ChatsListScreen() {
     if (!groups) return [];
 
     return _.sortBy(groups, (group) => {
-      const t = groupTimeMapping[group.identifier];
+      const t = null;
       return t ?? new Date("1970-01-01T00:00:00Z"); // This is to keep empty chats at the bottom
     }).reverse();
   }, [groupTimeMapping, groups?.length]);
@@ -104,11 +73,16 @@ export default function ChatsListScreen() {
     ({ item: group }) => (
       <GroupItem
         group={group}
-        onClick={() => navigation.navigate("ChatWindow", group)}
+        onClick={() =>
+          navigation.navigate("ChatWindow", {
+            groupId: group.id,
+            name: group.name,
+          })
+        }
         onMessage={(date) => {
           setGroupTimeMapping((mapping) => ({
             ...mapping,
-            [group.identifier]: date,
+            // [group.identifier]: date,
           }));
         }}
       />
@@ -120,7 +94,6 @@ export default function ChatsListScreen() {
     <SafeAreaView style={styles.container}>
       <List
         data={sortedGroups}
-        keyExtractor={(g) => g.identifier}
         estimatedItemSize={styles.chatGroup.height}
         renderItem={renderItem}
         refreshing={isLoading}
