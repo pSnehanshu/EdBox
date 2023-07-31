@@ -11,13 +11,12 @@ import {
   Flex,
   useColorModeValue,
 } from "@chakra-ui/react";
-
-import {} from "@chakra-ui/react";
-import { useConfig } from "../utils/config";
+import { useAtom } from "jotai";
+import { SelectedSchoolIdAtom } from "../utils/config";
 
 export default function LoginPage() {
-  const config = useConfig();
-  console.log(config, "config");
+  const schoolId = useAtom(SelectedSchoolIdAtom);
+
   return (
     <>
       <Flex
@@ -32,7 +31,7 @@ export default function LoginPage() {
           isFitted
           size="fit"
           maxH="40vh"
-          defaultIndex={config ? 1 : 0}
+          defaultIndex={schoolId ? 1 : 0}
         >
           <TabList justifyContent="center">
             <Tab>Pick School</Tab>

@@ -19,6 +19,7 @@
     "@trpc/react-query": "^10.32.0",
     "date-fns": "^2.30.0",
     "framer-motion": "^10.12.17",
+    "jotai": "^2.2.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^5.3.4",

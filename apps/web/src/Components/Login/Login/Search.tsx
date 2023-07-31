@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { trpc } from "../../../utils/trpc";
-import { useConfig, useConfigUpdate } from "../../../utils/config";
+import { SelectedSchoolIdAtom } from "../../../utils/config";
+import { useAtom } from "jotai";
 import {
   Box,
   Flex,
@@ -38,16 +39,26 @@ function useDebounce(value: string, delay: number) {
 }
 
 export default function Search() {
-  const [page, setPage] = useState(1);
   const [search, setSearch] = useState<string>("");
   const debouncedSearch = useDebounce(search, 500);
-
+  const [page, setPage] = useState(1);
   const { data, isFetching, isError } = trpc.school.schoolList.useQuery({
     search: debouncedSearch.toLowerCase(),
     page,
   });
-  console.log(search, "search");
-  console.log(data, isFetching, isError);
+
+  const [selectedSchoolId, updateSelectedSchool] =
+    useAtom(SelectedSchoolIdAtom);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const handleOptionSelect = (schoolId: string) => {
+    updateSelectedSchool(schoolId);
+    localStorage.setItem("schoolId", schoolId);
+    setSearch("");
+  };
+
+  const selectedSchool = data?.schools.find((s) => s.id === selectedSchoolId);
+
   return (
     <Flex>
       <Stack>
@@ -61,83 +72,41 @@ export default function Search() {
           boxShadow={"lg"}
           p={8}
         >
-          {/* {isFetching && <Spinner />} */}
+          {isFetching && <Spinner />}
           <Stack spacing={4}>
             <FormControl id="school" w="100%">
-              <DropDown
-                search={search}
-                setSearch={(e) => setSearch(e)}
-                schools={data?.schools}
-              />
+              <Popover isLazy>
+                <Input
+                  placeholder="Your school!"
+                  value={search}
+                  mb={2}
+                  onChange={(e) => setSearch(e.target.value)}
+                  onFocus={() => setIsDropdownOpen(true)}
+                  onBlur={() => setTimeout(() => setIsDropdownOpen(false), 500)}
+                />
+                <p>{selectedSchool?.name}</p>
+
+                <Box maxHeight="150px" overflowY="auto">
+                  <List styleType="none">
+                    {isDropdownOpen &&
+                      data?.schools &&
+                      data?.schools.map((item, index) => (
+                        <ListItem key={index} m={2}>
+                          <Link
+                            onClick={() => handleOptionSelect(item.id)}
+                            color="blue.500"
+                          >
+                            {item.name}
+                          </Link>
+                        </ListItem>
+                      ))}
+                  </List>
+                </Box>
+              </Popover>
             </FormControl>
           </Stack>
         </Box>
       </Stack>
     </Flex>
-  );
-}
-
-type School = {
-  id: string;
-  name: string;
-  website: string | null;
-};
-type DropDownParams = {
-  search: string;
-  setSearch: (searchText: string) => void;
-  schools: School[] | undefined;
-};
-
-function DropDown({ search, setSearch, schools }: DropDownParams) {
-  const updateConfig = useConfigUpdate();
-  const config = useConfig();
-  const [selectedOption, setSelectedOption] = useState<School | null>(null);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-  const handleOptionSelect = (option: School) => {
-    setSelectedOption(option);
-    setSearch(option.name);
-    updateConfig(option.id);
-    localStorage.setItem("schoolId", JSON.stringify(option.id));
-  };
-
-  console.log(config, search, schools, "data");
-  useEffect(() => {
-    const foundObject = schools?.find(
-      (item) => item.id === "clg28nmgv0000chohfd3mar5x",
-    );
-    console.log(foundObject, "data1");
-    setSearch(foundObject?.name ?? "");
-  }, [config, schools]);
-
-  return (
-    <Popover isLazy>
-      <Input
-        placeholder="Your school!"
-        value={search ?? "Your school!"}
-        mb={2}
-        onChange={(e) => setSearch(e.target.value)}
-        onFocus={() => setIsDropdownOpen(true)}
-        onBlur={() => setTimeout(() => setIsDropdownOpen(false), 500)}
-      />
-      <Box maxHeight="150px" overflowY="auto">
-        <List styleType="none">
-          {isDropdownOpen &&
-            schools &&
-            schools.map((item, index) => (
-              <ListItem key={index} m={2}>
-                <Link
-                  onClick={() => {
-                    handleOptionSelect(item);
-                  }}
-                  color="blue.500"
-                >
-                  {item.name}
-                </Link>
-              </ListItem>
-            ))}
-        </List>
-      </Box>
-    </Popover>
   );
 }
