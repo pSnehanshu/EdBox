@@ -2,17 +2,16 @@ import { useState, useEffect } from "react";
 import { trpc } from "../../../utils/trpc";
 
 import {
+  Box,
   FormControl,
   FormLabel,
   Input,
+  Link,
+  List,
   ListItem,
   Popover,
-  PopoverBody,
-  PopoverContent,
-  PopoverTrigger,
   Spinner,
   Stack,
-  UnorderedList,
 } from "@chakra-ui/react";
 
 function useDebounce(value: string, delay: number) {
@@ -69,9 +68,12 @@ type DropDownParams = {
 };
 
 function DropDown({ setSearch, schools }: DropDownParams) {
-  const [selectedOption, setSelectedOption] = useState("");
-  const handleOptionSelect = (option: any) => {
+  const [selectedOption, setSelectedOption] = useState<School | null>(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const handleOptionSelect = (option: School) => {
     setSelectedOption(option);
+    console.log(option, "schoole");
   };
 
   return (
@@ -79,14 +81,27 @@ function DropDown({ setSearch, schools }: DropDownParams) {
       <Input
         placeholder="Click me!"
         onChange={(e) => setSearch(e.target.value)}
+        onFocus={() => setIsDropdownOpen(true)}
+        onBlur={() => setTimeout(() => setIsDropdownOpen(false), 500)}
       />
-
-      <UnorderedList>
-        {schools &&
-          schools.map((item, index) => (
-            <ListItem key={index}>{item.name}</ListItem>
-          ))}
-      </UnorderedList>
+      <Box maxHeight="150px" overflowY="auto">
+        <List styleType="none">
+          {isDropdownOpen &&
+            schools &&
+            schools.map((item, index) => (
+              <ListItem key={index} mb={2}>
+                <Link
+                  onClick={() => {
+                    handleOptionSelect(item);
+                  }}
+                  color="blue.500"
+                >
+                  {item.name}
+                </Link>
+              </ListItem>
+            ))}
+        </List>
+      </Box>
     </Popover>
   );
 }
