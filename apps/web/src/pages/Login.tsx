@@ -25,7 +25,7 @@ import {} from "@chakra-ui/react";
 export default function LoginPage() {
   return (
     <>
-      <Search />
+      {/* <Search /> */}
       <Flex
         minH="100vh"
         align={"center"}
@@ -33,12 +33,17 @@ export default function LoginPage() {
         bg={useColorModeValue("gray.50", "gray.800")}
         flexDirection={"column"}
       >
-        <Tabs colorScheme="purple" isFitted maxH="40vh">
+        {/* <Tabs colorScheme="purple" isFitted maxH="40vh"> */}
+        <Tabs colorScheme="purple" isFitted size="fit" maxH="40vh">
           <TabList justifyContent="center">
+            <Tab>Pick School</Tab>
             <Tab>Parents</Tab>
             <Tab>Student</Tab>
           </TabList>
           <TabPanels>
+            <TabPanel>
+              <Search />
+            </TabPanel>
             <TabPanel>
               <LoginOTP />
             </TabPanel>
