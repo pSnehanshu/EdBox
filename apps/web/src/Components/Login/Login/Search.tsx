@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
 import { trpc } from "../../../utils/trpc";
-
+import { useConfig, useConfigUpdate } from "../../../utils/config";
 import {
   Box,
   Flex,
   FormControl,
-  FormLabel,
   Heading,
   Input,
   Link,
@@ -90,14 +89,26 @@ type DropDownParams = {
 };
 
 function DropDown({ search, setSearch, schools }: DropDownParams) {
+  const updateConfig = useConfigUpdate();
+  const config = useConfig();
   const [selectedOption, setSelectedOption] = useState<School | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleOptionSelect = (option: School) => {
     setSelectedOption(option);
-    console.log(option, "schoole");
     setSearch(option.name);
+    updateConfig(option.id);
+    localStorage.setItem("schoolId", JSON.stringify(option.id));
   };
+
+  console.log(config, search, schools, "data");
+  useEffect(() => {
+    const foundObject = schools?.find(
+      (item) => item.id === "clg28nmgv0000chohfd3mar5x",
+    );
+    console.log(foundObject, "data1");
+    setSearch(foundObject?.name ?? "");
+  }, [config, schools]);
 
   return (
     <Popover isLazy>

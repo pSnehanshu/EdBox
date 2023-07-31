@@ -10,22 +10,16 @@ import {
   TabPanel,
   Flex,
   useColorModeValue,
-  Stack,
-  Box,
-  FormControl,
-  Input,
-  FormLabel,
-  Heading,
-  Button,
-  Link,
 } from "@chakra-ui/react";
 
 import {} from "@chakra-ui/react";
+import { useConfig } from "../utils/config";
 
 export default function LoginPage() {
+  const config = useConfig();
+  console.log(config, "config");
   return (
     <>
-      {/* <Search /> */}
       <Flex
         minH="100vh"
         align={"center"}
@@ -33,8 +27,13 @@ export default function LoginPage() {
         bg={useColorModeValue("gray.50", "gray.800")}
         flexDirection={"column"}
       >
-        {/* <Tabs colorScheme="purple" isFitted maxH="40vh"> */}
-        <Tabs colorScheme="purple" isFitted size="fit" maxH="40vh">
+        <Tabs
+          colorScheme="purple"
+          isFitted
+          size="fit"
+          maxH="40vh"
+          defaultIndex={config ? 1 : 0}
+        >
           <TabList justifyContent="center">
             <Tab>Pick School</Tab>
             <Tab>Parents</Tab>
