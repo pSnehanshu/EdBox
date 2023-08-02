@@ -55,11 +55,13 @@ export default function Search() {
 
   const handleOptionSelect = (schoolId: string) => {
     updateSelectedSchool(schoolId);
-    localStorage.setItem("schoolId", schoolId);
-    setSearch("");
   };
 
   const selectedSchool = data?.schools.find((s) => s.id === selectedSchoolId);
+
+  useEffect(() => {
+    if (selectedSchool && !isDropdownOpen) setSearch(selectedSchool?.name);
+  }, [selectedSchool?.name]);
 
   return (
     <Flex>
@@ -92,8 +94,6 @@ export default function Search() {
                     {isFetching && <Spinner />}
                   </InputRightElement>
                 </InputGroup>
-
-                <p>{selectedSchool?.name}</p>
 
                 <Box maxHeight="150px" overflowY="auto">
                   <List styleType="none">
