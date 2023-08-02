@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { trpc } from "../../../utils/trpc";
-import { SelectedSchoolIdAtom } from "../../../utils/atoms";
+import { trpc } from "../../utils/trpc";
+import { SelectedSchoolIdAtom } from "../../utils/atoms";
 import { useAtom } from "jotai";
 import {
   Box,

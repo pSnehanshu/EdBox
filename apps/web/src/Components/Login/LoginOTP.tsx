@@ -12,21 +12,26 @@ import {
   Text,
   useColorModeValue,
 } from "@chakra-ui/react";
-
-// import { trpc } from "../../../utils/trpc";
-
-// Mutations
-// const requestOtp = trpc.auth.requestPhoneNumberOTP.useMutation({
-//   onSuccess(data) {
-//     // setUserId(data.userId);
-//   },
-//   onError(error) {
-//     console.error(error);
-//     console.error("Error", "Phone number isn't registered");
-//   },
-// });
+import { trpc } from "../../utils/trpc";
+import { useState } from "react";
+import { useAtom } from "jotai";
+import { SelectedSchoolIdAtom } from "../../utils/atoms";
 
 export default function LoginOTP() {
+  const [phoneNo, setPhoneNo] = useState("");
+  const [selectedSchoolId] = useAtom(SelectedSchoolIdAtom);
+
+  const requestOtp = trpc.auth.requestPhoneNumberOTP.useMutation({
+    onSuccess(data) {
+      // setUserId(data.userId)
+      console.log(data, "user");
+    },
+    onError(error) {
+      console.error(error);
+      console.error("Error", "Phone number isn't registered");
+    },
+  });
+
   return (
     <Flex>
       <Stack>
@@ -42,7 +47,12 @@ export default function LoginOTP() {
           <Stack spacing={4}>
             <FormControl id="email">
               <FormLabel>Phone Number</FormLabel>
-              <Input type="tel" />
+              <Input
+                type="tel"
+                value={phoneNo}
+                onChange={(e) => setPhoneNo(e.target.value)}
+                maxLength={10}
+              />
             </FormControl>
             <Stack spacing={10}>
               <Stack
@@ -55,7 +65,11 @@ export default function LoginOTP() {
               </Stack>
               <Button
                 onClick={() => {
-                  console.log("otp");
+                  if (phoneNo && selectedSchoolId)
+                    requestOtp.mutate({
+                      phoneNumber: phoneNo,
+                      schoolId: selectedSchoolId,
+                    });
                 }}
                 bg={"purple.600"}
                 color={"white"}
