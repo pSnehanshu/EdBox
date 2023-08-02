@@ -13,7 +13,7 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { trpc } from "../../utils/trpc";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useAtom } from "jotai";
 import { SelectedSchoolIdAtom } from "../../utils/atoms";
 import OtpPopup from "./OtpPopup";
@@ -22,10 +22,11 @@ export default function LoginOTP() {
   const [phoneNo, setPhoneNo] = useState("");
   const [selectedSchoolId] = useAtom(SelectedSchoolIdAtom);
   const [openOtp, setOpenOtp] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
   const requestOtp = trpc.auth.requestPhoneNumberOTP.useMutation({
     onSuccess(data) {
-      // setUserId(data.userId)
+      setUserId(data.userId);
       console.log(data, "user");
       setOpenOtp(true);
     },
@@ -35,9 +36,35 @@ export default function LoginOTP() {
     },
   });
 
+  const submitOTPMutation = trpc.auth.submitLoginOTP.useMutation({
+    async onSuccess(data) {
+      console.log(data, "otp");
+    },
+    onError(error) {
+      console.error(error);
+    },
+  });
+
+  const onSubmit = useCallback(
+    async (otp: any) => {
+      if (userId && otp && selectedSchoolId) {
+        submitOTPMutation.mutate({
+          userId,
+          otp,
+          schoolId: selectedSchoolId,
+        });
+      }
+    },
+    [userId, selectedSchoolId],
+  );
+
   return (
     <Flex>
-      <OtpPopup visible={openOtp} onClose={() => setOpenOtp(false)} />
+      <OtpPopup
+        visible={openOtp}
+        onClose={() => setOpenOtp(false)}
+        onSubmit={(otp: any) => onSubmit(otp)}
+      />
       <Stack>
         <Stack>
           <Heading fontSize={"4xl"}>Sign in to your account</Heading>

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Button,
   HStack,
@@ -15,15 +16,20 @@ import {
 interface props {
   visible: boolean;
   onClose?: () => void;
-  //  onSubmit
+  onSubmit: (otp: any) => void;
   //  description
   //  phoneNo
 }
-const handleComplete = () => {
-  console.log("aab");
-};
 
-export default function OtpPopup({ visible, onClose }: props) {
+export default function OtpPopup({ visible, onClose, onSubmit }: props) {
+  const [otp, setOtp] = useState<string | null>(null);
+
+  const handleComplete = (value: any) => {
+    // console.log(value);
+    onSubmit(value);
+    // onClose && onClose();
+  };
+
   return (
     <Modal isOpen={visible} onClose={() => onClose && onClose()}>
       <ModalOverlay />
