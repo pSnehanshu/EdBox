@@ -1,7 +1,6 @@
-import LoginEmail from "../Components/Login/Login/LoginEmail";
-import LoginOTP from "../Components/Login/Login/LoginOTP";
-import StudentLogin from "../Components/Login/Login/LoginStudetn";
-import Search from "../Components/Login/Login/Search";
+import LoginOTP from "../Components/Login/LoginOTP";
+import StudentLogin from "../Components/Login/LoginStudent";
+import Search from "../Components/Login/Search";
 import {
   Tabs,
   TabList,
