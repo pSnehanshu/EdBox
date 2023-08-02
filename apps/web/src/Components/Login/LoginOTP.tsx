@@ -16,15 +16,18 @@ import { trpc } from "../../utils/trpc";
 import { useState } from "react";
 import { useAtom } from "jotai";
 import { SelectedSchoolIdAtom } from "../../utils/atoms";
+import OtpPopup from "./OtpPopup";
 
 export default function LoginOTP() {
   const [phoneNo, setPhoneNo] = useState("");
   const [selectedSchoolId] = useAtom(SelectedSchoolIdAtom);
+  const [openOtp, setOpenOtp] = useState(false);
 
   const requestOtp = trpc.auth.requestPhoneNumberOTP.useMutation({
     onSuccess(data) {
       // setUserId(data.userId)
       console.log(data, "user");
+      setOpenOtp(true);
     },
     onError(error) {
       console.error(error);
@@ -34,6 +37,7 @@ export default function LoginOTP() {
 
   return (
     <Flex>
+      <OtpPopup visible={openOtp} onClose={() => setOpenOtp(false)} />
       <Stack>
         <Stack>
           <Heading fontSize={"4xl"}>Sign in to your account</Heading>
