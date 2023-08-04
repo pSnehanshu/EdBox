@@ -16,7 +16,7 @@ import { useState } from "react";
 
 export default function LoginPage() {
   const schoolId = useAtom(SelectedSchoolIdAtom);
-  console.log(schoolId, "schoolId");
+
   const [showSchoolSelector, setshowSchoolSelector] = useState(false);
 
   return (
