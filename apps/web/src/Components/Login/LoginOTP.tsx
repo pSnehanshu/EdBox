@@ -17,8 +17,11 @@ import { useState, useCallback } from "react";
 import { useAtom } from "jotai";
 import { SelectedSchoolIdAtom } from "../../utils/atoms";
 import OtpPopup from "./OtpPopup";
+interface props {
+  setshowSchoolSelector: () => void;
+}
 
-export default function LoginOTP() {
+export default function LoginOTP({ setshowSchoolSelector }: props) {
   const [phoneNo, setPhoneNo] = useState("");
   const [selectedSchoolId] = useAtom(SelectedSchoolIdAtom);
   const [openOtp, setOpenOtp] = useState(false);
@@ -85,7 +88,7 @@ export default function LoginOTP() {
                 maxLength={10}
               />
             </FormControl>
-            <Stack spacing={10}>
+            <Stack spacing={8}>
               <Stack
                 direction={{ base: "column", sm: "row" }}
                 align={"start"}
@@ -110,6 +113,7 @@ export default function LoginOTP() {
               >
                 Request OTP
               </Button>
+              <Button onClick={setshowSchoolSelector}>Change School</Button>
             </Stack>
           </Stack>
         </Box>

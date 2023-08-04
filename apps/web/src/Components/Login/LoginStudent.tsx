@@ -14,7 +14,11 @@ import {
   Select,
 } from "@chakra-ui/react";
 
-export default function StudentLogin() {
+interface props {
+  setshowSchoolSelector: () => void;
+}
+
+export default function StudentLogin({ setshowSchoolSelector }: props) {
   return (
     <Flex>
       <Stack>
@@ -55,7 +59,7 @@ export default function StudentLogin() {
               <FormLabel>Roll-No</FormLabel>
               <Input type="text" />
             </FormControl>
-            <Stack spacing={10}>
+            <Stack spacing={8}>
               <Stack
                 direction={{ base: "column", sm: "row" }}
                 align={"start"}
@@ -76,6 +80,7 @@ export default function StudentLogin() {
               >
                 Request OTP
               </Button>
+              <Button onClick={setshowSchoolSelector}>Change School</Button>
             </Stack>
           </Stack>
         </Box>

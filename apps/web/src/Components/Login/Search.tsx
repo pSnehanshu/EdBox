@@ -4,6 +4,7 @@ import { SelectedSchoolIdAtom } from "../../utils/atoms";
 import { useAtom } from "jotai";
 import {
   Box,
+  Button,
   Flex,
   FormControl,
   Heading,
@@ -39,8 +40,11 @@ function useDebounce(value: string, delay: number) {
   );
   return debouncedValue;
 }
+interface props {
+  setshowSchoolSelector: () => void;
+}
 
-export default function Search() {
+export default function Search({ setshowSchoolSelector }: props) {
   const [search, setSearch] = useState<string>("");
   const debouncedSearch = useDebounce(search, 500);
   const [page, setPage] = useState(1);
@@ -55,6 +59,7 @@ export default function Search() {
 
   const handleOptionSelect = (schoolId: string) => {
     updateSelectedSchool(schoolId);
+    setshowSchoolSelector();
   };
 
   const selectedSchool = data?.schools.find((s) => s.id === selectedSchoolId);
@@ -113,6 +118,9 @@ export default function Search() {
                 </Box>
               </Popover>
             </FormControl>
+            {selectedSchoolId && (
+              <Button onClick={setshowSchoolSelector}>Go to Login</Button>
+            )}
           </Stack>
         </Box>
       </Stack>

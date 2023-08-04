@@ -12,9 +12,12 @@ import {
 } from "@chakra-ui/react";
 import { useAtom } from "jotai";
 import { SelectedSchoolIdAtom } from "../utils/atoms";
+import { useState } from "react";
 
 export default function LoginPage() {
   const schoolId = useAtom(SelectedSchoolIdAtom);
+  console.log(schoolId, "schoolId");
+  const [showSchoolSelector, setshowSchoolSelector] = useState(false);
 
   return (
     <>
@@ -25,30 +28,34 @@ export default function LoginPage() {
         bg={useColorModeValue("gray.50", "gray.800")}
         flexDirection={"column"}
       >
-        <Tabs
-          colorScheme="purple"
-          isFitted
-          size="fit"
-          maxH="40vh"
-          defaultIndex={schoolId ? 1 : 0}
-        >
-          <TabList justifyContent="center">
-            <Tab>Pick School</Tab>
-            <Tab>Parents</Tab>
-            <Tab>Student</Tab>
-          </TabList>
-          <TabPanels>
-            <TabPanel>
-              <Search />
-            </TabPanel>
-            <TabPanel>
-              <LoginOTP />
-            </TabPanel>
-            <TabPanel>
-              <StudentLogin />
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
+        {!schoolId[0] || showSchoolSelector ? (
+          <Search setshowSchoolSelector={() => setshowSchoolSelector(false)} />
+        ) : (
+          <Tabs
+            colorScheme="purple"
+            isFitted
+            size="fit"
+            maxH="40vh"
+            defaultIndex={schoolId ? 0 : 1}
+          >
+            <TabList justifyContent="center">
+              <Tab>Parents</Tab>
+              <Tab>Student</Tab>
+            </TabList>
+            <TabPanels>
+              <TabPanel>
+                <LoginOTP
+                  setshowSchoolSelector={() => setshowSchoolSelector(true)}
+                />
+              </TabPanel>
+              <TabPanel>
+                <StudentLogin
+                  setshowSchoolSelector={() => setshowSchoolSelector(true)}
+                />
+              </TabPanel>
+            </TabPanels>
+          </Tabs>
+        )}
       </Flex>
     </>
   );
