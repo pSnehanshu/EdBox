@@ -13,25 +13,24 @@ import {
   PinInputField,
 } from "@chakra-ui/react";
 
-interface props {
+interface OtpPopupProps {
   visible: boolean;
   onClose?: () => void;
-  onSubmit: (otp: any) => void;
-  //  description
-  //  phoneNo
+  onSubmit: (otp: string) => void;
 }
 
-export default function OtpPopup({ visible, onClose, onSubmit }: props) {
-  const [otp, setOtp] = useState<string | null>(null);
-
-  const handleComplete = (value: any) => {
-    // console.log(value);
+export default function OtpPopup({
+  visible,
+  onClose,
+  onSubmit,
+}: OtpPopupProps) {
+  const handleComplete = (value: string) => {
     onSubmit(value);
-    // onClose && onClose();
+    onClose?.();
   };
 
   return (
-    <Modal isOpen={visible} onClose={() => onClose && onClose()}>
+    <Modal isOpen={visible} onClose={() => onClose?.()}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Submit OTP</ModalHeader>

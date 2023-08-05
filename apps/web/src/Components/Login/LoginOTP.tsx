@@ -9,28 +9,35 @@ import {
   Link,
   Button,
   Heading,
-  Text,
   useColorModeValue,
 } from "@chakra-ui/react";
+import { parseISO } from "date-fns";
 import { trpc } from "../../utils/trpc";
 import { useState, useCallback } from "react";
 import { useAtom } from "jotai";
-import { SelectedSchoolIdAtom } from "../../utils/atoms";
+import {
+  SelectedSchoolIdAtom,
+  SessionExpiryAtom,
+  SessionTokenAtom,
+} from "../../utils/atoms";
 import OtpPopup from "./OtpPopup";
-interface props {
+
+interface LoginOtpProps {
   setshowSchoolSelector: () => void;
 }
 
-export default function LoginOTP({ setshowSchoolSelector }: props) {
-  const [phoneNo, setPhoneNo] = useState("");
+export default function LoginOTP({ setshowSchoolSelector }: LoginOtpProps) {
   const [selectedSchoolId] = useAtom(SelectedSchoolIdAtom);
+  const [, setToken] = useAtom(SessionTokenAtom);
+  const [, setTokenExpiry] = useAtom(SessionExpiryAtom);
+
+  const [phoneNo, setPhoneNo] = useState("");
   const [openOtp, setOpenOtp] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
 
   const requestOtp = trpc.auth.requestPhoneNumberOTP.useMutation({
     onSuccess(data) {
       setUserId(data.userId);
-      console.log(data, "user");
       setOpenOtp(true);
     },
     onError(error) {
@@ -40,8 +47,9 @@ export default function LoginOTP({ setshowSchoolSelector }: props) {
   });
 
   const submitOTPMutation = trpc.auth.submitLoginOTP.useMutation({
-    async onSuccess(data) {
-      console.log(data, "otp");
+    async onSuccess({ token, expiry_date }) {
+      setToken(token);
+      setTokenExpiry(parseISO(expiry_date));
     },
     onError(error) {
       console.error(error);
@@ -49,7 +57,7 @@ export default function LoginOTP({ setshowSchoolSelector }: props) {
   });
 
   const onSubmit = useCallback(
-    async (otp: any) => {
+    async (otp: string) => {
       if (userId && otp && selectedSchoolId) {
         submitOTPMutation.mutate({
           userId,
@@ -66,7 +74,7 @@ export default function LoginOTP({ setshowSchoolSelector }: props) {
       <OtpPopup
         visible={openOtp}
         onClose={() => setOpenOtp(false)}
-        onSubmit={(otp: any) => onSubmit(otp)}
+        onSubmit={(otp) => onSubmit(otp)}
       />
       <Stack>
         <Stack>
