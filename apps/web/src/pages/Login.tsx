@@ -39,8 +39,8 @@ export default function LoginPage() {
             defaultIndex={schoolId ? 0 : 1}
           >
             <TabList justifyContent="center">
-              <Tab>Parents</Tab>
-              <Tab>Student</Tab>
+              <Tab>Parents, Teachers, and Staff</Tab>
+              <Tab>Students</Tab>
             </TabList>
             <TabPanels>
               <TabPanel>
