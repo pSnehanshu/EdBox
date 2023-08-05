@@ -8,7 +8,14 @@ import { trpc } from "./utils/trpc";
 import { env } from "./utils/env.ts";
 
 const ProvidersTree: React.FC = () => {
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: { staleTime: 30000 },
+        },
+      }),
+  );
   const [trpcClient] = useState(() =>
     trpc.createClient({
       links: [

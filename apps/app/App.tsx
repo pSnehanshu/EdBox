@@ -51,7 +51,14 @@ function AppWithConfig() {
     AsyncStorage.setItem(COLOR_SCHEME, scheme);
   }, []);
 
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: { staleTime: 30000 },
+        },
+      }),
+  );
   const [trpcClient] = useState(() =>
     trpc.createClient({
       links: [
