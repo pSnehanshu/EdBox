@@ -1,17 +1,11 @@
-import React, { useMemo, useState } from "react";
+import React, { Suspense, useMemo, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { httpBatchLink } from "@trpc/client";
 import { ChakraProvider } from "@chakra-ui/react";
 import Routes from "./routes.tsx";
-import { trpc } from "./utils/trpc";
-import { env } from "./utils/env.ts";
-import { useAtomValue } from "jotai";
-import { SessionTokenAtom } from "./utils/atoms.ts";
+import { trpc, links } from "./utils/trpc";
 
 const ProvidersTree: React.FC = () => {
-  const token = useAtomValue(SessionTokenAtom);
-
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -21,21 +15,10 @@ const ProvidersTree: React.FC = () => {
       }),
   );
 
-  const trpcClient = useMemo(
-    () =>
-      trpc.createClient({
-        links: [
-          httpBatchLink({
-            url: `${env.VITE_BACKEND_URL}/trpc`,
-            async headers() {
-              return {
-                "x-session-id": token,
-              };
-            },
-          }),
-        ],
-      }),
-    [token],
+  const [trpcClient] = useState(() =>
+    trpc.createClient({
+      links,
+    }),
   );
 
   return (
@@ -43,7 +26,9 @@ const ProvidersTree: React.FC = () => {
       <ChakraProvider>
         <trpc.Provider client={trpcClient} queryClient={queryClient}>
           <QueryClientProvider client={queryClient}>
-            <Routes />
+            <Suspense fallback={<h1>Please wait...</h1>}>
+              <Routes />
+            </Suspense>
           </QueryClientProvider>
         </trpc.Provider>
       </ChakraProvider>

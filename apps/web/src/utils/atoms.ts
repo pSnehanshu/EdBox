@@ -1,6 +1,9 @@
-import { parseISO } from "date-fns";
+import { parseISO, isPast } from "date-fns";
+import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 import { z } from "zod";
+import type { User } from "schooltalk-shared/types";
+import { trpcVanillaClient } from "./trpc";
 
 export const SelectedSchoolIdAtom = atomWithStorage<string | null>(
   "schoolId",
@@ -8,6 +11,25 @@ export const SelectedSchoolIdAtom = atomWithStorage<string | null>(
 );
 
 export const SessionTokenAtom = atomWithStorage("token", "");
+
+let userInMemory: User | null = null;
+
+export const IsLoggedInAtom = atom<Promise<boolean>>(async (get) => {
+  const expiry = get(SessionExpiryAtom);
+  if (isPast(expiry)) return false;
+
+  if (userInMemory) return true; // TODO: Implement expiry logic
+
+  // Check from API
+  try {
+    userInMemory = await trpcVanillaClient.profile.me.query();
+    return true;
+  } catch (error) {
+    console.error(error);
+  }
+
+  return false;
+});
 
 const expiryAtomSchema = z
   .string()
