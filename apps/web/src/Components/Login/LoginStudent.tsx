@@ -12,13 +12,19 @@ import {
   Text,
   useColorModeValue,
   Select,
+  Spinner,
 } from "@chakra-ui/react";
 import { trpc } from "../../utils/trpc";
 import { useAtom } from "jotai";
-import { SelectedSchoolIdAtom } from "../../utils/atoms";
+import {
+  SelectedSchoolIdAtom,
+  SessionExpiryAtom,
+  SessionTokenAtom,
+} from "../../utils/atoms";
 import { useCallback, useState } from "react";
-import { ClassWithSections, Section } from "schooltalk-shared/types";
+import { ClassWithSections } from "schooltalk-shared/types";
 import OtpPopup from "./OtpPopup";
+import { parseISO } from "date-fns";
 
 interface props {
   setshowSchoolSelector: () => void;
@@ -26,12 +32,14 @@ interface props {
 
 export default function StudentLogin({ setshowSchoolSelector }: props) {
   const [selectedSchoolId] = useAtom(SelectedSchoolIdAtom);
+  const [, setToken] = useAtom(SessionTokenAtom);
+  const [, setTokenExpiry] = useAtom(SessionExpiryAtom);
 
   const [selectedClass, setSelectedClass] = useState<ClassWithSections[]>();
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(
     null,
   );
-  const [rollno, setRollNo] = useState<string>();
+  const [rollno, setRollNo] = useState<string>("");
   const [openOtp, setOpenOtp] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
 
@@ -49,8 +57,7 @@ export default function StudentLogin({ setshowSchoolSelector }: props) {
 
   const classesAndSectionsData =
     trpc.school.class.fetchClassesAndSections.useQuery(
-      { schoolId: selectedSchoolId },
-      // type error
+      { schoolId: selectedSchoolId! },
       { cacheTime: 0 },
     );
 
@@ -73,8 +80,9 @@ export default function StudentLogin({ setshowSchoolSelector }: props) {
   };
 
   const submitOTPMutation = trpc.auth.submitLoginOTP.useMutation({
-    async onSuccess(data) {
-      console.log(data, "otp");
+    async onSuccess({ token, expiry_date }) {
+      setToken(token);
+      setTokenExpiry(parseISO(expiry_date));
     },
     onError(error) {
       console.error(error);
@@ -167,7 +175,18 @@ export default function StudentLogin({ setshowSchoolSelector }: props) {
               </Stack>
               <Button
                 onClick={() => {
-                  console.log("student");
+                  if (
+                    selectedClass &&
+                    selectedSectionId &&
+                    rollno &&
+                    selectedSchoolId
+                  )
+                    requestRollNumberOTP.mutate({
+                      school_id: selectedSchoolId,
+                      class_id: selectedClass[0].numeric_id,
+                      section_id: Number(selectedSectionId),
+                      rollnum: Number(rollno),
+                    });
                 }}
                 bg={"purple.600"}
                 color={"white"}
@@ -175,7 +194,7 @@ export default function StudentLogin({ setshowSchoolSelector }: props) {
                   bg: "purple.700",
                 }}
               >
-                Request OTP
+                {requestRollNumberOTP.isLoading ? <Spinner /> : "Request OTP"}
               </Button>
               <Button onClick={setshowSchoolSelector}>Change School</Button>
             </Stack>

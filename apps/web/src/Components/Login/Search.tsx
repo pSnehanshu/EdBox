@@ -102,8 +102,7 @@ export default function Search({ setshowSchoolSelector }: props) {
 
                 <Box maxHeight="150px" overflowY="auto">
                   <List styleType="none">
-                    {isDropdownOpen &&
-                      data?.schools &&
+                    {data?.schools &&
                       data?.schools.map((item, index) => (
                         <ListItem key={index} m={2}>
                           <Link

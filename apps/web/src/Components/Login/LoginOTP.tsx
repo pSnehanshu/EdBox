@@ -10,6 +10,7 @@ import {
   Button,
   Heading,
   useColorModeValue,
+  Spinner,
 } from "@chakra-ui/react";
 import { parseISO } from "date-fns";
 import { trpc } from "../../utils/trpc";
@@ -119,7 +120,7 @@ export default function LoginOTP({ setshowSchoolSelector }: LoginOtpProps) {
                   bg: "purple.700",
                 }}
               >
-                Request OTP
+                {requestOtp.isLoading ? <Spinner /> : "Request OTP"}
               </Button>
               <Button onClick={setshowSchoolSelector}>Change School</Button>
             </Stack>
