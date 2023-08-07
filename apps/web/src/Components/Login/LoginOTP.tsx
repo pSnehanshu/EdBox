@@ -120,7 +120,11 @@ export default function LoginOTP({ setshowSchoolSelector }: LoginOtpProps) {
                   bg: "purple.700",
                 }}
               >
-                {requestOtp.isLoading ? <Spinner /> : "Request OTP"}
+                {requestOtp.isLoading || submitOTPMutation.isLoading ? (
+                  <Spinner />
+                ) : (
+                  "Request OTP"
+                )}
               </Button>
               <Button onClick={setshowSchoolSelector}>Change School</Button>
             </Stack>

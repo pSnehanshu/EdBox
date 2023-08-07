@@ -194,7 +194,12 @@ export default function StudentLogin({ setshowSchoolSelector }: props) {
                   bg: "purple.700",
                 }}
               >
-                {requestRollNumberOTP.isLoading ? <Spinner /> : "Request OTP"}
+                {requestRollNumberOTP.isLoading ||
+                submitOTPMutation.isLoading ? (
+                  <Spinner />
+                ) : (
+                  "Request OTP"
+                )}
               </Button>
               <Button onClick={setshowSchoolSelector}>Change School</Button>
             </Stack>
