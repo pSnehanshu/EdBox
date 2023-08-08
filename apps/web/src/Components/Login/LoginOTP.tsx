@@ -20,6 +20,7 @@ import {
   SelectedSchoolIdAtom,
   SessionExpiryAtom,
   SessionTokenAtom,
+  CurrentUserId,
 } from "../../utils/atoms";
 import OtpPopup from "./OtpPopup";
 
@@ -31,14 +32,14 @@ export default function LoginOTP({ setshowSchoolSelector }: LoginOtpProps) {
   const [selectedSchoolId] = useAtom(SelectedSchoolIdAtom);
   const [, setToken] = useAtom(SessionTokenAtom);
   const [, setTokenExpiry] = useAtom(SessionExpiryAtom);
+  const [currentUserId, setCurrentUserId] = useAtom(CurrentUserId);
 
   const [phoneNo, setPhoneNo] = useState("");
   const [openOtp, setOpenOtp] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
 
   const requestOtp = trpc.auth.requestPhoneNumberOTP.useMutation({
     onSuccess(data) {
-      setUserId(data.userId);
+      setCurrentUserId(data.userId);
       setOpenOtp(true);
     },
     onError(error) {
@@ -59,15 +60,15 @@ export default function LoginOTP({ setshowSchoolSelector }: LoginOtpProps) {
 
   const onSubmit = useCallback(
     async (otp: string) => {
-      if (userId && otp && selectedSchoolId) {
+      if (currentUserId && otp && selectedSchoolId) {
         submitOTPMutation.mutate({
-          userId,
+          userId: currentUserId,
           otp,
           schoolId: selectedSchoolId,
         });
       }
     },
-    [userId, selectedSchoolId],
+    [currentUserId, selectedSchoolId],
   );
 
   return (

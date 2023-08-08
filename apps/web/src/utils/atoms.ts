@@ -54,3 +54,6 @@ export const SessionExpiryAtom = atomWithStorage<Date>(
     },
   },
 );
+
+export const CurrentRole = atomWithStorage<string | null>("role", null);
+export const CurrentUserId = atomWithStorage<string | null>("userId", null);
