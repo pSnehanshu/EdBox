@@ -19,6 +19,8 @@ import { useAtom } from "jotai";
 import { CurrentUserId } from "../utils/atoms";
 import DefaultAvatar from "../assets/images/default-avatar.jpg";
 import Logo from "../assets/images/splash.png";
+import { useMemo } from "react";
+import { StaticRole } from "schooltalk-shared/misc";
 
 export default function Navbar() {
   const [userId] = useAtom(CurrentUserId);
@@ -47,6 +49,21 @@ export default function Navbar() {
     { staleTime: 5 * 60 * 1000, enabled: !!user?.avatar_id },
   );
 
+  const availableRoles = useMemo<StaticRole[]>(() => {
+    const roles: StaticRole[] = [];
+    if (user?.Teacher?.id) roles.push(StaticRole.teacher);
+    if (user?.Student?.id) roles.push(StaticRole.student);
+    if (user?.Parent?.id) roles.push(StaticRole.parent);
+    if (user?.Staff?.role === "principal") roles.push(StaticRole.principal);
+    if (user?.Staff?.role === "vice_principal")
+      roles.push(StaticRole.vice_principal);
+    if (user?.Staff?.role === "others") roles.push(StaticRole.staff);
+
+    return roles;
+  }, [user]);
+
+  console.log(availableRoles);
+
   return (
     <>
       <Box bg={useColorModeValue("gray.100", "gray.900")} px={4}>
@@ -57,10 +74,13 @@ export default function Navbar() {
 
           <Flex alignItems={"center"}>
             <Stack direction={"row"} spacing={7}>
-              <Select placeholder="Select option">
-                <option value="option1">Option 1</option>
-                <option value="option2">Option 2</option>
-                <option value="option3">Option 3</option>
+              <Select placeholder="Select your role">
+                {availableRoles &&
+                  availableRoles?.map((item) => (
+                    <option value={item} key={item}>
+                      {StaticRole[item].split("_").join(" ").toUpperCase()}
+                    </option>
+                  ))}
               </Select>
               <Menu>
                 <MenuButton
