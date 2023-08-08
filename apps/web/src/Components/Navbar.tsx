@@ -29,7 +29,6 @@ export default function Navbar() {
     userId: userId!,
   });
   const user = profileQuery.data;
-  console.log(user, "userdata");
 
   const urlQuery = trpc.school.attachment.getFileURL.useQuery(
     {
@@ -61,8 +60,6 @@ export default function Navbar() {
 
     return roles;
   }, [user]);
-
-  console.log(availableRoles);
 
   return (
     <>
