@@ -4,6 +4,7 @@ import { atomWithStorage } from "jotai/utils";
 import { z } from "zod";
 import type { User } from "schooltalk-shared/types";
 import { trpcVanillaClient } from "./trpc";
+import { StaticRole } from "schooltalk-shared/misc";
 
 export const SelectedSchoolIdAtom = atomWithStorage<string | null>(
   "schoolId",
@@ -55,5 +56,5 @@ export const SessionExpiryAtom = atomWithStorage<Date>(
   },
 );
 
-export const CurrentRole = atomWithStorage<string | null>("role", null);
+export const CurrentRole = atomWithStorage<StaticRole>("role", StaticRole.none);
 export const CurrentUserId = atomWithStorage<string | null>("userId", null);

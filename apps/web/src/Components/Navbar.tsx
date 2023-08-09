@@ -13,10 +13,11 @@ import {
   Stack,
   Center,
   Select,
+  useColorMode,
 } from "@chakra-ui/react";
 import { trpc } from "../utils/trpc";
-import { useAtom } from "jotai";
-import { CurrentUserId } from "../utils/atoms";
+import { useAtom, useAtomValue } from "jotai";
+import { CurrentRole, CurrentUserId, IsLoggedInAtom } from "../utils/atoms";
 import DefaultAvatar from "../assets/images/default-avatar.jpg";
 import Logo from "../assets/images/splash.png";
 import { useMemo } from "react";
@@ -29,6 +30,8 @@ export default function Navbar() {
     userId: userId!,
   });
   const user = profileQuery.data;
+  const isLoggedIn = useAtomValue(IsLoggedInAtom);
+  const [currentUserRole, setCurrentUserRole] = useAtom(CurrentRole);
 
   const urlQuery = trpc.school.attachment.getFileURL.useQuery(
     {
@@ -49,6 +52,7 @@ export default function Navbar() {
   );
 
   const availableRoles = useMemo<StaticRole[]>(() => {
+    if (!isLoggedIn) return [];
     const roles: StaticRole[] = [];
     if (user?.Teacher?.id) roles.push(StaticRole.teacher);
     if (user?.Student?.id) roles.push(StaticRole.student);
@@ -61,6 +65,11 @@ export default function Navbar() {
     return roles;
   }, [user]);
 
+  const handleChangeRole = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const role = e.target.value;
+    setCurrentUserRole(StaticRole[role as keyof typeof StaticRole]);
+  };
+
   return (
     <>
       <Box bg={useColorModeValue("gray.100", "gray.900")} px={4}>
@@ -71,10 +80,13 @@ export default function Navbar() {
 
           <Flex alignItems={"center"}>
             <Stack direction={"row"} spacing={7}>
-              <Select placeholder="Select your role">
+              <Select
+                placeholder="Select your role"
+                onChange={handleChangeRole}
+              >
                 {availableRoles &&
                   availableRoles?.map((item) => (
-                    <option value={item} key={item}>
+                    <option value={StaticRole[item]} key={item}>
                       {StaticRole[item].split("_").join(" ").toUpperCase()}
                     </option>
                   ))}
