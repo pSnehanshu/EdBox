@@ -33,7 +33,7 @@ import { MoonIcon, SunIcon } from "@chakra-ui/icons";
 
 export default function Navbar() {
   const history = useHistory();
-  const [userId] = useAtom(CurrentUserIdAtom);
+  const [userId, setUserId] = useAtom(CurrentUserIdAtom);
   const [, setToken] = useAtom(SessionTokenAtom);
   const [, setTokenExpire] = useAtom(SessionExpiryAtom);
   const { colorMode, toggleColorMode } = useColorMode();
@@ -85,7 +85,9 @@ export default function Navbar() {
   const logOut = () => {
     setToken("");
     setTokenExpire(new Date());
-    history.push("/login");
+    setCurrentUserRole(StaticRole.none);
+    setUserId(null);
+    // window.location.reload();
   };
 
   return (
