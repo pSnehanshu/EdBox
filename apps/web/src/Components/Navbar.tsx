@@ -82,12 +82,11 @@ export default function Navbar() {
     setCurrentUserRole(StaticRole[role as keyof typeof StaticRole]);
   };
 
-  const logOut = () => {
+  const handleLogout = () => {
     setToken("");
     setTokenExpire(new Date());
     setCurrentUserRole(StaticRole.none);
     setUserId(null);
-    // window.location.reload();
   };
 
   return (
@@ -146,7 +145,7 @@ export default function Navbar() {
                   <br />
                   <MenuDivider />
                   <MenuItem>Account Settings</MenuItem> {/* edit details */}
-                  <MenuItem onClick={() => logOut()}>Logout</MenuItem>
+                  <MenuItem onClick={handleLogout}>Logout</MenuItem>
                 </MenuList>
               </Menu>
             </Stack>
