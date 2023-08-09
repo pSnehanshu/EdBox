@@ -17,7 +17,7 @@ import {
 import { trpc } from "../../utils/trpc";
 import { useAtom } from "jotai";
 import {
-  CurrentUserId,
+  CurrentUserIdAtom,
   SelectedSchoolIdAtom,
   SessionExpiryAtom,
   SessionTokenAtom,
@@ -43,7 +43,7 @@ export default function StudentLogin({ setshowSchoolSelector }: props) {
   const [rollno, setRollNo] = useState<string>("");
   const [openOtp, setOpenOtp] = useState(false);
   // const [userId, setUserId] = useState<string | null>(null);
-  const [currentUserId, setCurrentUserId] = useAtom(CurrentUserId);
+  const [currentUserId, setCurrentUserId] = useAtom(CurrentUserIdAtom);
 
   const requestRollNumberOTP = trpc.auth.rollNumberLoginRequestOTP.useMutation({
     onSuccess(data) {

@@ -17,21 +17,31 @@ import {
 } from "@chakra-ui/react";
 import { trpc } from "../utils/trpc";
 import { useAtom, useAtomValue } from "jotai";
-import { CurrentRole, CurrentUserId, IsLoggedInAtom } from "../utils/atoms";
+import {
+  CurrentRoleAtom,
+  CurrentUserIdAtom,
+  IsLoggedInAtom,
+  SessionExpiryAtom,
+  SessionTokenAtom,
+} from "../utils/atoms";
 import DefaultAvatar from "../assets/images/default-avatar.jpg";
 import Logo from "../assets/images/splash.png";
 import { useMemo } from "react";
 import { StaticRole } from "schooltalk-shared/misc";
+import { useHistory } from "react-router-dom";
 
 export default function Navbar() {
-  const [userId] = useAtom(CurrentUserId);
+  const history = useHistory();
+  const [userId] = useAtom(CurrentUserIdAtom);
+  const [, setToken] = useAtom(SessionTokenAtom);
+  const [, setTokenExpire] = useAtom(SessionExpiryAtom);
 
   const profileQuery = trpc.profile.getUserProfile.useQuery({
     userId: userId!,
   });
   const user = profileQuery.data;
   const isLoggedIn = useAtomValue(IsLoggedInAtom);
-  const [currentUserRole, setCurrentUserRole] = useAtom(CurrentRole);
+  const [currentUserRole, setCurrentUserRole] = useAtom(CurrentRoleAtom);
 
   const urlQuery = trpc.school.attachment.getFileURL.useQuery(
     {
@@ -70,6 +80,12 @@ export default function Navbar() {
     setCurrentUserRole(StaticRole[role as keyof typeof StaticRole]);
   };
 
+  const logOut = () => {
+    setToken("");
+    setTokenExpire(new Date());
+    history.push("/login");
+  };
+
   return (
     <>
       <Box bg={useColorModeValue("gray.100", "gray.900")} px={4}>
@@ -83,6 +99,7 @@ export default function Navbar() {
               <Select
                 placeholder="Select your role"
                 onChange={handleChangeRole}
+                value={StaticRole[currentUserRole]}
               >
                 {availableRoles &&
                   availableRoles?.map((item) => (
@@ -122,7 +139,7 @@ export default function Navbar() {
                   <br />
                   <MenuDivider />
                   <MenuItem>Account Settings</MenuItem> {/* edit details */}
-                  <MenuItem>Logout</MenuItem>
+                  <MenuItem onClick={() => logOut()}>Logout</MenuItem>
                 </MenuList>
               </Menu>
             </Stack>

@@ -20,7 +20,7 @@ import {
   SelectedSchoolIdAtom,
   SessionExpiryAtom,
   SessionTokenAtom,
-  CurrentUserId,
+  CurrentUserIdAtom,
 } from "../../utils/atoms";
 import OtpPopup from "./OtpPopup";
 
@@ -32,7 +32,7 @@ export default function LoginOTP({ setshowSchoolSelector }: LoginOtpProps) {
   const [selectedSchoolId] = useAtom(SelectedSchoolIdAtom);
   const [, setToken] = useAtom(SessionTokenAtom);
   const [, setTokenExpiry] = useAtom(SessionExpiryAtom);
-  const [currentUserId, setCurrentUserId] = useAtom(CurrentUserId);
+  const [currentUserId, setCurrentUserId] = useAtom(CurrentUserIdAtom);
 
   const [phoneNo, setPhoneNo] = useState("");
   const [openOtp, setOpenOtp] = useState(false);

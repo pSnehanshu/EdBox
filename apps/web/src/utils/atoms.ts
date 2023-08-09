@@ -56,5 +56,8 @@ export const SessionExpiryAtom = atomWithStorage<Date>(
   },
 );
 
-export const CurrentRole = atomWithStorage<StaticRole>("role", StaticRole.none);
-export const CurrentUserId = atomWithStorage<string | null>("userId", null);
+export const CurrentRoleAtom = atomWithStorage<StaticRole>(
+  "role",
+  StaticRole.none,
+);
+export const CurrentUserIdAtom = atomWithStorage<string | null>("userId", null);
