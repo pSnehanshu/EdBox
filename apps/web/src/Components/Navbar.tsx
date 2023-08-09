@@ -29,12 +29,14 @@ import Logo from "../assets/images/splash.png";
 import { useMemo } from "react";
 import { StaticRole } from "schooltalk-shared/misc";
 import { useHistory } from "react-router-dom";
+import { MoonIcon, SunIcon } from "@chakra-ui/icons";
 
 export default function Navbar() {
   const history = useHistory();
   const [userId] = useAtom(CurrentUserIdAtom);
   const [, setToken] = useAtom(SessionTokenAtom);
   const [, setTokenExpire] = useAtom(SessionExpiryAtom);
+  const { colorMode, toggleColorMode } = useColorMode();
 
   const profileQuery = trpc.profile.getUserProfile.useQuery({
     userId: userId!,
@@ -96,6 +98,9 @@ export default function Navbar() {
 
           <Flex alignItems={"center"}>
             <Stack direction={"row"} spacing={7}>
+              <Button onClick={toggleColorMode}>
+                {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
+              </Button>
               <Select
                 placeholder="Select your role"
                 onChange={handleChangeRole}

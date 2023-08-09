@@ -24,6 +24,7 @@
     "packages/*"
   ],
   "dependencies": {
+    "@chakra-ui/icons": "^2.1.0",
     "core-js": "^3.31.0",
     "prop-types": "^15.8.1"
   },
