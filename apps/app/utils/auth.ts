@@ -1,15 +1,13 @@
 import { isPast, isValid, parseISO } from "date-fns";
 import * as SecureStore from "expo-secure-store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import Toast from "react-native-toast-message";
-import type { User } from "schooltalk-shared/types";
-import { StaticRole } from "schooltalk-shared/misc";
+import { GenerateCurrentUserHook } from "schooltalk-shared/current-user";
 import { trpc } from "./trpc";
 import { AUTH_TOKEN, AUTH_TOKEN_EXPIRY, USER } from "./async-storage-keys";
 import { useDB } from "./db";
 import { getPushToken } from "./push-notifications";
-import { useConfigUpdate } from "./config";
 
 /**
  * Get the current token
@@ -60,7 +58,6 @@ export function useSetAuthToken() {
 
 export function useLogout() {
   const utils = trpc.useContext();
-  const setConfig = useConfigUpdate();
   const db = useDB();
 
   const logoutMutation = trpc.auth.logout.useMutation({
@@ -120,80 +117,10 @@ export function useLogout() {
   );
 }
 
-/**
- * Cache user object to avoid fetching from AsyncStorage over and over
- */
-let globalUser: User | null = null;
-
-type LoggedIn = {
-  isLoggedIn: true;
-  user: User;
-};
-
-type NotLoggedIn = {
-  isLoggedIn: false;
-  user: null;
-};
-
-export function useCurrentUser(): LoggedIn | NotLoggedIn {
-  const [user, setUser] = useState<User | null>(globalUser);
-  const me = trpc.profile.me.useQuery(undefined, {
-    retry: false,
-    staleTime: 60 * 60 * 1000,
-  });
-
-  useEffect(() => {
-    (async () => {
-      // Cached value found, no need to refetch
-      if (globalUser) return;
-
-      const token = await getAuthToken();
-      if (!token) return;
-
-      // Token is set, try to fetch the user object
-      const _user = await AsyncStorage.getItem(USER);
-      if (!_user) return;
-
-      const user = JSON.parse(_user);
-      setUser(user);
-
-      // Cache the value
-      globalUser = user;
-    })();
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      if (!me.isFetching) {
-        if (me.isError) {
-          const error = me.error;
-          if (error.data?.code === "UNAUTHORIZED") {
-            // Session is invalid
-            setUser(null);
-            await AsyncStorage.removeItem(USER);
-            globalUser = null;
-          }
-        } else {
-          // Save locally
-          setUser(me.data ?? null);
-          await AsyncStorage.setItem(USER, JSON.stringify(me.data));
-          globalUser = me.data ?? null;
-        }
-      }
-    })();
-  }, [me.isFetching]);
-
-  const isLoggedIn = !!user;
-
-  if (isLoggedIn) {
-    return {
-      isLoggedIn,
-      user,
-    };
-  }
-
-  return {
-    isLoggedIn,
-    user: null,
-  };
-}
+export const useCurrentUser = GenerateCurrentUserHook({
+  trpc,
+  getAuthToken,
+  getStoredUser: () => AsyncStorage.getItem(USER),
+  removeStoredUser: () => AsyncStorage.removeItem(USER),
+  setStoredUser: (user) => AsyncStorage.setItem(USER, JSON.stringify(user)),
+});
