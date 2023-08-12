@@ -13,23 +13,25 @@ const ConfigSchema = z.object({
 type Config = z.infer<typeof ConfigSchema>;
 
 type ConfigOptions = {
+  backendURL: string;
   preloadedSchoolId?: string;
   getStoredSchoolId: () => Promise<string | null>;
   setStoredSchoolId: (schoolId: string) => Promise<void>;
 };
 
 export function GenerateConfigAtom({
+  backendURL,
   preloadedSchoolId,
   getStoredSchoolId,
   setStoredSchoolId,
 }: ConfigOptions) {
   /** The preloaded values */
   const preloadedConfig = ConfigSchema.parse({
-    backendHost: "...",
+    backendHost: backendURL,
     schoolId: preloadedSchoolId ?? "",
   });
 
-  console.log("Pre-loaded config", preloadedConfig);
+  console.log(`Pre-loaded config: ${JSON.stringify(preloadedConfig, null, 2)}`);
 
   /** Atom to store just the values */
   const _configValueAtom = atom<Config>(preloadedConfig);

@@ -24,6 +24,7 @@ export const hasPreloadedSchool = !!preloadedSchoolId;
 
 /** Atom to modify the value */
 const ConfigAtom = GenerateConfigAtom({
+  backendURL: Constants.expoConfig?.extra?.backendHost,
   preloadedSchoolId,
   getStoredSchoolId: () => AsyncStorage.getItem(SELECTED_SCHOOL_ID),
   setStoredSchoolId: (schoolId) =>
