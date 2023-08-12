@@ -7,7 +7,11 @@ import { z } from "zod";
 import Constants from "expo-constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SELECTED_SCHOOL_ID } from "./async-storage-keys";
-import { StaticRole, getUserRoleHierarchical } from "schooltalk-shared/misc";
+import {
+  StaticRole,
+  getUserRoleHierarchical,
+  getUserStaticRoles,
+} from "schooltalk-shared/misc";
 import { useEffect } from "react";
 import { useCurrentUser } from "./auth";
 
@@ -104,8 +108,15 @@ export function useSelectDefaultRole() {
   const { isLoggedIn, user } = useCurrentUser();
 
   useEffect(() => {
-    if (config.activeStaticRole === StaticRole.none && isLoggedIn) {
-      setConfig({ activeStaticRole: getUserRoleHierarchical(user) });
+    if (isLoggedIn) {
+      if (
+        config.activeStaticRole === StaticRole.none ||
+        !getUserStaticRoles(user).includes(config.activeStaticRole) // If current selected role doesn't belong to the user, change it
+      ) {
+        setConfig({ activeStaticRole: getUserRoleHierarchical(user) });
+      }
+    } else {
+      setConfig({ activeStaticRole: StaticRole.none });
     }
   }, [config.activeStaticRole, user, isLoggedIn]);
 }
