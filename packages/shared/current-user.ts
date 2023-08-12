@@ -2,11 +2,6 @@ import { useState, useEffect } from "react";
 import type { TrpcReactType } from "../../apps/app/utils/trpc";
 import { User } from "./types";
 
-/**
- * Cache user object to avoid fetching from AsyncStorage over and over
- */
-let globalUser: User | null = null;
-
 type LoggedIn = {
   isLoggedIn: true;
   user: User;
@@ -32,7 +27,12 @@ export function GenerateCurrentUserHook({
   removeStoredUser,
   setStoredUser,
 }: CurrentUserProps) {
-  const useCurrentUser = (): LoggedIn | NotLoggedIn => {
+  /**
+   * Cache user object to avoid fetching from AsyncStorage over and over
+   */
+  let globalUser: User | null = null;
+
+  return (): LoggedIn | NotLoggedIn => {
     const [user, setUser] = useState<User | null>(globalUser);
     const me = trpc.profile.me.useQuery(undefined, {
       retry: false,
@@ -83,14 +83,9 @@ export function GenerateCurrentUserHook({
     const isLoggedIn = !!user;
 
     if (isLoggedIn) {
-      return {
-        isLoggedIn,
-        user,
-      };
+      return { isLoggedIn, user };
     }
 
     return { isLoggedIn, user: null };
   };
-
-  return useCurrentUser;
 }
