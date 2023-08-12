@@ -2,7 +2,6 @@ import {
   Box,
   Flex,
   Avatar,
-  Text,
   Button,
   Menu,
   MenuButton,
@@ -27,12 +26,10 @@ import {
 import DefaultAvatar from "../assets/images/default-avatar.jpg";
 import Logo from "../assets/images/splash.png";
 import { useMemo } from "react";
-import { StaticRole } from "schooltalk-shared/misc";
-import { useHistory } from "react-router-dom";
+import { StaticRole, getUserStaticRoles } from "schooltalk-shared/misc";
 import { MoonIcon, SunIcon } from "@chakra-ui/icons";
 
 export default function Navbar() {
-  const history = useHistory();
   const [userId, setUserId] = useAtom(CurrentUserIdAtom);
   const [, setToken] = useAtom(SessionTokenAtom);
   const [, setTokenExpire] = useAtom(SessionExpiryAtom);
@@ -63,24 +60,10 @@ export default function Navbar() {
     { staleTime: 5 * 60 * 1000, enabled: !!user?.avatar_id },
   );
 
-  const availableRoles = useMemo<StaticRole[]>(() => {
-    if (!isLoggedIn) return [];
-    const roles: StaticRole[] = [];
-    if (user?.Teacher?.id) roles.push(StaticRole.teacher);
-    if (user?.Student?.id) roles.push(StaticRole.student);
-    if (user?.Parent?.id) roles.push(StaticRole.parent);
-    if (user?.Staff?.role === "principal") roles.push(StaticRole.principal);
-    if (user?.Staff?.role === "vice_principal")
-      roles.push(StaticRole.vice_principal);
-    if (user?.Staff?.role === "others") roles.push(StaticRole.staff);
-
-    return roles;
-  }, [user]);
-
-  const handleChangeRole = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const role = e.target.value;
-    setCurrentUserRole(StaticRole[role as keyof typeof StaticRole]);
-  };
+  const availableRoles = useMemo<StaticRole[]>(
+    () => (isLoggedIn ? getUserStaticRoles(user) : []),
+    [user, isLoggedIn],
+  );
 
   const handleLogout = () => {
     setToken("");
@@ -104,15 +87,16 @@ export default function Navbar() {
               </Button>
               <Select
                 placeholder="Select your role"
-                onChange={handleChangeRole}
-                value={StaticRole[currentUserRole]}
+                onChange={(e) =>
+                  setCurrentUserRole(parseInt(e.target.value, 10))
+                }
+                value={currentUserRole}
               >
-                {availableRoles &&
-                  availableRoles?.map((item) => (
-                    <option value={StaticRole[item]} key={item}>
-                      {StaticRole[item].split("_").join(" ").toUpperCase()}
-                    </option>
-                  ))}
+                {availableRoles.map((item) => (
+                  <option value={item} key={item}>
+                    {StaticRole[item].split("_").join(" ").toUpperCase()}
+                  </option>
+                ))}
               </Select>
               <Menu>
                 <MenuButton
