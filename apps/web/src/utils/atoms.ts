@@ -1,15 +1,16 @@
 import { parseISO, isPast } from "date-fns";
-import { atom } from "jotai";
+import { atom, useAtom, useAtomValue } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 import { z } from "zod";
 import type { User } from "schooltalk-shared/types";
+import { GenerateConfigAtom } from "schooltalk-shared/client-config";
 import { trpcVanillaClient } from "./trpc";
-import { StaticRole } from "schooltalk-shared/misc";
+import { env } from "./env";
 
-export const SelectedSchoolIdAtom = atomWithStorage<string | null>(
-  "schoolId",
-  null,
-);
+// export const SelectedSchoolIdAtom = atomWithStorage<string | null>(
+//   "schoolId",
+//   null,
+// );
 
 export const SessionTokenAtom = atomWithStorage("token", "");
 
@@ -56,8 +57,28 @@ export const SessionExpiryAtom = atomWithStorage<Date>(
   },
 );
 
-export const CurrentRoleAtom = atomWithStorage<StaticRole>(
-  "role",
-  StaticRole.none,
-);
+// export const CurrentRoleAtom = atomWithStorage<StaticRole>(
+//   "role",
+//   StaticRole.none,
+// );
 export const CurrentUserIdAtom = atomWithStorage<string | null>("userId", null);
+
+export const ConfigAtom = GenerateConfigAtom({
+  backendURL: env.VITE_BACKEND_URL,
+  preloadedSchoolId: localStorage.getItem("schoolId") ?? undefined,
+  getStoredSchoolId: async () => localStorage.getItem("schoolId"),
+  setStoredSchoolId: async (schoolId) =>
+    localStorage.setItem("schoolId", schoolId),
+});
+
+/** Get the current config */
+export function useConfig() {
+  return useAtomValue(ConfigAtom);
+}
+
+/** Returns a setter for config */
+export function useConfigUpdate() {
+  const [, setConfig] = useAtom(ConfigAtom);
+
+  return setConfig;
+}

@@ -17,7 +17,8 @@ import {
 import { trpc } from "../utils/trpc";
 import { useAtom, useAtomValue } from "jotai";
 import {
-  CurrentRoleAtom,
+  useConfig,
+  useConfigUpdate,
   CurrentUserIdAtom,
   IsLoggedInAtom,
   SessionExpiryAtom,
@@ -40,7 +41,11 @@ export default function Navbar() {
   });
   const user = profileQuery.data;
   const isLoggedIn = useAtomValue(IsLoggedInAtom);
-  const [currentUserRole, setCurrentUserRole] = useAtom(CurrentRoleAtom);
+
+  const { activeStaticRole: currentUserRole } = useConfig();
+  const setConfig = useConfigUpdate();
+  const setCurrentUserRole = (role: StaticRole) =>
+    setConfig({ activeStaticRole: role });
 
   const urlQuery = trpc.school.attachment.getFileURL.useQuery(
     {

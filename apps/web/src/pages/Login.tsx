@@ -10,12 +10,11 @@ import {
   Flex,
   useColorModeValue,
 } from "@chakra-ui/react";
-import { useAtom } from "jotai";
-import { SelectedSchoolIdAtom } from "../utils/atoms";
+import { useConfig } from "../utils/atoms";
 import { useState } from "react";
 
 export default function LoginPage() {
-  const schoolId = useAtom(SelectedSchoolIdAtom);
+  const { schoolId } = useConfig();
 
   const [showSchoolSelector, setshowSchoolSelector] = useState(false);
 
@@ -28,7 +27,7 @@ export default function LoginPage() {
         bg={useColorModeValue("gray.50", "gray.800")}
         flexDirection={"column"}
       >
-        {!schoolId[0] || showSchoolSelector ? (
+        {!schoolId || showSchoolSelector ? (
           <Search setshowSchoolSelector={() => setshowSchoolSelector(false)} />
         ) : (
           <Tabs

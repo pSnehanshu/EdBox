@@ -17,7 +17,7 @@ import { trpc } from "../../utils/trpc";
 import { useState, useCallback } from "react";
 import { useAtom } from "jotai";
 import {
-  SelectedSchoolIdAtom,
+  useConfig,
   SessionExpiryAtom,
   SessionTokenAtom,
   CurrentUserIdAtom,
@@ -29,7 +29,9 @@ interface LoginOtpProps {
 }
 
 export default function LoginOTP({ setshowSchoolSelector }: LoginOtpProps) {
-  const [selectedSchoolId] = useAtom(SelectedSchoolIdAtom);
+  const config = useConfig();
+  const selectedSchoolId = config.schoolId;
+
   const [, setToken] = useAtom(SessionTokenAtom);
   const [, setTokenExpiry] = useAtom(SessionExpiryAtom);
   const [currentUserId, setCurrentUserId] = useAtom(CurrentUserIdAtom);

@@ -2,7 +2,6 @@ import {
   Flex,
   Box,
   FormControl,
-  FormLabel,
   Input,
   Checkbox,
   Stack,
@@ -18,7 +17,7 @@ import { trpc } from "../../utils/trpc";
 import { useAtom } from "jotai";
 import {
   CurrentUserIdAtom,
-  SelectedSchoolIdAtom,
+  useConfig,
   SessionExpiryAtom,
   SessionTokenAtom,
 } from "../../utils/atoms";
@@ -32,7 +31,7 @@ interface props {
 }
 
 export default function StudentLogin({ setshowSchoolSelector }: props) {
-  const [selectedSchoolId] = useAtom(SelectedSchoolIdAtom);
+  const { schoolId: selectedSchoolId } = useConfig();
   const [, setToken] = useAtom(SessionTokenAtom);
   const [, setTokenExpiry] = useAtom(SessionExpiryAtom);
 

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { trpc } from "../../utils/trpc";
-import { SelectedSchoolIdAtom } from "../../utils/atoms";
-import { useAtom } from "jotai";
+import { useConfig, useConfigUpdate } from "../../utils/atoms";
 import {
   Box,
   Button,
@@ -47,14 +46,18 @@ interface props {
 export default function Search({ setshowSchoolSelector }: props) {
   const [search, setSearch] = useState<string>("");
   const debouncedSearch = useDebounce(search, 500);
-  const [page, setPage] = useState(1);
-  const { data, isFetching, isError } = trpc.school.schoolList.useQuery({
+  const [page] = useState(1);
+  const { data, isFetching } = trpc.school.schoolList.useQuery({
     search: debouncedSearch.toLowerCase(),
     page,
   });
 
-  const [selectedSchoolId, updateSelectedSchool] =
-    useAtom(SelectedSchoolIdAtom);
+  // const [selectedSchoolId, updateSelectedSchool] =
+  //   useAtom(SelectedSchoolIdAtom);
+  const { schoolId: selectedSchoolId } = useConfig();
+  const setConfig = useConfigUpdate();
+  const updateSelectedSchool = (schoolId: string) => setConfig({ schoolId });
+
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleOptionSelect = (schoolId: string) => {
