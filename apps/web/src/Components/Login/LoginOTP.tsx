@@ -16,12 +16,7 @@ import { parseISO } from "date-fns";
 import { trpc } from "../../utils/trpc";
 import { useState, useCallback } from "react";
 import { useAtom } from "jotai";
-import {
-  useConfig,
-  SessionExpiryAtom,
-  SessionTokenAtom,
-  CurrentUserIdAtom,
-} from "../../utils/atoms";
+import { useConfig, SessionExpiryAtom } from "../../utils/atoms";
 import OtpPopup from "./OtpPopup";
 
 interface LoginOtpProps {
@@ -32,12 +27,13 @@ export default function LoginOTP({ setshowSchoolSelector }: LoginOtpProps) {
   const config = useConfig();
   const selectedSchoolId = config.schoolId;
 
-  const [, setToken] = useAtom(SessionTokenAtom);
   const [, setTokenExpiry] = useAtom(SessionExpiryAtom);
-  const [currentUserId, setCurrentUserId] = useAtom(CurrentUserIdAtom);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   const [phoneNo, setPhoneNo] = useState("");
   const [openOtp, setOpenOtp] = useState(false);
+
+  const trpcUtils = trpc.useContext();
 
   const requestOtp = trpc.auth.requestPhoneNumberOTP.useMutation({
     onSuccess(data) {
@@ -52,7 +48,8 @@ export default function LoginOTP({ setshowSchoolSelector }: LoginOtpProps) {
 
   const submitOTPMutation = trpc.auth.submitLoginOTP.useMutation({
     async onSuccess({ token, expiry_date }) {
-      setToken(token);
+      localStorage.setItem("token", token);
+      trpcUtils.profile.me.invalidate();
       setTokenExpiry(parseISO(expiry_date));
     },
     onError(error) {

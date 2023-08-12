@@ -15,12 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { trpc } from "../../utils/trpc";
 import { useAtom } from "jotai";
-import {
-  CurrentUserIdAtom,
-  useConfig,
-  SessionExpiryAtom,
-  SessionTokenAtom,
-} from "../../utils/atoms";
+import { useConfig, SessionExpiryAtom } from "../../utils/atoms";
 import { useCallback, useState } from "react";
 import { ClassWithSections } from "schooltalk-shared/types";
 import OtpPopup from "./OtpPopup";
@@ -32,7 +27,6 @@ interface props {
 
 export default function StudentLogin({ setshowSchoolSelector }: props) {
   const { schoolId: selectedSchoolId } = useConfig();
-  const [, setToken] = useAtom(SessionTokenAtom);
   const [, setTokenExpiry] = useAtom(SessionExpiryAtom);
 
   const [selectedClass, setSelectedClass] = useState<ClassWithSections[]>();
@@ -41,8 +35,8 @@ export default function StudentLogin({ setshowSchoolSelector }: props) {
   );
   const [rollno, setRollNo] = useState<string>("");
   const [openOtp, setOpenOtp] = useState(false);
-  // const [userId, setUserId] = useState<string | null>(null);
-  const [currentUserId, setCurrentUserId] = useAtom(CurrentUserIdAtom);
+
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   const requestRollNumberOTP = trpc.auth.rollNumberLoginRequestOTP.useMutation({
     onSuccess(data) {
@@ -80,9 +74,12 @@ export default function StudentLogin({ setshowSchoolSelector }: props) {
     setSelectedSectionId(e.target.value);
   };
 
+  const trpcUtils = trpc.useContext();
+
   const submitOTPMutation = trpc.auth.submitLoginOTP.useMutation({
     async onSuccess({ token, expiry_date }) {
-      setToken(token);
+      localStorage.setItem("token", token);
+      trpcUtils.profile.me.invalidate();
       setTokenExpiry(parseISO(expiry_date));
     },
     onError(error) {

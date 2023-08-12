@@ -7,11 +7,10 @@ import {
 import Main from "./pages/Main";
 import About from "./pages/About";
 import LoginPage from "./pages/Login";
-import { useAtomValue } from "jotai";
-import { IsLoggedInAtom } from "./utils/atoms";
+import { useCurrentUser } from "./utils/atoms";
 
 export default function Routes() {
-  const isLoggedIn = useAtomValue(IsLoggedInAtom);
+  const { isLoggedIn } = useCurrentUser();
 
   return (
     <Router>

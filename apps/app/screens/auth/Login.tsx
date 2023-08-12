@@ -62,7 +62,7 @@ export default function LoginScreen() {
   });
 
   const onSubmit = useCallback(
-    async (otp: any) => {
+    async (otp: string) => {
       if (userId && otp) {
         submitOTPMutation.mutate({
           userId,

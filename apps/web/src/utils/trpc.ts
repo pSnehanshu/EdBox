@@ -6,24 +6,10 @@ import { env } from "./env";
 export const links: TRPCLink<AppRouter>[] = [
   httpBatchLink({
     url: `${env.VITE_BACKEND_URL}/trpc`,
-    async headers() {
-      // Read from localStorage
-      let token = "";
-      try {
-        const storedToken = localStorage.getItem("token");
-        if (storedToken) {
-          const parsed = JSON.parse(storedToken) as unknown;
-          if (typeof parsed === "string") {
-            token = parsed;
-          }
-        }
-      } catch (error) {
-        console.warn(error);
-      }
-
+    headers() {
       // Set header
       return {
-        "x-session-id": token,
+        "x-session-id": localStorage.getItem("token") ?? undefined,
       };
     },
   }),

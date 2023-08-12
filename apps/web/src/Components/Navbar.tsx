@@ -15,14 +15,12 @@ import {
   useColorMode,
 } from "@chakra-ui/react";
 import { trpc } from "../utils/trpc";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtom } from "jotai";
 import {
   useConfig,
   useConfigUpdate,
-  CurrentUserIdAtom,
-  IsLoggedInAtom,
+  useCurrentUser,
   SessionExpiryAtom,
-  SessionTokenAtom,
 } from "../utils/atoms";
 import DefaultAvatar from "../assets/images/default-avatar.jpg";
 import Logo from "../assets/images/splash.png";
@@ -31,21 +29,16 @@ import { StaticRole, getUserStaticRoles } from "schooltalk-shared/misc";
 import { MoonIcon, SunIcon } from "@chakra-ui/icons";
 
 export default function Navbar() {
-  const [userId, setUserId] = useAtom(CurrentUserIdAtom);
-  const [, setToken] = useAtom(SessionTokenAtom);
+  const { isLoggedIn, user } = useCurrentUser();
   const [, setTokenExpire] = useAtom(SessionExpiryAtom);
   const { colorMode, toggleColorMode } = useColorMode();
-
-  const profileQuery = trpc.profile.getUserProfile.useQuery({
-    userId: userId!,
-  });
-  const user = profileQuery.data;
-  const isLoggedIn = useAtomValue(IsLoggedInAtom);
 
   const { activeStaticRole: currentUserRole } = useConfig();
   const setConfig = useConfigUpdate();
   const setCurrentUserRole = (role: StaticRole) =>
     setConfig({ activeStaticRole: role });
+
+  const trpcUtils = trpc.useContext();
 
   const urlQuery = trpc.school.attachment.getFileURL.useQuery(
     {
@@ -71,10 +64,10 @@ export default function Navbar() {
   );
 
   const handleLogout = () => {
-    setToken("");
-    setTokenExpire(new Date());
+    localStorage.setItem("token", "");
+    trpcUtils.profile.me.invalidate();
+    setTokenExpire(new Date(0));
     setCurrentUserRole(StaticRole.none);
-    setUserId(null);
   };
 
   return (
