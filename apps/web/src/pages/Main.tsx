@@ -1,9 +1,3 @@
-import Navbar from "../Components/Navbar";
-
 export default function MainPage() {
-  return (
-    <>
-      <Navbar />
-    </>
-  );
+  return <h1>Main page</h1>;
 }

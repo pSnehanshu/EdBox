@@ -8,23 +8,28 @@ import Main from "./pages/Main";
 import About from "./pages/About";
 import LoginPage from "./pages/Login";
 import { useCurrentUser } from "./utils/atoms";
+import Navbar from "./Components/Navbar";
 
 export default function Routes() {
   const { isLoggedIn } = useCurrentUser();
 
   return (
-    <Router>
-      <Switch>
-        <Route path="/about">
-          {isLoggedIn ? <About /> : <Redirect to="/login" />}
-        </Route>
-        <Route path="/login">
-          {isLoggedIn ? <Redirect to="/" /> : <LoginPage />}
-        </Route>
-        <Route path="/">
-          {isLoggedIn ? <Main /> : <Redirect to="/login" />}
-        </Route>
-      </Switch>
-    </Router>
+    <>
+      <Navbar />
+
+      <Router>
+        <Switch>
+          <Route path="/about">
+            {isLoggedIn ? <About /> : <Redirect to="/login" />}
+          </Route>
+          <Route path="/login">
+            {isLoggedIn ? <Redirect to="/" /> : <LoginPage />}
+          </Route>
+          <Route path="/">
+            {isLoggedIn ? <Main /> : <Redirect to="/login" />}
+          </Route>
+        </Switch>
+      </Router>
+    </>
   );
 }

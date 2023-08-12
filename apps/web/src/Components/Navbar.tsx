@@ -83,53 +83,59 @@ export default function Navbar() {
               <Button onClick={toggleColorMode}>
                 {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
               </Button>
-              <Select
-                placeholder="Select your role"
-                onChange={(e) =>
-                  setCurrentUserRole(parseInt(e.target.value, 10))
-                }
-                value={currentUserRole}
-              >
-                {availableRoles.map((item) => (
-                  <option value={item} key={item}>
-                    {StaticRole[item].split("_").join(" ").toUpperCase()}
-                  </option>
-                ))}
-              </Select>
-              <Menu>
-                <MenuButton
-                  as={Button}
-                  rounded={"full"}
-                  variant={"link"}
-                  cursor={"pointer"}
-                  minW={0}
-                >
-                  <Avatar
-                    size={"sm"}
-                    src={urlQuery.data?.url ?? DefaultAvatar}
-                  />
-                </MenuButton>
-                <MenuList alignItems={"center"}>
-                  <br />
-                  <Center>
-                    <Avatar
-                      size={"2xl"}
-                      src={urlQuery.data?.url ?? DefaultAvatar}
-                    />
-                  </Center>
-                  <br />
-                  <Center>
-                    <p>
-                      <span>{user?.salutation} </span>
-                      {user?.name}
-                    </p>
-                  </Center>
-                  <br />
-                  <MenuDivider />
-                  <MenuItem>Account Settings</MenuItem> {/* edit details */}
-                  <MenuItem onClick={handleLogout}>Logout</MenuItem>
-                </MenuList>
-              </Menu>
+
+              {isLoggedIn && (
+                <>
+                  <Select
+                    placeholder="Select your role"
+                    onChange={(e) =>
+                      setCurrentUserRole(parseInt(e.target.value, 10))
+                    }
+                    value={currentUserRole}
+                  >
+                    {availableRoles.map((item) => (
+                      <option value={item} key={item}>
+                        {StaticRole[item].split("_").join(" ").toUpperCase()}
+                      </option>
+                    ))}
+                  </Select>
+
+                  <Menu>
+                    <MenuButton
+                      as={Button}
+                      rounded={"full"}
+                      variant={"link"}
+                      cursor={"pointer"}
+                      minW={0}
+                    >
+                      <Avatar
+                        size={"sm"}
+                        src={urlQuery.data?.url ?? DefaultAvatar}
+                      />
+                    </MenuButton>
+                    <MenuList alignItems={"center"}>
+                      <br />
+                      <Center>
+                        <Avatar
+                          size={"2xl"}
+                          src={urlQuery.data?.url ?? DefaultAvatar}
+                        />
+                      </Center>
+                      <br />
+                      <Center>
+                        <p>
+                          <span>{user?.salutation} </span>
+                          {user?.name}
+                        </p>
+                      </Center>
+                      <br />
+                      <MenuDivider />
+                      <MenuItem>Account Settings</MenuItem> {/* edit details */}
+                      <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                    </MenuList>
+                  </Menu>
+                </>
+              )}
             </Stack>
           </Flex>
         </Flex>
