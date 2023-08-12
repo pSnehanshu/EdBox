@@ -128,6 +128,7 @@ async function main() {
       joining_batch_num: 1,
       current_batch_num: 1,
       roll_num: 1,
+      section: 1,
       User: {
         create: {
           name: "Ayushman Phukan",
