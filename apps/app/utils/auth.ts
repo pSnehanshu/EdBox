@@ -71,9 +71,6 @@ export function useLogout() {
         position: "top",
       });
 
-      // Unset previously selected role
-      setConfig({ activeStaticRole: StaticRole.none });
-
       // Clear token
       await SecureStore.deleteItemAsync(AUTH_TOKEN);
       await SecureStore.deleteItemAsync(AUTH_TOKEN_EXPIRY);
