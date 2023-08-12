@@ -51,5 +51,8 @@
     "schooltalk-shared": "*",
     "socket.io": "^4.6.1",
     "zod": "^3.21.4"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   }
 }
