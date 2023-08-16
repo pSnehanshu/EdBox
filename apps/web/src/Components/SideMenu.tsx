@@ -44,7 +44,7 @@ const LinkItems: Array<LinkItemProps> = [
 export default function SideMenu() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
-    <>
+    <Box minH="100vh" position="relative">
       <SidebarContent
         onClose={() => onClose}
         display={{ base: "none", md: "block" }}
@@ -62,7 +62,7 @@ export default function SideMenu() {
         </DrawerContent>
       </Drawer>
       <MobileNav display={{ base: "flex", md: "none" }} onOpen={onOpen} />
-    </>
+    </Box>
   );
 }
 
@@ -70,7 +70,7 @@ interface SidebarProps extends BoxProps {
   onClose: () => void;
 }
 
-const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
+export const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
   return (
     <Box
       bg={useColorModeValue("gray.100", "gray.900")}
@@ -101,7 +101,6 @@ interface NavItemProps extends FlexProps {
   abbr: string;
 }
 const NavItem = ({ children, icon, abbr, ...rest }: NavItemProps) => {
-  console.log(children);
   const { colorMode } = useColorMode();
   return (
     <Box

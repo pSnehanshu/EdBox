@@ -9,14 +9,14 @@ import About from "./pages/About";
 import LoginPage from "./pages/Login";
 import { useCurrentUser } from "./utils/atoms";
 import Navbar from "./Components/Navbar";
+import SideMenu from "./Components/SideMenu";
 
 export default function Routes() {
   const { isLoggedIn } = useCurrentUser();
-  console.log(isLoggedIn, "log");
   return (
     <>
       <Navbar />
-
+      {isLoggedIn && <SideMenu />}
       <Router>
         <Switch>
           <Route path="/about">
