@@ -12,7 +12,7 @@ import Navbar from "./Components/Navbar";
 
 export default function Routes() {
   const { isLoggedIn } = useCurrentUser();
-
+  console.log(isLoggedIn, "log");
   return (
     <>
       <Navbar />

@@ -72,7 +72,12 @@ export default function Navbar() {
 
   return (
     <>
-      <Box bg={useColorModeValue("gray.100", "gray.900")} px={4}>
+      <Box
+        bg={useColorModeValue("gray.100", "gray.800")}
+        px={8}
+        borderBottom="1px"
+        borderColor="gray.200"
+      >
         <Flex h={16} alignItems={"center"} justifyContent={"space-between"}>
           <Box>
             <Avatar size={"xl"} src={Logo} />
