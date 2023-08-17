@@ -21,7 +21,8 @@ export default function LoginPage() {
   return (
     <>
       <Flex
-        minH="100vh"
+        minH="90vh"
+        minW="100vw"
         align={"center"}
         justify={"center"}
         bg={useColorModeValue("gray.50", "gray.800")}

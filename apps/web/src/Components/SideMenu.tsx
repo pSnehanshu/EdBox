@@ -24,6 +24,7 @@ import {
 } from "react-icons/md";
 import { PiExam, PiBooksLight } from "react-icons/pi";
 import { IconType } from "react-icons";
+import { Link, useLocation } from "react-router-dom";
 
 interface LinkItemProps {
   name: string;
@@ -31,14 +32,14 @@ interface LinkItemProps {
   icon: IconType;
 }
 const LinkItems: Array<LinkItemProps> = [
-  { name: "Home", abbr: "home", icon: FiHome },
-  { name: "Homeworks", abbr: "homework", icon: MdOutlineHomeWork },
-  { name: "Class tests and Exams", abbr: "exam", icon: PiExam },
-  { name: "Members", abbr: "member", icon: MdOutlinePeople },
-  { name: "Subjects", abbr: "subject", icon: PiBooksLight },
-  { name: "Routine", abbr: "routine", icon: MdOutlineViewTimeline },
-  { name: "School Information", abbr: "school_info", icon: MdInfoOutline },
-  { name: "Settings", abbr: "setting", icon: FiSettings },
+  { name: "Home", abbr: "/home", icon: FiHome },
+  { name: "Homeworks", abbr: "/homework", icon: MdOutlineHomeWork },
+  { name: "Class tests and Exams", abbr: "/exam", icon: PiExam },
+  { name: "Members", abbr: "/member", icon: MdOutlinePeople },
+  { name: "Subjects", abbr: "/subject", icon: PiBooksLight },
+  { name: "Routine", abbr: "/routine", icon: MdOutlineViewTimeline },
+  { name: "School Information", abbr: "/school_info", icon: MdInfoOutline },
+  { name: "Settings", abbr: "/setting", icon: FiSettings },
 ];
 
 export default function SideMenu() {
@@ -51,7 +52,7 @@ export default function SideMenu() {
       />
       <Drawer
         isOpen={isOpen}
-        placement="right"
+        placement="left"
         onClose={onClose}
         returnFocusOnClose={false}
         onOverlayClick={onClose}
@@ -87,9 +88,11 @@ export const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
         <CloseButton display={{ base: "flex", md: "none" }} onClick={onClose} />
       </Flex>
       {LinkItems.map((link) => (
-        <NavItem key={link.name} icon={link.icon} abbr={link.abbr}>
-          {link.name}
-        </NavItem>
+        <Link to={link.abbr}>
+          <NavItem key={link.name} icon={link.icon} abbr={link.abbr}>
+            {link.name}
+          </NavItem>
+        </Link>
       ))}
     </Box>
   );
@@ -102,24 +105,25 @@ interface NavItemProps extends FlexProps {
 }
 const NavItem = ({ children, icon, abbr, ...rest }: NavItemProps) => {
   const { colorMode } = useColorMode();
+  let { pathname } = useLocation();
   return (
     <Box
       as="a"
-      href="#"
       style={{ textDecoration: "none" }}
       _focus={{ boxShadow: "none" }}
     >
       <Flex
         align="center"
         p="4"
+        my="4"
         mx="4"
         borderRadius="lg"
         role="group"
         cursor="pointer"
         // "home" => current state
-        bg={abbr === "home" ? "blue.400" : "transparent"}
+        bg={abbr == pathname ? "blue.400" : "transparent"}
         color={
-          abbr === "home" ? "black" : colorMode === "dark" ? "white" : "black"
+          abbr == pathname ? "black" : colorMode === "dark" ? "white" : "black"
         }
         _hover={{
           bg: "blue.400",
@@ -148,8 +152,8 @@ interface MobileProps extends FlexProps {
 const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
   return (
     <Flex
-      position="absolute"
-      top="0"
+      position="fixed"
+      top="16"
       right="0"
       ml={{ base: 0, md: 60 }}
       px={{ base: 4, md: 24 }}
