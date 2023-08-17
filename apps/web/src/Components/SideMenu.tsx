@@ -88,8 +88,8 @@ export const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
         <CloseButton display={{ base: "flex", md: "none" }} onClick={onClose} />
       </Flex>
       {LinkItems.map((link) => (
-        <Link to={link.abbr}>
-          <NavItem key={link.name} icon={link.icon} abbr={link.abbr}>
+        <Link to={link.abbr} key={link.name}>
+          <NavItem icon={link.icon} abbr={link.abbr}>
             {link.name}
           </NavItem>
         </Link>
