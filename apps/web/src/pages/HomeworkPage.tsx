@@ -3,10 +3,15 @@ import {
   Card,
   CardBody,
   CardHeader,
+  Divider,
+  Flex,
   Heading,
+  Input,
+  Select,
   Stack,
   StackDivider,
   Text,
+  Textarea,
 } from "@chakra-ui/react";
 import { StaticRole } from "schooltalk-shared/misc";
 import { useConfig } from "../utils/atoms";
@@ -14,7 +19,8 @@ import { trpc } from "../utils/trpc";
 import { Homework } from "schooltalk-shared/types";
 import { useMemo } from "react";
 import { format, isPast, parseISO } from "date-fns";
-import { MdOutlineAttachFile } from "react-icons/md";
+import { MdOutlineAttachFile, MdOutlineFileUpload } from "react-icons/md";
+import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
 
 const pageLimit = 10;
 
@@ -65,17 +71,27 @@ export default function HomeworkPage() {
     <Box>
       <Card>
         <CardHeader>
-          <Heading size="md">Home Works</Heading>
+          <Heading size="xl">Home Works</Heading>
         </CardHeader>
+        <Divider />
         <CardBody>
-          <Stack divider={<StackDivider />} spacing="4">
-            <Box>
-              {homeworks &&
-                homeworks.map((item, index) => (
-                  <SingleHomework key={index} homework={item} />
-                ))}
-            </Box>
+          <Stack divider={<StackDivider borderColor="gray.200" />} spacing={4}>
+            {homeworks &&
+              homeworks.map((item, index) => (
+                <Box>
+                  <SingleHomework key={index} homework={item} />{" "}
+                </Box>
+              ))}
           </Stack>
+        </CardBody>
+      </Card>
+      <Card mt={8}>
+        <CardHeader>
+          <Heading size="xl">Create new Home Works</Heading>
+        </CardHeader>
+        <Divider />
+        <CardBody>
+          <CreateHomeworkForm />
         </CardBody>
       </Card>
     </Box>
@@ -115,17 +131,54 @@ function SingleHomework({ homework }: homeworkProps) {
 
   return (
     <>
-      <Heading size="xs" textTransform="uppercase">
-        {homework.Subject.name} — {classAndSection}
-      </Heading>
-      <Text pt="2" fontSize="sm">
+      <Flex justifyContent="space-between">
+        <Heading size="md" textTransform="uppercase">
+          {homework.Subject.name} — {classAndSection}
+        </Heading>
+        <Flex>
+          <MdOutlineAttachFile size={24} />
+          <Heading size="md" textTransform="uppercase">
+            {homework.Attachments.length}
+          </Heading>
+        </Flex>
+      </Flex>
+
+      <Text pt="2" fontSize="lg">
         {homework.text ? homework.text : ""}
-        <MdOutlineAttachFile />
-        {homework.Attachments.length}
       </Text>
-      <Text pt="2" fontSize="sm">
+      <Text pt="2" fontSize="sm" color={isPastDue ? "red" : "gray.400"}>
         Due date: {"\n" + dueDateStr}
       </Text>
+    </>
+  );
+}
+
+function CreateHomeworkForm() {
+  return (
+    <>
+      <Stack spacing={3}>
+        <Flex gap={8}>
+          <Select placeholder="Class" size="lg"></Select>
+          <Select placeholder="Section" size="lg"></Select>
+        </Flex>
+        <Select placeholder="Subject" size="lg"></Select>
+        <Input
+          placeholder="Due date (optional)"
+          size="md"
+          type="datetime-local"
+        />
+        <Textarea placeholder="Description (optional)" size="md" />
+        <Flex justifyContent="center" gap={2}>
+          <MdOutlineFileUpload size={28} />
+          <Text fontSize="lg" fontWeight="semibold">
+            Upload File
+          </Text>
+        </Flex>
+        <Flex justifyContent="center">
+          {/* <CloseIcon boxSize={"5"} /> */}
+          <CheckIcon boxSize={"6"} />
+        </Flex>
+      </Stack>
     </>
   );
 }
