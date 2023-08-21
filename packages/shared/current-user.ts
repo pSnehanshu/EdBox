@@ -5,11 +5,13 @@ import { User } from "./types";
 type LoggedIn = {
   isLoggedIn: true;
   user: User;
+  isLoading: boolean;
 };
 
 type NotLoggedIn = {
   isLoggedIn: false;
   user: null;
+  isLoading: boolean;
 };
 
 type CurrentUserProps = {
@@ -34,6 +36,8 @@ export function GenerateCurrentUserHook({
 
   return (): LoggedIn | NotLoggedIn => {
     const [user, setUser] = useState<User | null>(globalUser);
+    const [isLoading, setIsLoading] = useState(true);
+
     const me = trpc.profile.me.useQuery(undefined, {
       retry: false,
       staleTime: 60 * 60 * 1000,
@@ -56,7 +60,7 @@ export function GenerateCurrentUserHook({
 
         // Cache the value
         globalUser = user;
-      })();
+      })().finally(() => setIsLoading(false));
     }, []);
 
     useEffect(() => {
@@ -77,15 +81,15 @@ export function GenerateCurrentUserHook({
             globalUser = me.data ?? null;
           }
         }
-      })();
+      })().finally(() => setIsLoading(false));
     }, [me.isFetching]);
 
     const isLoggedIn = !!user;
 
     if (isLoggedIn) {
-      return { isLoggedIn, user };
+      return { isLoggedIn, user, isLoading };
     }
 
-    return { isLoggedIn, user: null };
+    return { isLoggedIn, user: null, isLoading };
   };
 }

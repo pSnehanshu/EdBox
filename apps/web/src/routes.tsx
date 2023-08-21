@@ -13,15 +13,19 @@ import SideMenu from "./Components/SideMenu";
 import HomePage from "./pages/HomePage";
 import { Flex } from "@chakra-ui/react";
 import HomeworkPage from "./pages/HomeworkPage";
+import FullScreenProgress from "./Components/FullScreenProgress";
 
 export default function Routes() {
-  const { isLoggedIn } = useCurrentUser();
+  const { isLoggedIn, isLoading } = useCurrentUser();
+
+  if (isLoading) return <FullScreenProgress />;
   return (
     <>
       <Router>
         <Navbar />
         <Flex>
           {isLoggedIn && <SideMenu />}
+
           <Switch>
             <Route path="/about">
               {isLoggedIn ? <About /> : <Redirect to="/login" />}

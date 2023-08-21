@@ -1,17 +1,10 @@
 import React, { Suspense, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Flex, ChakraProvider, CircularProgress } from "@chakra-ui/react";
+import { ChakraProvider } from "@chakra-ui/react";
 import Routes from "./routes.tsx";
 import { trpc, links } from "./utils/trpc";
-
-function Loading() {
-  return (
-    <Flex h="100vh" justifyContent="center" alignItems="center">
-      <CircularProgress isIndeterminate size="120px" />
-    </Flex>
-  );
-}
+import FullScreenProgress from "./Components/FullScreenProgress.tsx";
 
 const ProvidersTree: React.FC = () => {
   const [queryClient] = useState(
@@ -34,7 +27,7 @@ const ProvidersTree: React.FC = () => {
       <ChakraProvider>
         <trpc.Provider client={trpcClient} queryClient={queryClient}>
           <QueryClientProvider client={queryClient}>
-            <Suspense fallback={<Loading />}>
+            <Suspense fallback={<FullScreenProgress />}>
               <Routes />
             </Suspense>
           </QueryClientProvider>
