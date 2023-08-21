@@ -93,3 +93,5 @@ export function GenerateCurrentUserHook({
     return { isLoggedIn, user: null, isLoading };
   };
 }
+
+export type CurrentUserHookType = ReturnType<typeof GenerateCurrentUserHook>;

@@ -1,6 +1,12 @@
 import { z } from "zod";
-import { atom } from "jotai";
-import { StaticRole } from "./misc";
+import { useEffect } from "react";
+import { atom, useAtom } from "jotai";
+import {
+  StaticRole,
+  getUserRoleHierarchical,
+  getUserStaticRoles,
+} from "./misc";
+import type { CurrentUserHookType } from "./current-user";
 
 /** The schema */
 const ConfigSchema = z.object({
@@ -76,4 +82,35 @@ export function GenerateConfigAtom({
   );
 
   return ConfigAtom;
+}
+
+type DefaultRoleSelector = {
+  useCurrentUser: CurrentUserHookType;
+  ConfigAtom: ReturnType<typeof GenerateConfigAtom>;
+};
+
+/**
+ * This hook will automatically select a default role if none is selected
+ */
+export function GenerateDefaultRoleSelector({
+  useCurrentUser,
+  ConfigAtom: configAtom,
+}: DefaultRoleSelector) {
+  return () => {
+    const [config, setConfig] = useAtom(configAtom);
+    const { isLoggedIn, user } = useCurrentUser();
+
+    useEffect(() => {
+      if (isLoggedIn) {
+        if (
+          config.activeStaticRole === StaticRole.none ||
+          !getUserStaticRoles(user).includes(config.activeStaticRole) // If current selected role doesn't belong to the user, change it
+        ) {
+          setConfig({ activeStaticRole: getUserRoleHierarchical(user) });
+        }
+      } else {
+        setConfig({ activeStaticRole: StaticRole.none });
+      }
+    }, [config.activeStaticRole, user, isLoggedIn]);
+  };
 }

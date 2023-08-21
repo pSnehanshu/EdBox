@@ -2,7 +2,10 @@ import { parseISO } from "date-fns";
 import { useAtom, useAtomValue } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 import { z } from "zod";
-import { GenerateConfigAtom } from "schooltalk-shared/client-config";
+import {
+  GenerateConfigAtom,
+  GenerateDefaultRoleSelector,
+} from "schooltalk-shared/client-config";
 import { GenerateCurrentUserHook } from "schooltalk-shared/current-user";
 import { trpc } from "./trpc";
 import { env } from "./env";
@@ -59,3 +62,11 @@ export function useConfigUpdate() {
 
   return setConfig;
 }
+
+/**
+ * This hook will automatically select a default role if none is selected
+ */
+export const useSelectDefaultRole = GenerateDefaultRoleSelector({
+  ConfigAtom,
+  useCurrentUser,
+});
