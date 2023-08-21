@@ -1,45 +1,20 @@
-import { parseISO, isPast } from "date-fns";
-import { atom, useAtom, useAtomValue } from "jotai";
+import { parseISO } from "date-fns";
+import { useAtom, useAtomValue } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 import { z } from "zod";
-import type { User } from "schooltalk-shared/types";
 import { GenerateConfigAtom } from "schooltalk-shared/client-config";
 import { GenerateCurrentUserHook } from "schooltalk-shared/current-user";
-import { trpc, trpcVanillaClient } from "./trpc";
+import { trpc } from "./trpc";
 import { env } from "./env";
 
-// export const SelectedSchoolIdAtom = atomWithStorage<string | null>(
-//   "schoolId",
-//   null,
-// );
-
 export const useCurrentUser = GenerateCurrentUserHook({
-  trpc: trpc,
+  trpc,
   getAuthToken: async () => localStorage.getItem("token"),
   setStoredUser: async (user) =>
     localStorage.setItem("user", JSON.stringify(user)),
   getStoredUser: async () => localStorage.getItem("user"),
   removeStoredUser: async () => localStorage.removeItem("user"),
 });
-
-// let userInMemory: User | null = null;
-
-// export const IsLoggedInAtom = atom<Promise<boolean>>(async (get) => {
-//   const expiry = get(SessionExpiryAtom);
-//   if (isPast(expiry)) return false;
-
-//   if (userInMemory) return true; // TODO: Implement expiry logic
-
-//   // Check from API
-//   try {
-//     userInMemory = await trpcVanillaClient.profile.me.query();
-//     return true;
-//   } catch (error) {
-//     console.error(error);
-//   }
-
-//   return false;
-// });
 
 const expiryAtomSchema = z
   .string()
@@ -64,12 +39,6 @@ export const SessionExpiryAtom = atomWithStorage<Date>(
     },
   },
 );
-
-// export const CurrentRoleAtom = atomWithStorage<StaticRole>(
-//   "role",
-//   StaticRole.none,
-// );
-// export const CurrentUserIdAtom = atomWithStorage<string | null>("userId", null);
 
 export const ConfigAtom = GenerateConfigAtom({
   backendURL: env.VITE_BACKEND_URL,

@@ -1,5 +1,5 @@
 import { createTRPCReact } from "@trpc/react-query";
-import { TRPCLink, httpBatchLink, createTRPCProxyClient } from "@trpc/client";
+import { TRPCLink, httpBatchLink } from "@trpc/client";
 import type { AppRouter } from "../../../backend/trpc";
 import { env } from "./env";
 
@@ -16,5 +16,3 @@ export const links: TRPCLink<AppRouter>[] = [
 ];
 
 export const trpc = createTRPCReact<AppRouter>();
-
-export const trpcVanillaClient = createTRPCProxyClient<AppRouter>({ links });
