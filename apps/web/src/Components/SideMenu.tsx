@@ -1,4 +1,3 @@
-import React, { ReactNode } from "react";
 import {
   IconButton,
   Box,
@@ -6,7 +5,6 @@ import {
   Flex,
   Icon,
   useColorModeValue,
-  Text,
   Drawer,
   DrawerContent,
   useDisclosure,
@@ -32,7 +30,7 @@ interface LinkItemProps {
   icon: IconType;
 }
 const LinkItems: Array<LinkItemProps> = [
-  { name: "Home", abbr: "/home", icon: FiHome },
+  { name: "Home", abbr: "/", icon: FiHome },
   { name: "Homeworks", abbr: "/homework", icon: MdOutlineHomeWork },
   { name: "Class tests and Exams", abbr: "/exam", icon: PiExam },
   { name: "Members", abbr: "/member", icon: MdOutlinePeople },

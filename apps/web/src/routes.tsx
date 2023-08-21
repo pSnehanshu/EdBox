@@ -4,7 +4,6 @@ import {
   Route,
   Redirect,
 } from "react-router-dom";
-import Main from "./pages/Main";
 import About from "./pages/About";
 import LoginPage from "./pages/Login";
 import { useCurrentUser } from "./utils/atoms";
@@ -33,14 +32,11 @@ export default function Routes() {
             <Route path="/login">
               {isLoggedIn ? <Redirect to="/" /> : <LoginPage />}
             </Route>
-            <Route path="/home">
-              {isLoggedIn ? <HomePage /> : <Redirect to="/login" />}
-            </Route>
             <Route path="/homework">
               {isLoggedIn ? <HomeworkPage /> : <Redirect to="/login" />}
             </Route>
             <Route path="/">
-              {isLoggedIn ? <Main /> : <Redirect to="/login" />}
+              {isLoggedIn ? <HomePage /> : <Redirect to="/login" />}
             </Route>
           </Switch>
         </Flex>
