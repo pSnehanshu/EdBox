@@ -14,6 +14,7 @@ import {
   Select,
   useColorMode,
 } from "@chakra-ui/react";
+import { Link, useLocation } from "react-router-dom";
 import { trpc } from "../utils/trpc";
 import { useAtom } from "jotai";
 import {
@@ -70,6 +71,8 @@ export default function Navbar() {
     setCurrentUserRole(StaticRole.none);
   };
 
+  const { pathname } = useLocation();
+
   return (
     <>
       <Box
@@ -79,9 +82,9 @@ export default function Navbar() {
         borderColor="gray.200"
       >
         <Flex h={16} alignItems={"center"} justifyContent={"space-between"}>
-          <Box>
+          <Link to="/">
             <Avatar size={"xl"} src={Logo} />
-          </Box>
+          </Link>
 
           <Flex alignItems={"center"}>
             <Stack direction={"row"} spacing={7}>
@@ -89,7 +92,7 @@ export default function Navbar() {
                 {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
               </Button>
 
-              {isLoggedIn && (
+              {isLoggedIn ? (
                 <>
                   <Select
                     placeholder="Select your role"
@@ -140,6 +143,12 @@ export default function Navbar() {
                     </MenuList>
                   </Menu>
                 </>
+              ) : (
+                pathname !== "/login" && (
+                  <Button as={Link} to="/login">
+                    Login to EdBox
+                  </Button>
+                )
               )}
             </Stack>
           </Flex>
