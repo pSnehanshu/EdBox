@@ -3,14 +3,7 @@ import React from "react";
 
 export default function NotFound() {
   return (
-    <Flex
-      ml={{ base: 0, md: "72" }}
-      p="4"
-      w="full"
-      maxH="100vh"
-      flexDirection="column"
-      alignItems="center"
-    >
+    <Flex maxH="100vh" flexDirection="column" alignItems="center">
       <SvgComponent style={{ width: "80%" }} />
       <a href="https://storyset.com/web" target="_blank">
         Web illustrations by Storyset

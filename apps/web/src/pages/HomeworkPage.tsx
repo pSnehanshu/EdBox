@@ -62,7 +62,7 @@ export default function HomeworkPage() {
   console.log(homeworks);
 
   return (
-    <Box ml={{ base: 0, md: "72" }} p="4">
+    <Box>
       <Card>
         <CardHeader>
           <Heading size="md">Home Works</Heading>
