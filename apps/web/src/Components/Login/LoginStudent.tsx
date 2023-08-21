@@ -180,13 +180,11 @@ export default function StudentLogin({ setshowSchoolSelector }: props) {
                 _hover={{
                   bg: "purple.700",
                 }}
+                isLoading={
+                  requestRollNumberOTP.isLoading || submitOTPMutation.isLoading
+                }
               >
-                {requestRollNumberOTP.isLoading ||
-                submitOTPMutation.isLoading ? (
-                  <Spinner />
-                ) : (
-                  "Request OTP"
-                )}
+                Request OTP
               </Button>
               <Button onClick={setshowSchoolSelector}>Change School</Button>
             </Stack>

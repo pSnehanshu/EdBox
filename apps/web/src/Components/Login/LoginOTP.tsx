@@ -108,12 +108,9 @@ export default function LoginOTP({ setshowSchoolSelector }: LoginOtpProps) {
                 _hover={{
                   bg: "purple.700",
                 }}
+                isLoading={requestOtp.isLoading || submitOTPMutation.isLoading}
               >
-                {requestOtp.isLoading || submitOTPMutation.isLoading ? (
-                  <Spinner />
-                ) : (
-                  "Request OTP"
-                )}
+                Request OTP
               </Button>
               <Button onClick={setshowSchoolSelector}>Change School</Button>
             </Stack>
