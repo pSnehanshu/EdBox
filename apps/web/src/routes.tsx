@@ -13,6 +13,7 @@ import HomePage from "./pages/HomePage";
 import { Flex } from "@chakra-ui/react";
 import HomeworkPage from "./pages/HomeworkPage";
 import FullScreenProgress from "./Components/FullScreenProgress";
+import NotFound from "./pages/NotFound";
 
 export default function Routes() {
   const { isLoggedIn, isLoading } = useCurrentUser();
@@ -35,8 +36,11 @@ export default function Routes() {
             <Route path="/homework">
               {isLoggedIn ? <HomeworkPage /> : <Redirect to="/login" />}
             </Route>
-            <Route path="/">
+            <Route exact path="/">
               {isLoggedIn ? <HomePage /> : <Redirect to="/login" />}
+            </Route>
+            <Route path="*">
+              <NotFound />
             </Route>
           </Switch>
         </Flex>
