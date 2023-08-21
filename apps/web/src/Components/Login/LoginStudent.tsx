@@ -108,9 +108,6 @@ export default function StudentLogin({ setshowSchoolSelector }: props) {
         onSubmit={(otp: any) => onSubmit(otp)}
       />
       <Stack>
-        <Stack>
-          <Heading fontSize={"4xl"}>Sign in to your account</Heading>
-        </Stack>
         <Box
           rounded={"lg"}
           bg={useColorModeValue("white", "gray.700")}
@@ -163,14 +160,6 @@ export default function StudentLogin({ setshowSchoolSelector }: props) {
               />
             </FormControl>
             <Stack spacing={8}>
-              <Stack
-                direction={{ base: "column", sm: "row" }}
-                align={"start"}
-                justify={"space-between"}
-              >
-                <Checkbox>Remember me</Checkbox>
-                <Link color={"purple.700"}>Forgot password?</Link>
-              </Stack>
               <Button
                 onClick={() => {
                   if (
