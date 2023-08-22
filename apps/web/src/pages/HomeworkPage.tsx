@@ -1,17 +1,17 @@
 import {
   Box,
+  Button,
   Card,
   CardBody,
   CardHeader,
   Divider,
   Flex,
   Heading,
-  Input,
-  Select,
+  Modal,
   Stack,
   StackDivider,
   Text,
-  Textarea,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { StaticRole } from "schooltalk-shared/misc";
 import { useConfig } from "../utils/atoms";
@@ -21,6 +21,7 @@ import { useMemo } from "react";
 import { format, isPast, parseISO } from "date-fns";
 import { MdOutlineAttachFile, MdOutlineFileUpload } from "react-icons/md";
 import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
+import HomeworkForm from "../Components/HomeworkForm";
 
 const pageLimit = 10;
 
@@ -28,6 +29,8 @@ export default function HomeworkPage() {
   const { activeStaticRole: currentUserRole } = useConfig();
   const isStudent = currentUserRole === StaticRole.student;
   const isTeacher = currentUserRole === StaticRole.teacher;
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const homeworkTeacherQuery =
     trpc.school.homework.fetchForTeacher.useInfiniteQuery(
@@ -85,15 +88,10 @@ export default function HomeworkPage() {
           </Stack>
         </CardBody>
       </Card>
-      <Card mt={8}>
-        <CardHeader>
-          <Heading size="xl">Create new Home Works</Heading>
-        </CardHeader>
-        <Divider />
-        <CardBody>
-          <CreateHomeworkForm />
-        </CardBody>
-      </Card>
+      <Button onClick={onOpen}>Open Modal</Button>
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <HomeworkForm />
+      </Modal>
     </Box>
   );
 }
@@ -149,36 +147,6 @@ function SingleHomework({ homework }: homeworkProps) {
       <Text pt="2" fontSize="sm" color={isPastDue ? "red" : "gray.400"}>
         Due date: {"\n" + dueDateStr}
       </Text>
-    </>
-  );
-}
-
-function CreateHomeworkForm() {
-  return (
-    <>
-      <Stack spacing={3}>
-        <Flex gap={8}>
-          <Select placeholder="Class" size="lg"></Select>
-          <Select placeholder="Section" size="lg"></Select>
-        </Flex>
-        <Select placeholder="Subject" size="lg"></Select>
-        <Input
-          placeholder="Due date (optional)"
-          size="md"
-          type="datetime-local"
-        />
-        <Textarea placeholder="Description (optional)" size="md" />
-        <Flex justifyContent="center" gap={2}>
-          <MdOutlineFileUpload size={28} />
-          <Text fontSize="lg" fontWeight="semibold">
-            Upload File
-          </Text>
-        </Flex>
-        <Flex justifyContent="center">
-          {/* <CloseIcon boxSize={"5"} /> */}
-          <CheckIcon boxSize={"6"} />
-        </Flex>
-      </Stack>
     </>
   );
 }
