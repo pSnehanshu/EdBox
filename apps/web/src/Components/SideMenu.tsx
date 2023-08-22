@@ -23,6 +23,7 @@ import {
 import { PiExam, PiBooksLight } from "react-icons/pi";
 import { IconType } from "react-icons";
 import { Link, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 
 interface LinkItemProps {
   name: string;
@@ -42,6 +43,11 @@ const LinkItems: Array<LinkItemProps> = [
 
 export default function SideMenu() {
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  // Close navbar when navigation happens
+  const { pathname, search, state } = useLocation();
+  useEffect(onClose, [pathname, search, state]);
+
   return (
     <Box minH="100vh" position="relative">
       <SidebarContent
@@ -104,6 +110,7 @@ interface NavItemProps extends FlexProps {
 const NavItem = ({ children, icon, abbr, ...rest }: NavItemProps) => {
   const { colorMode } = useColorMode();
   let { pathname } = useLocation();
+
   return (
     <Box
       as="a"

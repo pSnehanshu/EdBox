@@ -11,7 +11,10 @@ import {
   getUserRoleHierarchical,
   getUserStaticRoles,
 } from "schooltalk-shared/misc";
-import { GenerateConfigAtom } from "schooltalk-shared/client-config";
+import {
+  GenerateConfigAtom,
+  GenerateDefaultRoleSelector,
+} from "schooltalk-shared/client-config";
 import { useEffect } from "react";
 import { useCurrentUser } from "./auth";
 
@@ -46,21 +49,7 @@ export function useConfigUpdate() {
 /**
  * This hook will automatically select a default role if none is selected
  */
-export function useSelectDefaultRole() {
-  const config = useConfig();
-  const setConfig = useConfigUpdate();
-  const { isLoggedIn, user } = useCurrentUser();
-
-  useEffect(() => {
-    if (isLoggedIn) {
-      if (
-        config.activeStaticRole === StaticRole.none ||
-        !getUserStaticRoles(user).includes(config.activeStaticRole) // If current selected role doesn't belong to the user, change it
-      ) {
-        setConfig({ activeStaticRole: getUserRoleHierarchical(user) });
-      }
-    } else {
-      setConfig({ activeStaticRole: StaticRole.none });
-    }
-  }, [config.activeStaticRole, user, isLoggedIn]);
-}
+export const useSelectDefaultRole = GenerateDefaultRoleSelector({
+  ConfigAtom,
+  useCurrentUser,
+});

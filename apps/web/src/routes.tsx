@@ -5,7 +5,7 @@ import {
   Redirect,
 } from "react-router-dom";
 import LoginPage from "./pages/Login";
-import { useCurrentUser } from "./utils/atoms";
+import { useCurrentUser, useSelectDefaultRole } from "./utils/atoms";
 import Navbar from "./Components/Navbar";
 import SideMenu from "./Components/SideMenu";
 import HomePage from "./pages/HomePage";
@@ -15,6 +15,9 @@ import FullScreenProgress from "./Components/FullScreenProgress";
 import NotFound from "./pages/NotFound";
 
 export default function Routes() {
+  // DO NOT EVER REMOVE THIS HOOK
+  useSelectDefaultRole();
+
   const { isLoggedIn, isLoading } = useCurrentUser();
 
   const isSidebarVisible = isLoggedIn;
