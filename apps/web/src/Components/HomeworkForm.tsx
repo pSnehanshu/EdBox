@@ -31,13 +31,9 @@ interface HomeworkFormData {
 
 interface HomeworkFormProps {
   homework?: Homework;
-  onSubmit: (data: HomeworkFormData) => void;
 }
 
-export default function HomeworkForm({
-  homework,
-  onSubmit,
-}: HomeworkFormProps) {
+export default function HomeworkForm({ homework }: HomeworkFormProps) {
   const { schoolId: selectedSchoolId } = useConfig();
 
   const [selectedClass, setSelectedClass] = useState(homework?.Class);

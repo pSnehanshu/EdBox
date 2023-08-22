@@ -88,7 +88,7 @@ export default function HomeworkPage() {
           </Stack>
         </CardBody>
       </Card>
-      <Button onClick={onOpen}>Open Modal</Button>
+      <Button onClick={onOpen}>Create new HW</Button>
       <Modal isOpen={isOpen} onClose={onClose}>
         <HomeworkForm />
       </Modal>
