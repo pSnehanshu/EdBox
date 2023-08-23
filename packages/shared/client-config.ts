@@ -10,7 +10,7 @@ import type { CurrentUserHookType } from "./current-user";
 
 /** The schema */
 const ConfigSchema = z.object({
-  backendHost: z.string().url(),
+  backendHost: z.union([z.string().url(), z.string().startsWith("/")]),
   schoolId: z.union([z.string().cuid(), z.literal("")]),
   previewMessageLength: z.number().int().default(200),
   activeStaticRole: z.nativeEnum(StaticRole).default(StaticRole.none),

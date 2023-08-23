@@ -62,9 +62,8 @@ export default function HomeworkForm({ homework }: HomeworkFormProps) {
       const filteredData = classesAndSectionsData?.data?.find((ele) => {
         return ele.numeric_id === selectedNumericId;
       });
-      const { Sections, ...restData } = filteredData;
 
-      setSelectedClass(restData);
+      setSelectedClass(filteredData);
       setSelectedSection(undefined);
     }
   };
