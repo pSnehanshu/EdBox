@@ -8,7 +8,8 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "moduleResolution": "node",
-    "module": "CommonJS"
+    "module": "CommonJS",
+    "skipLibCheck": true
   },
   "ts-node": {
     "files": true
