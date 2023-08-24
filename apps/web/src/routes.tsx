@@ -1,18 +1,20 @@
+import { lazy } from "react";
 import {
   BrowserRouter as Router,
   Switch,
   Route,
   Redirect,
 } from "react-router-dom";
-import LoginPage from "./pages/Login";
 import { useCurrentUser, useSelectDefaultRole } from "./utils/atoms";
 import Navbar from "./Components/Navbar";
 import SideMenu from "./Components/SideMenu";
-import HomePage from "./pages/HomePage";
 import { Box, Flex } from "@chakra-ui/react";
-import HomeworkPage from "./pages/HomeworkPage";
 import FullScreenProgress from "./Components/FullScreenProgress";
 import NotFound from "./pages/NotFound";
+
+const LoginPage = lazy(() => import("./pages/Login"));
+const HomePage = lazy(() => import("./pages/HomePage"));
+const HomeworkPage = lazy(() => import("./pages/HomeworkPage"));
 
 export default function Routes() {
   // DO NOT EVER REMOVE THIS HOOK
