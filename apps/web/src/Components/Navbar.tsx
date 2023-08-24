@@ -13,6 +13,7 @@ import {
   Center,
   Select,
   useColorMode,
+  Image,
 } from "@chakra-ui/react";
 import { Link, useLocation } from "react-router-dom";
 import { trpc } from "../utils/trpc";
@@ -24,7 +25,7 @@ import {
   SessionExpiryAtom,
 } from "../utils/atoms";
 import DefaultAvatar from "../assets/images/default-avatar.jpg";
-import Logo from "../assets/images/splash.png";
+import Logo from "../assets/images/edbox-logo.png";
 import { useMemo } from "react";
 import { StaticRole, getUserStaticRoles } from "schooltalk-shared/misc";
 import { MoonIcon, SunIcon } from "@chakra-ui/icons";
@@ -74,86 +75,87 @@ export default function Navbar() {
   const { pathname } = useLocation();
 
   return (
-    <>
-      <Box
-        bg={useColorModeValue("gray.100", "gray.800")}
-        px={8}
-        borderBottom="1px"
-        borderColor="gray.200"
-      >
-        <Flex h={16} alignItems={"center"} justifyContent={"space-between"}>
-          <Link to="/">
-            <Avatar size={"xl"} src={Logo} />
-          </Link>
-
-          <Flex alignItems={"center"}>
-            <Stack direction={"row"} spacing={7}>
-              <Button onClick={toggleColorMode}>
-                {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
-              </Button>
-
-              {isLoggedIn ? (
-                <>
-                  <Select
-                    placeholder="Select your role"
-                    onChange={(e) =>
-                      setCurrentUserRole(parseInt(e.target.value, 10))
-                    }
-                    value={currentUserRole}
-                  >
-                    {availableRoles.map((item) => (
-                      <option value={item} key={item}>
-                        {StaticRole[item].split("_").join(" ").toUpperCase()}
-                      </option>
-                    ))}
-                  </Select>
-
-                  <Menu>
-                    <MenuButton
-                      as={Button}
-                      rounded={"full"}
-                      variant={"link"}
-                      cursor={"pointer"}
-                      minW={0}
-                    >
-                      <Avatar
-                        size={"sm"}
-                        src={urlQuery.data?.url ?? DefaultAvatar}
-                      />
-                    </MenuButton>
-                    <MenuList alignItems={"center"}>
-                      <br />
-                      <Center>
-                        <Avatar
-                          size={"2xl"}
-                          src={urlQuery.data?.url ?? DefaultAvatar}
-                        />
-                      </Center>
-                      <br />
-                      <Center>
-                        <p>
-                          <span>{user?.salutation} </span>
-                          {user?.name}
-                        </p>
-                      </Center>
-                      <br />
-                      <MenuDivider />
-                      <MenuItem>Account Settings</MenuItem> {/* edit details */}
-                      <MenuItem onClick={handleLogout}>Logout</MenuItem>
-                    </MenuList>
-                  </Menu>
-                </>
-              ) : (
-                pathname !== "/login" && (
-                  <Button as={Link} to="/login">
-                    Login to EdBox
-                  </Button>
-                )
-              )}
-            </Stack>
-          </Flex>
-        </Flex>
+    <Flex
+      h={16}
+      alignItems={"center"}
+      justifyContent={"space-between"}
+      bg={useColorModeValue("gray.100", "gray.800")}
+      px={8}
+      borderBottom="1px"
+      borderColor="gray.200"
+    >
+      <Box h="full" p="2">
+        <Link to="/">
+          <Image src={Logo} maxH="full" />
+        </Link>
       </Box>
-    </>
+
+      <Flex alignItems={"center"}>
+        <Stack direction={"row"} spacing={7}>
+          <Button onClick={toggleColorMode}>
+            {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
+          </Button>
+
+          {isLoggedIn ? (
+            <>
+              <Select
+                placeholder="Select your role"
+                onChange={(e) =>
+                  setCurrentUserRole(parseInt(e.target.value, 10))
+                }
+                value={currentUserRole}
+              >
+                {availableRoles.map((item) => (
+                  <option value={item} key={item}>
+                    {StaticRole[item].split("_").join(" ").toUpperCase()}
+                  </option>
+                ))}
+              </Select>
+
+              <Menu>
+                <MenuButton
+                  as={Button}
+                  rounded={"full"}
+                  variant={"link"}
+                  cursor={"pointer"}
+                  minW={0}
+                >
+                  <Avatar
+                    size={"sm"}
+                    src={urlQuery.data?.url ?? DefaultAvatar}
+                  />
+                </MenuButton>
+                <MenuList alignItems={"center"}>
+                  <br />
+                  <Center>
+                    <Avatar
+                      size={"2xl"}
+                      src={urlQuery.data?.url ?? DefaultAvatar}
+                    />
+                  </Center>
+                  <br />
+                  <Center>
+                    <p>
+                      <span>{user?.salutation} </span>
+                      {user?.name}
+                    </p>
+                  </Center>
+                  <br />
+                  <MenuDivider />
+                  <MenuItem>Account Settings</MenuItem> {/* edit details */}
+                  <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                </MenuList>
+              </Menu>
+            </>
+          ) : (
+            pathname !== "/login" && (
+              <Button as={Link} to="/login">
+                Login to EdBox
+              </Button>
+            )
+          )}
+        </Stack>
+      </Flex>
+    </Flex>
   );
 }
