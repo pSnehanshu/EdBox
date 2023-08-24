@@ -98,12 +98,15 @@ export default function Navbar() {
   return (
     <Flex
       h={16}
+      pos="fixed"
       alignItems={"center"}
       justifyContent={"space-between"}
       bg={useColorModeValue("gray.100", "gray.800")}
       px={8}
       borderBottom="1px"
       borderColor="gray.200"
+      minW="100vw"
+      zIndex={10}
     >
       <Box h="full" p="2">
         <Link to="/">
@@ -136,7 +139,8 @@ export default function Navbar() {
                 rounded={"full"}
                 variant={"link"}
                 cursor={"pointer"}
-                minW={0}
+                minW="8"
+                minH="8"
               >
                 <Avatar size={"sm"} src={urlQuery.data?.url ?? DefaultAvatar} />
               </MenuButton>
@@ -155,7 +159,10 @@ export default function Navbar() {
                   {user?.name}
                 </Center>
                 <MenuDivider />
-                <MenuItem>Account Settings</MenuItem> {/* edit details */}
+                <MenuItem>
+                  <Link to="/settings">Account Settings</Link>
+                </MenuItem>{" "}
+                {/* edit details */}
                 <MenuItem onClick={() => logoutMutation.mutate({})}>
                   Logout
                 </MenuItem>

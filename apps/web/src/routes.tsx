@@ -30,7 +30,12 @@ export default function Routes() {
         <Flex>
           {isSidebarVisible && <SideMenu />}
 
-          <Box ml={{ base: 0, md: isSidebarVisible ? 72 : 0 }} p="4" w="full">
+          <Box
+            ml={{ base: 0, md: isSidebarVisible ? 72 : 0 }}
+            mt="16"
+            p="4"
+            w="full"
+          >
             <Switch>
               <Route path="/login">
                 {isLoggedIn ? <Redirect to="/" /> : <LoginPage />}
