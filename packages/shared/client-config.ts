@@ -7,6 +7,7 @@ import {
   getUserStaticRoles,
 } from "./misc";
 import type { CurrentUserHookType } from "./current-user";
+import { MaybePromise } from "./types";
 
 /** The schema */
 const ConfigSchema = z.object({
@@ -21,8 +22,8 @@ type Config = z.infer<typeof ConfigSchema>;
 type ConfigOptions = {
   backendURL: string;
   preloadedSchoolId?: string;
-  getStoredSchoolId: () => Promise<string | null>;
-  setStoredSchoolId: (schoolId: string) => Promise<void>;
+  getStoredSchoolId?: () => MaybePromise<string | null>;
+  setStoredSchoolId?: (schoolId: string) => void;
 };
 
 export function GenerateConfigAtom({
@@ -48,16 +49,17 @@ export function GenerateConfigAtom({
       const existingConfig = get(_configValueAtom);
       if (existingConfig.schoolId) return existingConfig;
 
-      // Fetch existing selected school id
-      const selectedSchoolId = await getStoredSchoolId().catch((err) => {
-        // We want to ignore this failure
-        console.error(err);
-        return null;
-      });
+      try {
+        // Fetch existing selected school id
+        const selectedSchoolId = await getStoredSchoolId?.();
 
-      if (!selectedSchoolId) return existingConfig;
+        if (!selectedSchoolId) return existingConfig;
 
-      existingConfig.schoolId = selectedSchoolId;
+        existingConfig.schoolId = selectedSchoolId;
+      } catch (error) {
+        console.error(error);
+      }
+
       return existingConfig;
     },
     async (get, set, update: Partial<Config>) => {
@@ -69,10 +71,12 @@ export function GenerateConfigAtom({
 
       // Check if school id changed
       if (existingConfig.schoolId !== updatedConfig.schoolId) {
-        await setStoredSchoolId(updatedConfig.schoolId).catch((err) => {
+        try {
+          await setStoredSchoolId?.(updatedConfig.schoolId);
+        } catch (error) {
           // We want to ignore this failure
-          console.error(err);
-        });
+          console.error(error);
+        }
       }
 
       console.log("Config updated", updatedConfig);

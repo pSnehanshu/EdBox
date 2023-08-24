@@ -9,6 +9,7 @@ import type { Context } from "../../apps/backend/trpc/context";
 import type { FilePermissionsInput } from "./misc";
 
 export type Nullable<T> = T | null | undefined | void;
+export type MaybePromise<T> = T | Promise<T>;
 
 export type ArrayElement<ArrayType extends readonly unknown[]> =
   ArrayType extends readonly (infer ElementType)[] ? ElementType : never;
