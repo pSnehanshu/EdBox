@@ -159,7 +159,8 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
   return (
     <Flex
       position="fixed"
-      top="16"
+      zIndex={11}
+      top="-2"
       right="0"
       ml={{ base: 0, md: 60 }}
       px={{ base: 4, md: 24 }}

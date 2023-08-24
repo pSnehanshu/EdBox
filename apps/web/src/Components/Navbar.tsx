@@ -102,7 +102,7 @@ export default function Navbar() {
       alignItems={"center"}
       justifyContent={"space-between"}
       bg={useColorModeValue("gray.100", "gray.800")}
-      px={8}
+      px={{ base: 0, md: 8 }}
       borderBottom="1px"
       borderColor="gray.200"
       minW="100vw"
@@ -114,7 +114,7 @@ export default function Navbar() {
         </Link>
       </Box>
 
-      <Stack direction={"row"} gap="4">
+      <Stack direction={"row"} gap="2" mr={{ base: "16", md: "0" }}>
         <Button onClick={toggleColorMode}>
           {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
         </Button>
