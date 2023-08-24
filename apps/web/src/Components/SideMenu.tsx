@@ -84,11 +84,12 @@ export const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
       borderRight="1px"
       borderRightColor={useColorModeValue("gray.200", "gray.700")}
       w={{ base: "full", md: "72" }}
-      pos="absolute"
       h="full"
       {...rest}
+      mt={{ base: 0, md: 16 }}
+      pos="fixed"
     >
-      <Flex alignItems="end" mx="8" justifyContent="flex-end">
+      <Flex alignItems="end" mx="4" justifyContent="flex-end">
         <CloseButton display={{ base: "flex", md: "none" }} onClick={onClose} />
       </Flex>
       {LinkItems.map((link) => (
@@ -158,7 +159,8 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
   return (
     <Flex
       position="fixed"
-      top="16"
+      zIndex={11}
+      top="-2"
       right="0"
       ml={{ base: 0, md: 60 }}
       px={{ base: 4, md: 24 }}
