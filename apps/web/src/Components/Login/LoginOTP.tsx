@@ -4,13 +4,9 @@ import {
   FormControl,
   FormLabel,
   Input,
-  Checkbox,
   Stack,
-  Link,
   Button,
-  Heading,
   useColorModeValue,
-  Spinner,
 } from "@chakra-ui/react";
 import { parseISO } from "date-fns";
 import { trpc } from "../../utils/trpc";
@@ -19,11 +15,17 @@ import { useAtom } from "jotai";
 import { useConfig, SessionExpiryAtom } from "../../utils/atoms";
 import OtpPopup from "./OtpPopup";
 
-interface LoginOtpProps {
+export interface LoginOtpProps {
   setshowSchoolSelector: () => void;
+  onLogin: () => void;
+  onLoginFailed: (reason: string) => void;
 }
 
-export default function LoginOTP({ setshowSchoolSelector }: LoginOtpProps) {
+export default function LoginOTP({
+  setshowSchoolSelector,
+  onLogin,
+  onLoginFailed,
+}: LoginOtpProps) {
   const config = useConfig();
   const selectedSchoolId = config.schoolId;
 
@@ -42,18 +44,20 @@ export default function LoginOTP({ setshowSchoolSelector }: LoginOtpProps) {
     },
     onError(error) {
       console.error(error);
-      console.error("Error", "Phone number isn't registered");
+      onLoginFailed("Phone number isn't registered");
     },
   });
 
   const submitOTPMutation = trpc.auth.submitLoginOTP.useMutation({
     async onSuccess({ token, expiry_date }) {
+      onLogin();
       localStorage.setItem("token", token);
       trpcUtils.profile.me.invalidate();
       setTokenExpiry(parseISO(expiry_date));
     },
     onError(error) {
       console.error(error);
+      onLoginFailed("Incorrect OTP");
     },
   });
 

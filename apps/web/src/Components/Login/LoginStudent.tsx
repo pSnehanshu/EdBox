@@ -3,15 +3,11 @@ import {
   Box,
   FormControl,
   Input,
-  Checkbox,
   Stack,
-  Link,
   Button,
-  Heading,
   Text,
   useColorModeValue,
   Select,
-  Spinner,
 } from "@chakra-ui/react";
 import { trpc } from "../../utils/trpc";
 import { useAtom } from "jotai";
@@ -20,12 +16,13 @@ import { useCallback, useState } from "react";
 import { ClassWithSections } from "schooltalk-shared/types";
 import OtpPopup from "./OtpPopup";
 import { parseISO } from "date-fns";
+import type { LoginOtpProps } from "./LoginOTP";
 
-interface props {
-  setshowSchoolSelector: () => void;
-}
-
-export default function StudentLogin({ setshowSchoolSelector }: props) {
+export default function StudentLogin({
+  setshowSchoolSelector,
+  onLogin,
+  onLoginFailed,
+}: LoginOtpProps) {
   const { schoolId: selectedSchoolId } = useConfig();
   const [, setTokenExpiry] = useAtom(SessionExpiryAtom);
 
@@ -46,7 +43,7 @@ export default function StudentLogin({ setshowSchoolSelector }: props) {
     },
     onError(error) {
       console.error(error);
-      console.error("Error", "wrong data");
+      onLoginFailed("Student not found");
     },
   });
 
@@ -78,12 +75,14 @@ export default function StudentLogin({ setshowSchoolSelector }: props) {
 
   const submitOTPMutation = trpc.auth.submitLoginOTP.useMutation({
     async onSuccess({ token, expiry_date }) {
+      onLogin();
       localStorage.setItem("token", token);
       trpcUtils.profile.me.invalidate();
       setTokenExpiry(parseISO(expiry_date));
     },
     onError(error) {
       console.error(error);
+      onLoginFailed("Incorrect OTP");
     },
   });
 
