@@ -7,6 +7,7 @@ import {
   GenerateDefaultRoleSelector,
 } from "schooltalk-shared/client-config";
 import { GenerateCurrentUserHook } from "schooltalk-shared/current-user";
+import { StaticRole } from "schooltalk-shared/misc";
 import { trpc } from "./trpc";
 import { env } from "./env";
 
@@ -46,9 +47,14 @@ export const SessionExpiryAtom = atomWithStorage<Date>(
 export const ConfigAtom = GenerateConfigAtom({
   backendURL: env.VITE_BACKEND_URL,
   preloadedSchoolId: localStorage.getItem("schoolId") ?? undefined,
-  getStoredSchoolId: async () => localStorage.getItem("schoolId"),
-  setStoredSchoolId: async (schoolId) =>
-    localStorage.setItem("schoolId", schoolId),
+  getStoredSchoolId: () => localStorage.getItem("schoolId"),
+  setStoredSchoolId: (schoolId) => localStorage.setItem("schoolId", schoolId),
+  getSelectedRole() {
+    const role = parseInt(localStorage.getItem("role") ?? "0", 10);
+    if (role in StaticRole) return role;
+    return StaticRole.none;
+  },
+  setSelectedRole: (role) => localStorage.setItem("role", role.toString()),
 });
 
 /** Get the current config */

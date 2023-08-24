@@ -24,6 +24,8 @@ type ConfigOptions = {
   preloadedSchoolId?: string;
   getStoredSchoolId?: () => MaybePromise<string | null>;
   setStoredSchoolId?: (schoolId: string) => void;
+  getSelectedRole?: () => MaybePromise<StaticRole>;
+  setSelectedRole?: (role: StaticRole) => void;
 };
 
 export function GenerateConfigAtom({
@@ -31,6 +33,8 @@ export function GenerateConfigAtom({
   preloadedSchoolId,
   getStoredSchoolId,
   setStoredSchoolId,
+  getSelectedRole,
+  setSelectedRole,
 }: ConfigOptions) {
   /** The preloaded values */
   const preloadedConfig = ConfigSchema.parse({
@@ -46,35 +50,54 @@ export function GenerateConfigAtom({
   /** Atom to modify the value */
   const ConfigAtom = atom(
     async (get) => {
-      const existingConfig = get(_configValueAtom);
-      if (existingConfig.schoolId) return existingConfig;
+      const config = get(_configValueAtom);
 
-      try {
-        // Fetch existing selected school id
-        const selectedSchoolId = await getStoredSchoolId?.();
-
-        if (!selectedSchoolId) return existingConfig;
-
-        existingConfig.schoolId = selectedSchoolId;
-      } catch (error) {
-        console.error(error);
+      // Pre-fill schoolId
+      if (!config.schoolId) {
+        try {
+          // Fetch existing selected school id
+          const selectedSchoolId = await getStoredSchoolId?.();
+          if (selectedSchoolId) config.schoolId = selectedSchoolId;
+        } catch (error) {
+          console.error(error);
+        }
       }
 
-      return existingConfig;
+      // Pre-fill active role
+      if (config.activeStaticRole === StaticRole.none) {
+        try {
+          const role = await getSelectedRole?.();
+          if (typeof role !== "undefined" && role !== StaticRole.none)
+            config.activeStaticRole = role;
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      return config;
     },
     async (get, set, update: Partial<Config>) => {
-      const existingConfig = await get(ConfigAtom);
+      const config = await get(ConfigAtom);
       const updatedConfig = {
-        ...existingConfig,
+        ...config,
         ...update,
       };
 
       // Check if school id changed
-      if (existingConfig.schoolId !== updatedConfig.schoolId) {
+      if (config.schoolId !== updatedConfig.schoolId) {
         try {
           await setStoredSchoolId?.(updatedConfig.schoolId);
         } catch (error) {
           // We want to ignore this failure
+          console.error(error);
+        }
+      }
+
+      // Check if school id changed
+      if (config.activeStaticRole !== updatedConfig.activeStaticRole) {
+        try {
+          await setSelectedRole?.(updatedConfig.activeStaticRole);
+        } catch (error) {
           console.error(error);
         }
       }
@@ -102,7 +125,7 @@ export function GenerateDefaultRoleSelector({
 }: DefaultRoleSelector) {
   return () => {
     const [config, setConfig] = useAtom(configAtom);
-    const { isLoggedIn, user } = useCurrentUser();
+    const { isLoggedIn, isLoading, user } = useCurrentUser();
 
     useEffect(() => {
       if (isLoggedIn) {
@@ -112,7 +135,7 @@ export function GenerateDefaultRoleSelector({
         ) {
           setConfig({ activeStaticRole: getUserRoleHierarchical(user) });
         }
-      } else {
+      } else if (!isLoading) {
         setConfig({ activeStaticRole: StaticRole.none });
       }
     }, [config.activeStaticRole, user, isLoggedIn]);
