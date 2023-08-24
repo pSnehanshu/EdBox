@@ -17,7 +17,8 @@ yarn install
 
 ## Apps
 
-This project contains two apps:
+This project contains these apps:
 
-1. [Backend](apps/backend/README.md)
-2. [App](apps/app/README.md)
+1. [App](apps/app/README.md)
+2. [Backend](apps/backend/README.md)
+3. [Web](apps/web/README.md)
