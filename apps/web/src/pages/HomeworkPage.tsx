@@ -17,7 +17,7 @@ import { StaticRole } from "schooltalk-shared/misc";
 import { useConfig } from "../utils/atoms";
 import { trpc } from "../utils/trpc";
 import { Homework } from "schooltalk-shared/types";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { format, isPast, parseISO } from "date-fns";
 import { MdOutlineAttachFile, MdOutlineFileUpload } from "react-icons/md";
 import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
@@ -29,6 +29,10 @@ export default function HomeworkPage() {
   const { activeStaticRole: currentUserRole } = useConfig();
   const isStudent = currentUserRole === StaticRole.student;
   const isTeacher = currentUserRole === StaticRole.teacher;
+
+  const [homeworkEdit, setHomeworkEdit] = useState<undefined | Homework>(
+    undefined,
+  );
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -87,7 +91,16 @@ export default function HomeworkPage() {
         <CardHeader>
           <Flex dir="row" justifyContent={"space-between"}>
             <Heading size="xl">Home Works</Heading>
-            {isTeacher && <Button onClick={onOpen}>Create new</Button>}
+            {isTeacher && (
+              <Button
+                onClick={() => {
+                  onOpen();
+                  setHomeworkEdit(undefined);
+                }}
+              >
+                Create new
+              </Button>
+            )}
           </Flex>
         </CardHeader>
         <Divider />
@@ -96,7 +109,12 @@ export default function HomeworkPage() {
             {homeworks &&
               homeworks.map((item, index) => (
                 <Box>
-                  <SingleHomework key={index} homework={item} />{" "}
+                  <SingleHomework
+                    key={index}
+                    homework={item}
+                    onClick={onOpen}
+                    setHomework={(hw) => setHomeworkEdit(hw)}
+                  />
                 </Box>
               ))}
           </Stack>
@@ -105,6 +123,7 @@ export default function HomeworkPage() {
 
       <Modal isOpen={isOpen} onClose={onClose}>
         <HomeworkForm
+          homework={homeworkEdit}
           onSubmit={(hw) =>
             createHomework.mutate({
               ...hw,
@@ -121,9 +140,11 @@ export default function HomeworkPage() {
 
 interface homeworkProps {
   homework: Homework;
+  onClick: () => void;
+  setHomework: (hw: Homework) => void;
 }
 
-function SingleHomework({ homework }: homeworkProps) {
+function SingleHomework({ homework, onClick, setHomework }: homeworkProps) {
   const dueDate = useMemo(
     () => (homework.due_date ? parseISO(homework.due_date) : null),
     [homework.due_date],
@@ -163,13 +184,25 @@ function SingleHomework({ homework }: homeworkProps) {
           </Heading>
         </Flex>
       </Flex>
+      <Flex justifyContent="space-between" dir="row">
+        <Box dir="flex" justifyContent="space-between">
+          <Text pt="2" fontSize="lg">
+            {homework.text ? homework.text : ""}
+          </Text>
+          <Text pt="2" fontSize="sm" color={isPastDue ? "red" : "gray.400"}>
+            Due date: {"\n" + dueDateStr}
+          </Text>
+        </Box>
 
-      <Text pt="2" fontSize="lg">
-        {homework.text ? homework.text : ""}
-      </Text>
-      <Text pt="2" fontSize="sm" color={isPastDue ? "red" : "gray.400"}>
-        Due date: {"\n" + dueDateStr}
-      </Text>
+        <Button
+          onClick={() => {
+            setHomework(homework);
+            onClick();
+          }}
+        >
+          edit
+        </Button>
+      </Flex>
     </>
   );
 }

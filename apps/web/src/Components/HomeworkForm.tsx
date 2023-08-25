@@ -18,7 +18,7 @@ import { MdOutlineFileUpload } from "react-icons/md";
 import { trpc } from "../utils/trpc";
 import { useConfig } from "../utils/atoms";
 import { Section, Homework, RouterInput } from "schooltalk-shared/types";
-import { parseISO } from "date-fns";
+import { format, parseISO } from "date-fns";
 
 interface HomeworkFormData {
   class_id: number;
@@ -56,7 +56,7 @@ export default function HomeworkForm({
   const [selectedSubject, setSelectedSubject] = useState(homework?.Subject);
   const [textContent, setTextContent] = useState(homework?.text ?? "");
   const [dueDate, setDueDate] = useState(
-    homework?.due_date ? parseISO(homework.due_date) : undefined,
+    homework?.due_date ? parseISO(homework.due_date) : new Date(),
   );
 
   const classesAndSectionsData =
@@ -118,6 +118,7 @@ export default function HomeworkForm({
               placeholder="Class"
               size="lg"
               onChange={handleClassSelectChange}
+              value={selectedClass?.numeric_id ?? undefined}
             >
               {classesAndSectionsData &&
                 classesAndSectionsData.data?.map((item) => (
@@ -130,6 +131,7 @@ export default function HomeworkForm({
               placeholder="Section"
               size="lg"
               onChange={handleSectionSelectChange}
+              value={selectedSection?.numeric_id ?? undefined}
             >
               {availableSections &&
                 availableSections.map((item) => (
@@ -143,6 +145,7 @@ export default function HomeworkForm({
             placeholder="Subject"
             size="lg"
             onChange={handleSubjectSelectChange}
+            value={selectedSubject?.id ?? undefined}
           >
             {subjectsQuery.data &&
               subjectsQuery?.data.map((item) => (
@@ -157,11 +160,13 @@ export default function HomeworkForm({
             size="md"
             type="datetime-local"
             onChange={(e) => setDueDate(parseISO(e.target.value))}
+            value={format(dueDate!, "yyyy-MM-dd'T'HH:mm")}
           />
           <Textarea
             placeholder="Description (optional)"
             size="md"
             onChange={(e) => setTextContent(e.target.value)}
+            value={textContent ?? null}
           />
           <Flex justifyContent="center" gap={2}>
             <MdOutlineFileUpload size={28} />
