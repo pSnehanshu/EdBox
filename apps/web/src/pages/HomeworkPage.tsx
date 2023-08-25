@@ -61,6 +61,15 @@ export default function HomeworkPage() {
       },
     );
 
+  const createHomework = trpc.school.homework.create.useMutation({
+    onSuccess(data) {
+      //  refresh
+    },
+    onError(error) {
+      alert(error);
+    },
+  });
+
   const query = isTeacher ? homeworkTeacherQuery : homeworkSectionQuery;
 
   const homeworks: Homework[] = [];
@@ -74,7 +83,10 @@ export default function HomeworkPage() {
     <Box>
       <Card>
         <CardHeader>
-          <Heading size="xl">Home Works</Heading>
+          <Flex dir="row" justifyContent={"space-between"}>
+            <Heading size="xl">Home Works</Heading>
+            {isTeacher && <Button onClick={onOpen}>Create new</Button>}
+          </Flex>
         </CardHeader>
         <Divider />
         <CardBody>
@@ -88,9 +100,18 @@ export default function HomeworkPage() {
           </Stack>
         </CardBody>
       </Card>
-      <Button onClick={onOpen}>Create new HW</Button>
+
       <Modal isOpen={isOpen} onClose={onClose}>
-        <HomeworkForm />
+        <HomeworkForm
+          onSubmit={(hw) =>
+            createHomework.mutate({
+              ...hw,
+              due_date: hw.due_date?.toISOString(),
+              file_permissions: hw.new_file_permissions,
+            })
+          }
+          isSubmitting={createHomework.isLoading}
+        />
       </Modal>
     </Box>
   );

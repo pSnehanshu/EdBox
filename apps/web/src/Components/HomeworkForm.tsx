@@ -28,12 +28,26 @@ interface HomeworkFormData {
   remove_attachments?: RouterInput["school"]["homework"]["update"]["remove_attachments"];
   new_file_permissions?: RouterInput["school"]["homework"]["update"]["new_file_permissions"];
 }
-
+interface HomeworkFormData {
+  class_id: number;
+  section_id: number;
+  subject_id: string;
+  text?: string;
+  due_date?: Date;
+  remove_attachments?: RouterInput["school"]["homework"]["update"]["remove_attachments"];
+  new_file_permissions?: RouterInput["school"]["homework"]["update"]["new_file_permissions"];
+}
 interface HomeworkFormProps {
   homework?: Homework;
+  onSubmit: (data: HomeworkFormData) => void;
+  isSubmitting: boolean;
 }
 
-export default function HomeworkForm({ homework }: HomeworkFormProps) {
+export default function HomeworkForm({
+  homework,
+  onSubmit,
+  isSubmitting,
+}: HomeworkFormProps) {
   const { schoolId: selectedSchoolId } = useConfig();
 
   const [selectedClass, setSelectedClass] = useState(homework?.Class);
@@ -141,8 +155,13 @@ export default function HomeworkForm({ homework }: HomeworkFormProps) {
             placeholder="Due date (optional)"
             size="md"
             type="datetime-local"
+            onChange={(e) => setDueDate(parseISO(e.target.value))}
           />
-          <Textarea placeholder="Description (optional)" size="md" />
+          <Textarea
+            placeholder="Description (optional)"
+            size="md"
+            onChange={(e) => setTextContent(e.target.value)}
+          />
           <Flex justifyContent="center" gap={2}>
             <MdOutlineFileUpload size={28} />
             <Text fontSize="lg" fontWeight="semibold">
@@ -152,8 +171,20 @@ export default function HomeworkForm({ homework }: HomeworkFormProps) {
         </Stack>
         <ModalFooter>
           <Flex justifyContent="center">
-            <CloseIcon boxSize={"5"} />
-            <CheckIcon boxSize={"6"} />
+            <CheckIcon
+              boxSize={"6"}
+              onClick={() => {
+                if (selectedSection && selectedClass && selectedSubject) {
+                  onSubmit({
+                    class_id: selectedClass.numeric_id,
+                    section_id: selectedSection.numeric_id,
+                    subject_id: selectedSubject.id,
+                    due_date: dueDate,
+                    text: textContent,
+                  });
+                }
+              }}
+            />
           </Flex>
         </ModalFooter>
       </ModalContent>
