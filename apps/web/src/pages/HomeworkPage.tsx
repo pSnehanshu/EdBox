@@ -75,6 +75,16 @@ export default function HomeworkPage() {
       alert(error);
     },
   });
+  const updateHomework = trpc.school.homework.update.useMutation({
+    onSuccess() {
+      if (isTeacher) homeworkTeacherQuery.refetch();
+      if (canFetchSectionHW) homeworkSectionQuery.refetch();
+      onClose();
+    },
+    onError(error) {
+      alert(error.message);
+    },
+  });
 
   const query = isTeacher ? homeworkTeacherQuery : homeworkSectionQuery;
 
@@ -124,6 +134,7 @@ export default function HomeworkPage() {
       <Modal isOpen={isOpen} onClose={onClose}>
         <HomeworkForm
           homework={homeworkEdit}
+          //
           onSubmit={(hw) =>
             createHomework.mutate({
               ...hw,
