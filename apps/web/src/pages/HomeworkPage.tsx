@@ -63,7 +63,9 @@ export default function HomeworkPage() {
 
   const createHomework = trpc.school.homework.create.useMutation({
     onSuccess(data) {
-      //  refresh
+      if (isTeacher) homeworkTeacherQuery.refetch();
+      if (canFetchSectionHW) homeworkSectionQuery.refetch();
+      onClose();
     },
     onError(error) {
       alert(error);

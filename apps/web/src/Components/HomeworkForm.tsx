@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
+import { CheckIcon } from "@chakra-ui/icons";
 import {
   Flex,
   Heading,
@@ -12,6 +12,7 @@ import {
   Stack,
   Textarea,
   Text,
+  Button,
 } from "@chakra-ui/react";
 import { MdOutlineFileUpload } from "react-icons/md";
 import { trpc } from "../utils/trpc";
@@ -97,11 +98,11 @@ export default function HomeworkForm({
     e: React.ChangeEvent<HTMLSelectElement>,
   ) => {
     const subject =
-      availableSections &&
-      availableSections.find((section) => {
-        return section.numeric_id === Number(e.target.value);
+      subjectsQuery.data &&
+      subjectsQuery.data.find((subject) => {
+        return subject.id === e.target.value;
       });
-    setSelectedSection(subject);
+    setSelectedSubject(subject);
   };
 
   return (
@@ -171,8 +172,7 @@ export default function HomeworkForm({
         </Stack>
         <ModalFooter>
           <Flex justifyContent="center">
-            <CheckIcon
-              boxSize={"6"}
+            <Button
               onClick={() => {
                 if (selectedSection && selectedClass && selectedSubject) {
                   onSubmit({
@@ -184,7 +184,10 @@ export default function HomeworkForm({
                   });
                 }
               }}
-            />
+              isLoading={isSubmitting}
+            >
+              <CheckIcon boxSize={"6"} />
+            </Button>
           </Flex>
         </ModalFooter>
       </ModalContent>
