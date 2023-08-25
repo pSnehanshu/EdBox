@@ -88,6 +88,7 @@ export const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
       {...rest}
       mt={{ base: 0, md: 16 }}
       pos="fixed"
+      overflowY="scroll"
     >
       <Flex alignItems="end" mx="4" justifyContent="flex-end">
         <CloseButton display={{ base: "flex", md: "none" }} onClick={onClose} />
