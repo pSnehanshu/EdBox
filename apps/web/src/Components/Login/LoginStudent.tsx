@@ -115,15 +115,18 @@ export default function StudentLogin({
           onSubmit={(e) => {
             e.preventDefault();
 
+            const selectedClassId = selectedClass?.at(0)?.numeric_id;
+
             if (
               selectedClass &&
               selectedSectionId &&
               rollno &&
-              selectedSchoolId
+              selectedSchoolId &&
+              typeof selectedClassId === "number"
             )
               requestRollNumberOTP.mutate({
                 school_id: selectedSchoolId,
-                class_id: selectedClass[0].numeric_id,
+                class_id: selectedClassId,
                 section_id: Number(selectedSectionId),
                 rollnum: Number(rollno),
               });
@@ -158,7 +161,7 @@ export default function StudentLogin({
                   disabled={!selectedClass}
                 >
                   {selectedClass &&
-                    selectedClass[0].Sections.map((item) => (
+                    selectedClass.at(0)?.Sections.map((item) => (
                       <option value={item.numeric_id} key={item.name}>
                         Section {item.name ?? item.numeric_id}
                       </option>
