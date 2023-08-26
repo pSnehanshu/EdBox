@@ -22,7 +22,7 @@ export default function LoginPage() {
 
   const schoolInfoQuery = trpc.school.schoolBasicInfo.useQuery(
     { schoolId },
-    { enabled: !!schoolId },
+    { enabled: !!schoolId, staleTime: 5 * 60 * 1000 },
   );
 
   const toast = useToast();
