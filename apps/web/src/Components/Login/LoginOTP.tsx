@@ -82,7 +82,17 @@ export default function LoginOTP({ onLogin, onLoginFailed }: LoginOtpProps) {
         boxShadow={"lg"}
         p={8}
       >
-        <Stack spacing={4}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+
+            if (phoneNo && selectedSchoolId)
+              requestOtp.mutate({
+                phoneNumber: phoneNo,
+                schoolId: selectedSchoolId,
+              });
+          }}
+        >
           <FormControl id="email">
             <FormLabel>Phone Number</FormLabel>
             <Input
@@ -93,26 +103,20 @@ export default function LoginOTP({ onLogin, onLoginFailed }: LoginOtpProps) {
               autoComplete="off"
             />
           </FormControl>
-          <Stack spacing={8}>
-            <Button
-              onClick={() => {
-                if (phoneNo && selectedSchoolId)
-                  requestOtp.mutate({
-                    phoneNumber: phoneNo,
-                    schoolId: selectedSchoolId,
-                  });
-              }}
-              bg={"purple.600"}
-              color={"white"}
-              _hover={{
-                bg: "purple.700",
-              }}
-              isLoading={requestOtp.isLoading || submitOTPMutation.isLoading}
-            >
-              Request OTP
-            </Button>
-          </Stack>
-        </Stack>
+          <Button
+            type="submit"
+            mt="2"
+            w="full"
+            bg={"purple.600"}
+            color={"white"}
+            _hover={{
+              bg: "purple.700",
+            }}
+            isLoading={requestOtp.isLoading || submitOTPMutation.isLoading}
+          >
+            Request OTP
+          </Button>
+        </form>
       </Box>
     </>
   );
