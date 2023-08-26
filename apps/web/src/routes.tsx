@@ -22,39 +22,30 @@ export default function Routes() {
 
   const { isLoggedIn, isLoading } = useCurrentUser();
 
-  const isSidebarVisible = isLoggedIn;
-
   if (isLoading) return <FullScreenProgress />;
   return (
-    <>
-      <Router>
-        <Navbar />
-        <Flex>
-          {isSidebarVisible && <SideMenu />}
+    <Router>
+      {isLoggedIn && <Navbar />}
+      <Flex>
+        {isLoggedIn && <SideMenu />}
 
-          <Box
-            ml={{ base: 0, md: isSidebarVisible ? 72 : 0 }}
-            mt="16"
-            p="4"
-            w="full"
-          >
-            <Switch>
-              <Route path="/login">
-                {isLoggedIn ? <Redirect to="/" /> : <LoginPage />}
-              </Route>
-              <Route path="/homework">
-                {isLoggedIn ? <HomeworkPage /> : <Redirect to="/login" />}
-              </Route>
-              <Route exact path="/">
-                {isLoggedIn ? <HomePage /> : <Redirect to="/login" />}
-              </Route>
-              <Route path="*">
-                <NotFound />
-              </Route>
-            </Switch>
-          </Box>
-        </Flex>
-      </Router>
-    </>
+        <Box ml={{ base: 0, md: isLoggedIn ? 72 : 0 }} mt="16" p="4" w="full">
+          <Switch>
+            <Route path="/login">
+              {isLoggedIn ? <Redirect to="/" /> : <LoginPage />}
+            </Route>
+            <Route path="/homework">
+              {isLoggedIn ? <HomeworkPage /> : <Redirect to="/login" />}
+            </Route>
+            <Route exact path="/">
+              {isLoggedIn ? <HomePage /> : <Redirect to="/login" />}
+            </Route>
+            <Route path="*">
+              <NotFound />
+            </Route>
+          </Switch>
+        </Box>
+      </Flex>
+    </Router>
   );
 }
