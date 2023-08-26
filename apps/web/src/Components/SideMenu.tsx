@@ -49,7 +49,7 @@ export default function SideMenu() {
   useEffect(onClose, [pathname, search, state]);
 
   return (
-    <Box minH="100vh" position="relative">
+    <Box minH="100vh">
       <SidebarContent
         onClose={() => onClose}
         display={{ base: "none", md: "block" }}

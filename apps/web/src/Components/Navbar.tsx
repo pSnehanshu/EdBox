@@ -97,18 +97,16 @@ export default function Navbar() {
 
   return (
     <Flex
-      h={16}
-      pos="fixed"
+      h="full"
       alignItems={"center"}
       justifyContent={"space-between"}
       bg={useColorModeValue("gray.100", "gray.800")}
       px={{ base: 0, md: 8 }}
       borderBottom="1px"
       borderColor="gray.200"
-      minW="100vw"
-      zIndex={10}
+      w="100vw"
     >
-      <Box h="full" p="2">
+      <Box h="16" p="2">
         <Link to="/">
           <Image src={Logo} maxH="full" />
         </Link>
