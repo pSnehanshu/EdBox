@@ -86,7 +86,7 @@ export default function StudentLogin({
   });
 
   const onSubmit = useCallback(
-    async (otp: any) => {
+    async (otp: string) => {
       if (currentUserId && otp && selectedSchoolId) {
         submitOTPMutation.mutate({
           userId: currentUserId,
@@ -99,95 +99,93 @@ export default function StudentLogin({
   );
 
   return (
-    <Flex>
+    <>
       <OtpPopup
         visible={openOtp}
         onClose={() => setOpenOtp(false)}
-        onSubmit={(otp: any) => onSubmit(otp)}
+        onSubmit={(otp) => onSubmit(otp)}
       />
-      <Stack>
-        <Box
-          rounded={"lg"}
-          bg={useColorModeValue("white", "gray.700")}
-          boxShadow={"lg"}
-          p={8}
-        >
-          <Stack spacing={4}>
-            <Stack
-              direction={{ base: "column", sm: "row" }}
-              align={"start"}
-              justify={"space-between"}
-            >
-              <Stack>
-                <Text>Class</Text>
-                <Select
-                  placeholder="Select class"
-                  onChange={handleClassSelectChange}
-                >
-                  {classesAndSectionsData &&
-                    classesAndSectionsData.data?.map((item) => (
-                      <option value={item.numeric_id} key={item.name}>
-                        Class {item.name ?? item.numeric_id}
-                      </option>
-                    ))}
-                </Select>
-              </Stack>
-
-              <Stack>
-                <Text>Section</Text>
-                <Select
-                  placeholder="Select section"
-                  onChange={handleSectionSelectChange}
-                  disabled={!selectedClass}
-                >
-                  {selectedClass &&
-                    selectedClass[0].Sections.map((item) => (
-                      <option value={item.numeric_id} key={item.name}>
-                        Section {item.name ?? item.numeric_id}
-                      </option>
-                    ))}
-                </Select>
-              </Stack>
-            </Stack>
-            <FormControl id="email">
-              <Text mb={2}>Roll-No</Text>
-              <Input
-                type="number"
-                value={rollno}
-                onChange={(e) => setRollNo(e.target.value)}
-              />
-            </FormControl>
-            <Stack spacing={8}>
-              <Button
-                onClick={() => {
-                  if (
-                    selectedClass &&
-                    selectedSectionId &&
-                    rollno &&
-                    selectedSchoolId
-                  )
-                    requestRollNumberOTP.mutate({
-                      school_id: selectedSchoolId,
-                      class_id: selectedClass[0].numeric_id,
-                      section_id: Number(selectedSectionId),
-                      rollnum: Number(rollno),
-                    });
-                }}
-                bg={"purple.600"}
-                color={"white"}
-                _hover={{
-                  bg: "purple.700",
-                }}
-                isLoading={
-                  requestRollNumberOTP.isLoading || submitOTPMutation.isLoading
-                }
+      <Box
+        rounded={"lg"}
+        bg={useColorModeValue("white", "gray.700")}
+        boxShadow={"lg"}
+        p={8}
+      >
+        <Stack spacing={4}>
+          <Stack
+            direction={{ base: "column", sm: "row" }}
+            align={"start"}
+            justify={"space-between"}
+          >
+            <Stack>
+              <Text>Class</Text>
+              <Select
+                placeholder="Select class"
+                onChange={handleClassSelectChange}
               >
-                Request OTP
-              </Button>
+                {classesAndSectionsData &&
+                  classesAndSectionsData.data?.map((item) => (
+                    <option value={item.numeric_id} key={item.name}>
+                      Class {item.name ?? item.numeric_id}
+                    </option>
+                  ))}
+              </Select>
+            </Stack>
+
+            <Stack>
+              <Text>Section</Text>
+              <Select
+                placeholder="Select section"
+                onChange={handleSectionSelectChange}
+                disabled={!selectedClass}
+              >
+                {selectedClass &&
+                  selectedClass[0].Sections.map((item) => (
+                    <option value={item.numeric_id} key={item.name}>
+                      Section {item.name ?? item.numeric_id}
+                    </option>
+                  ))}
+              </Select>
             </Stack>
           </Stack>
-        </Box>
-      </Stack>
-    </Flex>
+          <FormControl id="email">
+            <Text mb={2}>Roll-No</Text>
+            <Input
+              type="number"
+              value={rollno}
+              onChange={(e) => setRollNo(e.target.value)}
+            />
+          </FormControl>
+          <Stack spacing={8}>
+            <Button
+              onClick={() => {
+                if (
+                  selectedClass &&
+                  selectedSectionId &&
+                  rollno &&
+                  selectedSchoolId
+                )
+                  requestRollNumberOTP.mutate({
+                    school_id: selectedSchoolId,
+                    class_id: selectedClass[0].numeric_id,
+                    section_id: Number(selectedSectionId),
+                    rollnum: Number(rollno),
+                  });
+              }}
+              bg={"purple.600"}
+              color={"white"}
+              _hover={{
+                bg: "purple.700",
+              }}
+              isLoading={
+                requestRollNumberOTP.isLoading || submitOTPMutation.isLoading
+              }
+            >
+              Request OTP
+            </Button>
+          </Stack>
+        </Stack>
+      </Box>
+    </>
   );
 }

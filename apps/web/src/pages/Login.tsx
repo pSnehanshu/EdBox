@@ -1,5 +1,3 @@
-import LoginOTP from "../Components/Login/LoginOTP";
-import StudentLogin from "../Components/Login/LoginStudent";
 import SchoolSelector from "../Components/Login/SchoolSelector";
 import {
   useToast,
@@ -8,12 +6,7 @@ import {
   Image,
   Heading,
   Flex,
-  Button,
-  Tabs,
-  TabPanels,
-  TabPanel,
-  TabList,
-  Tab,
+  Box,
 } from "@chakra-ui/react";
 import Lottie from "lottie-react";
 import loginPageAnimation from "../assets/lottie/login-page-animation.json";
@@ -21,6 +14,7 @@ import { useConfig, useConfigUpdate } from "../utils/atoms";
 import { trpc } from "../utils/trpc";
 import FullScreenProgress from "../Components/FullScreenProgress";
 import { env } from "../utils/env";
+import LoginTabs from "../Components/Login/LoginTabs";
 
 export default function LoginPage() {
   const { schoolId } = useConfig();
@@ -87,34 +81,12 @@ export default function LoginPage() {
               Log into {schoolInfoQuery.data?.name}
             </Heading>
 
-            <Tabs m="4" isFitted>
-              <TabList>
-                <Tab>For Parents, Teachers, and Staff</Tab>
-                <Tab>For Students</Tab>
-              </TabList>
-              <TabPanels>
-                <TabPanel>
-                  <LoginOTP
-                    onLogin={handleLogin}
-                    onLoginFailed={handleLoginFailure}
-                  />
-                </TabPanel>
-                <TabPanel>
-                  <StudentLogin
-                    onLogin={handleLogin}
-                    onLoginFailed={handleLoginFailure}
-                  />
-                </TabPanel>
-              </TabPanels>
-            </Tabs>
-
-            <Button
-              variant="outline"
-              my="2"
-              onClick={() => setConfig({ schoolId: "" })}
-            >
-              Change school
-            </Button>
+            <Box mt="4">
+              <LoginTabs
+                onLogin={handleLogin}
+                onLoginFailed={handleLoginFailure}
+              />
+            </Box>
           </Flex>
         ) : (
           <SchoolSelector

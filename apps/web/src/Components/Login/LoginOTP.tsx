@@ -70,52 +70,50 @@ export default function LoginOTP({ onLogin, onLoginFailed }: LoginOtpProps) {
   );
 
   return (
-    <Flex>
+    <>
       <OtpPopup
         visible={openOtp}
         onClose={() => setOpenOtp(false)}
         onSubmit={(otp) => onSubmit(otp)}
       />
-      <Stack>
-        <Box
-          rounded={"lg"}
-          bg={useColorModeValue("white", "gray.700")}
-          boxShadow={"lg"}
-          p={8}
-        >
-          <Stack spacing={4}>
-            <FormControl id="email">
-              <FormLabel>Phone Number</FormLabel>
-              <Input
-                type="tel"
-                value={phoneNo}
-                onChange={(e) => setPhoneNo(e.target.value)}
-                maxLength={10}
-                autoComplete="off"
-              />
-            </FormControl>
-            <Stack spacing={8}>
-              <Button
-                onClick={() => {
-                  if (phoneNo && selectedSchoolId)
-                    requestOtp.mutate({
-                      phoneNumber: phoneNo,
-                      schoolId: selectedSchoolId,
-                    });
-                }}
-                bg={"purple.600"}
-                color={"white"}
-                _hover={{
-                  bg: "purple.700",
-                }}
-                isLoading={requestOtp.isLoading || submitOTPMutation.isLoading}
-              >
-                Request OTP
-              </Button>
-            </Stack>
+      <Box
+        rounded={"lg"}
+        bg={useColorModeValue("white", "gray.700")}
+        boxShadow={"lg"}
+        p={8}
+      >
+        <Stack spacing={4}>
+          <FormControl id="email">
+            <FormLabel>Phone Number</FormLabel>
+            <Input
+              type="tel"
+              value={phoneNo}
+              onChange={(e) => setPhoneNo(e.target.value)}
+              maxLength={10}
+              autoComplete="off"
+            />
+          </FormControl>
+          <Stack spacing={8}>
+            <Button
+              onClick={() => {
+                if (phoneNo && selectedSchoolId)
+                  requestOtp.mutate({
+                    phoneNumber: phoneNo,
+                    schoolId: selectedSchoolId,
+                  });
+              }}
+              bg={"purple.600"}
+              color={"white"}
+              _hover={{
+                bg: "purple.700",
+              }}
+              isLoading={requestOtp.isLoading || submitOTPMutation.isLoading}
+            >
+              Request OTP
+            </Button>
           </Stack>
-        </Box>
-      </Stack>
-    </Flex>
+        </Stack>
+      </Box>
+    </>
   );
 }
