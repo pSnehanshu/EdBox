@@ -14,9 +14,21 @@ import { useConfigUpdate } from "../../utils/atoms";
 export default function LoginTabs({ onLogin, onLoginFailed }: LoginOtpProps) {
   const setConfig = useConfigUpdate();
 
+  let defaultIndex = parseInt(localStorage.getItem("login-tab") ?? "0", 10);
+  if (Number.isNaN(defaultIndex)) {
+    defaultIndex = 0;
+    localStorage.setItem("login-tab", defaultIndex.toString());
+  }
+
   return (
     <Flex direction="column" minH={400} minW="400">
-      <Tabs isFitted>
+      <Tabs
+        isFitted
+        defaultIndex={defaultIndex}
+        onChange={(index) =>
+          localStorage.setItem("login-tab", index.toString())
+        }
+      >
         <TabList>
           <Tab>For Parents, Teachers, and Staff</Tab>
           <Tab>For Students</Tab>
