@@ -1,23 +1,20 @@
 import { useState, useEffect } from "react";
 import { trpc } from "../../utils/trpc";
-import { useConfig, useConfigUpdate } from "../../utils/atoms";
 import {
   Box,
-  Button,
-  Flex,
-  FormControl,
-  Heading,
+  Image,
   Input,
   InputGroup,
   InputRightElement,
-  Link,
   List,
   ListItem,
-  Popover,
   Spinner,
   Stack,
-  useColorModeValue,
+  Text,
 } from "@chakra-ui/react";
+import { SearchIcon } from "@chakra-ui/icons";
+import { ArrayElement, RouterOutput } from "schooltalk-shared/types";
+import { env } from "../../utils/env";
 
 function useDebounce(value: string, delay: number) {
   // State and setters for debounced value
@@ -39,93 +36,70 @@ function useDebounce(value: string, delay: number) {
   );
   return debouncedValue;
 }
+
+type School = ArrayElement<RouterOutput["school"]["schoolList"]["schools"]>;
+
 interface props {
-  setshowSchoolSelector: () => void;
+  onSchoolSelected: (school: School) => void;
 }
 
-export default function Search({ setshowSchoolSelector }: props) {
-  const [search, setSearch] = useState<string>("");
-  const debouncedSearch = useDebounce(search, 500);
+export default function Search({ onSchoolSelected }: props) {
+  const [_search, setSearch] = useState<string>("");
+  const search = useDebounce(_search, 500);
+
   const [page] = useState(1);
   const { data, isFetching } = trpc.school.schoolList.useQuery({
-    search: debouncedSearch.toLowerCase(),
+    search: search.toLowerCase(),
     page,
   });
 
-  // const [selectedSchoolId, updateSelectedSchool] =
-  //   useAtom(SelectedSchoolIdAtom);
-  const { schoolId: selectedSchoolId } = useConfig();
-  const setConfig = useConfigUpdate();
-  const updateSelectedSchool = (schoolId: string) => setConfig({ schoolId });
-
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-  const handleOptionSelect = (schoolId: string) => {
-    updateSelectedSchool(schoolId);
-    setshowSchoolSelector();
-  };
-
-  const selectedSchool = data?.schools.find((s) => s.id === selectedSchoolId);
-
-  useEffect(() => {
-    if (selectedSchool && !isDropdownOpen) setSearch(selectedSchool?.name);
-  }, [selectedSchool?.name]);
-
   return (
-    <Flex>
-      <Stack>
-        <Stack>
-          <Heading fontSize={"4xl"}>Pick your desired school</Heading>
-        </Stack>
-        <Box
-          w={["100%", "100%", "1/3"]}
-          rounded={"lg"}
-          bg={useColorModeValue("white", "gray.700")}
-          boxShadow={"lg"}
-          p={8}
-        >
-          <Stack spacing={4}>
-            <FormControl id="school" w="100%">
-              <Popover isLazy>
-                <InputGroup>
-                  <Input
-                    placeholder="Your school!"
-                    value={search}
-                    mb={2}
-                    onChange={(e) => setSearch(e.target.value)}
-                    onFocus={() => setIsDropdownOpen(true)}
-                    onBlur={() =>
-                      setTimeout(() => setIsDropdownOpen(false), 500)
-                    }
-                  />
-                  <InputRightElement>
-                    {isFetching && <Spinner />}
-                  </InputRightElement>
-                </InputGroup>
+    <Box p="4">
+      <InputGroup mb="4">
+        <Input
+          placeholder="Search for your school..."
+          value={_search}
+          onChange={(e) => setSearch(e.target.value)}
+          tabIndex={1}
+        />
+        <InputRightElement>
+          {isFetching ? <Spinner /> : <SearchIcon />}
+        </InputRightElement>
+      </InputGroup>
 
-                <Box maxHeight="150px" overflowY="auto">
-                  <List styleType="none">
-                    {data?.schools &&
-                      data?.schools.map((item, index) => (
-                        <ListItem key={index} m={2}>
-                          <Link
-                            onClick={() => handleOptionSelect(item.id)}
-                            color="blue.500"
-                          >
-                            {item.name}
-                          </Link>
-                        </ListItem>
-                      ))}
-                  </List>
-                </Box>
-              </Popover>
-            </FormControl>
-            {selectedSchoolId && (
-              <Button onClick={setshowSchoolSelector}>Go to Login</Button>
-            )}
-          </Stack>
-        </Box>
-      </Stack>
-    </Flex>
+      <List spacing="4" as="div">
+        {data?.schools?.map((school, index) => (
+          <ListItem
+            key={school.id}
+            as="button"
+            role="listitem"
+            display="flex"
+            w="full"
+            borderWidth={1}
+            borderColor="transparent"
+            cursor="pointer"
+            p="2"
+            borderRadius="8"
+            _hover={{
+              borderColor: "gray",
+            }}
+            onClick={() => onSchoolSelected(school)}
+          >
+            <Stack direction="row">
+              <Image
+                src={`${env.VITE_BACKEND_URL}/school-info/${school.id}/icon`}
+                minH="50"
+                minW="50"
+                maxH="50"
+                maxW="50"
+              />
+              <Text py="2" ml="4">
+                {school.name}
+              </Text>
+            </Stack>
+          </ListItem>
+        ))}
+      </List>
+    </Box>
   );
 }
