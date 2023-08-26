@@ -1,12 +1,29 @@
 import LoginOTP from "../Components/Login/LoginOTP";
 import StudentLogin from "../Components/Login/LoginStudent";
-import Search from "../Components/Login/Search";
-import { useToast, Grid, GridItem } from "@chakra-ui/react";
+import SchoolSelector from "../Components/Login/SchoolSelector";
+import {
+  useToast,
+  Grid,
+  GridItem,
+  Box,
+  Image,
+  Heading,
+  Flex,
+  Button,
+} from "@chakra-ui/react";
 import { useConfig, useConfigUpdate } from "../utils/atoms";
+import { trpc } from "../utils/trpc";
+import FullScreenProgress from "../Components/FullScreenProgress";
+import { env } from "../utils/env";
 
 export default function LoginPage() {
   const { schoolId } = useConfig();
   const setConfig = useConfigUpdate();
+
+  const schoolInfoQuery = trpc.school.schoolBasicInfo.useQuery(
+    { schoolId },
+    { enabled: !!schoolId },
+  );
 
   const toast = useToast();
 
@@ -27,6 +44,9 @@ export default function LoginPage() {
     });
   };
 
+  if (schoolInfoQuery.isFetching) return <FullScreenProgress />;
+  if (schoolInfoQuery.isError) return <h1>Error!</h1>;
+
   return (
     <Grid
       templateColumns={{
@@ -37,11 +57,44 @@ export default function LoginPage() {
       minH="100vh"
     >
       <GridItem>
-        {!schoolId && (
-          <Search
-            onSchoolSelected={(school) => {
-              setConfig({ schoolId: school.id });
-            }}
+        {schoolId ? (
+          <Flex
+            direction="column"
+            alignItems="center"
+            justifyContent="center"
+            h="full"
+          >
+            <Image
+              src={`${env.VITE_BACKEND_URL}/school-info/${schoolId}/icon`}
+              minH="50"
+              minW="50"
+              maxH="50"
+              maxW="50"
+            />
+
+            <Heading as="h1" my="2">
+              Welcome back
+            </Heading>
+
+            <Heading as="h2" size="sm" my="2" textAlign="center">
+              Log into {schoolInfoQuery.data?.name}
+            </Heading>
+
+            <Box m="4">
+              <LoginOTP onLogin={() => {}} />
+            </Box>
+
+            <Button
+              variant="outline"
+              my="2"
+              onClick={() => setConfig({ schoolId: "" })}
+            >
+              Change school
+            </Button>
+          </Flex>
+        ) : (
+          <SchoolSelector
+            onSchoolSelected={(schoolId) => setConfig({ schoolId })}
           />
         )}
       </GridItem>

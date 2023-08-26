@@ -13,7 +13,6 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { SearchIcon } from "@chakra-ui/icons";
-import { ArrayElement, RouterOutput } from "schooltalk-shared/types";
 import { env } from "../../utils/env";
 
 function useDebounce(value: string, delay: number) {
@@ -37,10 +36,8 @@ function useDebounce(value: string, delay: number) {
   return debouncedValue;
 }
 
-type School = ArrayElement<RouterOutput["school"]["schoolList"]["schools"]>;
-
 interface props {
-  onSchoolSelected: (school: School) => void;
+  onSchoolSelected: (schoolId: string) => void;
 }
 
 export default function Search({ onSchoolSelected }: props) {
@@ -83,7 +80,7 @@ export default function Search({ onSchoolSelected }: props) {
             _hover={{
               borderColor: "gray",
             }}
-            onClick={() => onSchoolSelected(school)}
+            onClick={() => onSchoolSelected(school.id)}
           >
             <Stack direction="row">
               <Image

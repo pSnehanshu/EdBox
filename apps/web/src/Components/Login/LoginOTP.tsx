@@ -16,16 +16,11 @@ import { useConfig, SessionExpiryAtom } from "../../utils/atoms";
 import OtpPopup from "./OtpPopup";
 
 export interface LoginOtpProps {
-  setshowSchoolSelector: () => void;
-  onLogin: () => void;
-  onLoginFailed: (reason: string) => void;
+  onLogin?: () => void;
+  onLoginFailed?: (reason: string) => void;
 }
 
-export default function LoginOTP({
-  setshowSchoolSelector,
-  onLogin,
-  onLoginFailed,
-}: LoginOtpProps) {
+export default function LoginOTP({ onLogin, onLoginFailed }: LoginOtpProps) {
   const config = useConfig();
   const selectedSchoolId = config.schoolId;
 
@@ -44,20 +39,20 @@ export default function LoginOTP({
     },
     onError(error) {
       console.error(error);
-      onLoginFailed("Phone number isn't registered");
+      onLoginFailed?.("Phone number isn't registered");
     },
   });
 
   const submitOTPMutation = trpc.auth.submitLoginOTP.useMutation({
     async onSuccess({ token, expiry_date }) {
-      onLogin();
+      onLogin?.();
       localStorage.setItem("token", token);
       trpcUtils.profile.me.invalidate();
       setTokenExpiry(parseISO(expiry_date));
     },
     onError(error) {
       console.error(error);
-      onLoginFailed("Incorrect OTP");
+      onLoginFailed?.("Incorrect OTP");
     },
   });
 
@@ -96,6 +91,7 @@ export default function LoginOTP({
                 value={phoneNo}
                 onChange={(e) => setPhoneNo(e.target.value)}
                 maxLength={10}
+                autoComplete="off"
               />
             </FormControl>
             <Stack spacing={8}>
@@ -116,7 +112,6 @@ export default function LoginOTP({
               >
                 Request OTP
               </Button>
-              <Button onClick={setshowSchoolSelector}>Change School</Button>
             </Stack>
           </Stack>
         </Box>

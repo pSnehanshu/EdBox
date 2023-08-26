@@ -19,7 +19,6 @@ import { parseISO } from "date-fns";
 import type { LoginOtpProps } from "./LoginOTP";
 
 export default function StudentLogin({
-  setshowSchoolSelector,
   onLogin,
   onLoginFailed,
 }: LoginOtpProps) {
@@ -43,7 +42,7 @@ export default function StudentLogin({
     },
     onError(error) {
       console.error(error);
-      onLoginFailed("Student not found");
+      onLoginFailed?.("Student not found");
     },
   });
 
@@ -75,14 +74,14 @@ export default function StudentLogin({
 
   const submitOTPMutation = trpc.auth.submitLoginOTP.useMutation({
     async onSuccess({ token, expiry_date }) {
-      onLogin();
+      onLogin?.();
       localStorage.setItem("token", token);
       trpcUtils.profile.me.invalidate();
       setTokenExpiry(parseISO(expiry_date));
     },
     onError(error) {
       console.error(error);
-      onLoginFailed("Incorrect OTP");
+      onLoginFailed?.("Incorrect OTP");
     },
   });
 
@@ -185,7 +184,6 @@ export default function StudentLogin({
               >
                 Request OTP
               </Button>
-              <Button onClick={setshowSchoolSelector}>Change School</Button>
             </Stack>
           </Stack>
         </Box>
