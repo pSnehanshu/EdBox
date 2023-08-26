@@ -5,11 +5,15 @@ import {
   useToast,
   Grid,
   GridItem,
-  Box,
   Image,
   Heading,
   Flex,
   Button,
+  Tabs,
+  TabPanels,
+  TabPanel,
+  TabList,
+  Tab,
 } from "@chakra-ui/react";
 import Lottie from "lottie-react";
 import loginPageAnimation from "../assets/lottie/login-page-animation.json";
@@ -83,12 +87,26 @@ export default function LoginPage() {
               Log into {schoolInfoQuery.data?.name}
             </Heading>
 
-            <Box m="4">
-              <LoginOTP
-                onLogin={handleLogin}
-                onLoginFailed={handleLoginFailure}
-              />
-            </Box>
+            <Tabs m="4" isFitted>
+              <TabList>
+                <Tab>For Parents, Teachers, and Staff</Tab>
+                <Tab>For Students</Tab>
+              </TabList>
+              <TabPanels>
+                <TabPanel>
+                  <LoginOTP
+                    onLogin={handleLogin}
+                    onLoginFailed={handleLoginFailure}
+                  />
+                </TabPanel>
+                <TabPanel>
+                  <StudentLogin
+                    onLogin={handleLogin}
+                    onLoginFailed={handleLoginFailure}
+                  />
+                </TabPanel>
+              </TabPanels>
+            </Tabs>
 
             <Button
               variant="outline"
