@@ -1,5 +1,4 @@
 import {
-  IconButton,
   Box,
   CloseButton,
   Flex,
@@ -7,12 +6,10 @@ import {
   useColorModeValue,
   Drawer,
   DrawerContent,
-  useDisclosure,
   BoxProps,
   FlexProps,
   useColorMode,
 } from "@chakra-ui/react";
-import { HamburgerIcon } from "@chakra-ui/icons";
 import { FiHome, FiSettings } from "react-icons/fi";
 import {
   MdOutlineHomeWork,
@@ -24,6 +21,8 @@ import { PiExam, PiBooksLight } from "react-icons/pi";
 import { IconType } from "react-icons";
 import { Link, useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import { useAtom } from "jotai";
+import { SideMenuOpenAtom } from "../utils/atoms";
 
 interface LinkItemProps {
   name: string;
@@ -42,7 +41,10 @@ const LinkItems: Array<LinkItemProps> = [
 ];
 
 export default function SideMenu() {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isSideMenuOpen, setSideMenuOpen] = useAtom(SideMenuOpenAtom);
+  const onClose = () => {
+    setSideMenuOpen(false);
+  };
 
   // Close navbar when navigation happens
   const { pathname, search, state } = useLocation();
@@ -51,11 +53,12 @@ export default function SideMenu() {
   return (
     <Box h="full">
       <SidebarContent
-        onClose={() => onClose}
-        display={{ base: "none", md: "block" }}
+        onClose={onClose}
+        display={{ base: "none", lg: "block" }}
       />
-      {/* <Drawer
-        isOpen={isOpen}
+
+      <Drawer
+        isOpen={isSideMenuOpen}
         placement="left"
         onClose={onClose}
         returnFocusOnClose={false}
@@ -63,16 +66,15 @@ export default function SideMenu() {
         size="full"
       >
         <DrawerContent>
-          <SidebarContent onClose={onClose} />
+          <SidebarContent onClose={onClose} overflow={"auto"} />
         </DrawerContent>
       </Drawer>
-      <MobileNav display={{ base: "flex", md: "none" }} onOpen={onOpen} /> */}
     </Box>
   );
 }
 
 interface SidebarProps extends BoxProps {
-  onClose: () => void;
+  onClose?: () => void;
 }
 
 export const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
@@ -90,12 +92,13 @@ export const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
         alignItems="end"
         mx="4"
         justifyContent="flex-end"
-        display={{ base: "flex", md: "none" }}
+        display={{ base: "flex", lg: "none" }}
       >
         <CloseButton onClick={onClose} />
       </Flex>
+
       {LinkItems.map((link) => (
-        <Link to={link.abbr} key={link.name}>
+        <Link to={link.abbr} key={link.abbr}>
           <NavItem icon={link.icon} abbr={link.abbr}>
             {link.name}
           </NavItem>
@@ -128,7 +131,6 @@ const NavItem = ({ children, icon, abbr, ...rest }: NavItemProps) => {
         borderRadius="lg"
         role="group"
         cursor="pointer"
-        // "home" => current state
         bg={abbr == pathname ? "blue.400" : "transparent"}
         color={
           abbr == pathname ? "black" : colorMode === "dark" ? "white" : "black"
@@ -151,32 +153,5 @@ const NavItem = ({ children, icon, abbr, ...rest }: NavItemProps) => {
         {children}
       </Flex>
     </Box>
-  );
-};
-
-interface MobileProps extends FlexProps {
-  onOpen: () => void;
-}
-const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
-  return (
-    <Flex
-      position="fixed"
-      zIndex={11}
-      top="-2"
-      right="0"
-      ml={{ base: 0, md: 60 }}
-      px={{ base: 4, md: 24 }}
-      height="20"
-      alignItems="center"
-      justifyContent="flex-start"
-      {...rest}
-    >
-      <IconButton
-        variant="outline"
-        onClick={onOpen}
-        aria-label="open menu"
-        icon={<HamburgerIcon />}
-      />
-    </Flex>
   );
 };

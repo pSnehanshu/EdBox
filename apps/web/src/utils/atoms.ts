@@ -1,5 +1,5 @@
 import { parseISO } from "date-fns";
-import { useAtom, useAtomValue } from "jotai";
+import { atom, useAtom, useAtomValue } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 import { z } from "zod";
 import {
@@ -76,3 +76,5 @@ export const useSelectDefaultRole = GenerateDefaultRoleSelector({
   ConfigAtom,
   useCurrentUser,
 });
+
+export const SideMenuOpenAtom = atom(false);

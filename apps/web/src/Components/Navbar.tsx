@@ -16,6 +16,7 @@ import {
   Image,
   Stack,
   ToastId,
+  IconButton,
 } from "@chakra-ui/react";
 import { Link, useLocation } from "react-router-dom";
 import { trpc } from "../utils/trpc";
@@ -25,12 +26,13 @@ import {
   useConfigUpdate,
   useCurrentUser,
   SessionExpiryAtom,
+  SideMenuOpenAtom,
 } from "../utils/atoms";
 import DefaultAvatar from "../assets/images/default-avatar.jpg";
 import Logo from "../assets/images/edbox-logo.png";
 import { useMemo, useRef } from "react";
 import { StaticRole, getUserStaticRoles } from "schooltalk-shared/misc";
-import { MoonIcon, SunIcon } from "@chakra-ui/icons";
+import { HamburgerIcon, MoonIcon, SunIcon } from "@chakra-ui/icons";
 
 export default function Navbar() {
   const { isLoggedIn, user } = useCurrentUser();
@@ -94,6 +96,7 @@ export default function Navbar() {
   );
 
   const { pathname } = useLocation();
+  const [, setSideMenuOpen] = useAtom(SideMenuOpenAtom);
 
   return (
     <Flex
@@ -112,7 +115,7 @@ export default function Navbar() {
         </Link>
       </Box>
 
-      <Stack direction={"row"} gap="2" mr={{ base: "16", md: "0" }}>
+      <Stack direction={"row"} gap="2" pr="2">
         <Button onClick={toggleColorMode}>
           {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
         </Button>
@@ -166,6 +169,14 @@ export default function Navbar() {
                 </MenuItem>
               </MenuList>
             </Menu>
+
+            <IconButton
+              variant="outline"
+              aria-label="open menu"
+              icon={<HamburgerIcon />}
+              display={{ base: "flex", lg: "none" }}
+              onClick={() => setSideMenuOpen((v) => !v)}
+            />
           </>
         ) : (
           pathname !== "/login" && (

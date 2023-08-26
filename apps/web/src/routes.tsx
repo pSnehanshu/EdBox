@@ -31,18 +31,34 @@ export default function Routes() {
         </Route>
 
         <Route path="/">
-          <Grid templateColumns="1fr 4fr" templateRows="1fr 11fr" h="100vh">
+          <Grid
+            templateColumns="1fr 4fr"
+            templateRows="1fr 11fr"
+            h="100vh"
+            w="100vw"
+          >
             <GridItem gridRow="1/2" gridColumn="1/3">
               <Navbar />
             </GridItem>
 
-            <GridItem gridRow="2/3" gridColumn="1/2" overflowY="auto">
+            <GridItem
+              gridRow="2/3"
+              gridColumn="1/2"
+              overflowY="auto"
+              display={{
+                base: "none",
+                lg: "block",
+              }}
+            >
               <SideMenu />
             </GridItem>
 
             <GridItem
               gridRow="2/3"
-              gridColumn="2/3"
+              gridColumn={{
+                base: "1/3",
+                lg: "2/3",
+              }}
               p="4"
               h="full"
               w="full"
