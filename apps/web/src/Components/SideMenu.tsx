@@ -49,12 +49,12 @@ export default function SideMenu() {
   useEffect(onClose, [pathname, search, state]);
 
   return (
-    <Box minH="100vh">
+    <Box h="full">
       <SidebarContent
         onClose={() => onClose}
         display={{ base: "none", md: "block" }}
       />
-      <Drawer
+      {/* <Drawer
         isOpen={isOpen}
         placement="left"
         onClose={onClose}
@@ -66,7 +66,7 @@ export default function SideMenu() {
           <SidebarContent onClose={onClose} />
         </DrawerContent>
       </Drawer>
-      <MobileNav display={{ base: "flex", md: "none" }} onOpen={onOpen} />
+      <MobileNav display={{ base: "flex", md: "none" }} onOpen={onOpen} /> */}
     </Box>
   );
 }
@@ -78,20 +78,21 @@ interface SidebarProps extends BoxProps {
 export const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
   return (
     <Box
+      {...rest}
+      h="full"
       bg={useColorModeValue("gray.100", "gray.900")}
-      pt={4}
+      py={4}
       px={4}
       borderRight="1px"
       borderRightColor={useColorModeValue("gray.200", "gray.700")}
-      w={{ base: "full", md: "72" }}
-      h="full"
-      {...rest}
-      mt={{ base: 0, md: 16 }}
-      pos="fixed"
-      overflowY="auto"
     >
-      <Flex alignItems="end" mx="4" justifyContent="flex-end">
-        <CloseButton display={{ base: "flex", md: "none" }} onClick={onClose} />
+      <Flex
+        alignItems="end"
+        mx="4"
+        justifyContent="flex-end"
+        display={{ base: "flex", md: "none" }}
+      >
+        <CloseButton onClick={onClose} />
       </Flex>
       {LinkItems.map((link) => (
         <Link to={link.abbr} key={link.name}>

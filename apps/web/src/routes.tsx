@@ -25,32 +25,53 @@ export default function Routes() {
   if (isLoading) return <FullScreenProgress />;
   return (
     <Router>
-      <Grid templateColumns="1fr 4fr" templateRows="1fr 11fr" h="100vh">
-        <GridItem gridRow="1/2" gridColumn="1/3">
-          <Navbar />
-        </GridItem>
+      <Switch>
+        <Route path="/login">
+          {isLoggedIn ? <Redirect to="/" /> : <LoginPage />}
+        </Route>
 
-        <GridItem gridRow="2/3" gridColumn="1/2">
-          {/* <SideMenu /> */}
-        </GridItem>
+        <Route path="/">
+          <Grid templateColumns="1fr 4fr" templateRows="1fr 11fr" h="100vh">
+            <GridItem gridRow="1/2" gridColumn="1/3">
+              <Navbar />
+            </GridItem>
 
-        <GridItem gridRow="2/3" gridColumn="2/3" p="4">
-          <Switch>
-            <Route path="/login">
-              {isLoggedIn ? <Redirect to="/" /> : <LoginPage />}
-            </Route>
-            <Route path="/homework">
-              {isLoggedIn ? <HomeworkPage /> : <Redirect to="/login" />}
-            </Route>
-            <Route exact path="/">
-              {isLoggedIn ? <HomePage /> : <Redirect to="/login" />}
-            </Route>
-            <Route path="*">
-              <NotFound />
-            </Route>
-          </Switch>
-        </GridItem>
-      </Grid>
+            <GridItem gridRow="2/3" gridColumn="1/2" overflowY="auto">
+              <SideMenu />
+            </GridItem>
+
+            <GridItem
+              gridRow="2/3"
+              gridColumn="2/3"
+              p="4"
+              h="full"
+              w="full"
+              overflowY="scroll"
+              overflowX="hidden"
+            >
+              <Switch>
+                <Route path="/homework">
+                  {isLoggedIn ? <HomeworkPage /> : <Redirect to="/login" />}
+                </Route>
+
+                <Route exact path="/">
+                  {isLoggedIn ? <HomePage /> : <Redirect to="/login" />}
+                </Route>
+
+                {isLoggedIn && (
+                  <Route path="*">
+                    <NotFound />
+                  </Route>
+                )}
+              </Switch>
+            </GridItem>
+          </Grid>
+        </Route>
+
+        <Route path="*">
+          <NotFound />
+        </Route>
+      </Switch>
     </Router>
   );
 }
