@@ -11,6 +11,8 @@ import {
   Flex,
   Button,
 } from "@chakra-ui/react";
+import Lottie from "lottie-react";
+import loginPageAnimation from "../assets/lottie/login-page-animation.json";
 import { useConfig, useConfigUpdate } from "../utils/atoms";
 import { trpc } from "../utils/trpc";
 import FullScreenProgress from "../Components/FullScreenProgress";
@@ -63,6 +65,7 @@ export default function LoginPage() {
             alignItems="center"
             justifyContent="center"
             h="full"
+            pt="8"
           >
             <Image
               src={`${env.VITE_BACKEND_URL}/school-info/${schoolId}/icon`}
@@ -81,7 +84,10 @@ export default function LoginPage() {
             </Heading>
 
             <Box m="4">
-              <LoginOTP onLogin={() => {}} />
+              <LoginOTP
+                onLogin={handleLogin}
+                onLoginFailed={handleLoginFailure}
+              />
             </Box>
 
             <Button
@@ -98,7 +104,18 @@ export default function LoginPage() {
           />
         )}
       </GridItem>
-      <GridItem></GridItem>
+      <GridItem>
+        <Flex
+          as={Lottie}
+          animationData={loginPageAnimation}
+          alignItems="center"
+          justifyContent="center"
+          h={{
+            base: "auto",
+            lg: "100vh",
+          }}
+        />
+      </GridItem>
     </Grid>
   );
 }
