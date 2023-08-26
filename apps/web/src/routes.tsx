@@ -32,7 +32,7 @@ export default function Routes() {
 
         <Route path="/">
           <Grid
-            templateColumns="1fr 4fr"
+            templateColumns="1fr 5fr"
             templateRows="1fr 11fr"
             h="100vh"
             w="100vw"
