@@ -2,6 +2,7 @@ import { useState } from "react";
 import { trpc } from "../../utils/trpc";
 import {
   Box,
+  Heading,
   Image,
   Input,
   InputGroup,
@@ -34,6 +35,10 @@ export default function Search({ onSchoolSelected }: props) {
 
   return (
     <Box p="4">
+      <Heading as="h1" textAlign="center" mb="4">
+        Find your school
+      </Heading>
+
       <Box mb="4">
         <InputGroup>
           <Input

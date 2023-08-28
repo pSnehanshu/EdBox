@@ -22,7 +22,7 @@ export default function StudentLogin({
   onLogin,
   onLoginFailed,
 }: LoginOtpProps) {
-  const { schoolId: selectedSchoolId } = useConfig();
+  const { schoolId } = useConfig();
   const [, setTokenExpiry] = useAtom(SessionExpiryAtom);
 
   const [selectedClass, setSelectedClass] = useState<ClassWithSections[]>();
@@ -48,8 +48,8 @@ export default function StudentLogin({
 
   const classesAndSectionsData =
     trpc.school.class.fetchClassesAndSections.useQuery(
-      { schoolId: selectedSchoolId! },
-      { cacheTime: 0 },
+      { schoolId },
+      { cacheTime: 0, enabled: !!schoolId },
     );
 
   const handleClassSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -87,15 +87,15 @@ export default function StudentLogin({
 
   const onSubmit = useCallback(
     async (otp: string) => {
-      if (currentUserId && otp && selectedSchoolId) {
+      if (currentUserId && otp && schoolId) {
         submitOTPMutation.mutate({
           userId: currentUserId,
           otp,
-          schoolId: selectedSchoolId,
+          schoolId,
         });
       }
     },
-    [currentUserId, selectedSchoolId],
+    [currentUserId, schoolId],
   );
 
   return (
@@ -121,11 +121,11 @@ export default function StudentLogin({
               selectedClass &&
               selectedSectionId &&
               rollno &&
-              selectedSchoolId &&
+              schoolId &&
               typeof selectedClassId === "number"
             )
               requestRollNumberOTP.mutate({
-                school_id: selectedSchoolId,
+                school_id: schoolId,
                 class_id: selectedClassId,
                 section_id: Number(selectedSectionId),
                 rollnum: Number(rollno),
