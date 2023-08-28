@@ -94,7 +94,7 @@ export default function LoginPage() {
           />
         )}
       </GridItem>
-      <GridItem>
+      <GridItem display={{ base: "none", lg: "block" }}>
         <Flex
           as={Lottie}
           animationData={loginPageAnimation}
