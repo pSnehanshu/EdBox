@@ -50,22 +50,32 @@ export default function Search({ onSchoolSelected }: props) {
     page,
   });
 
+  const numOfResults = data?.schools.length ?? 0;
+
   return (
     <Box p="4">
-      <InputGroup mb="4">
-        <Input
-          placeholder="Search for your school..."
-          value={_search}
-          onChange={(e) => setSearch(e.target.value)}
-          tabIndex={1}
-        />
-        <InputRightElement>
-          {isFetching ? <Spinner /> : <SearchIcon />}
-        </InputRightElement>
-      </InputGroup>
+      <Box mb="4">
+        <InputGroup>
+          <Input
+            placeholder="Search for your school..."
+            value={_search}
+            onChange={(e) => setSearch(e.target.value)}
+            tabIndex={1}
+          />
+          <InputRightElement>
+            {isFetching ? <Spinner /> : <SearchIcon />}
+          </InputRightElement>
+        </InputGroup>
+
+        {!isFetching && numOfResults < 1 && (
+          <Text as="i" opacity={0.7}>
+            No results for "{search}"
+          </Text>
+        )}
+      </Box>
 
       <List spacing="4" as="div">
-        {data?.schools?.map((school, index) => (
+        {data?.schools?.map((school) => (
           <ListItem
             key={school.id}
             as="button"
