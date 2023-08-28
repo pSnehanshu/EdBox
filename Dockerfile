@@ -28,7 +28,7 @@ RUN cd apps/web && VITE_BACKEND_URL=/api NODE_ENV=production yarn build
 # Build shared
 RUN yarn workspace schooltalk-shared run build
 # Build backend
-RUN yarn workspace schooltalk-backend run build
+RUN yarn workspace schooltalk-backend run build && find packages/shared/ -type f -name "*.ts" -delete
 
 # Install dependencies again but only production
 RUN yarn workspaces focus schooltalk-backend --production

@@ -20,7 +20,7 @@ app.use("/api", defineBackend());
 
 // Serve the static frontend
 const FE_ARTIFACT_DIR = path.join(__dirname, "..", "..", "web", "dist");
-app.use(express.static(FE_ARTIFACT_DIR));
+app.use(express.static(FE_ARTIFACT_DIR, { maxAge: "1y", immutable: true }));
 app.get("*", (_req, res) =>
   res.sendFile(path.join(FE_ARTIFACT_DIR, "index.html")),
 );
@@ -70,6 +70,9 @@ function defineBackend() {
       if (!["icon", "logo"].includes(type)) {
         return res.sendStatus(404);
       }
+
+      // Set a cache-period of 1 day
+      res.setHeader("Cache-Control", "public, max-age=86400");
 
       if (!schoolId) {
         return sendDefaultIcon(res);
