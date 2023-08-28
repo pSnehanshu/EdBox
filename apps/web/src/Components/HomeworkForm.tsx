@@ -55,6 +55,8 @@ export default function HomeworkForm({
   const [selectedSection, setSelectedSection] = useState(homework?.Section);
   const [selectedSubject, setSelectedSubject] = useState(homework?.Subject);
   const [textContent, setTextContent] = useState(homework?.text ?? "");
+
+  console.log(homework, "hw");
   const [dueDate, setDueDate] = useState(
     homework?.due_date ? parseISO(homework.due_date) : new Date(),
   );
@@ -150,7 +152,6 @@ export default function HomeworkForm({
             {subjectsQuery.data &&
               subjectsQuery?.data.map((item) => (
                 <option value={item.id} key={item.name}>
-                  {" "}
                   {item.name}
                 </option>
               ))}
