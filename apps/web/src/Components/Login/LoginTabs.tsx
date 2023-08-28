@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Flex,
   Tab,
@@ -43,13 +44,15 @@ export default function LoginTabs({ onLogin, onLoginFailed }: LoginOtpProps) {
         </TabPanels>
       </Tabs>
 
-      <Button
-        variant="outline"
-        my="2"
-        onClick={() => setConfig({ schoolId: "" })}
-      >
-        Change school
-      </Button>
+      <Box m="4">
+        <Button
+          w="full"
+          variant="outline"
+          onClick={() => setConfig({ schoolId: "" })}
+        >
+          Change school
+        </Button>
+      </Box>
     </Flex>
   );
 }
