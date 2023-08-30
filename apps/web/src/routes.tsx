@@ -10,6 +10,7 @@ import Navbar from "./Components/Navbar";
 import SideMenu from "./Components/SideMenu";
 import FullScreenProgress from "./Components/FullScreenProgress";
 import { Grid, GridItem } from "@chakra-ui/react";
+import ExamPage from "./pages/Exampage";
 
 const LoginPage = lazy(() => import("./pages/Login"));
 const HomePage = lazy(() => import("./pages/HomePage"));
@@ -70,6 +71,9 @@ export default function Routes() {
                   {isLoggedIn ? <HomeworkPage /> : <Redirect to="/login" />}
                 </Route>
 
+                <Route path="/exam">
+                  {isLoggedIn ? <ExamPage /> : <Redirect to="/login" />}
+                </Route>
                 <Route exact path="/">
                   {isLoggedIn ? <HomePage /> : <Redirect to="/login" />}
                 </Route>

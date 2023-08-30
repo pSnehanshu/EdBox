@@ -56,7 +56,6 @@ export default function HomeworkForm({
   const [selectedSubject, setSelectedSubject] = useState(homework?.Subject);
   const [textContent, setTextContent] = useState(homework?.text ?? "");
 
-  console.log(homework, "hw");
   const [dueDate, setDueDate] = useState(
     homework?.due_date ? parseISO(homework.due_date) : new Date(),
   );
@@ -169,12 +168,18 @@ export default function HomeworkForm({
             onChange={(e) => setTextContent(e.target.value)}
             value={textContent ?? null}
           />
+          {/* <Button
+            onClick={() => {
+              console.log("aa");
+            }}
+          > */}
           <Flex justifyContent="center" gap={2}>
             <MdOutlineFileUpload size={28} />
             <Text fontSize="lg" fontWeight="semibold">
               Upload File
             </Text>
           </Flex>
+          {/* </Button> */}
         </Stack>
         <ModalFooter>
           <Flex justifyContent="center">
