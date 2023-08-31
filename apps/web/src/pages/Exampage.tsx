@@ -27,22 +27,6 @@ export default function ExamPage() {
   const isStudent = currentUserRole === StaticRole.student;
   const isTeacher = currentUserRole === StaticRole.teacher;
 
-  const homeworkTeacherQuery =
-    trpc.school.homework.fetchForTeacher.useInfiniteQuery(
-      { limit: pageLimit },
-      { enabled: isTeacher, getNextPageParam: (item) => item.nextCursor },
-    );
-
-  const classAndSectionQuery = trpc.school.people.getStudentClass.useQuery(
-    undefined,
-    { enabled: isStudent },
-  );
-  const canFetchSectionHW =
-    isStudent &&
-    classAndSectionQuery.isFetched &&
-    typeof classAndSectionQuery.data?.Class.numeric_id === "number" &&
-    typeof classAndSectionQuery.data?.Section?.numeric_id === "number";
-
   const studentQuery = trpc.school.exam.fetchExamsAndTestsForStudent.useQuery(
     {},
     { enabled: isStudent },
@@ -52,6 +36,23 @@ export default function ExamPage() {
     { enabled: isTeacher },
   );
 
+  const createExam = trpc.school.exam.createExam.useMutation({
+    onSuccess(data) {
+      //
+    },
+    onError(error, variables, context) {
+      console.log(error, variables, context);
+    },
+  });
+
+  const updateExam = trpc.school.exam.updateExam.useMutation({
+    onSuccess() {
+      //
+    },
+    onError(error) {
+      alert(error.message);
+    },
+  });
   const query =
     currentUserRole === StaticRole.student
       ? studentQuery
@@ -66,14 +67,24 @@ export default function ExamPage() {
           <Flex dir="row" justifyContent={"space-between"}>
             <Heading size="xl">Exams</Heading>
             {isTeacher && (
-              <Button
-              // onClick={() => {
-              //   onOpen();
-              //   setHomeworkEdit(undefined);
-              // }}
-              >
-                Create new
-              </Button>
+              <Flex gap={4}>
+                <Button
+                // onClick={() => {
+                //   onOpen();
+                //   setHomeworkEdit(undefined);
+                // }}
+                >
+                  Create new Test
+                </Button>
+                <Button
+                // onClick={() => {
+                //   onOpen();
+                //   setHomeworkEdit(undefined);
+                // }}
+                >
+                  Create new Exam
+                </Button>
+              </Flex>
             )}
           </Flex>
         </CardHeader>
