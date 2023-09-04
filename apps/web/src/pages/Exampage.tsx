@@ -7,9 +7,11 @@ import {
   Divider,
   Flex,
   Heading,
+  Modal,
   Stack,
   StackDivider,
   Text,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { StaticRole } from "schooltalk-shared/misc";
 import { useConfig } from "../utils/atoms";
@@ -19,6 +21,7 @@ import { useMemo, useState } from "react";
 import { format, parseISO } from "date-fns";
 import { MdOutlineAttachFile } from "react-icons/md";
 import _ from "lodash";
+import ExamForm, { TestForm } from "../Components/ExamForm";
 
 const pageLimit = 10;
 
@@ -26,6 +29,10 @@ export default function ExamPage() {
   const { activeStaticRole: currentUserRole } = useConfig();
   const isStudent = currentUserRole === StaticRole.student;
   const isTeacher = currentUserRole === StaticRole.teacher;
+
+  const [createType, setCreateType] = useState<"test" | "exam" | null>(null);
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const studentQuery = trpc.school.exam.fetchExamsAndTestsForStudent.useQuery(
     {},
@@ -69,18 +76,18 @@ export default function ExamPage() {
             {isTeacher && (
               <Flex gap={4}>
                 <Button
-                // onClick={() => {
-                //   onOpen();
-                //   setHomeworkEdit(undefined);
-                // }}
+                  onClick={() => {
+                    setCreateType("test");
+                    onOpen();
+                  }}
                 >
                   Create new Test
                 </Button>
                 <Button
-                // onClick={() => {
-                //   onOpen();
-                //   setHomeworkEdit(undefined);
-                // }}
+                  onClick={() => {
+                    setCreateType("exam");
+                    onOpen();
+                  }}
                 >
                   Create new Exam
                 </Button>
@@ -100,6 +107,10 @@ export default function ExamPage() {
           </Stack>
         </CardBody>
       </Card>
+      <Modal isOpen={isOpen} onClose={onClose}>
+        {/* <ExamForm /> */}
+        <TestForm />
+      </Modal>
     </Box>
   );
 }
