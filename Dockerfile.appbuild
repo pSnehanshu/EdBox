@@ -1,5 +1,8 @@
 FROM ghcr.io/psnehanshu/expo-android-build-docker:main
 
+# Upgrade to latest version of EAS CLI
+RUN npm install -g eas-cli
+
 # Set up project
 
 WORKDIR /home/ubuntu/schooltalk
@@ -26,6 +29,10 @@ ENV PROFILE=$profile
 
 WORKDIR /home/ubuntu/schooltalk/apps/app
 
+# Fix for the error: "Input is required, but stdin is not readable. Failed to display prompt: Would you like us to run 'git init' in /home/ubuntu/schooltalk for you?"
+RUN git init
+
 CMD export $(grep -v '^#' .env | xargs) && \
     npx ts-node ./scripts/prepare-build.ts && \
-    eas build --platform android --profile $PROFILE --local
+    eas --version && \
+    eas build --platform android --profile $PROFILE --local --non-interactive
