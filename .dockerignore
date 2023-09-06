@@ -1,6 +1,5 @@
 fly.toml
 .dockerignore
 node_modules
-.git
 Dockerfile*
 tmp
