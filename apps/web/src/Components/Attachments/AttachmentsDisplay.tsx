@@ -1,6 +1,7 @@
 import { Card, Image, Stack } from "@chakra-ui/react";
 import { useMemo } from "react";
 import { FileUploadTask } from "schooltalk-shared/file-upload";
+import { UploadedFile } from "schooltalk-shared/types";
 import MIMEType from "whatwg-mimetype";
 
 interface attachmentFileType {

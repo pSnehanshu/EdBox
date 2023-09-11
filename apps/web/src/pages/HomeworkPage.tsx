@@ -8,6 +8,12 @@ import {
   Flex,
   Heading,
   Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Stack,
   StackDivider,
   Text,
@@ -22,6 +28,8 @@ import { format, isPast, parseISO } from "date-fns";
 import { MdOutlineAttachFile, MdOutlineFileUpload } from "react-icons/md";
 import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
 import HomeworkForm from "../Components/HomeworkForm";
+import AttachmentsDisplay from "../Components/Attachments/AttachmentsDisplay";
+import FilePreview from "../Components/Attachments/FilePreview";
 
 const pageLimit = 10;
 
@@ -189,17 +197,21 @@ function SingleHomework({ homework, onClick, setHomework }: homeworkProps) {
     [homework.Class.name, homework.Section.name],
   );
 
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   return (
-    <>
+    <Box>
       <Flex justifyContent="space-between">
         <Heading size="md" textTransform="uppercase">
           {homework.Subject.name} — {classAndSection}
         </Heading>
         <Flex>
-          <MdOutlineAttachFile size={24} />
-          <Heading size="md" textTransform="uppercase">
-            {homework.Attachments.length}
-          </Heading>
+          <Button variant="outline" onClick={() => onOpen()}>
+            <MdOutlineAttachFile size={24} />
+            <Heading size="md" textTransform="uppercase">
+              {homework.Attachments.length}
+            </Heading>
+          </Button>
         </Flex>
       </Flex>
       <Flex justifyContent="space-between" dir="row">
@@ -222,6 +234,31 @@ function SingleHomework({ homework, onClick, setHomework }: homeworkProps) {
           edit
         </Button>
       </Flex>
-    </>
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Attachments</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Flex>
+              {homework.Attachments.length > 0 && (
+                <Flex flexDir="column">
+                  <Heading size="lg">Attachments</Heading>
+                  {homework.Attachments.map((file, index) => (
+                    <FilePreview file={file.File} />
+                  ))}
+                </Flex>
+              )}
+            </Flex>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button colorScheme="blue" mr={3} onClick={onClose}>
+              Close
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </Box>
   );
 }

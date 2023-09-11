@@ -20,7 +20,7 @@ import { useConfig } from "../utils/atoms";
 import { Section, Homework, RouterInput } from "schooltalk-shared/types";
 import { format, parseISO } from "date-fns";
 import { useFileUpload } from "../../src/utils/file-upload";
-import AttachmentsDisplay from "./AttachmentsDisplay";
+import AttachmentsDisplay from "./Attachments/AttachmentsDisplay";
 
 interface HomeworkFormData {
   class_id: number;
