@@ -19,6 +19,8 @@ import { trpc } from "../utils/trpc";
 import { useConfig } from "../utils/atoms";
 import { Section, Homework, RouterInput } from "schooltalk-shared/types";
 import { format, parseISO } from "date-fns";
+import { useFileUpload } from "../../src/utils/file-upload";
+import AttachmentsDisplay from "./AttachmentsDisplay";
 
 interface HomeworkFormData {
   class_id: number;
@@ -106,6 +108,10 @@ export default function HomeworkForm({
     setSelectedSubject(subject);
   };
 
+  const fileUploadHandler = useFileUpload();
+
+  console.log(fileUploadHandler.uploadTasks, "fire");
+
   return (
     <>
       <ModalContent>
@@ -168,18 +174,24 @@ export default function HomeworkForm({
             onChange={(e) => setTextContent(e.target.value)}
             value={textContent ?? null}
           />
-          {/* <Button
-            onClick={() => {
-              console.log("aa");
-            }}
-          > */}
-          <Flex justifyContent="center" gap={2}>
-            <MdOutlineFileUpload size={28} />
-            <Text fontSize="lg" fontWeight="semibold">
-              Upload File
-            </Text>
+          <Button onClick={() => fileUploadHandler.pickAndUploadFile()}>
+            <Flex justifyContent="center" gap={2}>
+              <MdOutlineFileUpload size={24} />
+              <Text fontSize="lg" fontWeight="semibold">
+                Upload File
+              </Text>
+            </Flex>
+          </Button>
+          <Flex>
+            {fileUploadHandler.uploadTasks.length > 0 && (
+              <Flex flexDir="column">
+                <Heading size="lg">Attachments</Heading>
+                {fileUploadHandler.uploadTasks.map((file, index) => (
+                  <AttachmentsDisplay file={file} />
+                ))}
+              </Flex>
+            )}
           </Flex>
-          {/* </Button> */}
         </Stack>
         <ModalFooter>
           <Flex justifyContent="center">
