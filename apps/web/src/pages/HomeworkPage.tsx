@@ -101,8 +101,6 @@ export default function HomeworkPage() {
     homeworks.push(...page.data);
   });
 
-  console.log(homeworks);
-
   return (
     <Box>
       <Card>

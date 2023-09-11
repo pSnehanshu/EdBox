@@ -25,13 +25,10 @@ export default function FilePreview({ file }: attachmentFileType) {
     { staleTime: 5 * 60 * 1000 },
   );
 
-  console.log(file, "file");
-
   if (urlQuery.isLoading) return <></>;
 
   return (
     <Stack>
-      <h1>11</h1>
       <Image
         boxSize="150px"
         objectFit="cover"

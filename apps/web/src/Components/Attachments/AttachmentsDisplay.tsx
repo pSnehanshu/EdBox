@@ -14,8 +14,6 @@ export default function AttachmentsDisplay({ file: task }: attachmentFileType) {
     [task.file.mimeType],
   );
 
-  console.log(task);
-
   return (
     <Stack>
       {mime?.type === "image" ? (
