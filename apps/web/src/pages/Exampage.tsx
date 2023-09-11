@@ -108,8 +108,7 @@ export default function ExamPage() {
         </CardBody>
       </Card>
       <Modal isOpen={isOpen} onClose={onClose}>
-        {/* <ExamForm /> */}
-        <TestForm />
+        {createType === "exam" ? <ExamForm /> : <TestForm />}
       </Modal>
     </Box>
   );

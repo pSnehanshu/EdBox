@@ -18,6 +18,8 @@ import {
   SliderFilledTrack,
   SliderThumb,
   SliderMark,
+  useDisclosure,
+  Modal,
 } from "@chakra-ui/react";
 import { MdOutlineFileUpload } from "react-icons/md";
 import { trpc } from "../utils/trpc";
@@ -36,6 +38,8 @@ import { ExamTestSchema } from "schooltalk-shared/misc";
 export default function ExamForm() {
   const { schoolId: selectedSchoolId } = useConfig();
 
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   const [textContent, setTextContent] = useState("");
 
   return (
@@ -53,8 +57,19 @@ export default function ExamForm() {
             value={textContent ?? null}
           />
         </Stack>
-        <Button>Add Tests</Button>
+        <Flex justifyContent="center" my={8}>
+          <Button
+            onClick={() => {
+              onOpen();
+            }}
+          >
+            Add New Tests
+          </Button>
+        </Flex>
         {/* list of tests */}
+        <Heading size="sm" mx={8}>
+          Tests
+        </Heading>
         {/* create tests popup */}
         <ModalFooter>
           <Flex justifyContent="center">
@@ -64,6 +79,10 @@ export default function ExamForm() {
           </Flex>
         </ModalFooter>
       </ModalContent>
+
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <TestForm />
+      </Modal>
     </>
   );
 }
