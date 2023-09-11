@@ -204,6 +204,12 @@ export default function HomeworkForm({
                     subject_id: selectedSubject.id,
                     due_date: dueDate,
                     text: textContent,
+                    new_file_permissions: fileUploadHandler.uploadTasks.map(
+                      (file) => ({
+                        permission_id: file.permission.id,
+                        file_name: file.file.name,
+                      }),
+                    ),
                   });
                 }
               }}
