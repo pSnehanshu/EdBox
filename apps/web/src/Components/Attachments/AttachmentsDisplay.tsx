@@ -17,12 +17,7 @@ export default function AttachmentsDisplay({ file: task }: attachmentFileType) {
   return (
     <Stack>
       {mime?.type === "image" ? (
-        <Image
-          boxSize="150px"
-          objectFit="cover"
-          src={task.file.uri}
-          style={{ width: "100%", minHeight: "100%" }}
-        />
+        <Image objectFit="cover" src={task.file.uri} />
       ) : (
         <div>{task.file.name}</div>
       )}

@@ -114,112 +114,104 @@ export default function HomeworkForm({
 
   return (
     <>
-      <ModalContent>
-        <ModalHeader>
-          <Heading size="lg">Create new Home Works</Heading>
-        </ModalHeader>
-        <ModalCloseButton />
-        <Stack spacing={3} mx={8}>
-          <Flex gap={8}>
-            <Select
-              placeholder="Class"
-              size="lg"
-              onChange={handleClassSelectChange}
-              value={selectedClass?.numeric_id ?? undefined}
-            >
-              {classesAndSectionsData &&
-                classesAndSectionsData.data?.map((item) => (
-                  <option value={item.numeric_id} key={item.name}>
-                    Class {item.name ?? item.numeric_id}
-                  </option>
-                ))}
-            </Select>
-            <Select
-              placeholder="Section"
-              size="lg"
-              onChange={handleSectionSelectChange}
-              value={selectedSection?.numeric_id ?? undefined}
-            >
-              {availableSections &&
-                availableSections.map((item) => (
-                  <option value={item.numeric_id} key={item.name}>
-                    Section {item.name ?? item.numeric_id}
-                  </option>
-                ))}
-            </Select>
-          </Flex>
+      <Stack spacing={3}>
+        <Flex gap={8}>
           <Select
-            placeholder="Subject"
+            placeholder="Class"
             size="lg"
-            onChange={handleSubjectSelectChange}
-            value={selectedSubject?.id ?? undefined}
+            onChange={handleClassSelectChange}
+            value={selectedClass?.numeric_id ?? undefined}
           >
-            {subjectsQuery.data &&
-              subjectsQuery?.data.map((item) => (
-                <option value={item.id} key={item.name}>
-                  {item.name}
+            {classesAndSectionsData &&
+              classesAndSectionsData.data?.map((item) => (
+                <option value={item.numeric_id} key={item.name}>
+                  Class {item.name ?? item.numeric_id}
                 </option>
               ))}
           </Select>
-          <Input
-            placeholder="Due date (optional)"
-            size="md"
-            type="datetime-local"
-            onChange={(e) => setDueDate(parseISO(e.target.value))}
-            value={format(dueDate!, "yyyy-MM-dd'T'HH:mm")}
-          />
-          <Textarea
-            placeholder="Description (optional)"
-            size="md"
-            onChange={(e) => setTextContent(e.target.value)}
-            value={textContent ?? null}
-          />
-          <Button onClick={() => fileUploadHandler.pickAndUploadFile()}>
-            <Flex justifyContent="center" gap={2}>
-              <MdOutlineFileUpload size={24} />
-              <Text fontSize="lg" fontWeight="semibold">
-                Upload File
-              </Text>
+          <Select
+            placeholder="Section"
+            size="lg"
+            onChange={handleSectionSelectChange}
+            value={selectedSection?.numeric_id ?? undefined}
+          >
+            {availableSections &&
+              availableSections.map((item) => (
+                <option value={item.numeric_id} key={item.name}>
+                  Section {item.name ?? item.numeric_id}
+                </option>
+              ))}
+          </Select>
+        </Flex>
+        <Select
+          placeholder="Subject"
+          size="lg"
+          onChange={handleSubjectSelectChange}
+          value={selectedSubject?.id ?? undefined}
+        >
+          {subjectsQuery.data &&
+            subjectsQuery?.data.map((item) => (
+              <option value={item.id} key={item.name}>
+                {item.name}
+              </option>
+            ))}
+        </Select>
+        <Input
+          placeholder="Due date (optional)"
+          size="md"
+          type="datetime-local"
+          onChange={(e) => setDueDate(parseISO(e.target.value))}
+          value={format(dueDate!, "yyyy-MM-dd'T'HH:mm")}
+        />
+        <Textarea
+          placeholder="Description (optional)"
+          size="md"
+          onChange={(e) => setTextContent(e.target.value)}
+          value={textContent ?? null}
+        />
+        <Button onClick={() => fileUploadHandler.pickAndUploadFile()}>
+          <Flex justifyContent="center" gap={2}>
+            <MdOutlineFileUpload size={24} />
+            <Text fontSize="lg" fontWeight="semibold">
+              Upload File
+            </Text>
+          </Flex>
+        </Button>
+        <Flex>
+          {fileUploadHandler.uploadTasks.length > 0 && (
+            <Flex flexDir="column" gap={2}>
+              <Heading size="lg">Attachments</Heading>
+              {fileUploadHandler.uploadTasks.map((file, index) => (
+                <AttachmentsDisplay file={file} />
+              ))}
             </Flex>
-          </Button>
-          <Flex>
-            {fileUploadHandler.uploadTasks.length > 0 && (
-              <Flex flexDir="column">
-                <Heading size="lg">Attachments</Heading>
-                {fileUploadHandler.uploadTasks.map((file, index) => (
-                  <AttachmentsDisplay file={file} />
-                ))}
-              </Flex>
-            )}
-          </Flex>
-        </Stack>
-        <ModalFooter>
-          <Flex justifyContent="center">
-            <Button
-              onClick={() => {
-                if (selectedSection && selectedClass && selectedSubject) {
-                  onSubmit({
-                    class_id: selectedClass.numeric_id,
-                    section_id: selectedSection.numeric_id,
-                    subject_id: selectedSubject.id,
-                    due_date: dueDate,
-                    text: textContent,
-                    new_file_permissions: fileUploadHandler.uploadTasks.map(
-                      (file) => ({
-                        permission_id: file.permission.id,
-                        file_name: file.file.name,
-                      }),
-                    ),
-                  });
-                }
-              }}
-              isLoading={isSubmitting}
-            >
-              <CheckIcon boxSize={"6"} />
-            </Button>
-          </Flex>
-        </ModalFooter>
-      </ModalContent>
+          )}
+        </Flex>
+      </Stack>
+      <Flex justifyContent="end" py={4}>
+        <Button
+          onClick={() => {
+            if (selectedSection && selectedClass && selectedSubject) {
+              onSubmit({
+                class_id: selectedClass.numeric_id,
+                section_id: selectedSection.numeric_id,
+                subject_id: selectedSubject.id,
+                due_date: dueDate,
+                text: textContent,
+                new_file_permissions: fileUploadHandler.uploadTasks.map(
+                  (file) => ({
+                    permission_id: file.permission.id,
+                    file_name: file.file.name,
+                  }),
+                ),
+              });
+            }
+          }}
+          isLoading={isSubmitting}
+        >
+          <CheckIcon boxSize={"6"} />
+        </Button>
+      </Flex>
     </>
   );
 }

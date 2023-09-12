@@ -137,26 +137,35 @@ export default function HomeworkPage() {
         </CardBody>
       </Card>
 
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <HomeworkForm
-          homework={homeworkEdit}
-          onSubmit={(hw) => {
-            if (homeworkEdit) {
-              updateHomework.mutate({
-                ...hw,
-                homework_id: homeworkEdit?.id,
-                due_date: hw.due_date?.toISOString(),
-              });
-            } else {
-              createHomework.mutate({
-                ...hw,
-                due_date: hw.due_date?.toISOString(),
-                file_permissions: hw.new_file_permissions,
-              });
-            }
-          }}
-          isSubmitting={createHomework.isLoading}
-        />
+      <Modal isOpen={isOpen} onClose={onClose} scrollBehavior={"inside"}>
+        <ModalOverlay />
+        <ModalContent>
+          <Heading size="lg" px={8} py={4}>
+            Create new Home Works
+          </Heading>
+          <ModalCloseButton />
+          <ModalBody>
+            <HomeworkForm
+              homework={homeworkEdit}
+              onSubmit={(hw) => {
+                if (homeworkEdit) {
+                  updateHomework.mutate({
+                    ...hw,
+                    homework_id: homeworkEdit?.id,
+                    due_date: hw.due_date?.toISOString(),
+                  });
+                } else {
+                  createHomework.mutate({
+                    ...hw,
+                    due_date: hw.due_date?.toISOString(),
+                    file_permissions: hw.new_file_permissions,
+                  });
+                }
+              }}
+              isSubmitting={createHomework.isLoading}
+            />
+          </ModalBody>
+        </ModalContent>
       </Modal>
     </Box>
   );
