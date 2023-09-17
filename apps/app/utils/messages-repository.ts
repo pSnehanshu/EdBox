@@ -332,7 +332,7 @@ export class MessagesRepository {
           // for safety and/or to satisfy TypeScript.
           m.id ?? Math.random().toString(),
           JSON.stringify(m),
-          m.created_at ?? new Date().toISOString(),
+          m.created_at?.toISOString() ?? new Date().toISOString(),
           m.group_identifier ?? "",
           m.sort_key ?? Math.round(Math.random()),
         );

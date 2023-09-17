@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { getYear, getMonth, getDate, parseISO } from "date-fns";
+import { getYear, getMonth, getDate } from "date-fns";
 import type {
   Nullable,
   UnserializedUser,
@@ -303,10 +303,7 @@ export const examTestSchema = z.object({
   name: z.string().max(100).trim().optional(),
   class_id: z.number().int(),
   section_id: z.number().int().optional(),
-  date_of_exam: z
-    .string()
-    .datetime()
-    .transform((d) => parseISO(d)),
+  date_of_exam: z.date(),
   duration_minutes: z.number().int().min(0).default(0),
   subjectIds: z.string().cuid().array(),
   total_marks: z.number().int(),

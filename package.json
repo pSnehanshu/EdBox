@@ -27,7 +27,8 @@
     "@chakra-ui/icons": "^2.1.0",
     "core-js": "^3.31.0",
     "prop-types": "^15.8.1",
-    "react-icons": "^4.10.1"
+    "react-icons": "^4.10.1",
+    "superjson": "^1.13.1"
   },
   "packageManager": "yarn@3.3.1",
   "devDependencies": {

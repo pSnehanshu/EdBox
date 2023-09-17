@@ -1,4 +1,3 @@
-import { parseISO } from "date-fns";
 import { atom, useAtom, useAtomValue } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 import { z } from "zod";
@@ -20,18 +19,13 @@ export const useCurrentUser = GenerateCurrentUserHook({
   removeStoredUser: async () => localStorage.removeItem("user"),
 });
 
-const expiryAtomSchema = z
-  .string()
-  .datetime()
-  .transform((d) => parseISO(d));
-
 export const SessionExpiryAtom = atomWithStorage<Date>(
   "token-expiry",
   new Date(0), // Unix epoch
   {
     getItem(key, initialValue) {
       const storedValue = localStorage.getItem(key);
-      const validation = expiryAtomSchema.safeParse(storedValue);
+      const validation = z.date().safeParse(storedValue);
       if (!validation.success) return initialValue;
       return validation.data;
     },

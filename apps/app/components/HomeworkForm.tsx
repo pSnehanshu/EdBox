@@ -17,7 +17,7 @@ import type {
 } from "schooltalk-shared/types";
 import { FAB, ListItem } from "@rneui/themed";
 import MIMEType from "whatwg-mimetype";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import Toast from "react-native-toast-message";
 import { useConfig } from "../utils/config";
 import { trpc } from "../utils/trpc";
@@ -58,7 +58,7 @@ export default function HomeworkForm({
   const [selectedSubject, setSelectedSubject] = useState(homework?.Subject);
   const [textContent, setTextContent] = useState(homework?.text ?? "");
   const [dueDate, setDueDate] = useState(
-    homework?.due_date ? parseISO(homework.due_date) : undefined,
+    homework?.due_date ? homework.due_date : undefined,
   );
   const [datePickerVisible, setDatePickerVisible] = useState(false);
 

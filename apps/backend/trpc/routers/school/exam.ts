@@ -1,16 +1,9 @@
 import { TRPCError } from "@trpc/server";
-import { parseISO } from "date-fns";
 import _ from "lodash";
 import { StaticRole, examTestSchema } from "schooltalk-shared/misc";
 import { z } from "zod";
 import prisma from "../../../prisma";
 import { protectedProcedure, getRoleProcedure, router } from "../../trpc";
-
-const dateStringSchema = z
-  .string()
-  .datetime()
-  .default(() => new Date().toISOString())
-  .transform((d) => parseISO(d));
 
 type ExamTest = NonNullable<
   Awaited<
@@ -334,7 +327,7 @@ const examRouter = router({
   fetchExamsAndTestsForStudent: getRoleProcedure([StaticRole.student])
     .input(
       z.object({
-        after_date: dateStringSchema,
+        after_date: z.date().default(() => new Date()),
         limit: z.number().int().min(1).max(100).default(10),
         page: z.number().int().min(1).default(1),
       }),
@@ -437,7 +430,7 @@ const examRouter = router({
   fetchExamsAndTestsForTeacher: getRoleProcedure([StaticRole.teacher])
     .input(
       z.object({
-        after_date: dateStringSchema,
+        after_date: z.date().default(() => new Date()),
         limit: z.number().int().min(1).max(100).default(10),
         page: z.number().int().min(1).default(1),
       }),

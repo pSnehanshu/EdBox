@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { isPast, parseISO } from "date-fns";
+import { isPast } from "date-fns";
 import { z } from "zod";
 import type { Prisma } from "@prisma/client";
 import { FilePermissionsInputSchema } from "schooltalk-shared/misc";
@@ -12,11 +12,6 @@ import {
   studentProcedure,
 } from "../../trpc";
 
-const DateSchema = z
-  .string()
-  .datetime()
-  .transform((d) => parseISO(d));
-
 const homeworkRouter = router({
   fetchForSection: protectedProcedure
     .input(
@@ -25,7 +20,7 @@ const homeworkRouter = router({
         class_id: z.number().int(),
         limit: z.number().int().min(1).max(20).default(10),
         cursor: z.number().int().min(1).default(1),
-        after_due_date: DateSchema.optional(),
+        after_due_date: z.date().optional(),
       }),
     )
     .query(async ({ input, ctx }) => {
@@ -90,7 +85,7 @@ const homeworkRouter = router({
       z.object({
         limit: z.number().int().min(1).max(20).default(10),
         cursor: z.number().int().min(1).default(1),
-        after_due_date: DateSchema.optional(),
+        after_due_date: z.date().optional(),
       }),
     )
     .query(async ({ input, ctx }) => {
@@ -189,7 +184,7 @@ const homeworkRouter = router({
         section_id: z.number().int(),
         class_id: z.number().int(),
         subject_id: z.string().cuid(),
-        due_date: DateSchema.optional(),
+        due_date: z.date().optional(),
         file_permissions: FilePermissionsInputSchema.array().default([]),
       }),
     )
@@ -232,7 +227,7 @@ const homeworkRouter = router({
         section_id: z.number().int().optional(),
         class_id: z.number().int().optional(),
         subject_id: z.string().cuid().optional(),
-        due_date: DateSchema.optional(),
+        due_date: z.date().optional(),
         remove_attachments: z.string().cuid().array().optional(),
         new_file_permissions: FilePermissionsInputSchema.array().default([]),
       }),

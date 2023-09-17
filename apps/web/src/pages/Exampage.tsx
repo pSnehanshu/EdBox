@@ -18,7 +18,7 @@ import { useConfig } from "../utils/atoms";
 import { trpc } from "../utils/trpc";
 import { ExamItem } from "schooltalk-shared/types";
 import { useMemo, useState } from "react";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { MdOutlineAttachFile } from "react-icons/md";
 import _ from "lodash";
 import ExamForm, { TestForm } from "../Components/ExamForm";
@@ -124,7 +124,7 @@ function SingleExam({ exam }: examProps) {
   const startDate = useMemo(() => {
     const isoDate = Tests.at(0)?.date_of_exam;
     if (isoDate) {
-      return format(parseISO(isoDate), "MMM d, yyyy");
+      return format(isoDate, "MMM d, yyyy");
     } else {
       return "N/A";
     }
@@ -133,7 +133,7 @@ function SingleExam({ exam }: examProps) {
   const endDate = useMemo(() => {
     const isoDate = Tests.at(-1)?.date_of_exam;
     if (isoDate) {
-      return format(parseISO(isoDate), "MMM d, yyyy");
+      return format(isoDate, "MMM d, yyyy");
     } else {
       return "N/A";
     }
@@ -178,7 +178,7 @@ function SingleTest({ test }: testProps) {
   const remainingSubjectCount = Subjects.length;
 
   const date = useMemo(
-    () => format(parseISO(test.date_of_exam), "MMM d, yyyy hh:mm bbb"),
+    () => format(test.date_of_exam, "MMM d, yyyy hh:mm bbb"),
     [test.date_of_exam],
   );
   const duration = useMemo(() => {

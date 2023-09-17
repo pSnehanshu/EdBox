@@ -59,7 +59,7 @@ export default function HomeworkForm({
   const [textContent, setTextContent] = useState(homework?.text ?? "");
 
   const [dueDate, setDueDate] = useState(
-    homework?.due_date ? parseISO(homework.due_date) : new Date(),
+    homework?.due_date ? homework.due_date : new Date(),
   );
 
   const classesAndSectionsData =

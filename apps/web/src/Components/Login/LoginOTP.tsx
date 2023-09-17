@@ -8,7 +8,6 @@ import {
   Button,
   useColorModeValue,
 } from "@chakra-ui/react";
-import { parseISO } from "date-fns";
 import { trpc } from "../../utils/trpc";
 import { useState, useCallback } from "react";
 import { useAtom } from "jotai";
@@ -48,7 +47,7 @@ export default function LoginOTP({ onLogin, onLoginFailed }: LoginOtpProps) {
       onLogin?.();
       localStorage.setItem("token", token);
       trpcUtils.profile.me.invalidate();
-      setTokenExpiry(parseISO(expiry_date));
+      setTokenExpiry(expiry_date);
     },
     onError(error) {
       console.error(error);

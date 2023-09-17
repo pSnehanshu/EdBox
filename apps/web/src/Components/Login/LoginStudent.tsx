@@ -1,5 +1,4 @@
 import {
-  Flex,
   Box,
   FormControl,
   Input,
@@ -15,7 +14,6 @@ import { useConfig, SessionExpiryAtom } from "../../utils/atoms";
 import { useCallback, useState } from "react";
 import { ClassWithSections } from "schooltalk-shared/types";
 import OtpPopup from "./OtpPopup";
-import { parseISO } from "date-fns";
 import type { LoginOtpProps } from "./LoginOTP";
 
 export default function StudentLogin({
@@ -77,7 +75,7 @@ export default function StudentLogin({
       onLogin?.();
       localStorage.setItem("token", token);
       trpcUtils.profile.me.invalidate();
-      setTokenExpiry(parseISO(expiry_date));
+      setTokenExpiry(expiry_date);
     },
     onError(error) {
       console.error(error);

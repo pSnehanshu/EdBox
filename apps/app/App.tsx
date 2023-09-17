@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
 import { useCallback, useEffect, useState, Suspense } from "react";
 import { ThemeProvider } from "@rneui/themed";
+import superjson from "superjson";
 import { trpc } from "./utils/trpc";
 import useCachedResources from "./utils/useCachedResources";
 import useColorScheme, {
@@ -71,6 +72,7 @@ function AppWithConfig() {
           },
         }),
       ],
+      transformer: superjson,
     }),
   );
 

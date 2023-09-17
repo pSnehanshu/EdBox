@@ -1,7 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Text } from "@rneui/themed";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import _ from "lodash";
 import { useMemo } from "react";
 import { Pressable, StyleProp, StyleSheet, ViewStyle } from "react-native";
@@ -26,7 +26,7 @@ export const TestComp: React.FC<{
   const remainingSubjectCount = Subjects.length;
 
   const date = useMemo(
-    () => format(parseISO(test.date_of_exam), "MMM d, yyyy hh:mm bbb"),
+    () => format(test.date_of_exam, "MMM d, yyyy hh:mm bbb"),
     [test.date_of_exam],
   );
   const duration = useMemo(() => {

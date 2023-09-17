@@ -24,7 +24,7 @@ import { useConfig } from "../utils/atoms";
 import { trpc } from "../utils/trpc";
 import { Homework } from "schooltalk-shared/types";
 import { useMemo, useState } from "react";
-import { format, isPast, parseISO } from "date-fns";
+import { format, isPast } from "date-fns";
 import { MdOutlineAttachFile, MdOutlineFileUpload } from "react-icons/md";
 import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
 import HomeworkForm from "../Components/HomeworkForm";
@@ -152,12 +152,12 @@ export default function HomeworkPage() {
                   updateHomework.mutate({
                     ...hw,
                     homework_id: homeworkEdit?.id,
-                    due_date: hw.due_date?.toISOString(),
+                    due_date: hw.due_date,
                   });
                 } else {
                   createHomework.mutate({
                     ...hw,
-                    due_date: hw.due_date?.toISOString(),
+                    due_date: hw.due_date,
                     file_permissions: hw.new_file_permissions,
                   });
                 }
@@ -179,7 +179,7 @@ interface homeworkProps {
 
 function SingleHomework({ homework, onClick, setHomework }: homeworkProps) {
   const dueDate = useMemo(
-    () => (homework.due_date ? parseISO(homework.due_date) : null),
+    () => (homework.due_date ? homework.due_date : null),
     [homework.due_date],
   );
 

@@ -3,7 +3,7 @@ import { RefreshControl, StyleSheet } from "react-native";
 import { SpeedDial } from "@rneui/themed";
 import { MaterialCommunityIcons, Fontisto, Entypo } from "@expo/vector-icons";
 import { ListItem } from "@rneui/themed";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { dbBloodGroupToUIBloodGroup } from "schooltalk-shared/misc";
 import { View, Text, ScrollView } from "../../components/Themed";
 import { useCurrentUser } from "../../utils/auth";
@@ -98,7 +98,7 @@ export default function ProfileScreen({
                   <ListItem.Title>Date of birth</ListItem.Title>
                   <ListItem.Subtitle>
                     {user.date_of_birth
-                      ? format(parseISO(user.date_of_birth), "do MMMM, yyy")
+                      ? format(user.date_of_birth, "do MMMM, yyy")
                       : "Unknown"}
                   </ListItem.Subtitle>
                 </ListItem.Content>

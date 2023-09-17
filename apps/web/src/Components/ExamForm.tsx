@@ -32,7 +32,7 @@ import {
   ClassWithSections,
   Subject,
 } from "schooltalk-shared/types";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { ExamTestSchema } from "schooltalk-shared/misc";
 
 export default function ExamForm() {
@@ -103,7 +103,7 @@ export function TestForm({ testData }: TestModalProps) {
     Section | string | undefined
   >("All sections");
   const [dueDate, setDueDate] = useState(
-    testData?.date_of_exam ? parseISO(testData.date_of_exam) : undefined,
+    testData?.date_of_exam ? testData.date_of_exam : undefined,
   );
   const [datePickerVisible, setDatePickerVisible] = useState(false);
   const [selectedSubjects, setSelectedSubjects] = useState<Subject[]>([]);
