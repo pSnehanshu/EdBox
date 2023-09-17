@@ -123,10 +123,9 @@ export default function HomeworkPage() {
         <CardBody>
           <Stack divider={<StackDivider borderColor="gray.200" />} spacing={4}>
             {homeworks &&
-              homeworks.map((item, index) => (
-                <Box>
+              homeworks.map((item) => (
+                <Box key={item.id}>
                   <SingleHomework
-                    key={index}
                     homework={item}
                     onClick={onOpen}
                     setHomework={(hw) => setHomeworkEdit(hw)}
@@ -251,8 +250,8 @@ function SingleHomework({ homework, onClick, setHomework }: homeworkProps) {
               {homework.Attachments.length > 0 && (
                 <Flex flexDir="column">
                   <Heading size="lg">Attachments</Heading>
-                  {homework.Attachments.map((file, index) => (
-                    <FilePreview file={file.File} />
+                  {homework.Attachments.map((file) => (
+                    <FilePreview file={file.File} key={file.file_id} />
                   ))}
                 </Flex>
               )}

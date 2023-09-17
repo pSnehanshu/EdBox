@@ -118,11 +118,7 @@ const NavItem = ({ children, icon, abbr, ...rest }: NavItemProps) => {
   let { pathname } = useLocation();
 
   return (
-    <Box
-      as="a"
-      style={{ textDecoration: "none" }}
-      _focus={{ boxShadow: "none" }}
-    >
+    <Box style={{ textDecoration: "none" }} _focus={{ boxShadow: "none" }}>
       <Flex
         align="center"
         p="4"
