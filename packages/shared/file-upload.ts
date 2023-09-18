@@ -346,6 +346,34 @@ export function GenerateFileUploadHook({
       setUploadTasksMap({});
     }, []);
 
+    const UploadFileDrag = useCallback(
+      async (fileInfo: File, autoStart = true) => {
+        const { signedURL, permission } =
+          await uploadPermissionMutation.mutateAsync({
+            file_name: fileInfo.name,
+            size_in_bytes: fileInfo.size,
+            mime: fileInfo.mimeType,
+          });
+
+        const res = uploadFileToS3(fileInfo, signedURL);
+
+        const task: FileUploadTask = {
+          ...res,
+          permission,
+          file: {
+            name: fileInfo.name,
+            size: fileInfo.size,
+            mimeType: fileInfo.mimeType,
+            uri: fileInfo.uri,
+          },
+          started: false,
+        };
+
+        consumeTask(task, autoStart);
+      },
+      [],
+    );
+
     return {
       pickAndUploadFile,
       pickAndUploadMediaLib,
@@ -354,6 +382,7 @@ export function GenerateFileUploadHook({
       allDone: totalDone >= uploadTasks.length,
       cameraPermissionStatus,
       mediaPermissionStatus,
+      UploadFileDrag,
       removeAll,
     };
   };

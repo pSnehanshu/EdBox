@@ -114,10 +114,11 @@ export default function HomeworkForm({
 
   const onDrop = useCallback((acceptedFiles: any) => {
     console.log(acceptedFiles, "succes");
+    fileUploadHandler.UploadFileDrag(acceptedFiles);
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
-  console.log(isDragActive, "fire");
+  console.log(fileUploadHandler, "fire");
 
   return (
     <div {...getRootProps()}>
@@ -186,7 +187,7 @@ export default function HomeworkForm({
           </Flex>
         </Button>
         <div {...getRootProps()}>
-          {/* <input {...getInputProps()} /> */}
+          <input {...getInputProps()} />
           {isDragActive && (
             <Box
               border="1px dashed white"
