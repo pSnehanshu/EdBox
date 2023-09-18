@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { CheckIcon } from "@chakra-ui/icons";
 import {
   Flex,
@@ -13,6 +13,7 @@ import {
   Textarea,
   Text,
   Button,
+  Box,
 } from "@chakra-ui/react";
 import { MdOutlineFileUpload } from "react-icons/md";
 import { trpc } from "../utils/trpc";
@@ -21,6 +22,7 @@ import { Section, Homework, RouterInput } from "schooltalk-shared/types";
 import { format, parseISO } from "date-fns";
 import { useFileUpload } from "../../src/utils/file-upload";
 import AttachmentsDisplay from "./Attachments/AttachmentsDisplay";
+import { useDropzone } from "react-dropzone";
 
 interface HomeworkFormData {
   class_id: number;
@@ -110,10 +112,15 @@ export default function HomeworkForm({
 
   const fileUploadHandler = useFileUpload();
 
-  console.log(fileUploadHandler.uploadTasks, "fire");
+  const onDrop = useCallback((acceptedFiles: any) => {
+    console.log(acceptedFiles, "succes");
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+  console.log(isDragActive, "fire");
 
   return (
-    <>
+    <div {...getRootProps()}>
       <Stack spacing={3}>
         <Flex gap={8}>
           <Select
@@ -169,6 +176,7 @@ export default function HomeworkForm({
           onChange={(e) => setTextContent(e.target.value)}
           value={textContent ?? null}
         />
+
         <Button onClick={() => fileUploadHandler.pickAndUploadFile()}>
           <Flex justifyContent="center" gap={2}>
             <MdOutlineFileUpload size={24} />
@@ -177,6 +185,20 @@ export default function HomeworkForm({
             </Text>
           </Flex>
         </Button>
+        <div {...getRootProps()}>
+          {/* <input {...getInputProps()} /> */}
+          {isDragActive && (
+            <Box
+              border="1px dashed white"
+              borderRadius="md"
+              p={4}
+              textAlign="center"
+            >
+              Drag it Here !
+            </Box>
+          )}
+        </div>
+
         <Flex>
           {fileUploadHandler.uploadTasks.length > 0 && (
             <Flex flexDir="column" gap={2}>
@@ -212,6 +234,6 @@ export default function HomeworkForm({
           <CheckIcon boxSize={"6"} />
         </Button>
       </Flex>
-    </>
+    </div>
   );
 }
