@@ -22,6 +22,10 @@ export default function AttachmentsDisplay({ file: task }: attachmentFileType) {
     [task.file.mimeType],
   );
 
+  const removePic = () => {
+    console.log(task.file.name, "delete");
+  };
+
   useEffect(() => {
     const subscription = task.progress.subscribe({
       next(value) {
@@ -55,6 +59,7 @@ export default function AttachmentsDisplay({ file: task }: attachmentFileType) {
           <div>{task.file.name}</div>
         )}
         <SmallCloseIcon
+          onClick={removePic}
           boxSize={"6"}
           color="red.500"
           position="absolute"

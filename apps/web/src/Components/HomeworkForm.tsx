@@ -115,6 +115,12 @@ export default function HomeworkForm({
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
+  const removeFileById = (idToRemove: string) => {
+    return fileUploadHandler.uploadTasks.filter(
+      (file) => file.permission.id !== idToRemove,
+    );
+  };
+
   return (
     <>
       <Stack spacing={3}>
