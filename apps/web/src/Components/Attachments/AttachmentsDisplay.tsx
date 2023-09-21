@@ -1,4 +1,5 @@
-import { Card, Image, Stack } from "@chakra-ui/react";
+import { SmallCloseIcon } from "@chakra-ui/icons";
+import { Card, Flex, Image, Stack } from "@chakra-ui/react";
 import { useMemo } from "react";
 import { FileUploadTask } from "schooltalk-shared/file-upload";
 import { UploadedFile } from "schooltalk-shared/types";
@@ -15,12 +16,22 @@ export default function AttachmentsDisplay({ file: task }: attachmentFileType) {
   );
 
   return (
-    <Stack>
+    <Flex position="relative">
       {mime?.type === "image" ? (
         <Image objectFit="cover" src={task.file.uri} />
       ) : (
         <div>{task.file.name}</div>
       )}
-    </Stack>
+      <SmallCloseIcon
+        boxSize={"6"}
+        color="red.500"
+        position="absolute"
+        right="0"
+        _hover={{
+          color: "red.400",
+          cursor: "pointer",
+        }}
+      />
+    </Flex>
   );
 }

@@ -4,10 +4,6 @@ import {
   Flex,
   Heading,
   Input,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
   Select,
   Stack,
   Textarea,
@@ -118,10 +114,11 @@ export default function HomeworkForm({
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+  const { ref, ...rootProps } = getRootProps();
   console.log(fileUploadHandler, "fire");
 
   return (
-    <div {...getRootProps()}>
+    <>
       <Stack spacing={3}>
         <Flex gap={8}>
           <Select
@@ -177,16 +174,28 @@ export default function HomeworkForm({
           onChange={(e) => setTextContent(e.target.value)}
           value={textContent ?? null}
         />
+        <Flex
+          alignItems="center"
+          justifyContent="center"
+          flexDirection="column"
+          gap={4}
+          {...getRootProps({
+            onClick: (event) => event.stopPropagation(),
+          })}
+        >
+          <Button
+            onClick={() => fileUploadHandler.pickAndUploadFile()}
+            width="100%"
+            paddingY={4}
+          >
+            <Flex justifyContent="center" gap={2}>
+              <MdOutlineFileUpload size={24} />
+              <Text fontSize="lg" fontWeight="semibold">
+                Upload File or Drag it Here
+              </Text>
+            </Flex>
+          </Button>
 
-        <Button onClick={() => fileUploadHandler.pickAndUploadFile()}>
-          <Flex justifyContent="center" gap={2}>
-            <MdOutlineFileUpload size={24} />
-            <Text fontSize="lg" fontWeight="semibold">
-              Upload File
-            </Text>
-          </Flex>
-        </Button>
-        <div {...getRootProps()}>
           <input {...getInputProps()} />
           {isDragActive && (
             <Box
@@ -194,15 +203,16 @@ export default function HomeworkForm({
               borderRadius="md"
               p={4}
               textAlign="center"
+              width="100%"
             >
               Drag it Here !
             </Box>
           )}
-        </div>
+        </Flex>
 
         <Flex>
           {fileUploadHandler.uploadTasks.length > 0 && (
-            <Flex flexDir="column" gap={2}>
+            <Flex flexDir="column" gap={2} py={4}>
               <Heading size="lg">Attachments</Heading>
               {fileUploadHandler.uploadTasks.map((file, index) => (
                 <AttachmentsDisplay file={file} />
@@ -211,7 +221,7 @@ export default function HomeworkForm({
           )}
         </Flex>
       </Stack>
-      <Flex justifyContent="end" py={4}>
+      <Flex justifyContent="end" pb={4}>
         <Button
           onClick={() => {
             if (selectedSection && selectedClass && selectedSubject) {
@@ -235,6 +245,6 @@ export default function HomeworkForm({
           <CheckIcon boxSize={"6"} />
         </Button>
       </Flex>
-    </div>
+    </>
   );
 }
