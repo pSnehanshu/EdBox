@@ -115,7 +115,7 @@ export default function HomeworkForm({
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
   const { ref, ...rootProps } = getRootProps();
-  console.log(fileUploadHandler, "fire");
+  console.log(fileUploadHandler.uploadTasks.length, "fire");
 
   return (
     <>
@@ -211,14 +211,17 @@ export default function HomeworkForm({
         </Flex>
 
         <Flex>
-          {fileUploadHandler.uploadTasks.length > 0 && (
-            <Flex flexDir="column" gap={2} py={4}>
-              <Heading size="lg">Attachments</Heading>
-              {fileUploadHandler.uploadTasks.map((file, index) => (
-                <AttachmentsDisplay file={file} />
-              ))}
-            </Flex>
-          )}
+          <Flex flexDir="column" gap={2} py={4}>
+            <Heading size="lg">Attachments</Heading>
+            {fileUploadHandler.uploadTasks.map((file, index) => (
+              <AttachmentsDisplay key={index} file={file} />
+            ))}
+            {fileUploadHandler.uploadTasks.length <= 0 && (
+              <Text fontSize="xl" color="gray.500">
+                Nothing to display
+              </Text>
+            )}
+          </Flex>
         </Flex>
       </Stack>
       <Flex justifyContent="end" pb={4}>
