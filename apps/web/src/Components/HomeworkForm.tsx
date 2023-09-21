@@ -114,8 +114,6 @@ export default function HomeworkForm({
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
-  const { ref, ...rootProps } = getRootProps();
-  console.log(fileUploadHandler.uploadTasks.length, "fire");
 
   return (
     <>
