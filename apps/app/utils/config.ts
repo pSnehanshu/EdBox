@@ -7,15 +7,9 @@ import Constants from "expo-constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SELECTED_SCHOOL_ID } from "./async-storage-keys";
 import {
-  StaticRole,
-  getUserRoleHierarchical,
-  getUserStaticRoles,
-} from "schooltalk-shared/misc";
-import {
   GenerateConfigAtom,
   GenerateDefaultRoleSelector,
 } from "schooltalk-shared/client-config";
-import { useEffect } from "react";
 import { useCurrentUser } from "./auth";
 
 const preloadedSchoolId = Constants.expoConfig?.extra?.schoolId as

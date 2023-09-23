@@ -1,4 +1,5 @@
 import { io } from "socket.io-client";
+import { atom, useAtom } from "jotai";
 import { useConfig } from "./config";
 import {
   useRef,
@@ -13,13 +14,15 @@ import { SocketClient } from "../utils/types/common";
 
 const SocketContext = createContext<SocketClient | undefined>(undefined);
 
+export const SocketConnectedAtom = atom(false);
+
 interface SocketProviderProps {
   children: JSX.Element | JSX.Element[];
 }
 export function SocketProvider({ children }: SocketProviderProps) {
   const socket = useRef<SocketClient>();
   const [socketIsSet, setSocketIsSet] = useState(false);
-  const [socketIsConnected, setIsConnected] = useState(false);
+  const [socketIsConnected, setIsConnected] = useAtom(SocketConnectedAtom);
   const config = useConfig();
 
   useEffect(() => {

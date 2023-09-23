@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useContext } from "react";
+import { useAtomValue } from "jotai";
 import { StaticRole } from "schooltalk-shared/misc";
 import { RootTabParamList } from "../utils/types/common";
 import { ColorSchemeContext } from "../utils/useColorScheme";
@@ -12,6 +13,7 @@ import HomeTabScreen from "../screens/HomeTabScreen";
 import RoutineScreen from "../screens/routine/RoutineScreen";
 import SettingsScreen from "../screens/settings/SettingsScreen";
 import MenuScreen from "../screens/MenuScreen";
+import { SocketConnectedAtom } from "../utils/socketio";
 
 /**
  * A bottom tab navigator displays tab buttons on the bottom of the display to switch screens.
@@ -23,6 +25,7 @@ export function BottomTabNavigator() {
   const { scheme } = useContext(ColorSchemeContext);
   const school = useSchool();
   const config = useConfig();
+  const isSocketConnected = useAtomValue(SocketConnectedAtom);
 
   return (
     <BottomTab.Navigator
@@ -52,7 +55,7 @@ export function BottomTabNavigator() {
         name="ChatsTab"
         component={ChatsListScreen}
         options={{
-          title: "Chats",
+          title: `Chats${isSocketConnected ? "" : " (!)"}`,
           headerShown: true,
           tabBarIcon: ({ focused, color }) => (
             <Ionicons
