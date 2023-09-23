@@ -1,4 +1,3 @@
-import { lazy } from "react";
 import {
   BrowserRouter as Router,
   Switch,
@@ -10,12 +9,11 @@ import Navbar from "./Components/Navbar";
 import SideMenu from "./Components/SideMenu";
 import FullScreenProgress from "./Components/FullScreenProgress";
 import { Grid, GridItem } from "@chakra-ui/react";
+import LoginPage from "./pages/Login";
+import HomePage from "./pages/HomePage";
+import HomeworkPage from "./pages/HomeworkPage";
+import NotFound from "./pages/NotFound";
 import ExamPage from "./pages/Exampage";
-
-const LoginPage = lazy(() => import("./pages/Login"));
-const HomePage = lazy(() => import("./pages/HomePage"));
-const HomeworkPage = lazy(() => import("./pages/HomeworkPage"));
-const NotFound = lazy(() => import("./pages/NotFound"));
 
 export default function Routes() {
   // DO NOT EVER REMOVE THIS HOOK
@@ -24,6 +22,7 @@ export default function Routes() {
   const { isLoggedIn, isLoading } = useCurrentUser();
 
   if (isLoading) return <FullScreenProgress />;
+
   return (
     <Router>
       <Switch>
@@ -74,6 +73,7 @@ export default function Routes() {
                 <Route path="/exam">
                   {isLoggedIn ? <ExamPage /> : <Redirect to="/login" />}
                 </Route>
+
                 <Route exact path="/">
                   {isLoggedIn ? <HomePage /> : <Redirect to="/login" />}
                 </Route>
