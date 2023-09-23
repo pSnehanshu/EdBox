@@ -41,24 +41,30 @@ export default function Routes() {
               <Navbar />
             </GridItem>
 
-            <GridItem
-              gridRow="2/3"
-              gridColumn="1/2"
-              overflowY="auto"
-              display={{
-                base: "none",
-                lg: "block",
-              }}
-            >
-              <SideMenu />
-            </GridItem>
+            {isLoggedIn && (
+              <GridItem
+                gridRow="2/3"
+                gridColumn="1/2"
+                overflowY="auto"
+                display={{
+                  base: "none",
+                  lg: "block",
+                }}
+              >
+                <SideMenu />
+              </GridItem>
+            )}
 
             <GridItem
               gridRow="2/3"
-              gridColumn={{
-                base: "1/3",
-                lg: "2/3",
-              }}
+              gridColumn={
+                isLoggedIn
+                  ? {
+                      base: "1/3",
+                      lg: "2/3",
+                    }
+                  : "1/3"
+              }
               p="4"
               h="full"
               w="full"
@@ -78,18 +84,12 @@ export default function Routes() {
                   {isLoggedIn ? <HomePage /> : <Redirect to="/login" />}
                 </Route>
 
-                {isLoggedIn && (
-                  <Route path="*">
-                    <NotFound />
-                  </Route>
-                )}
+                <Route path="*">
+                  <NotFound />
+                </Route>
               </Switch>
             </GridItem>
           </Grid>
-        </Route>
-
-        <Route path="*">
-          <NotFound />
         </Route>
       </Switch>
     </Router>
