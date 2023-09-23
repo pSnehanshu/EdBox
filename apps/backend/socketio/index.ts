@@ -26,7 +26,7 @@ export default function initSocketIo(server: HTTPServer) {
 
   io.of(async (name, data, next) => {
     // Remove the first "/" to get the school id
-    const schoolId = name.slice(1);
+    const schoolId = name.split("/").at(-1);
 
     // Make sure school exists and is active
     const school = await prisma.school
@@ -46,7 +46,7 @@ export default function initSocketIo(server: HTTPServer) {
     next(ok ? null : new Error("School not found"), ok);
   })
     .use(async (socket, next) => {
-      const schoolId = socket.nsp.name.slice(1);
+      const schoolId = socket.nsp.name.split("/").at(-1);
 
       const token = socket.handshake.auth.token as string;
       if (!token) {

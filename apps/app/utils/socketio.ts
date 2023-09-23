@@ -18,9 +18,13 @@ interface SocketProviderProps {
 }
 export function SocketProvider({ children }: SocketProviderProps) {
   const socket = useRef<SocketClient>();
-  const [, setSocketIsSet] = useState(false);
-  const [, setIsConnected] = useState(false);
+  const [socketIsSet, setSocketIsSet] = useState(false);
+  const [socketIsConnected, setIsConnected] = useState(false);
   const config = useConfig();
+
+  useEffect(() => {
+    console.log(JSON.stringify({ socketIsSet, socketIsConnected }));
+  }, [socketIsSet, socketIsConnected]);
 
   useEffect(() => {
     (async () => {
