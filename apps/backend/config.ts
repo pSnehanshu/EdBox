@@ -18,7 +18,7 @@ const ConfigSchema = z.object({
   AWS_REGION: z.string().default("ap-south-1"),
   IK_PUBLIC_KEY: z.string(),
   IK_PRIVATE_KEY: z.string(),
-  ARTIFICIAL_LATENCY: StringNumber.default("3000"),
+  ARTIFICIAL_LATENCY: StringNumber.default("1500"),
 });
 
 export default ConfigSchema.parse(process.env);

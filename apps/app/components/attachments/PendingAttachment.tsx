@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import MIMEType from "whatwg-mimetype";
 import { LinearProgress } from "@rneui/themed";
 import * as Haptics from "expo-haptics";
-import { FileUploadTask } from "../../utils/types/common";
+import { type FileUploadTask } from "schooltalk-shared/file-upload";
 import { Alert, Image, Pressable, StyleSheet } from "react-native";
 import useColorScheme from "../../utils/useColorScheme";
 import { Text, View } from "../Themed";

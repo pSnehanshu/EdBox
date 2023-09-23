@@ -1,6 +1,6 @@
 import { useState } from "react";
 import DatePicker from "react-native-date-picker";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import type {
   DBBloodGroup,
   Gender,
@@ -79,7 +79,7 @@ export default function ProfileEditScreen({
     user?.blood_group ?? undefined,
   );
   const [birthOfDate, setBirthOfDate] = useState<Date | null>(
-    user?.date_of_birth ? parseISO(user?.date_of_birth) : null,
+    user?.date_of_birth ? user.date_of_birth : null,
   );
 
   const [addressLine1, setAddressLine1] = useState<string | undefined>(

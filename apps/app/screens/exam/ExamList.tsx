@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Pressable, SafeAreaView, StyleSheet } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
 import type { ExamItem } from "schooltalk-shared/types";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { ListItem, Divider, SpeedDial, Dialog } from "@rneui/themed";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -29,7 +29,7 @@ const ExamComp: React.FC<{
   const startDate = useMemo(() => {
     const isoDate = Tests.at(0)?.date_of_exam;
     if (isoDate) {
-      return format(parseISO(isoDate), "MMM d, yyyy");
+      return format(isoDate, "MMM d, yyyy");
     } else {
       return "N/A";
     }
@@ -38,7 +38,7 @@ const ExamComp: React.FC<{
   const endDate = useMemo(() => {
     const isoDate = Tests.at(-1)?.date_of_exam;
     if (isoDate) {
-      return format(parseISO(isoDate), "MMM d, yyyy");
+      return format(isoDate, "MMM d, yyyy");
     } else {
       return "N/A";
     }

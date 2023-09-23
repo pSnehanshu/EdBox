@@ -118,6 +118,10 @@ const profileRouter = router({
           Teacher: true,
           Parent: true,
           Staff: true,
+          teacher_id: true,
+          staff_id: true,
+          parent_id: true,
+          student_id: true,
         },
       });
 

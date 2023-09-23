@@ -1,10 +1,11 @@
 import { initTRPC, TRPCError } from "@trpc/server";
+import superjson from "superjson";
 import { hasUserStaticRoles, StaticRole } from "schooltalk-shared/misc";
 import { Permissions } from "schooltalk-shared/permissions.enum";
 import { userHasPermissions } from "../utils/permissions";
 import type { Context } from "./context";
 
-const t = initTRPC.context<Context>().create();
+const t = initTRPC.context<Context>().create({ transformer: superjson });
 
 //////////////////
 // MIDDLEWARES //

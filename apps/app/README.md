@@ -30,8 +30,7 @@ To build APK, you will need a few things (Assuming you're using Ubuntu 20):
 5. Then run a container using `docker run -d --name app-builder schooltalk-app-builder`.
 6. You can monitor the logs using `docker logs app-builder -f -n 100`.
 7. Once build finishes, note down the path of the generated APK file from the previous command's output.
-8. Then extract the APK file using [this method](https://stackoverflow.com/a/31316636/9990365). Put the appropriate image name, which is `schooltalk-app-builder`.
-
+8. Then extract the APK file using [this method](https://stackoverflow.com/a/38356081/17157744). Put the appropriate container name, which is `app-builder`.
 
 ## Publish update
 

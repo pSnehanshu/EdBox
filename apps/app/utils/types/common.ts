@@ -12,10 +12,7 @@ import type {
   ClientToServerEvents,
   Group,
   ServerToClientEvents,
-  UploadPermission,
 } from "schooltalk-shared/types";
-import type { Subject } from "rxjs";
-import type { FileSystemUploadResult } from "expo-file-system";
 
 declare global {
   namespace ReactNavigation {
@@ -74,21 +71,4 @@ export interface SettingsOption {
   subtitle?: string;
   icon?: JSX.Element;
   onPress?: () => void;
-}
-
-interface File {
-  name?: string;
-  size?: number;
-  mimeType?: string;
-  uri: string;
-}
-
-export interface FileUploadTask {
-  progress: Subject<number>;
-  start: () => Promise<FileSystemUploadResult | undefined>;
-  cancel: () => Promise<void>;
-  permission: UploadPermission;
-  file: File;
-  uploadResult?: FileSystemUploadResult;
-  started: boolean;
 }

@@ -15,7 +15,7 @@ import { CustomSelect } from "./CustomSelect";
 import { Pressable } from "react-native";
 import { useConfig } from "../utils/config";
 import DatePicker from "react-native-date-picker";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import type { ExamTestSchema } from "schooltalk-shared/misc";
 import { Toast } from "react-native-toast-message/lib/src/Toast";
 import { CustomSlider } from "./CustomSlider";
@@ -44,7 +44,7 @@ export default function TestModal({
     Section | string | undefined
   >("All sections");
   const [dueDate, setDueDate] = useState(
-    testData?.date_of_exam ? parseISO(testData.date_of_exam) : undefined,
+    testData?.date_of_exam ? testData.date_of_exam : undefined,
   );
   const [datePickerVisible, setDatePickerVisible] = useState(false);
   const [selectedSubjects, setSelectedSubjects] = useState<Subject[]>([]);
@@ -241,7 +241,7 @@ export default function TestModal({
                 typeof selectedSection === "string"
                   ? undefined
                   : selectedSection?.numeric_id,
-              date_of_exam: dueDate.toISOString(),
+              date_of_exam: dueDate,
               duration_minutes: duration,
               subjectIds,
               total_marks: mark,

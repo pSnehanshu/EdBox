@@ -5,7 +5,7 @@ import { StaticRole } from "schooltalk-shared/misc";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FAB } from "@rneui/themed";
 import { Homework } from "schooltalk-shared/types";
-import { format, parseISO, isPast } from "date-fns";
+import { format, isPast } from "date-fns";
 import { RootStackParamList } from "../../utils/types/common";
 import { List, Text, View } from "../../components/Themed";
 import { trpc } from "../../utils/trpc";
@@ -124,7 +124,7 @@ interface HomeworkProps {
 }
 function SingleHomework({ homework, onClick }: HomeworkProps) {
   const dueDate = useMemo(
-    () => (homework.due_date ? parseISO(homework.due_date) : null),
+    () => (homework.due_date ? homework.due_date : null),
     [homework.due_date],
   );
 

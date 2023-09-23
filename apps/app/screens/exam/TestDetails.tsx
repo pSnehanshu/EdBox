@@ -6,7 +6,7 @@ import _ from "lodash";
 import { RootStackScreenProps } from "../../utils/types/common";
 import { trpc } from "../../utils/trpc";
 import { View } from "../../components/Themed";
-import { addMinutes, format, parseISO } from "date-fns";
+import { addMinutes, format } from "date-fns";
 import { ArrayElement } from "schooltalk-shared/types";
 import { StaticRole } from "schooltalk-shared/misc";
 import { useConfig } from "../../utils/config";
@@ -97,7 +97,7 @@ const TestDetailsScreen: React.FC<RootStackScreenProps<"TestDetails">> = ({
     const { data: test } = testQuery;
 
     if (test) {
-      const dateOfExam = parseISO(test.date_of_exam);
+      const dateOfExam = test.date_of_exam;
       const dateFormatted = format(dateOfExam, "MMMM d, yyyy");
       const startTimeFormatted = format(dateOfExam, "hh:mm bb");
       const endTime = addMinutes(dateOfExam, test.duration_minutes);

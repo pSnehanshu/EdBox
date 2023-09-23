@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
 import { useCallback, useEffect, useState, Suspense } from "react";
 import { ThemeProvider } from "@rneui/themed";
+import superjson from "superjson";
 import { trpc } from "./utils/trpc";
 import useCachedResources from "./utils/useCachedResources";
 import useColorScheme, {
@@ -51,7 +52,14 @@ function AppWithConfig() {
     AsyncStorage.setItem(COLOR_SCHEME, scheme);
   }, []);
 
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: { staleTime: 30000 },
+        },
+      }),
+  );
   const [trpcClient] = useState(() =>
     trpc.createClient({
       links: [
@@ -64,6 +72,7 @@ function AppWithConfig() {
           },
         }),
       ],
+      transformer: superjson,
     }),
   );
 

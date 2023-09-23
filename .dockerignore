@@ -1,3 +1,5 @@
-Dockerfile*
+fly.toml
+.dockerignore
 node_modules
+Dockerfile*
 tmp

@@ -23,7 +23,7 @@ export default function CreateHomeworkScreen({
         onSubmit={(hw) =>
           createHomework.mutate({
             ...hw,
-            due_date: hw.due_date?.toISOString(),
+            due_date: hw.due_date,
             file_permissions: hw.new_file_permissions,
           })
         }

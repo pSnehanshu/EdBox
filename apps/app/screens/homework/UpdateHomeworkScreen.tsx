@@ -38,7 +38,7 @@ export default function UpdateHomeworkScreen({
             updateHomework.mutate({
               ...hw,
               homework_id: homeworkId,
-              due_date: hw.due_date?.toISOString(),
+              due_date: hw.due_date,
             });
           }}
           isSubmitting={updateHomework.isLoading}

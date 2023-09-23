@@ -15,7 +15,6 @@ import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
 import * as WebBrowser from "expo-web-browser";
 import ImageView from "react-native-image-viewing";
-import { parseISO } from "date-fns";
 import { trpc } from "../../utils/trpc";
 import { Text, View } from "../Themed";
 import useColorScheme from "../../utils/useColorScheme";
@@ -368,12 +367,7 @@ function FileInfoFetcherComp({
 
   useEffect(() => {
     if (isImage && fileObject && urlQuery.data) {
-      onFetched(
-        fileObject,
-        index,
-        urlQuery.data.url,
-        parseISO(urlQuery.data.expiry),
-      );
+      onFetched(fileObject, index, urlQuery.data.url, urlQuery.data.expiry);
     }
   }, [isImage && fileObject && urlQuery.data]);
 

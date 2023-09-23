@@ -7,7 +7,7 @@ export async function createContext({ req }: CreateExpressContextOptions) {
   const sessionId = req.headers["x-session-id"];
 
   // Session ID not submitted
-  if (typeof sessionId !== "string") {
+  if (typeof sessionId !== "string" || !sessionId) {
     return { session: null };
   }
 

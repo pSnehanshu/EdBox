@@ -14,7 +14,7 @@ import MIMEType from "whatwg-mimetype";
 import type { UploadedFile } from "schooltalk-shared/types";
 import Spinner from "react-native-loading-spinner-overlay/lib";
 import { StaticRole } from "schooltalk-shared/misc";
-import { format, isPast, parseISO } from "date-fns";
+import { format, isPast } from "date-fns";
 import { MaterialCommunityIcons, FontAwesome5 } from "@expo/vector-icons";
 import { trpc } from "../../utils/trpc";
 import { useCurrentUser } from "../../utils/auth";
@@ -84,7 +84,7 @@ export default function DisplayHomeworkScreen({
   };
 
   const dueDate = useMemo(
-    () => (homework?.due_date ? parseISO(homework.due_date) : null),
+    () => (homework?.due_date ? homework.due_date : null),
     [homework?.due_date],
   );
   const dueDateStr = useMemo(

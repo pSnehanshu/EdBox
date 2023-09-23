@@ -1,5 +1,5 @@
 import { Card, Text } from "@rneui/themed";
-import { differenceInDays, parseISO } from "date-fns";
+import { differenceInDays } from "date-fns";
 import { useMemo } from "react";
 import { useEffect } from "react";
 import Spinner from "react-native-loading-spinner-overlay";
@@ -33,8 +33,7 @@ const ExamDetailsStudentScreen: React.FC<
 
       if (!firstTestDate || !lastTestDate) return "N/A";
 
-      const days =
-        differenceInDays(parseISO(lastTestDate), parseISO(firstTestDate)) + 1;
+      const days = differenceInDays(lastTestDate, firstTestDate) + 1;
 
       return `${days} days`;
     }

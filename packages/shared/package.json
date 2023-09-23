@@ -10,10 +10,13 @@
     "build": "tsc"
   },
   "dependencies": {
-    "async": "^3.2.4"
+    "async": "^3.2.4",
+    "jotai": "^2.2.3",
+    "react": "18.2.0"
   },
   "devDependencies": {
-    "@types/async": "^3.2.18",
-    "typescript": "^4.9.5"
+    "@types/async": "^3.2.20",
+    "@types/react": "~18.2.14",
+    "typescript": "^5.1.3"
   }
 }
