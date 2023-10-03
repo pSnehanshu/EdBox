@@ -32,7 +32,7 @@ import {
   ClassWithSections,
   Subject,
 } from "schooltalk-shared/types";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { ExamTestSchema } from "schooltalk-shared/misc";
 
 export default function ExamForm() {
@@ -41,6 +41,8 @@ export default function ExamForm() {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const [textContent, setTextContent] = useState("");
+
+  const [selectedTests, setTest] = useState<ExamTestSchema[]>([]);
 
   return (
     <>
@@ -57,7 +59,7 @@ export default function ExamForm() {
             value={textContent ?? null}
           />
         </Stack>
-        <Flex justifyContent="center" my={8}>
+        <Flex justifyContent="end" m={8}>
           <Button
             onClick={() => {
               onOpen();
@@ -81,17 +83,23 @@ export default function ExamForm() {
       </ModalContent>
 
       <Modal isOpen={isOpen} onClose={onClose}>
-        <TestForm />
+        <TestForm
+          onSubmit={(test) => {
+            setTest((tests) => tests.concat(test));
+            onClose();
+          }}
+        />
       </Modal>
     </>
   );
 }
 
 interface TestModalProps {
+  onSubmit: (test: ExamTestSchema) => void;
   testData?: ExamTest | ExamTestSchema | null;
 }
 
-export function TestForm({ testData }: TestModalProps) {
+export function TestForm({ onSubmit, testData }: TestModalProps) {
   const { schoolId: selectedSchoolId } = useConfig();
 
   const [multiselectSub, setMultiselectSub] = useState(false);
@@ -149,13 +157,19 @@ export function TestForm({ testData }: TestModalProps) {
   const handleSectionSelectChange = (
     e: React.ChangeEvent<HTMLSelectElement>,
   ) => {
-    const section =
-      sectionsOptions &&
-      sectionsOptions.find((section) => {
-        if (typeof section === "string") return section;
+    let section: string | Section | undefined = "All sections";
 
-        return section.numeric_id === Number(e.target.value);
-      });
+    if (e.target.value === "0") {
+      section = "All sections";
+    } else {
+      section =
+        sectionsOptions &&
+        sectionsOptions.find((section) => {
+          if (typeof section !== "string")
+            return section.numeric_id === Number(e.target.value);
+        });
+    }
+
     setSelectedSection(section);
   };
 
@@ -190,7 +204,10 @@ export function TestForm({ testData }: TestModalProps) {
             >
               {sectionsOptions &&
                 sectionsOptions.map((item, index) => (
-                  <option value={index} key={index}>
+                  <option
+                    value={typeof item == "string" ? 0 : item.numeric_id}
+                    key={index}
+                  >
                     {typeof item == "string" ? item : "Section " + item.name}
                   </option>
                 ))}
@@ -205,7 +222,13 @@ export function TestForm({ testData }: TestModalProps) {
                 </option>
               ))}
           </Select>
-          <Input placeholder="Exam date" size="md" type="datetime-local" />
+          <Input
+            placeholder="Exam date"
+            size="md"
+            type="datetime-local"
+            onChange={(e) => setDueDate(parseISO(e.target.value))}
+            value={dueDate ? format(dueDate!, "yyyy-MM-dd'T'HH:mm") : undefined}
+          />
 
           {/* total mark + duraiton */}
           <Text>Marks</Text>
@@ -266,7 +289,38 @@ export function TestForm({ testData }: TestModalProps) {
         </Stack>
         <ModalFooter>
           <Flex justifyContent="center">
-            <Button>
+            <Button
+              onClick={() => {
+                console.log(selectedSection, "data");
+                if (
+                  selectedClass &&
+                  selectedSection &&
+                  selectedSubjects.length > 0 &&
+                  mark &&
+                  dueDate &&
+                  duration
+                ) {
+                  let subjectIds = selectedSubjects.map((s) => s.id);
+                  if (!multiselectSub && subjectIds.length > 1) {
+                    subjectIds = [subjectIds[0]];
+                  }
+
+                  onSubmit({
+                    class_id: selectedClass?.numeric_id,
+                    section_id:
+                      typeof selectedSection === "string"
+                        ? undefined
+                        : selectedSection?.numeric_id,
+                    date_of_exam: dueDate,
+                    duration_minutes: duration,
+                    subjectIds,
+                    total_marks: mark,
+                  });
+                } else {
+                  console.log("insufficient data");
+                }
+              }}
+            >
               <CheckIcon boxSize={"6"} />
             </Button>
           </Flex>
