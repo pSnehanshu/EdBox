@@ -21,7 +21,8 @@ import { useMemo, useState } from "react";
 import { format } from "date-fns";
 import { MdOutlineAttachFile } from "react-icons/md";
 import _ from "lodash";
-import ExamForm, { TestForm } from "../Components/ExamForm";
+import ExamForm from "../Components/ExamForm";
+import { TestForm } from "../Components/TestForm";
 
 const pageLimit = 10;
 
