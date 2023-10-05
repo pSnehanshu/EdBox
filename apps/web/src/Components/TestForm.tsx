@@ -51,7 +51,7 @@ export function TestForm({ onSubmit, testData }: TestModalProps) {
     testData?.date_of_exam ? testData.date_of_exam : undefined,
   );
   const [datePickerVisible, setDatePickerVisible] = useState(false);
-  const [selectedSubjects, setSelectedSubjects] = useState<Subject[]>([]);
+  const [selectedSubjects, setSelectedSubjects] = useState<Subject>();
 
   const subjectsQuery = trpc.school.subject.fetchSubjects.useQuery({}, {});
 
@@ -110,6 +110,17 @@ export function TestForm({ onSubmit, testData }: TestModalProps) {
     setSelectedSection(section);
   };
 
+  const handleSubjectSelectChange = (
+    e: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    const subject =
+      subjectsQuery.data &&
+      subjectsQuery.data.find((subject) => {
+        return subject.id === e.target.value;
+      });
+    setSelectedSubjects(subject);
+  };
+
   const sectionsOptions = ["All sections", ...(selectedClass?.Sections ?? [])];
 
   return (
@@ -151,7 +162,12 @@ export function TestForm({ onSubmit, testData }: TestModalProps) {
             </Select>
           </Flex>
 
-          <Select placeholder="Subject" size="lg">
+          <Select
+            placeholder="Subject"
+            size="lg"
+            onChange={handleSubjectSelectChange}
+            // value={selectedSubject?.id ?? undefined}
+          >
             {subjectsQuery.data &&
               subjectsQuery?.data.map((item) => (
                 <option value={item.id} key={item.name}>
@@ -228,19 +244,19 @@ export function TestForm({ onSubmit, testData }: TestModalProps) {
           <Flex justifyContent="center">
             <Button
               onClick={() => {
-                console.log(selectedSection, "data");
                 if (
                   selectedClass &&
                   selectedSection &&
-                  selectedSubjects.length > 0 &&
+                  selectedSubjects &&
                   mark &&
                   dueDate &&
                   duration
                 ) {
-                  let subjectIds = selectedSubjects.map((s) => s.id);
-                  if (!multiselectSub && subjectIds.length > 1) {
-                    subjectIds = [subjectIds[0]];
-                  }
+                  // let subjectIds = selectedSubjects.map((s) => s.id);
+                  // if (!multiselectSub && subjectIds.length > 1) {
+                  //   subjectIds = [subjectIds[0]];
+                  // }
+                  // currently one subject only
 
                   onSubmit &&
                     onSubmit({
@@ -251,7 +267,7 @@ export function TestForm({ onSubmit, testData }: TestModalProps) {
                           : selectedSection?.numeric_id,
                       date_of_exam: dueDate,
                       duration_minutes: duration,
-                      subjectIds,
+                      subjectIds: [selectedSubjects.id],
                       total_marks: mark,
                     });
                 } else {
@@ -265,60 +281,5 @@ export function TestForm({ onSubmit, testData }: TestModalProps) {
         </ModalFooter>
       </ModalContent>
     </>
-  );
-}
-
-interface TestItemInterface {
-  test: ExamTestSchema;
-  onDelete: () => void;
-  onEdit: () => void;
-}
-
-function TestComponent({ test, onEdit, onDelete }: TestItemInterface) {
-  const subjectsQuery = trpc.school.subject.fetchSubjects.useQuery({});
-  const selectedSubjects = subjectsQuery.data
-    ?.filter((obj) => test.subjectIds.includes(obj.id))
-    .map((obj) => obj.name);
-
-  return (
-    <Box w="100%" borderBottomWidth="1px" borderColor="gray">
-      <Flex justifyContent="space-between">
-        <Flex alignItems="center" flex="1">
-          <Text fontSize="lg" fontWeight="bold" mr="2">
-            {selectedSubjects?.[0]}
-            {selectedSubjects && selectedSubjects.length > 1
-              ? ` & ${selectedSubjects.length - 1} more`
-              : ""}
-          </Text>
-
-          <Text>
-            {format(new Date(test.date_of_exam), "MMM dd, yyyy hh:mm aaa")}
-          </Text>
-        </Flex>
-        <Flex alignItems="center">
-          <Text mr="2">{test.duration_minutes} minutes</Text>
-          <Text>{test.total_marks} marks</Text>
-        </Flex>
-      </Flex>
-      <Flex justifyContent="space-between" p="2" mt="2">
-        <Button
-          size="sm"
-          colorScheme="blue"
-          leftIcon={<EditIcon />}
-          onClick={onEdit}
-        >
-          Edit
-        </Button>
-        <Button
-          size="sm"
-          colorScheme="red"
-          borderColor="red"
-          leftIcon={<DeleteIcon />}
-          onClick={onDelete}
-        >
-          Delete
-        </Button>
-      </Flex>
-    </Box>
   );
 }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CheckIcon } from "@chakra-ui/icons";
+import { CheckIcon, DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import {
   Flex,
   Heading,
@@ -13,12 +13,14 @@ import {
   Button,
   useDisclosure,
   Modal,
+  Box,
 } from "@chakra-ui/react";
 
 import { trpc } from "../utils/trpc";
 import { useConfig } from "../utils/atoms";
 import { ExamTestSchema } from "schooltalk-shared/misc";
 import { TestForm } from "./TestForm";
+import { format } from "date-fns";
 
 export default function ExamForm() {
   const { schoolId: selectedSchoolId } = useConfig();
@@ -28,6 +30,8 @@ export default function ExamForm() {
   const [textContent, setTextContent] = useState("");
 
   const [selectedTests, setTest] = useState<ExamTestSchema[]>([]);
+
+  console.log(selectedTests);
 
   return (
     <>
@@ -57,6 +61,16 @@ export default function ExamForm() {
         <Heading size="sm" mx={8}>
           Tests
         </Heading>
+        <>
+          {selectedTests ? (
+            selectedTests.map((test, index) => {
+              return <TestComponent key={index} test={test} />;
+            })
+          ) : (
+            <Text>No Tests added</Text>
+          )}
+        </>
+
         {/* create tests popup */}
         <ModalFooter>
           <Flex justifyContent="center">
@@ -76,5 +90,60 @@ export default function ExamForm() {
         />
       </Modal>
     </>
+  );
+}
+
+interface TestItemInterface {
+  test: ExamTestSchema;
+  onDelete?: () => void;
+  onEdit?: () => void;
+}
+
+function TestComponent({ test, onEdit, onDelete }: TestItemInterface) {
+  const subjectsQuery = trpc.school.subject.fetchSubjects.useQuery({});
+  const selectedSubjects = subjectsQuery.data
+    ?.filter((obj) => test.subjectIds.includes(obj.id))
+    .map((obj) => obj.name);
+
+  return (
+    <Box w="100%" borderBottomWidth="1px" borderColor="gray" p={8}>
+      <Flex justifyContent="space-between">
+        <Flex alignItems="" flex="1" flexDir="column">
+          <Text fontSize="lg" fontWeight="bold" mr="2">
+            {selectedSubjects?.[0]}
+            {selectedSubjects && selectedSubjects.length > 1
+              ? ` & ${selectedSubjects.length - 1} more`
+              : ""}
+          </Text>
+
+          <Text>
+            {format(new Date(test.date_of_exam), "MMM dd, yyyy hh:mm aaa")}
+          </Text>
+        </Flex>
+        <Flex alignItems="center" flexDir="column">
+          <Text mr="2">{test.duration_minutes} minutes</Text>
+          <Text>{test.total_marks} marks</Text>
+        </Flex>
+      </Flex>
+      <Flex justifyContent="space-between" p="2" mt="2">
+        <Button
+          size="sm"
+          colorScheme="blue"
+          leftIcon={<EditIcon />}
+          onClick={onEdit}
+        >
+          Edit
+        </Button>
+        <Button
+          size="sm"
+          colorScheme="red"
+          borderColor="red"
+          leftIcon={<DeleteIcon />}
+          onClick={onDelete}
+        >
+          Delete
+        </Button>
+      </Flex>
+    </Box>
   );
 }
