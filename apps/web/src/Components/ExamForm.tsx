@@ -31,6 +31,10 @@ export default function ExamForm() {
 
   const [selectedTests, setTest] = useState<ExamTestSchema[]>([]);
 
+  const [currentTest, setCurrentTest] = useState<ExamTestSchema | null>(null);
+
+  const [currentTestIndex, setCurrentTestIndex] = useState<number | null>(null);
+
   console.log(selectedTests);
 
   return (
@@ -58,13 +62,26 @@ export default function ExamForm() {
           </Button>
         </Flex>
         {/* list of tests */}
-        <Heading size="sm" mx={8}>
+        <Heading size="md" mx={8} pb={4}>
           Tests
         </Heading>
         <>
           {selectedTests ? (
             selectedTests.map((test, index) => {
-              return <TestComponent key={index} test={test} />;
+              return (
+                <TestComponent
+                  key={index}
+                  test={test}
+                  onEdit={() => {
+                    setCurrentTest(test);
+                    setCurrentTestIndex(index);
+                    onOpen();
+                  }}
+                  onDelete={() => {
+                    setTest((tests) => tests.filter((e, i) => i !== index));
+                  }}
+                />
+              );
             })
           ) : (
             <Text>No Tests added</Text>
@@ -83,8 +100,19 @@ export default function ExamForm() {
 
       <Modal isOpen={isOpen} onClose={onClose}>
         <TestForm
+          testData={currentTest}
           onSubmit={(test) => {
-            setTest((tests) => tests.concat(test));
+            if (currentTest && typeof currentTestIndex === "number") {
+              setTest((tests) => {
+                tests.splice(currentTestIndex, 1, test);
+                return tests;
+              });
+            } else {
+              setTest((tests) => tests.concat(test));
+            }
+
+            setCurrentTest(null);
+            setCurrentTestIndex(null);
             onClose();
           }}
         />
@@ -106,7 +134,7 @@ function TestComponent({ test, onEdit, onDelete }: TestItemInterface) {
     .map((obj) => obj.name);
 
   return (
-    <Box w="100%" borderBottomWidth="1px" borderColor="gray" p={8}>
+    <Box w="100%" borderTopWidth="1px" borderColor="gray" px={8} py={4}>
       <Flex justifyContent="space-between">
         <Flex alignItems="" flex="1" flexDir="column">
           <Text fontSize="lg" fontWeight="bold" mr="2">

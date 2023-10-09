@@ -29,7 +29,7 @@ import {
 } from "@chakra-ui/react";
 import { format, parseISO } from "date-fns";
 import { MdOutlineFileUpload } from "react-icons/md";
-import { CheckIcon, DeleteIcon, EditIcon } from "@chakra-ui/icons";
+import { CheckIcon } from "@chakra-ui/icons";
 
 interface TestModalProps {
   onSubmit?: (test: ExamTestSchema) => void;
@@ -40,7 +40,6 @@ export function TestForm({ onSubmit, testData }: TestModalProps) {
   const { schoolId: selectedSchoolId } = useConfig();
 
   const [multiselectSub, setMultiselectSub] = useState(false);
-
   const [mark, setMark] = useState(testData?.total_marks ?? 25);
   const [duration, setDuration] = useState(testData?.duration_minutes ?? 30);
   const [selectedClass, setSelectedClass] = useState<ClassWithSections>();
@@ -63,6 +62,29 @@ export function TestForm({ onSubmit, testData }: TestModalProps) {
         ),
       );
   }, [selectedClass, testData?.section_id]);
+
+  useEffect(() => {
+    let tempSubjectArray: string[] = [];
+    if (testData && "Subjects" in testData) {
+      tempSubjectArray = testData?.Subjects.map((e) => {
+        return e.Subject.id;
+      });
+    } else {
+      tempSubjectArray = testData?.subjectIds ?? [];
+    }
+    if (tempSubjectArray && tempSubjectArray?.length > 1) {
+      setMultiselectSub(true);
+    }
+    if (subjectsQuery.data)
+      //
+      setSelectedSubjects(
+        subjectsQuery?.data.filter((obj) =>
+          tempSubjectArray?.includes(obj.id),
+        )[0],
+      );
+  }, [subjectsQuery.data]);
+
+  console.log(selectedSubjects, "tet");
 
   const classesAndSectionsData =
     trpc.school.class.fetchClassesAndSections.useQuery(
@@ -149,6 +171,11 @@ export function TestForm({ onSubmit, testData }: TestModalProps) {
               placeholder="Section"
               size="lg"
               onChange={handleSectionSelectChange}
+              value={
+                typeof selectedSection == "string"
+                  ? 0
+                  : selectedSection?.numeric_id
+              }
             >
               {sectionsOptions &&
                 sectionsOptions.map((item, index) => (
@@ -166,7 +193,7 @@ export function TestForm({ onSubmit, testData }: TestModalProps) {
             placeholder="Subject"
             size="lg"
             onChange={handleSubjectSelectChange}
-            // value={selectedSubject?.id ?? undefined}
+            value={selectedSubjects?.id ?? undefined}
           >
             {subjectsQuery.data &&
               subjectsQuery?.data.map((item) => (
@@ -232,13 +259,6 @@ export function TestForm({ onSubmit, testData }: TestModalProps) {
             </SliderTrack>
             <SliderThumb />
           </Slider>
-
-          <Flex justifyContent="center" gap={2}>
-            <MdOutlineFileUpload size={28} />
-            <Text fontSize="lg" fontWeight="semibold">
-              Upload File
-            </Text>
-          </Flex>
         </Stack>
         <ModalFooter>
           <Flex justifyContent="center">
