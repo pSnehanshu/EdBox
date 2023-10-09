@@ -84,8 +84,6 @@ export function TestForm({ onSubmit, testData }: TestModalProps) {
       );
   }, [subjectsQuery.data]);
 
-  console.log(selectedSubjects, "tet");
-
   const classesAndSectionsData =
     trpc.school.class.fetchClassesAndSections.useQuery(
       { schoolId: selectedSchoolId },

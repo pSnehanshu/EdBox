@@ -21,8 +21,13 @@ import { useConfig } from "../utils/atoms";
 import { ExamTestSchema } from "schooltalk-shared/misc";
 import { TestForm } from "./TestForm";
 import { format } from "date-fns";
+import { ExamItem } from "schooltalk-shared/types";
+interface ExamModalProps {
+  onSubmit: (name: string, tests: ExamTestSchema[]) => void;
+  // examData?: Extract<ExamItem, { type: "exam" }>["item"];
+}
 
-export default function ExamForm() {
+export default function ExamForm({ onSubmit }: ExamModalProps) {
   const { schoolId: selectedSchoolId } = useConfig();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -34,8 +39,6 @@ export default function ExamForm() {
   const [currentTest, setCurrentTest] = useState<ExamTestSchema | null>(null);
 
   const [currentTestIndex, setCurrentTestIndex] = useState<number | null>(null);
-
-  console.log(selectedTests);
 
   return (
     <>
@@ -91,7 +94,16 @@ export default function ExamForm() {
         {/* create tests popup */}
         <ModalFooter>
           <Flex justifyContent="center">
-            <Button isLoading={false}>
+            <Button
+              isLoading={false}
+              onClick={() => {
+                if (selectedTests?.length > 0) {
+                  onSubmit(textContent, selectedTests);
+                } else {
+                  console.log("Fail to save exam");
+                }
+              }}
+            >
               <CheckIcon boxSize={"6"} />
             </Button>
           </Flex>
@@ -110,7 +122,6 @@ export default function ExamForm() {
             } else {
               setTest((tests) => tests.concat(test));
             }
-
             setCurrentTest(null);
             setCurrentTestIndex(null);
             onClose();

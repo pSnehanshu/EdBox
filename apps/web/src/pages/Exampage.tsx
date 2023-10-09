@@ -109,7 +109,18 @@ export default function ExamPage() {
         </CardBody>
       </Card>
       <Modal isOpen={isOpen} onClose={onClose}>
-        {createType === "exam" ? <ExamForm /> : <TestForm />}
+        {createType === "exam" ? (
+          <ExamForm
+            onSubmit={(examName, tests) => {
+              createExam.mutate({
+                name: examName,
+                tests: tests,
+              });
+            }}
+          />
+        ) : (
+          <TestForm />
+        )}
       </Modal>
     </Box>
   );
