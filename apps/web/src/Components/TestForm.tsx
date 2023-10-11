@@ -9,11 +9,22 @@ import { useConfig } from "../utils/atoms";
 import { useEffect, useState } from "react";
 import { trpc } from "../utils/trpc";
 import {
+  IndicatorsContainerProps,
+  Select as MultiSelect,
+} from "chakra-react-select";
+import {
   Box,
   Button,
   Flex,
+  FormControl,
+  FormLabel,
   Heading,
   Input,
+  Menu,
+  MenuButton,
+  MenuItemOption,
+  MenuList,
+  MenuOptionGroup,
   ModalCloseButton,
   ModalContent,
   ModalFooter,
@@ -25,6 +36,7 @@ import {
   SliderThumb,
   SliderTrack,
   Stack,
+  Switch,
   Text,
 } from "@chakra-ui/react";
 import { format, parseISO } from "date-fns";
@@ -143,6 +155,8 @@ export function TestForm({ onSubmit, testData }: TestModalProps) {
 
   const sectionsOptions = ["All sections", ...(selectedClass?.Sections ?? [])];
 
+  console.log(subjectsQuery.data, "data");
+
   return (
     <>
       <ModalContent>
@@ -187,19 +201,50 @@ export function TestForm({ onSubmit, testData }: TestModalProps) {
             </Select>
           </Flex>
 
-          <Select
-            placeholder="Subject"
-            size="lg"
-            onChange={handleSubjectSelectChange}
-            value={selectedSubjects?.id ?? undefined}
-          >
-            {subjectsQuery.data &&
-              subjectsQuery?.data.map((item) => (
-                <option value={item.id} key={item.name}>
-                  {item.name}
-                </option>
-              ))}
-          </Select>
+          <FormControl display="flex" alignItems="center">
+            <FormLabel htmlFor="multi-subjects" mb="0">
+              Select Multiple Subjects
+            </FormLabel>
+            <Switch
+              id="multi-subjects"
+              isChecked={multiselectSub}
+              onChange={() => setMultiselectSub((prev) => !prev)}
+            />
+          </FormControl>
+          {multiselectSub ? (
+            <MultiSelect
+              isMulti
+              name="Subject"
+              getOptionLabel={(option) => option.name}
+              getOptionValue={(option) => option.id}
+              options={subjectsQuery.data}
+              placeholder="Subject"
+              closeMenuOnSelect={false}
+              size="lg"
+              chakraStyles={{
+                placeholder: (provided) => ({
+                  ...provided,
+                  color: "white",
+                }),
+              }}
+            />
+          ) : (
+            // make both same and change the value isMulti
+            <Select
+              placeholder="Subject"
+              size="lg"
+              onChange={handleSubjectSelectChange}
+              value={selectedSubjects?.id ?? undefined}
+            >
+              {subjectsQuery.data &&
+                subjectsQuery?.data.map((item) => (
+                  <option value={item.id} key={item.name}>
+                    {item.name}
+                  </option>
+                ))}
+            </Select>
+          )}
+
           <Input
             placeholder="Exam date"
             size="md"
