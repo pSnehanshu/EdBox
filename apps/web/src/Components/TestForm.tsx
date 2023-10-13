@@ -211,26 +211,34 @@ export function TestForm({ onSubmit, testData }: TestModalProps) {
               onChange={() => setMultiselectSub((prev) => !prev)}
             />
           </FormControl>
-          {multiselectSub ? (
-            <MultiSelect
-              isMulti
-              name="Subject"
-              getOptionLabel={(option) => option.name}
-              getOptionValue={(option) => option.id}
-              options={subjectsQuery.data}
-              placeholder="Subject"
-              closeMenuOnSelect={false}
-              size="lg"
-              chakraStyles={{
-                placeholder: (provided) => ({
-                  ...provided,
-                  color: "white",
-                }),
-              }}
-            />
-          ) : (
-            // make both same and change the value isMulti
-            <Select
+
+          <MultiSelect
+            isMulti={multiselectSub}
+            name="Subject"
+            getOptionLabel={(option) => option.name}
+            getOptionValue={(option) => option.id}
+            options={subjectsQuery.data}
+            placeholder="Subject"
+            closeMenuOnSelect={false}
+            size="lg"
+            components={{
+              IndicatorSeparator: () => null,
+            }}
+            chakraStyles={{
+              placeholder: (provided) => ({
+                ...provided,
+                color: "white",
+              }),
+              dropdownIndicator: (provided, state) => ({
+                ...provided,
+                backgroundColor: "transparent",
+                p: 0,
+                w: "40px",
+              }),
+            }}
+          />
+
+          {/* <Select
               placeholder="Subject"
               size="lg"
               onChange={handleSubjectSelectChange}
@@ -242,8 +250,7 @@ export function TestForm({ onSubmit, testData }: TestModalProps) {
                     {item.name}
                   </option>
                 ))}
-            </Select>
-          )}
+            </Select> */}
 
           <Input
             placeholder="Exam date"
@@ -261,6 +268,7 @@ export function TestForm({ onSubmit, testData }: TestModalProps) {
             onChange={(val) => setMark(val)}
             max={180}
             step={5}
+            zIndex="0"
           >
             <SliderMark
               value={mark}
@@ -285,6 +293,7 @@ export function TestForm({ onSubmit, testData }: TestModalProps) {
             onChange={(val) => setDuration(val)}
             max={180}
             step={5}
+            zIndex="0"
           >
             <SliderMark
               value={duration}
