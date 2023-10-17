@@ -62,7 +62,7 @@ export function TestForm({ onSubmit, testData }: TestModalProps) {
     testData?.date_of_exam ? testData.date_of_exam : undefined,
   );
   const [datePickerVisible, setDatePickerVisible] = useState(false);
-  const [selectedSubjects, setSelectedSubjects] = useState<Subject>();
+  const [selectedSubjects, setSelectedSubjects] = useState<Subject[]>([]);
 
   const subjectsQuery = trpc.school.subject.fetchSubjects.useQuery({}, {});
 
@@ -88,11 +88,8 @@ export function TestForm({ onSubmit, testData }: TestModalProps) {
       setMultiselectSub(true);
     }
     if (subjectsQuery.data)
-      //
       setSelectedSubjects(
-        subjectsQuery?.data.filter((obj) =>
-          tempSubjectArray?.includes(obj.id),
-        )[0],
+        subjectsQuery?.data.filter((obj) => tempSubjectArray?.includes(obj.id)),
       );
   }, [subjectsQuery.data]);
 
@@ -141,21 +138,9 @@ export function TestForm({ onSubmit, testData }: TestModalProps) {
 
     setSelectedSection(section);
   };
-
-  const handleSubjectSelectChange = (
-    e: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
-    const subject =
-      subjectsQuery.data &&
-      subjectsQuery.data.find((subject) => {
-        return subject.id === e.target.value;
-      });
-    setSelectedSubjects(subject);
-  };
+  console.log(selectedSubjects, "subjects");
 
   const sectionsOptions = ["All sections", ...(selectedClass?.Sections ?? [])];
-
-  console.log(subjectsQuery.data, "data");
 
   return (
     <>
@@ -219,10 +204,13 @@ export function TestForm({ onSubmit, testData }: TestModalProps) {
             getOptionValue={(option) => option.id}
             options={subjectsQuery.data}
             placeholder="Subject"
-            closeMenuOnSelect={false}
+            closeMenuOnSelect={!multiselectSub}
             size="lg"
-            components={{
-              IndicatorSeparator: () => null,
+            value={selectedSubjects}
+            onChange={(value) => {
+              // type
+              if (multiselectSub) value && setSelectedSubjects(value);
+              else value && setSelectedSubjects([value]);
             }}
             chakraStyles={{
               placeholder: (provided) => ({
@@ -235,6 +223,9 @@ export function TestForm({ onSubmit, testData }: TestModalProps) {
                 p: 0,
                 w: "40px",
               }),
+            }}
+            components={{
+              IndicatorSeparator: () => null,
             }}
           />
 
@@ -324,12 +315,10 @@ export function TestForm({ onSubmit, testData }: TestModalProps) {
                   dueDate &&
                   duration
                 ) {
-                  // let subjectIds = selectedSubjects.map((s) => s.id);
-                  // if (!multiselectSub && subjectIds.length > 1) {
-                  //   subjectIds = [subjectIds[0]];
-                  // }
-                  // currently one subject only
-
+                  let subjectIds = selectedSubjects.map((s) => s.id);
+                  if (!multiselectSub && subjectIds.length > 1) {
+                    subjectIds = [subjectIds[0]];
+                  }
                   onSubmit &&
                     onSubmit({
                       class_id: selectedClass?.numeric_id,
@@ -339,7 +328,7 @@ export function TestForm({ onSubmit, testData }: TestModalProps) {
                           : selectedSection?.numeric_id,
                       date_of_exam: dueDate,
                       duration_minutes: duration,
-                      subjectIds: [selectedSubjects.id],
+                      subjectIds,
                       total_marks: mark,
                     });
                 } else {
