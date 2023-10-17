@@ -208,9 +208,12 @@ export function TestForm({ onSubmit, testData }: TestModalProps) {
             size="lg"
             value={selectedSubjects}
             onChange={(value) => {
-              // type
-              if (multiselectSub) value && setSelectedSubjects(value);
-              else value && setSelectedSubjects([value]);
+              if (Array.isArray(value)) {
+                setSelectedSubjects(value);
+              } else if (value) {
+                // @ts-expect-error We know `value` is a single item, but can't express that in TS
+                setSelectedSubjects([value]);
+              }
             }}
             chakraStyles={{
               placeholder: (provided) => ({
