@@ -138,7 +138,6 @@ export function TestForm({ onSubmit, testData }: TestModalProps) {
 
     setSelectedSection(section);
   };
-  console.log(selectedSubjects, "subjects");
 
   const sectionsOptions = ["All sections", ...(selectedClass?.Sections ?? [])];
 

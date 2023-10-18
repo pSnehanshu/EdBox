@@ -24,10 +24,10 @@ import { format } from "date-fns";
 import { ExamItem } from "schooltalk-shared/types";
 interface ExamModalProps {
   onSubmit: (name: string, tests: ExamTestSchema[]) => void;
-  // examData?: Extract<ExamItem, { type: "exam" }>["item"];
+  isSubmitting: boolean;
 }
 
-export default function ExamForm({ onSubmit }: ExamModalProps) {
+export default function ExamForm({ onSubmit, isSubmitting }: ExamModalProps) {
   const { schoolId: selectedSchoolId } = useConfig();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -95,12 +95,12 @@ export default function ExamForm({ onSubmit }: ExamModalProps) {
         <ModalFooter>
           <Flex justifyContent="center">
             <Button
-              isLoading={false}
+              isLoading={isSubmitting}
               onClick={() => {
                 if (selectedTests?.length > 0) {
                   onSubmit(textContent, selectedTests);
                 } else {
-                  console.log("Fail to save exam");
+                  console.log("Failes to save exam");
                 }
               }}
             >

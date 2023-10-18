@@ -46,7 +46,16 @@ export default function ExamPage() {
 
   const createExam = trpc.school.exam.createExam.useMutation({
     onSuccess(data) {
-      //
+      onClose();
+    },
+    onError(error, variables, context) {
+      console.log(error, variables, context);
+    },
+  });
+
+  const createTest = trpc.school.exam.createTest.useMutation({
+    onSuccess(data) {
+      onClose();
     },
     onError(error, variables, context) {
       console.log(error, variables, context);
@@ -117,9 +126,14 @@ export default function ExamPage() {
                 tests: tests,
               });
             }}
+            isSubmitting={createExam.isLoading}
           />
         ) : (
-          <TestForm />
+          <TestForm
+            onSubmit={(test) => {
+              createTest.mutate(test);
+            }}
+          />
         )}
       </Modal>
     </Box>
@@ -179,6 +193,19 @@ interface testProps {
 }
 
 function SingleTest({ test }: testProps) {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const testQuery = trpc.school.exam.getTestInfo.useQuery({ testId: test.id });
+
+  const updateTest = trpc.school.exam.updateTest.useMutation({
+    onSuccess() {
+      console.log("test updated");
+    },
+    onError(error) {
+      console.log(error);
+    },
+  });
+
   const { Subjects: _subs } = test;
   const Subjects = _.clone(test.Subjects);
 
@@ -193,6 +220,7 @@ function SingleTest({ test }: testProps) {
     () => format(test.date_of_exam, "MMM d, yyyy hh:mm bbb"),
     [test.date_of_exam],
   );
+
   const duration = useMemo(() => {
     if (test.duration_minutes < 60) {
       return `${test.duration_minutes} min`;
@@ -202,6 +230,7 @@ function SingleTest({ test }: testProps) {
       return `${wholeHours}h ${mins > 0 ? `${mins}m` : ""}`;
     }
   }, [test.duration_minutes]);
+
   return (
     <>
       <Flex justifyContent="space-between">
@@ -210,7 +239,7 @@ function SingleTest({ test }: testProps) {
           {remainingSubjectCount > 0 ? ` & ${remainingSubjectCount} more` : ""}
         </Heading>
         <Flex>
-          <MdOutlineAttachFile size={24} />
+          <Text>test</Text>
           <Heading size="md" textTransform="uppercase"></Heading>
         </Flex>
       </Flex>
@@ -221,8 +250,27 @@ function SingleTest({ test }: testProps) {
           </Text>
         </Box>
 
-        <Button mt={8}>edit</Button>
+        <Button
+          mt={8}
+          onClick={() => {
+            onOpen();
+          }}
+        >
+          edit
+        </Button>
       </Flex>
+
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <TestForm
+          testData={testQuery.data}
+          onSubmit={(e) => {
+            updateTest.mutate({
+              id: test.id,
+              data: e,
+            });
+          }}
+        />
+      </Modal>
     </>
   );
 }
