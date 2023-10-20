@@ -21,18 +21,23 @@ import { useConfig } from "../utils/atoms";
 import { ExamTestSchema } from "schooltalk-shared/misc";
 import { TestForm } from "./TestForm";
 import { format } from "date-fns";
-import { ExamItem } from "schooltalk-shared/types";
+import { ExamItem, ExamTest } from "schooltalk-shared/types";
 interface ExamModalProps {
+  examData?: Extract<ExamItem, { type: "exam" }>["item"];
   onSubmit: (name: string, tests: ExamTestSchema[]) => void;
   isSubmitting: boolean;
 }
 
-export default function ExamForm({ onSubmit, isSubmitting }: ExamModalProps) {
+export default function ExamForm({
+  examData,
+  onSubmit,
+  isSubmitting,
+}: ExamModalProps) {
   const { schoolId: selectedSchoolId } = useConfig();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const [textContent, setTextContent] = useState("");
+  const [textContent, setTextContent] = useState(examData?.name ?? "");
 
   const [selectedTests, setTest] = useState<ExamTestSchema[]>([]);
 
@@ -40,11 +45,13 @@ export default function ExamForm({ onSubmit, isSubmitting }: ExamModalProps) {
 
   const [currentTestIndex, setCurrentTestIndex] = useState<number | null>(null);
 
+  console.log(examData?.Tests, "examdata");
+
   return (
     <>
       <ModalContent>
         <ModalHeader>
-          <Heading size="lg">Create new Exam</Heading>
+          <Heading size="lg">{examData ? "Update" : "Create New"} Exam</Heading>
         </ModalHeader>
         <ModalCloseButton />
         <Stack spacing={3} mx={8}>
@@ -64,7 +71,6 @@ export default function ExamForm({ onSubmit, isSubmitting }: ExamModalProps) {
             Add New Tests
           </Button>
         </Flex>
-        {/* list of tests */}
         <Heading size="md" mx={8} pb={4}>
           Tests
         </Heading>
@@ -90,8 +96,6 @@ export default function ExamForm({ onSubmit, isSubmitting }: ExamModalProps) {
             <Text>No Tests added</Text>
           )}
         </>
-
-        {/* create tests popup */}
         <ModalFooter>
           <Flex justifyContent="center">
             <Button

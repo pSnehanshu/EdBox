@@ -145,7 +145,7 @@ export function TestForm({ onSubmit, testData }: TestModalProps) {
     <>
       <ModalContent>
         <ModalHeader>
-          <Heading size="lg">Create new Test</Heading>
+          <Heading size="lg">{testData ? "Update" : "Create New"} Test</Heading>
         </ModalHeader>
         <ModalCloseButton />
         <Stack spacing={3} mx={8}>

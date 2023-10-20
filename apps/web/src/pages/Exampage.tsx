@@ -47,6 +47,8 @@ export default function ExamPage() {
   const createExam = trpc.school.exam.createExam.useMutation({
     onSuccess(data) {
       onClose();
+      if (isTeacher) teacherQuery.refetch();
+      if (isStudent) studentQuery.refetch();
     },
     onError(error, variables, context) {
       console.log(error, variables, context);
@@ -145,6 +147,8 @@ interface examProps {
 }
 
 function SingleExam({ exam }: examProps) {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   const Tests = exam.Tests;
 
   const startDate = useMemo(() => {
@@ -171,7 +175,6 @@ function SingleExam({ exam }: examProps) {
           {exam.name} examination
         </Heading>
         <Flex>
-          <MdOutlineAttachFile size={24} />
           <Heading size="md" textTransform="uppercase"></Heading>
         </Flex>
       </Flex>
@@ -181,9 +184,19 @@ function SingleExam({ exam }: examProps) {
             {startDate} - {endDate}
           </Text>
         </Box>
-
-        <Button mt={8}>edit</Button>
+        <Button
+          onClick={() => {
+            onOpen();
+          }}
+          mt={8}
+        >
+          Edit Exam
+        </Button>
       </Flex>
+
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ExamForm examData={exam} onSubmit={() => {}} isSubmitting={false} />
+      </Modal>
     </>
   );
 }
@@ -239,7 +252,6 @@ function SingleTest({ test }: testProps) {
           {remainingSubjectCount > 0 ? ` & ${remainingSubjectCount} more` : ""}
         </Heading>
         <Flex>
-          <Text>test</Text>
           <Heading size="md" textTransform="uppercase"></Heading>
         </Flex>
       </Flex>
@@ -256,7 +268,7 @@ function SingleTest({ test }: testProps) {
             onOpen();
           }}
         >
-          edit
+          Edit Test
         </Button>
       </Flex>
 
