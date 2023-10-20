@@ -15021,7 +15021,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:*, prop-types@npm:15.8.1, prop-types@npm:^15.6.0, prop-types@npm:^15.6.2, prop-types@npm:^15.8.1":
+"prop-types@npm:*, prop-types@npm:15.8.1, prop-types@npm:^15, prop-types@npm:^15.6.0, prop-types@npm:^15.6.2, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -15574,6 +15574,17 @@ __metadata:
   bin:
     react-native: cli.js
   checksum: fe887c1b8bded23f9efea9dc10a8a8b2f32147e06418fc9a78294944874797abb0185ebcb0fdc5ce88046280bca72264ae8d119f4ca681a3e0bc502d0f75bfbe
+  languageName: node
+  linkType: hard
+
+"react-paginate@npm:^8.2.0":
+  version: 8.2.0
+  resolution: "react-paginate@npm:8.2.0"
+  dependencies:
+    prop-types: ^15
+  peerDependencies:
+    react: ^16 || ^17 || ^18
+  checksum: a0969b4ef27be466ef3e052e2c7c61fca60af24e0d10c76770ebd9953ad6131206a276dfc335e61cf35aa494ff3aacc2610682e3192d7f2ee9541928edb46721
   languageName: node
   linkType: hard
 
@@ -16481,6 +16492,7 @@ __metadata:
     prop-types: ^15.8.1
     react-dropzone: ^14.2.3
     react-icons: ^4.10.1
+    react-paginate: ^8.2.0
     react-select: ^5.7.7
     superjson: ^1.13.1
   languageName: unknown

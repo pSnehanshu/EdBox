@@ -40,7 +40,7 @@ export default function ExamPage() {
     { enabled: isStudent },
   );
   const teacherQuery = trpc.school.exam.fetchExamsAndTestsForTeacher.useQuery(
-    {},
+    { limit: 10, page: 1 },
     { enabled: isTeacher },
   );
 
@@ -79,6 +79,8 @@ export default function ExamPage() {
       ? teacherQuery
       : null;
 
+  console.log(teacherQuery.data, "exam");
+
   return (
     <Box>
       <Card>
@@ -86,14 +88,14 @@ export default function ExamPage() {
           <Flex dir="row" justifyContent={"space-between"}>
             <Heading size="xl">Exams</Heading>
             {isTeacher && (
-              <Flex gap={4}>
+              <Flex gap={4} flexWrap="wrap" paddingX={4}>
                 <Button
                   onClick={() => {
                     setCreateType("test");
                     onOpen();
                   }}
                 >
-                  Create new Test
+                  Create New Test
                 </Button>
                 <Button
                   onClick={() => {
@@ -101,7 +103,7 @@ export default function ExamPage() {
                     onOpen();
                   }}
                 >
-                  Create new Exam
+                  Create New Exam
                 </Button>
               </Flex>
             )}
