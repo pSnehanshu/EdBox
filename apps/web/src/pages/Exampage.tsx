@@ -109,7 +109,7 @@ export default function ExamPage() {
         <CardBody>
           <Stack divider={<StackDivider borderColor="gray.200" />} spacing={4}>
             {query?.data &&
-              query?.data.map((item, index) => {
+              query?.data.items.map((item, index) => {
                 if (item.type === "exam")
                   return <SingleExam key={index} exam={item.item} />;
                 else return <SingleTest key={index} test={item.item} />;

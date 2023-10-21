@@ -154,11 +154,11 @@ const ExamListScreen: React.FC<
 
   return (
     <SafeAreaView style={styles.container}>
-      {query.data.length > 0 ? (
+      {query.data.items.length > 0 ? (
         <List
           onRefresh={() => query.refetch()}
           refreshing={query.isFetching}
-          data={query.data}
+          data={query.data.items}
           estimatedItemSize={77}
           keyExtractor={({ item, type }) => `${type}-${item.id}`}
           ItemSeparatorComponent={Divider}

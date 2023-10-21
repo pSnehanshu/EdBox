@@ -63,7 +63,7 @@ export type Student = ArrayElement<
 >;
 
 export type ExamItem = ArrayElement<
-  RouterOutput["school"]["exam"]["fetchExamsAndTestsForStudent"]
+  RouterOutput["school"]["exam"]["fetchExamsAndTestsForStudent"]["items"]
 >;
 
 export type ExamTest = RouterOutput["school"]["exam"]["getTestInfo"];
