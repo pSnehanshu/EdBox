@@ -18,7 +18,7 @@ import { useConfig } from "../utils/atoms";
 import { trpc } from "../utils/trpc";
 import { ExamItem } from "schooltalk-shared/types";
 import { useMemo, useState } from "react";
-import { format } from "date-fns";
+import { format, startOfDay } from "date-fns";
 import { MdOutlineAttachFile } from "react-icons/md";
 import _ from "lodash";
 import ExamForm from "../Components/ExamForm";
@@ -36,11 +36,11 @@ export default function ExamPage() {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const studentQuery = trpc.school.exam.fetchExamsAndTestsForStudent.useQuery(
-    {},
+    { after_date: startOfDay(new Date()) },
     { enabled: isStudent },
   );
   const teacherQuery = trpc.school.exam.fetchExamsAndTestsForTeacher.useQuery(
-    {},
+    { after_date: startOfDay(new Date()) },
     { enabled: isTeacher },
   );
 
