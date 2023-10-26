@@ -1,52 +1,57 @@
-import { useEffect, useState } from "react";
-import { CheckIcon } from "@chakra-ui/icons";
+import { useState } from "react";
+import { CheckIcon, DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import {
   Flex,
   Heading,
-  Input,
   ModalCloseButton,
   ModalContent,
   ModalFooter,
   ModalHeader,
-  Select,
   Stack,
   Textarea,
   Text,
   Button,
-  Slider,
-  SliderTrack,
-  SliderFilledTrack,
-  SliderThumb,
-  SliderMark,
   useDisclosure,
   Modal,
+  Box,
 } from "@chakra-ui/react";
-import { MdOutlineFileUpload } from "react-icons/md";
+
 import { trpc } from "../utils/trpc";
 import { useConfig } from "../utils/atoms";
-import {
-  Section,
-  Homework,
-  RouterInput,
-  ExamTest,
-  ClassWithSections,
-  Subject,
-} from "schooltalk-shared/types";
-import { format } from "date-fns";
 import { ExamTestSchema } from "schooltalk-shared/misc";
+import { TestForm } from "./TestForm";
+import { format } from "date-fns";
+import { ExamItem, ExamTest } from "schooltalk-shared/types";
+interface ExamModalProps {
+  examData?: Extract<ExamItem, { type: "exam" }>["item"];
+  onSubmit: (name: string, tests: ExamTestSchema[]) => void;
+  isSubmitting: boolean;
+}
 
-export default function ExamForm() {
+export default function ExamForm({
+  examData,
+  onSubmit,
+  isSubmitting,
+}: ExamModalProps) {
   const { schoolId: selectedSchoolId } = useConfig();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const [textContent, setTextContent] = useState("");
+  const [textContent, setTextContent] = useState(examData?.name ?? "");
+
+  const [selectedTests, setTest] = useState<ExamTestSchema[]>([]);
+
+  const [currentTest, setCurrentTest] = useState<ExamTestSchema | null>(null);
+
+  const [currentTestIndex, setCurrentTestIndex] = useState<number | null>(null);
+
+  console.log(examData?.Tests, "examdata");
 
   return (
     <>
       <ModalContent>
         <ModalHeader>
-          <Heading size="lg">Create new Exam</Heading>
+          <Heading size="lg">{examData ? "Update" : "Create New"} Exam</Heading>
         </ModalHeader>
         <ModalCloseButton />
         <Stack spacing={3} mx={8}>
@@ -57,7 +62,7 @@ export default function ExamForm() {
             value={textContent ?? null}
           />
         </Stack>
-        <Flex justifyContent="center" my={8}>
+        <Flex justifyContent="end" m={8}>
           <Button
             onClick={() => {
               onOpen();
@@ -66,14 +71,43 @@ export default function ExamForm() {
             Add New Tests
           </Button>
         </Flex>
-        {/* list of tests */}
-        <Heading size="sm" mx={8}>
+        <Heading size="md" mx={8} pb={4}>
           Tests
         </Heading>
-        {/* create tests popup */}
+        <>
+          {selectedTests ? (
+            selectedTests.map((test, index) => {
+              return (
+                <TestComponent
+                  key={index}
+                  test={test}
+                  onEdit={() => {
+                    setCurrentTest(test);
+                    setCurrentTestIndex(index);
+                    onOpen();
+                  }}
+                  onDelete={() => {
+                    setTest((tests) => tests.filter((e, i) => i !== index));
+                  }}
+                />
+              );
+            })
+          ) : (
+            <Text>No Tests added</Text>
+          )}
+        </>
         <ModalFooter>
           <Flex justifyContent="center">
-            <Button isLoading={false}>
+            <Button
+              isLoading={isSubmitting}
+              onClick={() => {
+                if (selectedTests?.length > 0) {
+                  onSubmit(textContent, selectedTests);
+                } else {
+                  console.log("Failes to save exam");
+                }
+              }}
+            >
               <CheckIcon boxSize={"6"} />
             </Button>
           </Flex>
@@ -81,197 +115,78 @@ export default function ExamForm() {
       </ModalContent>
 
       <Modal isOpen={isOpen} onClose={onClose}>
-        <TestForm />
+        <TestForm
+          testData={currentTest}
+          onSubmit={(test) => {
+            if (currentTest && typeof currentTestIndex === "number") {
+              setTest((tests) => {
+                tests.splice(currentTestIndex, 1, test);
+                return tests;
+              });
+            } else {
+              setTest((tests) => tests.concat(test));
+            }
+            setCurrentTest(null);
+            setCurrentTestIndex(null);
+            onClose();
+          }}
+        />
       </Modal>
     </>
   );
 }
 
-interface TestModalProps {
-  testData?: ExamTest | ExamTestSchema | null;
+interface TestItemInterface {
+  test: ExamTestSchema;
+  onDelete?: () => void;
+  onEdit?: () => void;
 }
 
-export function TestForm({ testData }: TestModalProps) {
-  const { schoolId: selectedSchoolId } = useConfig();
-
-  const [multiselectSub, setMultiselectSub] = useState(false);
-
-  const [mark, setMark] = useState(testData?.total_marks ?? 25);
-  const [duration, setDuration] = useState(testData?.duration_minutes ?? 30);
-  const [selectedClass, setSelectedClass] = useState<ClassWithSections>();
-  const [selectedSection, setSelectedSection] = useState<
-    Section | string | undefined
-  >("All sections");
-  const [dueDate, setDueDate] = useState(
-    testData?.date_of_exam ? testData.date_of_exam : undefined,
-  );
-  const [datePickerVisible, setDatePickerVisible] = useState(false);
-  const [selectedSubjects, setSelectedSubjects] = useState<Subject[]>([]);
-
-  const subjectsQuery = trpc.school.subject.fetchSubjects.useQuery({}, {});
-
-  useEffect(() => {
-    if (testData?.section_id)
-      setSelectedSection(
-        selectedClass?.Sections.find(
-          (d) => d.numeric_id === testData?.section_id,
-        ),
-      );
-  }, [selectedClass, testData?.section_id]);
-
-  const classesAndSectionsData =
-    trpc.school.class.fetchClassesAndSections.useQuery(
-      { schoolId: selectedSchoolId },
-      {
-        cacheTime: 0,
-        onSuccess(data) {
-          setSelectedClass((c) => {
-            if (c) return c;
-            return data.find((d) => d.numeric_id === testData?.class_id);
-          });
-        },
-      },
-    );
-
-  const handleClassSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    if (classesAndSectionsData) {
-      const selectedNumericId = Number(e.target.value);
-
-      const filteredData = classesAndSectionsData?.data?.find((ele) => {
-        return ele.numeric_id === selectedNumericId;
-      });
-
-      setSelectedClass(filteredData);
-      setSelectedSection(undefined);
-    }
-  };
-
-  const handleSectionSelectChange = (
-    e: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
-    const section =
-      sectionsOptions &&
-      sectionsOptions.find((section) => {
-        if (typeof section === "string") return section;
-
-        return section.numeric_id === Number(e.target.value);
-      });
-    setSelectedSection(section);
-  };
-
-  const sectionsOptions = ["All sections", ...(selectedClass?.Sections ?? [])];
+function TestComponent({ test, onEdit, onDelete }: TestItemInterface) {
+  const subjectsQuery = trpc.school.subject.fetchSubjects.useQuery({});
+  const selectedSubjects = subjectsQuery.data
+    ?.filter((obj) => test.subjectIds.includes(obj.id))
+    .map((obj) => obj.name);
 
   return (
-    <>
-      <ModalContent>
-        <ModalHeader>
-          <Heading size="lg">Create new Test</Heading>
-        </ModalHeader>
-        <ModalCloseButton />
-        <Stack spacing={3} mx={8}>
-          <Flex gap={8}>
-            <Select
-              placeholder="Class"
-              size="lg"
-              onChange={handleClassSelectChange}
-              value={selectedClass?.numeric_id ?? undefined}
-            >
-              {classesAndSectionsData &&
-                classesAndSectionsData.data?.map((item) => (
-                  <option value={item.numeric_id} key={item.name}>
-                    Class {item.name ?? item.numeric_id}
-                  </option>
-                ))}
-            </Select>
-            <Select
-              placeholder="Section"
-              size="lg"
-              onChange={handleSectionSelectChange}
-            >
-              {sectionsOptions &&
-                sectionsOptions.map((item, index) => (
-                  <option value={index} key={index}>
-                    {typeof item == "string" ? item : "Section " + item.name}
-                  </option>
-                ))}
-            </Select>
-          </Flex>
+    <Box w="100%" borderTopWidth="1px" borderColor="gray" px={8} py={4}>
+      <Flex justifyContent="space-between">
+        <Flex alignItems="" flex="1" flexDir="column">
+          <Text fontSize="lg" fontWeight="bold" mr="2">
+            {selectedSubjects?.[0]}
+            {selectedSubjects && selectedSubjects.length > 1
+              ? ` & ${selectedSubjects.length - 1} more`
+              : ""}
+          </Text>
 
-          <Select placeholder="Subject" size="lg">
-            {subjectsQuery.data &&
-              subjectsQuery?.data.map((item) => (
-                <option value={item.id} key={item.name}>
-                  {item.name}
-                </option>
-              ))}
-          </Select>
-          <Input placeholder="Exam date" size="md" type="datetime-local" />
-
-          {/* total mark + duraiton */}
-          <Text>Marks</Text>
-          <Slider
-            aria-label="slider-ex-1"
-            defaultValue={mark}
-            onChange={(val) => setMark(val)}
-            max={180}
-            step={5}
-          >
-            <SliderMark
-              value={mark}
-              textAlign="center"
-              bg="blue.500"
-              color="white"
-              mt="-10"
-              ml="-4"
-              w="8"
-            >
-              {mark}
-            </SliderMark>
-            <SliderTrack>
-              <SliderFilledTrack />
-            </SliderTrack>
-            <SliderThumb />
-          </Slider>
-          <Text>Duration</Text>
-          <Slider
-            aria-label="slider-ex-6"
-            defaultValue={duration}
-            onChange={(val) => setDuration(val)}
-            max={180}
-            step={5}
-          >
-            <SliderMark
-              value={duration}
-              textAlign="center"
-              bg="blue.500"
-              color="white"
-              mt="-10"
-              ml="-4"
-              w="8"
-            >
-              {duration}
-            </SliderMark>
-            <SliderTrack>
-              <SliderFilledTrack />
-            </SliderTrack>
-            <SliderThumb />
-          </Slider>
-
-          <Flex justifyContent="center" gap={2}>
-            <MdOutlineFileUpload size={28} />
-            <Text fontSize="lg" fontWeight="semibold">
-              Upload File
-            </Text>
-          </Flex>
-        </Stack>
-        <ModalFooter>
-          <Flex justifyContent="center">
-            <Button>
-              <CheckIcon boxSize={"6"} />
-            </Button>
-          </Flex>
-        </ModalFooter>
-      </ModalContent>
-    </>
+          <Text>
+            {format(new Date(test.date_of_exam), "MMM dd, yyyy hh:mm aaa")}
+          </Text>
+        </Flex>
+        <Flex alignItems="center" flexDir="column">
+          <Text mr="2">{test.duration_minutes} minutes</Text>
+          <Text>{test.total_marks} marks</Text>
+        </Flex>
+      </Flex>
+      <Flex justifyContent="space-between" p="2" mt="2">
+        <Button
+          size="sm"
+          colorScheme="blue"
+          leftIcon={<EditIcon />}
+          onClick={onEdit}
+        >
+          Edit
+        </Button>
+        <Button
+          size="sm"
+          colorScheme="red"
+          borderColor="red"
+          leftIcon={<DeleteIcon />}
+          onClick={onDelete}
+        >
+          Delete
+        </Button>
+      </Flex>
+    </Box>
   );
 }

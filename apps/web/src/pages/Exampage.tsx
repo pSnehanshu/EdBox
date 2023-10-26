@@ -17,11 +17,13 @@ import { StaticRole } from "schooltalk-shared/misc";
 import { useConfig } from "../utils/atoms";
 import { trpc } from "../utils/trpc";
 import { ExamItem } from "schooltalk-shared/types";
-import { useMemo, useState } from "react";
-import { format } from "date-fns";
+import { useEffect, useMemo, useState } from "react";
+import { format, startOfDay } from "date-fns";
 import { MdOutlineAttachFile } from "react-icons/md";
 import _ from "lodash";
-import ExamForm, { TestForm } from "../Components/ExamForm";
+import ExamForm from "../Components/ExamForm";
+import { TestForm } from "../Components/TestForm";
+import { Paginate } from "react-paginate-chakra-ui";
 
 const pageLimit = 10;
 
@@ -32,20 +34,34 @@ export default function ExamPage() {
 
   const [createType, setCreateType] = useState<"test" | "exam" | null>(null);
 
+  const [page, setPage] = useState(1);
+  const [totalNoOfExams, setTotalNoOfExams] = useState<number | undefined>();
+
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const studentQuery = trpc.school.exam.fetchExamsAndTestsForStudent.useQuery(
-    {},
+    { after_date: startOfDay(new Date()) },
     { enabled: isStudent },
   );
   const teacherQuery = trpc.school.exam.fetchExamsAndTestsForTeacher.useQuery(
-    {},
+    { limit: 5, page: page },
     { enabled: isTeacher },
   );
 
   const createExam = trpc.school.exam.createExam.useMutation({
     onSuccess(data) {
-      //
+      onClose();
+      if (isTeacher) teacherQuery.refetch();
+      if (isStudent) studentQuery.refetch();
+    },
+    onError(error, variables, context) {
+      console.log(error, variables, context);
+    },
+  });
+
+  const createTest = trpc.school.exam.createTest.useMutation({
+    onSuccess(data) {
+      onClose();
     },
     onError(error, variables, context) {
       console.log(error, variables, context);
@@ -67,6 +83,12 @@ export default function ExamPage() {
       ? teacherQuery
       : null;
 
+  console.log(teacherQuery.data, "exam");
+
+  useEffect(() => {
+    if (teacherQuery.data?.total) setTotalNoOfExams(teacherQuery.data?.total);
+  }, [teacherQuery.data]);
+
   return (
     <Box>
       <Card>
@@ -74,14 +96,14 @@ export default function ExamPage() {
           <Flex dir="row" justifyContent={"space-between"}>
             <Heading size="xl">Exams</Heading>
             {isTeacher && (
-              <Flex gap={4}>
+              <Flex gap={4} flexWrap="wrap" paddingX={4}>
                 <Button
                   onClick={() => {
                     setCreateType("test");
                     onOpen();
                   }}
                 >
-                  Create new Test
+                  Create New Test
                 </Button>
                 <Button
                   onClick={() => {
@@ -89,7 +111,7 @@ export default function ExamPage() {
                     onOpen();
                   }}
                 >
-                  Create new Exam
+                  Create New Exam
                 </Button>
               </Flex>
             )}
@@ -99,16 +121,45 @@ export default function ExamPage() {
         <CardBody>
           <Stack divider={<StackDivider borderColor="gray.200" />} spacing={4}>
             {query?.data &&
-              query?.data.map((item, index) => {
+              query?.data.items.map((item, index) => {
                 if (item.type === "exam")
                   return <SingleExam key={index} exam={item.item} />;
                 else return <SingleTest key={index} test={item.item} />;
               })}
           </Stack>
         </CardBody>
+        {totalNoOfExams && totalNoOfExams > 0 && (
+          <Paginate
+            page={page - 1}
+            margin={1}
+            shadow="sm"
+            fontWeight="bold"
+            variant="outline"
+            selectedVariant="solid"
+            count={teacherQuery.data?.total}
+            pageSize={5}
+            onPageChange={(p: number) => setPage(p + 1)}
+          />
+        )}
       </Card>
       <Modal isOpen={isOpen} onClose={onClose}>
-        {createType === "exam" ? <ExamForm /> : <TestForm />}
+        {createType === "exam" ? (
+          <ExamForm
+            onSubmit={(examName, tests) => {
+              createExam.mutate({
+                name: examName,
+                tests: tests,
+              });
+            }}
+            isSubmitting={createExam.isLoading}
+          />
+        ) : (
+          <TestForm
+            onSubmit={(test) => {
+              createTest.mutate(test);
+            }}
+          />
+        )}
       </Modal>
     </Box>
   );
@@ -119,6 +170,8 @@ interface examProps {
 }
 
 function SingleExam({ exam }: examProps) {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   const Tests = exam.Tests;
 
   const startDate = useMemo(() => {
@@ -145,7 +198,6 @@ function SingleExam({ exam }: examProps) {
           {exam.name} examination
         </Heading>
         <Flex>
-          <MdOutlineAttachFile size={24} />
           <Heading size="md" textTransform="uppercase"></Heading>
         </Flex>
       </Flex>
@@ -155,9 +207,19 @@ function SingleExam({ exam }: examProps) {
             {startDate} - {endDate}
           </Text>
         </Box>
-
-        <Button mt={8}>edit</Button>
+        <Button
+          onClick={() => {
+            onOpen();
+          }}
+          mt={8}
+        >
+          Edit Exam
+        </Button>
       </Flex>
+
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ExamForm examData={exam} onSubmit={() => {}} isSubmitting={false} />
+      </Modal>
     </>
   );
 }
@@ -167,6 +229,19 @@ interface testProps {
 }
 
 function SingleTest({ test }: testProps) {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const testQuery = trpc.school.exam.getTestInfo.useQuery({ testId: test.id });
+
+  const updateTest = trpc.school.exam.updateTest.useMutation({
+    onSuccess() {
+      console.log("test updated");
+    },
+    onError(error) {
+      console.log(error);
+    },
+  });
+
   const { Subjects: _subs } = test;
   const Subjects = _.clone(test.Subjects);
 
@@ -181,6 +256,7 @@ function SingleTest({ test }: testProps) {
     () => format(test.date_of_exam, "MMM d, yyyy hh:mm bbb"),
     [test.date_of_exam],
   );
+
   const duration = useMemo(() => {
     if (test.duration_minutes < 60) {
       return `${test.duration_minutes} min`;
@@ -190,6 +266,7 @@ function SingleTest({ test }: testProps) {
       return `${wholeHours}h ${mins > 0 ? `${mins}m` : ""}`;
     }
   }, [test.duration_minutes]);
+
   return (
     <>
       <Flex justifyContent="space-between">
@@ -198,7 +275,6 @@ function SingleTest({ test }: testProps) {
           {remainingSubjectCount > 0 ? ` & ${remainingSubjectCount} more` : ""}
         </Heading>
         <Flex>
-          <MdOutlineAttachFile size={24} />
           <Heading size="md" textTransform="uppercase"></Heading>
         </Flex>
       </Flex>
@@ -209,8 +285,27 @@ function SingleTest({ test }: testProps) {
           </Text>
         </Box>
 
-        <Button mt={8}>edit</Button>
+        <Button
+          mt={8}
+          onClick={() => {
+            onOpen();
+          }}
+        >
+          Edit Test
+        </Button>
       </Flex>
+
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <TestForm
+          testData={testQuery.data}
+          onSubmit={(e) => {
+            updateTest.mutate({
+              id: test.id,
+              data: e,
+            });
+          }}
+        />
+      </Modal>
     </>
   );
 }
