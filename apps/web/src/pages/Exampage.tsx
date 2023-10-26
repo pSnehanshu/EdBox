@@ -17,12 +17,13 @@ import { StaticRole } from "schooltalk-shared/misc";
 import { useConfig } from "../utils/atoms";
 import { trpc } from "../utils/trpc";
 import { ExamItem } from "schooltalk-shared/types";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { format, startOfDay } from "date-fns";
 import { MdOutlineAttachFile } from "react-icons/md";
 import _ from "lodash";
 import ExamForm from "../Components/ExamForm";
 import { TestForm } from "../Components/TestForm";
+import { Paginate } from "react-paginate-chakra-ui";
 
 const pageLimit = 10;
 
@@ -33,6 +34,9 @@ export default function ExamPage() {
 
   const [createType, setCreateType] = useState<"test" | "exam" | null>(null);
 
+  const [page, setPage] = useState(1);
+  const [totalNoOfExams, setTotalNoOfExams] = useState<number | undefined>();
+
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const studentQuery = trpc.school.exam.fetchExamsAndTestsForStudent.useQuery(
@@ -40,7 +44,7 @@ export default function ExamPage() {
     { enabled: isStudent },
   );
   const teacherQuery = trpc.school.exam.fetchExamsAndTestsForTeacher.useQuery(
-    { limit: 10, page: 1 },
+    { limit: 5, page: page },
     { enabled: isTeacher },
   );
 
@@ -81,6 +85,10 @@ export default function ExamPage() {
 
   console.log(teacherQuery.data, "exam");
 
+  useEffect(() => {
+    if (teacherQuery.data?.total) setTotalNoOfExams(teacherQuery.data?.total);
+  }, [teacherQuery.data]);
+
   return (
     <Box>
       <Card>
@@ -120,6 +128,19 @@ export default function ExamPage() {
               })}
           </Stack>
         </CardBody>
+        {totalNoOfExams && totalNoOfExams > 0 && (
+          <Paginate
+            page={page - 1}
+            margin={1}
+            shadow="sm"
+            fontWeight="bold"
+            variant="outline"
+            selectedVariant="solid"
+            count={teacherQuery.data?.total}
+            pageSize={5}
+            onPageChange={(p: number) => setPage(p + 1)}
+          />
+        )}
       </Card>
       <Modal isOpen={isOpen} onClose={onClose}>
         {createType === "exam" ? (

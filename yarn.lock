@@ -15021,7 +15021,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:*, prop-types@npm:15.8.1, prop-types@npm:^15, prop-types@npm:^15.6.0, prop-types@npm:^15.6.2, prop-types@npm:^15.8.1":
+"prop-types@npm:*, prop-types@npm:15.8.1, prop-types@npm:^15.6.0, prop-types@npm:^15.6.2, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -15243,6 +15243,19 @@ __metadata:
   peerDependencies:
     react: ^18.2.0
   checksum: 7d323310bea3a91be2965f9468d552f201b1c27891e45ddc2d6b8f717680c95a75ae0bc1e3f5cf41472446a2589a75aed4483aee8169287909fcd59ad149e8cc
+  languageName: node
+  linkType: hard
+
+"react-dom@npm:^17.0.2":
+  version: 17.0.2
+  resolution: "react-dom@npm:17.0.2"
+  dependencies:
+    loose-envify: ^1.1.0
+    object-assign: ^4.1.1
+    scheduler: ^0.20.2
+  peerDependencies:
+    react: 17.0.2
+  checksum: 1c1eaa3bca7c7228d24b70932e3d7c99e70d1d04e13bb0843bbf321582bc25d7961d6b8a6978a58a598af2af496d1cedcfb1bf65f6b0960a0a8161cb8dab743c
   languageName: node
   linkType: hard
 
@@ -15577,14 +15590,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-paginate@npm:^8.2.0":
-  version: 8.2.0
-  resolution: "react-paginate@npm:8.2.0"
+"react-paginate-chakra-ui@npm:^0.1.2":
+  version: 0.1.2
+  resolution: "react-paginate-chakra-ui@npm:0.1.2"
   dependencies:
-    prop-types: ^15
+    react: ^17.0.2
+    react-dom: ^17.0.2
   peerDependencies:
-    react: ^16 || ^17 || ^18
-  checksum: a0969b4ef27be466ef3e052e2c7c61fca60af24e0d10c76770ebd9953ad6131206a276dfc335e61cf35aa494ff3aacc2610682e3192d7f2ee9541928edb46721
+    "@chakra-ui/icons": ^1.1.1
+    "@chakra-ui/react": ^1.7.1
+    "@emotion/react": ^11
+    "@emotion/styled": ^11
+  checksum: 5f20cc54e3e84fb77784e04a28667d5f5241ddc2ad639181eca6a5ba499517ba2177fddd03b778c3bf57a2bc0518e9c3e5ef4221adb34a6a9661acb7ebcbc6c3
   languageName: node
   linkType: hard
 
@@ -15789,6 +15806,16 @@ __metadata:
   dependencies:
     loose-envify: ^1.1.0
   checksum: 88e38092da8839b830cda6feef2e8505dec8ace60579e46aa5490fc3dc9bba0bd50336507dc166f43e3afc1c42939c09fe33b25fae889d6f402721dcd78fca1b
+  languageName: node
+  linkType: hard
+
+"react@npm:^17.0.2":
+  version: 17.0.2
+  resolution: "react@npm:17.0.2"
+  dependencies:
+    loose-envify: ^1.1.0
+    object-assign: ^4.1.1
+  checksum: b254cc17ce3011788330f7bbf383ab653c6848902d7936a87b09d835d091e3f295f7e9dd1597c6daac5dc80f90e778c8230218ba8ad599f74adcc11e33b9d61b
   languageName: node
   linkType: hard
 
@@ -16332,6 +16359,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"scheduler@npm:^0.20.2":
+  version: 0.20.2
+  resolution: "scheduler@npm:0.20.2"
+  dependencies:
+    loose-envify: ^1.1.0
+    object-assign: ^4.1.1
+  checksum: c4b35cf967c8f0d3e65753252d0f260271f81a81e427241295c5a7b783abf4ea9e905f22f815ab66676f5313be0a25f47be582254db8f9241b259213e999b8fc
+  languageName: node
+  linkType: hard
+
 "scheduler@npm:^0.22.0":
   version: 0.22.0
   resolution: "scheduler@npm:0.22.0"
@@ -16492,7 +16529,7 @@ __metadata:
     prop-types: ^15.8.1
     react-dropzone: ^14.2.3
     react-icons: ^4.10.1
-    react-paginate: ^8.2.0
+    react-paginate-chakra-ui: ^0.1.2
     react-select: ^5.7.7
     superjson: ^1.13.1
   languageName: unknown
