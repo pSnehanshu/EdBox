@@ -4,7 +4,7 @@
   "description": "Communication app for teachers, students, parents, and administration.",
   "repository": "git@github.com:pSnehanshu/schooltalk.git",
   "author": "Snehanshu <hello@snehanshu.com>",
-  "license": "UNLICENSED",
+  "license": "AGPL-3.0-or-later",
   "private": true,
   "scripts": {
     "dev:app": "yarn workspace schooltalk-app start",
