@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Pressable, SafeAreaView, StyleSheet } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
 import type { ExamItem } from "schooltalk-shared/types";
-import { format } from "date-fns";
+import { format, startOfDay } from "date-fns";
 import { ListItem, Divider, SpeedDial, Dialog } from "@rneui/themed";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -123,11 +123,11 @@ const ExamListScreen: React.FC<
   const isStudent = config.activeStaticRole === StaticRole.student;
 
   const studentQuery = trpc.school.exam.fetchExamsAndTestsForStudent.useQuery(
-    {},
+    { after_date: startOfDay(new Date()) },
     { enabled: isStudent },
   );
   const teacherQuery = trpc.school.exam.fetchExamsAndTestsForTeacher.useQuery(
-    {},
+    { after_date: startOfDay(new Date()) },
     { enabled: isTeacher },
   );
 
@@ -154,11 +154,11 @@ const ExamListScreen: React.FC<
 
   return (
     <SafeAreaView style={styles.container}>
-      {query.data.length > 0 ? (
+      {query.data.items.length > 0 ? (
         <List
           onRefresh={() => query.refetch()}
           refreshing={query.isFetching}
-          data={query.data}
+          data={query.data.items}
           estimatedItemSize={77}
           keyExtractor={({ item, type }) => `${type}-${item.id}`}
           ItemSeparatorComponent={Divider}

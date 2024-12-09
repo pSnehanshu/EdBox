@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import _ from "lodash";
 import { StaticRole, examTestSchema } from "schooltalk-shared/misc";
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 import prisma from "../../../prisma";
 import { protectedProcedure, getRoleProcedure, router } from "../../trpc";
 
@@ -33,6 +34,8 @@ type ExamTest = NonNullable<
     >
   >
 >;
+
+type ExamListOutput = { items: ExamItem[]; total: number };
 
 type IndependentTest = Omit<ExamTest, "Exam">;
 
@@ -332,7 +335,7 @@ const examRouter = router({
         page: z.number().int().min(1).default(1),
       }),
     )
-    .query(async ({ input, ctx }): Promise<ExamItem[]> => {
+    .query(async ({ input, ctx }): Promise<ExamListOutput> => {
       const student = await prisma.student.findUnique({
         where: {
           id: ctx.user.student_id!,
@@ -354,11 +357,6 @@ const examRouter = router({
           class_id: student.CurrentBatch?.class_id,
           date_of_exam: { gte: input.after_date },
           OR: [{ section_id: student.section }, { section_id: null }],
-          AND: [
-            {
-              OR: [{ exam_id: null }],
-            },
-          ],
         },
         include: {
           Exam: {
@@ -418,14 +416,45 @@ const examRouter = router({
         });
       });
 
+      // Count total
+      const [totalExams, totalIndependentTests] = await Promise.all([
+        prisma.exam.count({
+          where: {
+            school_id: ctx.user.school_id,
+            Tests: {
+              some: {
+                school_id: ctx.user.school_id,
+                class_id: student.CurrentBatch?.class_id,
+                date_of_exam: { gte: input.after_date },
+                OR: [{ section_id: student.section }, { section_id: null }],
+              },
+            },
+          },
+        }),
+        prisma.examTest.count({
+          where: {
+            school_id: ctx.user.school_id,
+            class_id: student.CurrentBatch?.class_id,
+            date_of_exam: { gte: input.after_date },
+            exam_id: null,
+            OR: [{ section_id: student.section }, { section_id: null }],
+          },
+        }),
+      ]);
+
       // Sort the items
-      return _.sortBy(items, ({ type, item }) => {
+      const sortedItems = _.sortBy(items, ({ type, item }) => {
         if (type === "test") {
           return item.date_of_exam;
         } else {
           return item.Tests[0]?.date_of_exam;
         }
       });
+
+      return {
+        items: sortedItems,
+        total: totalExams + totalIndependentTests,
+      };
     }),
   fetchExamsAndTestsForTeacher: getRoleProcedure([StaticRole.teacher])
     .input(
@@ -435,22 +464,24 @@ const examRouter = router({
         page: z.number().int().min(1).default(1),
       }),
     )
-    .query(async ({ input, ctx }): Promise<ExamItem[]> => {
-      const tests: ExamTest[] = await prisma.examTest.findMany({
-        where: {
-          school_id: ctx.user.school_id,
-          Subjects: {
-            some: {
-              Subject: {
-                Periods: {
-                  some: {
-                    teacher_id: ctx.user.Teacher?.id,
-                  },
+    .query(async ({ input, ctx }): Promise<ExamListOutput> => {
+      const where: Prisma.ExamTestWhereInput = {
+        school_id: ctx.user.school_id,
+        Subjects: {
+          some: {
+            Subject: {
+              Periods: {
+                some: {
+                  teacher_id: ctx.user.Teacher?.id,
                 },
               },
             },
           },
         },
+      };
+
+      const tests: ExamTest[] = await prisma.examTest.findMany({
+        where,
         include: {
           Exam: {
             include: {
@@ -518,14 +549,35 @@ const examRouter = router({
         });
       });
 
+      // Count total
+      const [totalExams, totalIndependentTests] = await Promise.all([
+        prisma.exam.count({
+          where: {
+            school_id: ctx.user.school_id,
+            Tests: { some: where },
+          },
+        }),
+        prisma.examTest.count({
+          where: {
+            ...where,
+            exam_id: null,
+          },
+        }),
+      ]);
+
       // Sort the items
-      return _.sortBy(items, ({ type, item }) => {
+      const sortedItems = _.sortBy(items, ({ type, item }) => {
         if (type === "test") {
           return item.date_of_exam;
         } else {
           return item.Tests[0]?.date_of_exam;
         }
       });
+
+      return {
+        items: sortedItems,
+        total: totalExams + totalIndependentTests,
+      };
     }),
 });
 
